@@ -10,6 +10,7 @@ data class AppDimensions(
     val itemSpacing: Dp = 12.dp,
     val minimumTouchTarget: Dp = 48.dp,
     val navigationRailBreakpoint: Dp = 720.dp,
+    val topBarOverlayClearance: Dp = 88.dp,
 )
 
 val LocalAppDimensions = staticCompositionLocalOf { AppDimensions() }

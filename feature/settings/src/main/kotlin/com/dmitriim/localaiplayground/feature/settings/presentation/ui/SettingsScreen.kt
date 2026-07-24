@@ -12,14 +12,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 
 @Composable
 fun SettingsScreen() {
+    val dimensions = LocalAppDimensions.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(20.dp),
+            .padding(
+                start = 20.dp,
+                top = dimensions.topBarOverlayClearance + 20.dp,
+                end = 20.dp,
+                bottom = 20.dp,
+            ),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text("Privacy & app behavior", style = MaterialTheme.typography.headlineMedium)

@@ -9,12 +9,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 
 @Composable
 fun RunsScreen() {
+    val dimensions = LocalAppDimensions.current
+
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                start = 20.dp,
+                top = dimensions.topBarOverlayClearance,
+                end = 20.dp,
+            ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(

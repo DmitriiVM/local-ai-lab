@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.feature.playground.presentation.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.AiCapability
+import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.OperationState
 import com.dmitriim.localaiplayground.feature.playground.presentation.PlaygroundUiState
 
@@ -28,8 +30,14 @@ fun PlaygroundScreen(
     onOpenCapability: (AiCapability) -> Unit,
     onOpenModels: () -> Unit,
 ) {
+    val dimensions = LocalAppDimensions.current
+
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        contentPadding = PaddingValues(
+            top = dimensions.topBarOverlayClearance,
+            bottom = 112.dp,
+        ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
