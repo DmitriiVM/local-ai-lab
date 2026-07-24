@@ -245,6 +245,32 @@ replacement, and update the affected plan files.
 - **Consequence:** Remote model hosts supply model bytes; they do not control which
   entries the installed MVP presents as approved.
 
+### D-024 — CPU baseline with declared experimental acceleration
+
+- **State:** Accepted
+- **Decision:** CPU is the required baseline for every initial native profile.
+  Vulkan and NNAPI remain experimental backends and may be offered only with an
+  explicit requested/effective-backend record and a visible fallback reason.
+- **Consequence:** No device is rejected merely because an experimental accelerator
+  is absent or fails. The initial Stage 0 implementation requests and uses CPU.
+
+### D-025 — Stage 0 language-quality scope
+
+- **State:** Accepted
+- **Decision:** Stage 0 proves that the selected STT and TTS engines load and
+  infer on the reference device. English and Russian quality assessment is deferred
+  to the project owner.
+- **Consequence:** Compatibility results must not be described as bilingual quality
+  acceptance. Later language validation records its own samples and outcomes.
+
+### D-026 — Curated downloads in the MVP
+
+- **State:** Accepted
+- **Decision:** The MVP supports curated model downloads; it is not import-only.
+- **Consequence:** Stage 2 implements the bundled catalog, integrity verification,
+  transactional multi-file installation, and the API-specific download scheduler
+  already described by D-023 and D-104.
+
 ## 3. Provisional decisions to validate in Stage 0
 
 ### D-101 — Keep API 26 as application minimum
@@ -316,16 +342,37 @@ replacement, and update the affected plan files.
 - **Decision deadline:** End of Stage 0 for starter profiles; before MOD-003 for
   download approval.
 
+### D-107 — Stage 0 CPU feasibility result
+
+- **State:** Accepted
+- **Decision:** Retain llama.cpp for GGUF and the checksum-pinned sherpa-onnx AAR
+  for STT, TTS, and VAD. The initial known-good compatibility profile is CPU-only:
+  Qwen3 1.7B Q4_K_M, Whisper Base INT8, Silero VAD, and Supertonic 3 INT8.
+- **Reference device:** Samsung SM-S926B (Galaxy S24+), Android API 36,
+  `arm64-v8a`, 10.94 GiB RAM; 3.11–3.49 GiB was available during the probes.
+- **Observed results:** Qwen loaded in 867 ms and generated a short response in
+  1,432 ms. A later explicit unload/reload in the same app process loaded in
+  971 ms. Whisper file STT completed in 545 ms. Supertonic generated 123,390 PCM
+  samples at 44.1 kHz in 845 ms. Silero VAD detected speech in 25 ms.
+- **Native packaging:** The app packages arm64 libraries with 16 KiB-compatible
+  linker alignment. The llama.cpp CPU backend is statically linked; it does not
+  depend on runtime-downloaded backend plugins.
+- **Boundary:** These are feasibility measurements, not cross-device promises or
+  EN/RU quality validation. Production catalog entries remain subject to their
+  final manifest/license/attribution review in Stage 2.
+
 ## 4. Questions
 
 ### Q-001 — Reference devices
 
-- **State:** Open
+- **State:** Partially resolved
 - **Question:** Which physical devices define low-memory, mid-range, and flagship
   verification?
 - **Needed information:** Device model, API level, RAM, SoC/ABI, available storage.
-- **Blocks:** Stage 0 exit and numeric performance budgets.
-- **Owner:** Project owner.
+- **Resolution so far:** Samsung SM-S926B (Galaxy S24+), API 36, `arm64-v8a`,
+  10.94 GiB RAM is the first physical reference device. A low-memory and a
+  mid-range device are still needed for release support claims.
+- **Blocks:** Device-matrix performance budgets, not the initial feasibility spike.
 
 ### Q-002 — Starter LLM model
 
@@ -380,16 +427,14 @@ replacement, and update the affected plan files.
 
 ### Q-006 — Curated downloads versus import-only first release
 
-- **State:** Open
+- **State:** Resolved by D-026
 - **Question:** Must the MVP download models inside the app, or is document-based
   import sufficient for its intended users?
 - **Tradeoff:** Downloads improve onboarding but introduce hosting, integrity,
   resumability, licenses, network permissions, and ongoing catalog maintenance.
-- **Current direction:** Begin implementation with manual import. Add one-tap
-  downloads after Stage 0 only for individually approved public model versions
-  governed by D-022 and D-023.
-- **Blocks:** MOD-003 only; it does not block imported-model inference.
-- **Owner:** Project owner after model/license selection.
+- **Resolution:** The MVP supports curated downloads. They are implemented in
+  Stage 2 only for individually approved public model versions governed by D-022
+  and D-023.
 
 ### Q-007 — Minimum supported device memory
 

@@ -66,6 +66,25 @@ The model names and approximate sizes below are planning inputs, not download
 manifest data. The install UI uses only exact values from an approved, versioned
 manifest.
 
+### 4.0 Stage 0 pinned compatibility inputs
+
+The following inputs completed a CPU-only inference on the first reference device.
+They are the starting data for the bundled curated catalog, not yet its production
+installer manifest. The Stage 2 downloader must verify every listed digest before
+installation and preserve the stated file roles.
+
+| Capability | Immutable public source | Bytes / SHA-256 | File roles / observed result |
+| --- | --- | --- | --- |
+| LLM | `https://huggingface.co/ggml-org/Qwen3-1.7B-GGUF/resolve/daeb8e2d528a760970442092f6bf1e55c3b659eb/Qwen3-1.7B-Q4_K_M.gguf` | 1,282,439,264 / `d2387ca2dbfee2ffabce7120d3770dadca0b293052bc2f0e138fdc940d9bc7b5` | One GGUF; Apache-2.0 in model metadata. CPU load and short generation succeeded. |
+| STT | `https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-base.tar.bz2` | 207,557,382 / `911b2083efd7c0dca2ac3b358b75222660dc09fb716d64fbfc417ba6c99ff3de` | `base-encoder.int8.onnx`, `base-decoder.int8.onnx`, `base-tokens.txt`; bundled 16 kHz PCM WAV completed file STT. |
+| VAD | `https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx` | 643,854 / `9e2449e1087496d8d4caba907f23e0bd3f78d91fa552479bb9c23ac09cbb1fd6` | One `silero_vad.onnx`; speech detection succeeded on the bundled Whisper WAV. |
+| TTS | `https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/sherpa-onnx-supertonic-3-tts-int8-2026-05-11.tar.bz2` | 128,774,318 / `82fa96f91c4ef8abaae3a14a3f4153facf88bed821d1f7331cec2700f432c427` | Predictor, encoder, estimator, vocoder, `tts.json`, `unicode_indexer.bin`, and `voice.bin`; PCM synthesis succeeded. Bundle includes an MIT license. |
+
+The Whisper and Silero distribution-license/attribution text must be copied into
+the production catalog record before those entries become user-visible downloads.
+The Stage 0 archive supplied no local license file for either asset, so its digest
+and source alone are not treated as a completed distribution review.
+
 ### 4.1 VAD
 
 | Profile | Candidate | State | Purpose |

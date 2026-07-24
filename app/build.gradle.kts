@@ -38,6 +38,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":ai:llamacpp"))
+    implementation(project(":ai:sherpa"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

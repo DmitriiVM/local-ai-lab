@@ -43,8 +43,9 @@ Remove the highest-risk unknowns before building significant UI or persistence.
 - Begin with the provisional candidates in
   [PLAN_MODELS.md](./PLAN_MODELS.md): Qwen3 1.7B Q4_K_M, Whisper Base multilingual
   INT8, Silero VAD, and Supertonic 3 INT8.
-- Validate complete English and Russian STT → LLM → TTS turns independently. Do not
-  combine models merely because each is described as multilingual.
+- Prove one local STT, LLM, TTS, and VAD inference on the reference device. English
+  and Russian quality validation is deferred to the project owner under D-025; do
+  not combine models merely because each is described as multilingual.
 - Confirm exact llama.cpp and sherpa-onnx revisions.
 - Record inspected reference snapshots and adopted/rejected techniques in
   [PLAN_REFERENCES.md](./PLAN_REFERENCES.md).

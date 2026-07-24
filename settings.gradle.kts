@@ -24,4 +24,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "LocalAiPlayground"
 include(":app")
- 
+include(":ai:api")
+include(":ai:llamacpp")
+include(":ai:sherpa")
