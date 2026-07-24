@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.metro)
 }
 
 android {
@@ -18,4 +19,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+}
+
+dependencies {
+    api(project(":core:model"))
+    implementation(project(":core:di"))
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.metro.runtime)
 }

@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.metro)
 }
 
 android {
@@ -54,4 +55,6 @@ android {
 
 dependencies {
     api(project(":ai:api"))
+    implementation(project(":core:di"))
+    implementation(libs.kotlinx.coroutines.android)
 }

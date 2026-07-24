@@ -312,13 +312,15 @@ replacement, and update the affected plan files.
 
 ### D-105 — Material 3 Adaptive Navigation 3 integration
 
-- **State:** Provisional
-- **Current direction:** Keep the app’s adaptive navigation layout behind a stable
-  boundary and use the Material 3 Adaptive Navigation 3 add-on only after validating
-  its selected beta/stable version.
-- **Fallback:** Use Navigation 3 core with a locally controlled bottom-bar/navigation
-  rail layout; feature keys and entries remain unchanged.
-- **Decision deadline:** During Stage 1 before adaptive shell completion.
+- **State:** Accepted
+- **Decision:** Keep the app’s adaptive navigation layout behind a stable boundary
+  and use Navigation 3 core with a locally controlled bottom-bar/navigation-rail
+  layout.
+- **Reason:** This keeps feature keys and entries independent from the adaptive
+  presentation layer and avoids coupling the Stage 1 foundation to the alpha
+  Material 3 Adaptive Navigation 3 add-on.
+- **Revisit:** The add-on may replace the local layout implementation after a stable
+  version is validated without changing feature navigation contracts.
 
 ### D-106 — Provisional runtime and model catalog
 

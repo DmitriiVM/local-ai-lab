@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.metro)
 }
 
 android {
@@ -25,5 +26,7 @@ android {
 
 dependencies {
     api(project(":ai:api"))
+    implementation(project(":core:di"))
     implementation(files("libs/sherpa-onnx-1.13.4.aar"))
+    implementation(libs.kotlinx.coroutines.android)
 }
