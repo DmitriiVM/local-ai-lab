@@ -107,16 +107,8 @@ class SherpaTextToSpeechEngine : TextToSpeechEngine {
         val audio = active.generateWithConfigAndCallback(
             request.text,
             generationConfig,
-        ) { samples ->
-            if (cancelled.get()) {
-                0
-            } else if (samples.isEmpty() || onAudioChunk(samples)) {
-                1
-            } else {
-                cancelled.set(true)
-                0
-            }
-        }
+            AudioChunkCallback(cancelled, onAudioChunk),
+        )
         check(!cancelled.get()) { "Speech synthesis was cancelled." }
         require(audio.samples.isNotEmpty()) { "The voice model returned no audio." }
         return TextToSpeechResult(
@@ -143,4 +135,23 @@ class SherpaTextToSpeechEngine : TextToSpeechEngine {
 
     private fun effectiveThreads(requested: Int): Int = requested.takeIf { it > 0 }
         ?: Runtime.getRuntime().availableProcessors().coerceIn(1, 4)
+
+    /**
+     * The sherpa-onnx JNI binding looks up this exact specialised Kotlin method:
+     * `invoke(float[]): Integer`. Do not replace this with an inline lambda: newer
+     * Android desugaring emits only the erased `invoke(Object): Object` method.
+     */
+    private class AudioChunkCallback(
+        private val cancelled: AtomicBoolean,
+        private val onAudioChunk: (FloatArray) -> Boolean,
+    ) : Function1<FloatArray, Int> {
+        override fun invoke(samples: FloatArray): Int = when {
+            cancelled.get() -> 0
+            samples.isEmpty() || onAudioChunk(samples) -> 1
+            else -> {
+                cancelled.set(true)
+                0
+            }
+        }
+    }
 }
