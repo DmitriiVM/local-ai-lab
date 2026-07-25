@@ -47,7 +47,7 @@ fun SettingsScreen(
         )
     }
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, top = dimensions.topBarOverlayClearance + 20.dp, end = 20.dp, bottom = 20.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, top = dimensions.topBarOverlayClearance + 20.dp, end = 20.dp, bottom = 20.dp + dimensions.bottomNavigationOverlayClearance),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text("Settings", style = MaterialTheme.typography.headlineMedium)

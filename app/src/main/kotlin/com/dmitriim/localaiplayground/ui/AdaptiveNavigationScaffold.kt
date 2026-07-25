@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -95,12 +96,16 @@ fun AdaptiveNavigationScaffold(
             }
         } else {
             Box(modifier = Modifier.fillMaxSize()) {
-                Scaffold(
-                    contentWindowInsets = WindowInsets.safeDrawing.only(
-                        WindowInsetsSides.Horizontal,
-                    ),
-                ) { contentPadding ->
-                    content(Modifier.padding(contentPadding))
+                CompositionLocalProvider(
+                    LocalAppDimensions provides dimensions.copy(bottomNavigationOverlayClearance = 112.dp),
+                ) {
+                    Scaffold(
+                        contentWindowInsets = WindowInsets.safeDrawing.only(
+                            WindowInsetsSides.Horizontal,
+                        ),
+                    ) { contentPadding ->
+                        content(Modifier.padding(contentPadding))
+                    }
                 }
                 LiquidGlassNavigationBar(
                     selectedDestination = selectedDestination,
@@ -124,6 +129,7 @@ private fun LiquidGlassNavigationBar(
     modifier: Modifier = Modifier,
 ) {
     val barShape = RoundedCornerShape(32.dp)
+    val colors = MaterialTheme.colorScheme
 
     Box(
         modifier = modifier
@@ -134,16 +140,16 @@ private fun LiquidGlassNavigationBar(
             .shadow(
                 elevation = 24.dp,
                 shape = barShape,
-                ambientColor = Color.Black.copy(alpha = 0.55f),
-                spotColor = Color.Black.copy(alpha = 0.75f),
+                ambientColor = colors.scrim.copy(alpha = 0.22f),
+                spotColor = colors.scrim.copy(alpha = 0.34f),
             )
             .clip(barShape)
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF4B4B50).copy(alpha = 0.84f),
-                        Color(0xFF242429).copy(alpha = 0.88f),
-                        Color(0xFF111114).copy(alpha = 0.94f),
+                        colors.surfaceContainerHigh.copy(alpha = 0.94f),
+                        colors.surfaceContainer.copy(alpha = 0.96f),
+                        colors.surface.copy(alpha = 0.98f),
                     ),
                 ),
             )
@@ -151,9 +157,9 @@ private fun LiquidGlassNavigationBar(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color.White.copy(alpha = 0.42f),
-                        Color.White.copy(alpha = 0.10f),
-                        Color.Black.copy(alpha = 0.50f),
+                        colors.outlineVariant.copy(alpha = 0.68f),
+                        colors.outline.copy(alpha = 0.20f),
+                        colors.scrim.copy(alpha = 0.18f),
                     ),
                 ),
                 shape = barShape,
@@ -181,11 +187,12 @@ private fun LiquidGlassNavigationItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.colorScheme
     val contentColor by animateColorAsState(
         targetValue = if (selected) {
-            Color.White
+            colors.onSecondaryContainer
         } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
+            colors.onSurfaceVariant
         },
         label = "navigation item color",
     )
@@ -211,9 +218,9 @@ private fun LiquidGlassNavigationItem(
                         .background(
                             Brush.verticalGradient(
                                 listOf(
-                                    Color.White.copy(alpha = 0.22f),
-                                    Color.White.copy(alpha = 0.10f),
-                                    Color.White.copy(alpha = 0.06f),
+                                    colors.secondaryContainer.copy(alpha = 0.82f),
+                                    colors.secondaryContainer.copy(alpha = 0.58f),
+                                    colors.secondaryContainer.copy(alpha = 0.36f),
                                 ),
                             ),
                         )
@@ -221,8 +228,8 @@ private fun LiquidGlassNavigationItem(
                             width = 1.dp,
                             brush = Brush.verticalGradient(
                                 listOf(
-                                    Color.White.copy(alpha = 0.45f),
-                                    Color.White.copy(alpha = 0.08f),
+                                    colors.outlineVariant.copy(alpha = 0.72f),
+                                    colors.outline.copy(alpha = 0.18f),
                                 ),
                             ),
                             shape = itemShape,

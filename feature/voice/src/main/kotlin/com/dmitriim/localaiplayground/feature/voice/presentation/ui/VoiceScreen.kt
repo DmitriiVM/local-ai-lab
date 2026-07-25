@@ -38,7 +38,7 @@ fun VoiceScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(start = 16.dp, top = dimensions.topBarOverlayClearance + 12.dp, end = 16.dp, bottom = 24.dp),
+            .padding(start = 16.dp, top = dimensions.topBarOverlayClearance + 12.dp, end = 16.dp, bottom = 24.dp + dimensions.bottomNavigationOverlayClearance),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("Local voice assistant", style = MaterialTheme.typography.headlineSmall)

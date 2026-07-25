@@ -56,7 +56,7 @@ fun TextToSpeechScreen(
                 start = 16.dp,
                 top = dimensions.topBarOverlayClearance + 12.dp,
                 end = 16.dp,
-                bottom = 24.dp,
+                bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
             ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

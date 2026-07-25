@@ -43,7 +43,7 @@ fun RunsScreen(
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = dimensions.topBarOverlayClearance + 20.dp, bottom = 24.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = dimensions.topBarOverlayClearance + 20.dp, bottom = 24.dp + dimensions.bottomNavigationOverlayClearance),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         item { Text("Runs", style = MaterialTheme.typography.headlineMedium) }
@@ -90,7 +90,7 @@ private fun RunDetails(run: RunRecord, onClose: () -> Unit, onShare: () -> Unit,
     val dimensions = LocalAppDimensions.current
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = dimensions.topBarOverlayClearance + 20.dp, bottom = 24.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = dimensions.topBarOverlayClearance + 20.dp, bottom = 24.dp + dimensions.bottomNavigationOverlayClearance),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {

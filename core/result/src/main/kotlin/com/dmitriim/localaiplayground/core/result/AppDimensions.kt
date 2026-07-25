@@ -11,6 +11,7 @@ data class AppDimensions(
     val minimumTouchTarget: Dp = 48.dp,
     val navigationRailBreakpoint: Dp = 720.dp,
     val topBarOverlayClearance: Dp = 88.dp,
+    val bottomNavigationOverlayClearance: Dp = 0.dp,
 )
 
 val LocalAppDimensions = staticCompositionLocalOf { AppDimensions() }

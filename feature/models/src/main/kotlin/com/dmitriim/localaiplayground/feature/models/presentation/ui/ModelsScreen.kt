@@ -3,6 +3,7 @@ package com.dmitriim.localaiplayground.feature.models.presentation.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -42,6 +43,7 @@ fun ModelsScreen(
     val dimensions = LocalAppDimensions.current
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        contentPadding = PaddingValues(bottom = dimensions.bottomNavigationOverlayClearance + 64.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
@@ -72,7 +74,7 @@ fun ModelsScreen(
             }
         } else {
             item { Text("Installed", style = MaterialTheme.typography.titleLarge) }
-            items(uiState.installed.size, key = { uiState.installed[it].manifest.modelId.value }) { index ->
+            items(uiState.installed.size, key = { "installed-${uiState.installed[it].manifest.modelId.value}" }) { index ->
                 InstalledModelCard(
                     model = uiState.installed[index],
                     onLoad = onLoad,
@@ -83,7 +85,7 @@ fun ModelsScreen(
             }
         }
         item { Text("Approved downloads", style = MaterialTheme.typography.titleLarge) }
-        items(uiState.catalog.size, key = { uiState.catalog[it].manifest.modelId.value }) { index ->
+        items(uiState.catalog.size, key = { "catalog-${uiState.catalog[it].manifest.modelId.value}" }) { index ->
             CatalogModelCard(
                 model = uiState.catalog[index],
                 transfer = uiState.transfers[uiState.catalog[index].manifest.modelId],

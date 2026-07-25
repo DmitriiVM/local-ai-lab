@@ -60,7 +60,7 @@ fun SpeechToTextScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scroll)
-            .padding(start = 16.dp, top = dimensions.topBarOverlayClearance + 12.dp, end = 16.dp, bottom = 24.dp),
+            .padding(start = 16.dp, top = dimensions.topBarOverlayClearance + 12.dp, end = 16.dp, bottom = 24.dp + dimensions.bottomNavigationOverlayClearance),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("Local speech to text", style = MaterialTheme.typography.headlineSmall)

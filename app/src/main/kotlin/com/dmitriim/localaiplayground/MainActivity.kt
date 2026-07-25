@@ -22,10 +22,6 @@ import com.dmitriim.localaiplayground.source.settings.ThemePreference
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.BLACK),
-            navigationBarStyle = SystemBarStyle.dark(Color.BLACK),
-        )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
         }
@@ -39,6 +35,15 @@ class MainActivity : ComponentActivity() {
                 ThemePreference.DARK -> true
             }
             SideEffect {
+                val systemBarStyle = if (darkTheme) {
+                    SystemBarStyle.dark(Color.BLACK)
+                } else {
+                    SystemBarStyle.light(Color.WHITE, Color.BLACK)
+                }
+                enableEdgeToEdge(
+                    statusBarStyle = systemBarStyle,
+                    navigationBarStyle = systemBarStyle,
+                )
                 if (settings.keepScreenAwake) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }

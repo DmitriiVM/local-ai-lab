@@ -26,7 +26,7 @@ fun DeviceScreen(
         modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
         contentPadding = PaddingValues(
             top = dimensions.topBarOverlayClearance,
-            bottom = 112.dp,
+            bottom = dimensions.bottomNavigationOverlayClearance,
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
