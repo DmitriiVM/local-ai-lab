@@ -10,6 +10,7 @@ import com.dmitriim.localaiplayground.ai.api.ModelRuntimeValidator
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.di.ApplicationCoroutineScope
 import com.dmitriim.localaiplayground.core.model.AiCapability
+import com.dmitriim.localaiplayground.core.model.ChatModelReference
 import com.dmitriim.localaiplayground.core.model.CatalogModel
 import com.dmitriim.localaiplayground.core.model.DeviceDiagnostics
 import com.dmitriim.localaiplayground.core.model.EngineId
@@ -152,6 +153,30 @@ class ModelRepositoryImpl(
             )
             dao.upsert(updated)
             updated.toDomainOrNull() ?: error("The saved model manifest is invalid.")
+        }
+    }
+
+    override suspend fun resolveChatModel(modelId: ModelId): Result<ChatModelReference> = runCatching {
+        withContext(Dispatchers.IO) {
+            val record = requireNotNull(dao.find(modelId.value)) { "This model is not installed." }
+            val manifest = json.decodeFromString<ModelManifest>(record.manifestJson)
+            require(AiCapability.CHAT in manifest.capabilities && manifest.profileType == RuntimeProfileType.LLM) {
+                "This installed model is not a compatible local chat model."
+            }
+            val directory = File(rootDirectory, record.localDirectoryName)
+            val validation = validateManifest(manifest, directory)
+            require(validation.first == ModelValidationState.READY) {
+                validation.second ?: "The installed chat model is not ready."
+            }
+            val primary = requireNotNull(manifest.files.firstOrNull { it.role == ModelFileRole.PRIMARY_MODEL }) {
+                "The chat model does not declare a primary GGUF file."
+            }
+            ChatModelReference(
+                modelId = modelId,
+                displayName = manifest.displayName,
+                modelPath = File(directory, primary.relativePath).absolutePath,
+                defaultContextSize = manifest.contextSize ?: 512,
+            )
         }
     }
 

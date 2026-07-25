@@ -1,17 +1,18 @@
 package com.dmitriim.localaiplayground.ai.api
 
-/**
- * Engine-neutral boundary for the Stage 0 LLM spike.
- *
- * Calls are deliberately suspend-free here: the owner chooses its worker thread and
- * must never invoke an implementation from the Android main thread.
- */
+/** Engine-neutral local chat boundary. Calls must run away from the Android main thread. */
 interface LlmEngine : AutoCloseable {
     val isLoaded: Boolean
 
     fun load(request: LlmLoadRequest): LlmLoadResult
 
-    fun generate(request: LlmGenerationRequest): LlmGenerationResult
+    /** Formats messages with the model's embedded chat template when it has one. */
+    fun format(messages: List<LlmChatMessage>): String
+
+    /** Returns an exact token count for a formatted prompt. */
+    fun countTokens(prompt: String): Int
+
+    fun generate(request: LlmGenerationRequest, onToken: (String) -> Unit): LlmGenerationResult
 
     fun cancel()
 
@@ -27,25 +28,51 @@ data class LlmLoadRequest(
     val requestedBackend: LlmBackend = LlmBackend.CPU,
 )
 
-data class LlmGenerationRequest(
-    val prompt: String,
-    val maxTokens: Int = 32,
-)
-
 data class LlmLoadResult(
     val effectiveBackend: LlmBackend,
     val effectiveThreadCount: Int,
     val loadDurationMs: Long,
     val systemInfo: String,
+    val coldStart: Boolean,
+)
+
+data class LlmChatMessage(
+    val role: LlmChatRole,
+    val content: String,
+)
+
+enum class LlmChatRole(val wireName: String) {
+    SYSTEM("system"),
+    USER("user"),
+    ASSISTANT("assistant"),
+}
+
+data class LlmGenerationRequest(
+    val prompt: String,
+    val maxTokens: Int = 128,
+    val temperature: Float = 0.7f,
+    val topK: Int = 40,
+    val topP: Float = 0.9f,
+    /** -1 delegates seed selection to llama.cpp. */
+    val seed: Int = -1,
 )
 
 data class LlmGenerationResult(
     val text: String,
+    val promptTokenCount: Int,
     val generatedTokenCount: Int,
     val firstTokenLatencyMs: Long?,
+    val promptDurationMs: Long,
+    val generationDurationMs: Long,
     val totalDurationMs: Long,
-    val cancelled: Boolean,
+    val finishReason: LlmFinishReason,
 )
+
+enum class LlmFinishReason {
+    STOP_TOKEN,
+    MAX_TOKENS,
+    CANCELLED,
+}
 
 enum class LlmBackend {
     CPU,
