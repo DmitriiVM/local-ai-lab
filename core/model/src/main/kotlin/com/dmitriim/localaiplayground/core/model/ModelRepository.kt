@@ -15,6 +15,8 @@ interface ModelRepository {
     suspend fun resolveChatModel(modelId: ModelId): Result<ChatModelReference>
     /** Resolves a validated app-private STT model directory. */
     suspend fun resolveSpeechToTextModel(modelId: ModelId): Result<SpeechToTextModelReference>
+    /** Resolves a validated app-private TTS model directory. */
+    suspend fun resolveTextToSpeechModel(modelId: ModelId): Result<TextToSpeechModelReference>
     suspend fun compatibility(model: ModelManifest): ModelCompatibility
     suspend fun load(modelId: ModelId): Result<Unit>
     suspend fun unload(modelId: ModelId): Result<Unit>
@@ -30,6 +32,14 @@ data class ChatModelReference(
 )
 
 data class SpeechToTextModelReference(
+    val modelId: ModelId,
+    val displayName: String,
+    val modelDirectory: String,
+    val sampleRateHz: Int,
+    val languages: Set<String>,
+)
+
+data class TextToSpeechModelReference(
     val modelId: ModelId,
     val displayName: String,
     val modelDirectory: String,

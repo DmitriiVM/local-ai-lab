@@ -1,9 +1,14 @@
-package com.dmitriim.localaiplayground.core.audio
+package com.dmitriim.localaiplayground.core.audio.input.storage
 
 import android.app.Application
 import android.net.Uri
 import android.provider.OpenableColumns
+import com.dmitriim.localaiplayground.core.audio.input.android.MicrophoneCapture
+import com.dmitriim.localaiplayground.core.audio.input.android.PlatformAudioDecoder
 import com.dmitriim.localaiplayground.core.di.AppScope
+import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
+import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
+import com.dmitriim.localaiplayground.core.audio.input.model.STT_SAMPLE_RATE_HZ
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import java.io.File

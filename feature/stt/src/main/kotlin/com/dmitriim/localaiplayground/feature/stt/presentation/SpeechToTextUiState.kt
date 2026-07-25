@@ -1,7 +1,7 @@
 package com.dmitriim.localaiplayground.feature.stt.presentation
 
-import com.dmitriim.localaiplayground.core.audio.AudioLevel
-import com.dmitriim.localaiplayground.core.audio.PcmAudioInput
+import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
+import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelValidationState

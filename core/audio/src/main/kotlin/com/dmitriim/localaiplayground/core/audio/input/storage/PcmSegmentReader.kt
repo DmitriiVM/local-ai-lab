@@ -1,5 +1,6 @@
-package com.dmitriim.localaiplayground.core.audio
+package com.dmitriim.localaiplayground.core.audio.input.storage
 
+import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import java.io.FileInputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive

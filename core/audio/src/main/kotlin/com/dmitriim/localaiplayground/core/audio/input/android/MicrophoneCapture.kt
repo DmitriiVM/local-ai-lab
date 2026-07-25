@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.core.audio
+package com.dmitriim.localaiplayground.core.audio.input.android
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
+import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream

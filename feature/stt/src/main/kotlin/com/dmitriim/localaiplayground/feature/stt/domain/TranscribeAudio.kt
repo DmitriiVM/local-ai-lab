@@ -4,7 +4,7 @@ import android.os.SystemClock
 import com.dmitriim.localaiplayground.ai.api.SpeechToTextEngine
 import com.dmitriim.localaiplayground.ai.api.SpeechToTextLoadRequest
 import com.dmitriim.localaiplayground.ai.api.SpeechToTextRequest
-import com.dmitriim.localaiplayground.core.audio.AudioInputStore
+import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localaiplayground.core.model.ModelRepository
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers

@@ -3,8 +3,8 @@ package com.dmitriim.localaiplayground.feature.stt.presentation
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dmitriim.localaiplayground.core.audio.AudioInputStore
-import com.dmitriim.localaiplayground.core.audio.PcmAudioInput
+import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
+import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelRepository

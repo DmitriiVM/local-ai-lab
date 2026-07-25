@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.core.audio
+package com.dmitriim.localaiplayground.core.audio.input.android
 
 import android.app.Application
 import android.media.AudioFormat

@@ -271,6 +271,18 @@ replacement, and update the affected plan files.
   transactional multi-file installation, and the API-specific download scheduler
   already described by D-023 and D-104.
 
+### D-027 — Stage 5 generated-audio retention
+
+- **State:** Accepted
+- **Decision:** Retain only the latest successful TTS WAV in app-private storage so
+  it can be replayed or shared. Replace it after the next successful synthesis.
+- **Failure behavior:** Failed and cancelled synthesis never replaces the latest
+  successful WAV, and partial files are removed.
+- **Export boundary:** A document explicitly exported by the user is independent
+  from app-private retention and is not removed when the latest synthesis changes.
+- **Later scope:** Stage 7 may add durable generated-audio history and configurable
+  retention without changing this Stage 5 bounded default.
+
 ## 3. Provisional decisions to validate in Stage 0
 
 ### D-101 — Keep API 26 as application minimum
@@ -450,11 +462,13 @@ replacement, and update the affected plan files.
 
 ### Q-008 — Recording and generated-audio retention
 
-- **State:** Open
+- **State:** Partially resolved by D-027
 - **Question:** Are audio artifacts deleted after a run, retained until explicit
   deletion, or removed after a configurable period?
-- **Current recommendation:** Do not retain microphone audio by default; retain
-  exported/generated TTS only when the user asks or history requires replay.
+- **Resolution so far:** Stage 5 retains exactly one latest successful generated
+  TTS WAV under D-027. Explicit exports are independent.
+- **Still open:** Final microphone-audio retention and any Stage 7 configurable or
+  multi-item generated-audio history policy.
 - **Blocks:** Stage 7 storage/privacy completion.
 - **Owner:** Project owner.
 

@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.core.audio
+package com.dmitriim.localaiplayground.core.audio.input.model
 
 import java.io.File
 

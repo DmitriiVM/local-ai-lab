@@ -29,6 +29,7 @@ import com.dmitriim.localaiplayground.core.model.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.RuntimeProfileType
 import com.dmitriim.localaiplayground.core.model.SpeechToTextModelReference
+import com.dmitriim.localaiplayground.core.model.TextToSpeechModelReference
 import com.dmitriim.localaiplayground.source.database.InstalledModelEntity
 import com.dmitriim.localaiplayground.source.database.ModelDatabaseProvider
 import dev.zacsweers.metro.ContributesBinding
@@ -58,6 +59,7 @@ import kotlinx.serialization.json.Json
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import kotlin.coroutines.coroutineContext
+import androidx.core.net.toUri
 
 @Inject
 @SingleIn(AppScope::class)
@@ -99,7 +101,7 @@ class ModelRepositoryImpl(
             val temporary = temporaryDirectory(modelId)
             try {
                 val copiedNames = request.documentUris.map { uriString ->
-                    val uri = android.net.Uri.parse(uriString)
+                    val uri = uriString.toUri()
                     val name = documentName(uri)
                     require(isSafeName(name)) { "The document name is not safe to install." }
                     require(copiedNamesSafe(temporary, name)) { "More than one selected document is named $name." }
@@ -198,6 +200,31 @@ class ModelRepositoryImpl(
                 displayName = manifest.displayName,
                 modelDirectory = directory.absolutePath,
                 sampleRateHz = manifest.sampleRateHz ?: 16_000,
+                languages = manifest.languages,
+            )
+        }
+    }
+
+    override suspend fun resolveTextToSpeechModel(modelId: ModelId): Result<TextToSpeechModelReference> = runCatching {
+        withContext(Dispatchers.IO) {
+            val record = requireNotNull(dao.find(modelId.value)) { "This model is not installed." }
+            val manifest = json.decodeFromString<ModelManifest>(record.manifestJson)
+            require(
+                AiCapability.TEXT_TO_SPEECH in manifest.capabilities &&
+                    manifest.profileType == RuntimeProfileType.SUPERTONIC_TTS,
+            ) {
+                "This installed model is not a compatible Supertonic text-to-speech model."
+            }
+            val directory = File(rootDirectory, record.localDirectoryName)
+            val validation = validateManifest(manifest, directory)
+            require(validation.first == ModelValidationState.READY) {
+                validation.second ?: "The installed voice model is not ready."
+            }
+            TextToSpeechModelReference(
+                modelId = modelId,
+                displayName = manifest.displayName,
+                modelDirectory = directory.absolutePath,
+                sampleRateHz = manifest.sampleRateHz ?: 44_100,
                 languages = manifest.languages,
             )
         }
