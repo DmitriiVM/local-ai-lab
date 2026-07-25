@@ -28,6 +28,7 @@ import com.dmitriim.localaiplayground.core.model.ModelSource
 import com.dmitriim.localaiplayground.core.model.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.RuntimeProfileType
+import com.dmitriim.localaiplayground.core.model.SpeechToTextModelReference
 import com.dmitriim.localaiplayground.source.database.InstalledModelEntity
 import com.dmitriim.localaiplayground.source.database.ModelDatabaseProvider
 import dev.zacsweers.metro.ContributesBinding
@@ -176,6 +177,28 @@ class ModelRepositoryImpl(
                 displayName = manifest.displayName,
                 modelPath = File(directory, primary.relativePath).absolutePath,
                 defaultContextSize = manifest.contextSize ?: 512,
+            )
+        }
+    }
+
+    override suspend fun resolveSpeechToTextModel(modelId: ModelId): Result<SpeechToTextModelReference> = runCatching {
+        withContext(Dispatchers.IO) {
+            val record = requireNotNull(dao.find(modelId.value)) { "This model is not installed." }
+            val manifest = json.decodeFromString<ModelManifest>(record.manifestJson)
+            require(AiCapability.SPEECH_TO_TEXT in manifest.capabilities && manifest.profileType == RuntimeProfileType.WHISPER_STT) {
+                "This installed model is not a compatible Whisper speech-to-text model."
+            }
+            val directory = File(rootDirectory, record.localDirectoryName)
+            val validation = validateManifest(manifest, directory)
+            require(validation.first == ModelValidationState.READY) {
+                validation.second ?: "The installed speech model is not ready."
+            }
+            SpeechToTextModelReference(
+                modelId = modelId,
+                displayName = manifest.displayName,
+                modelDirectory = directory.absolutePath,
+                sampleRateHz = manifest.sampleRateHz ?: 16_000,
+                languages = manifest.languages,
             )
         }
     }
