@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.core.audio.output.storage
 
 import android.app.Application
 import android.net.Uri
+import android.util.Log
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
 import dev.zacsweers.metro.Inject
@@ -35,6 +36,7 @@ class GeneratedAudioStore(private val application: Application) {
         require(directory.exists() || directory.mkdirs()) {
             "Could not create app-private generated-audio storage."
         }
+        Log.i(TAG, "Saving generated WAV: samples=${samples.size}, sampleRateHz=$sampleRateHz")
         partialFile.delete()
         writeWave(partialFile, samples, sampleRateHz)
         require(readMetadata(partialFile) != null) { "The generated WAV could not be validated." }
@@ -54,7 +56,9 @@ class GeneratedAudioStore(private val application: Application) {
             if (backupFile.exists()) backupFile.renameTo(latestFile)
             throw error
         }
-        return requireNotNull(readMetadata(latestFile))
+        return requireNotNull(readMetadata(latestFile)).also {
+            Log.i(TAG, "Generated WAV saved: bytes=${latestFile.length()}, durationMs=${it.durationMs}")
+        }
     }
 
     @Synchronized
@@ -62,11 +66,16 @@ class GeneratedAudioStore(private val application: Application) {
         partialFile.delete()
         if (!latestFile.exists() && backupFile.exists()) backupFile.renameTo(latestFile)
         if (latestFile.exists()) backupFile.delete()
-        return readMetadata(latestFile)
+        return readMetadata(latestFile).also { audio ->
+            Log.i(TAG, "Latest generated WAV lookup: available=${audio != null}")
+        }
     }
 
     fun discardPartial() {
-        synchronized(this) { partialFile.delete() }
+        synchronized(this) {
+            val discarded = partialFile.delete()
+            if (discarded) Log.i(TAG, "Discarded partial generated WAV.")
+        }
     }
 
     /** Clears only app-private retained output; previously exported documents are unaffected. */
@@ -80,13 +89,16 @@ class GeneratedAudioStore(private val application: Application) {
 
     fun export(audio: GeneratedAudioFile, destination: Uri) {
         val source = checkedFile(audio)
+        Log.i(TAG, "Exporting generated WAV: bytes=${source.length()}, destinationScheme=${destination.scheme}")
         application.contentResolver.openOutputStream(destination, "w")?.use { output ->
             FileInputStream(source).use { input -> input.copyTo(output) }
         } ?: error("Android could not open the selected export destination.")
+        Log.i(TAG, "Generated WAV export completed.")
     }
 
     fun streamPcm16(audio: GeneratedAudioFile, onChunk: (ByteArray) -> Boolean) {
         val source = checkedFile(audio)
+        Log.i(TAG, "Streaming retained WAV for replay: bytes=${source.length()}, samples=${audio.sampleCount}")
         BufferedInputStream(FileInputStream(source)).use { input ->
             var remaining = audio.sampleCount.toLong() * PCM_BYTES_PER_SAMPLE
             var skipped = 0L
@@ -187,6 +199,7 @@ class GeneratedAudioStore(private val application: Application) {
     }
 
     companion object {
+        private const val TAG = "AiP123Tts"
         const val DIRECTORY_NAME = "generated-audio"
         private const val LATEST_NAME = "latest.wav"
         private const val PARTIAL_NAME = "latest.partial"

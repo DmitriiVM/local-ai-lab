@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.ai.sherpa
 
+import android.util.Log
 import com.dmitriim.localaiplayground.ai.api.SpeechToTextEngine
 import com.dmitriim.localaiplayground.ai.api.SpeechToTextLoadRequest
 import com.dmitriim.localaiplayground.ai.api.SpeechToTextLoadResult
@@ -29,32 +30,40 @@ class SherpaSpeechToTextEngine : SpeechToTextEngine {
 
     override fun load(request: SpeechToTextLoadRequest): SpeechToTextLoadResult = synchronized(lock) {
         val requestedDirectory = File(request.modelDirectory).canonicalPath
+        Log.i(TAG, "Sherpa STT load requested: directory=$requestedDirectory, language=${request.languageCode}, requestedThreads=${request.threadCount}")
         if (recognizer != null && loadedDirectory == requestedDirectory) {
+            Log.i(TAG, "Sherpa STT model reuse: effectiveThreads=${effectiveThreads(request.threadCount)}")
             return SpeechToTextLoadResult(effectiveThreadCount = effectiveThreads(request.threadCount), loadDurationMs = 0, coldStart = false)
         }
         unloadLocked()
         val required = SherpaProfiles.missingFiles(File(requestedDirectory), SherpaProfiles.whisperBaseRequiredFiles)
         require(required.isEmpty()) { "Whisper model files are missing: ${required.joinToString()}" }
         val threads = effectiveThreads(request.threadCount)
-        val duration = measureTimeMillis {
-            recognizer = OfflineRecognizer(null, OfflineRecognizerConfig().apply {
-                modelConfig = OfflineModelConfig().apply {
-                    whisper = OfflineWhisperModelConfig().apply {
-                        encoder = File(requestedDirectory, "base-encoder.int8.onnx").absolutePath
-                        decoder = File(requestedDirectory, "base-decoder.int8.onnx").absolutePath
-                        language = request.languageCode
-                        task = "transcribe"
-                        enableSegmentTimestamps = true
+        val duration = try {
+            measureTimeMillis {
+                recognizer = OfflineRecognizer(null, OfflineRecognizerConfig().apply {
+                    modelConfig = OfflineModelConfig().apply {
+                        whisper = OfflineWhisperModelConfig().apply {
+                            encoder = File(requestedDirectory, "base-encoder.int8.onnx").absolutePath
+                            decoder = File(requestedDirectory, "base-decoder.int8.onnx").absolutePath
+                            language = request.languageCode
+                            task = "transcribe"
+                            enableSegmentTimestamps = true
+                        }
+                        tokens = File(requestedDirectory, "base-tokens.txt").absolutePath
+                        numThreads = threads
+                        provider = "cpu"
+                        debug = false
                     }
-                    tokens = File(requestedDirectory, "base-tokens.txt").absolutePath
-                    numThreads = threads
-                    provider = "cpu"
-                    debug = false
-                }
-            })
+                })
+            }
+        } catch (error: Throwable) {
+            Log.e(TAG, "Sherpa STT native model creation failed: ${error.message}", error)
+            throw error
         }
         loadedDirectory = requestedDirectory
         cancelled = false
+        Log.i(TAG, "Sherpa STT model loaded: loadMs=$duration, effectiveThreads=$threads")
         SpeechToTextLoadResult(threads, duration, coldStart = true)
     }
 
@@ -62,27 +71,41 @@ class SherpaSpeechToTextEngine : SpeechToTextEngine {
         check(!cancelled) { "Transcription was cancelled." }
         val activeRecognizer = checkNotNull(recognizer) { "Load a speech model before transcription." }
         require(request.samples.isNotEmpty()) { "The audio input is empty." }
+        Log.i(TAG, "Sherpa STT inference started: samples=${request.samples.size}, sampleRateHz=${request.sampleRateHz}")
         val stream = activeRecognizer.createStream()
         try {
             var text = ""
-            val duration = measureTimeMillis {
-                check(!cancelled) { "Transcription was cancelled." }
-                stream.acceptWaveform(request.samples, request.sampleRateHz)
-                activeRecognizer.decode(stream)
-                check(!cancelled) { "Transcription was cancelled." }
-                text = activeRecognizer.getResult(stream).text.trim()
+            val duration = try {
+                measureTimeMillis {
+                    check(!cancelled) { "Transcription was cancelled." }
+                    stream.acceptWaveform(request.samples, request.sampleRateHz)
+                    activeRecognizer.decode(stream)
+                    check(!cancelled) { "Transcription was cancelled." }
+                    text = activeRecognizer.getResult(stream).text.trim()
+                }
+            } catch (error: Throwable) {
+                Log.e(TAG, "Sherpa STT inference failed: ${error.message}", error)
+                throw error
             }
+            Log.i(TAG, "Sherpa STT inference completed: processingMs=$duration, transcriptLength=${text.length}")
             SpeechToTextResult(text, duration)
         } finally {
             stream.release()
         }
     }
 
-    override fun cancel() { cancelled = true }
+    override fun cancel() {
+        Log.i(TAG, "Sherpa STT cancellation flag set.")
+        cancelled = true
+    }
 
-    override fun unload() = synchronized(lock) { unloadLocked() }
+    override fun unload() = synchronized(lock) {
+        Log.i(TAG, "Sherpa STT unload requested.")
+        unloadLocked()
+    }
 
     private fun unloadLocked() {
+        if (recognizer != null) Log.i(TAG, "Sherpa STT releasing native recognizer.")
         recognizer?.release()
         recognizer = null
         loadedDirectory = null
@@ -91,4 +114,8 @@ class SherpaSpeechToTextEngine : SpeechToTextEngine {
 
     private fun effectiveThreads(requested: Int): Int = requested.takeIf { it > 0 }
         ?: Runtime.getRuntime().availableProcessors().coerceIn(1, 4)
+
+    private companion object {
+        const val TAG = "AiP123Stt"
+    }
 }

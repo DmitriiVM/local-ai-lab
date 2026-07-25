@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.feature.models.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.di.AppScope
@@ -42,9 +43,10 @@ class ModelsViewModel(
         }
     }
 
-    fun import(profile: RuntimeProfileType, uris: List<String>) = launchOperation {
+    fun import(profile: RuntimeProfileType, uris: List<String>) = launchOperation("import ${profile.name}") {
+        Log.i(TAG, "Models UI import requested: profile=$profile, documentCount=${uris.size}")
         val engine = if (profile == RuntimeProfileType.LLM) EngineId("llama.cpp") else EngineId("sherpa-onnx")
-        modelLibrary.import(
+        val modelId = modelLibrary.import(
             ModelImportRequest(
                 displayName = "Imported ${profile.displayName}",
                 engineId = engine,
@@ -52,16 +54,23 @@ class ModelsViewModel(
                 documentUris = uris,
             ),
         ).getOrThrow()
+        Log.i(TAG, "Models UI import completed: profile=$profile, modelId=${modelId.value}")
         "Model imported and validated."
     }
 
-    fun download(modelId: ModelId) = launchOperation {
+    fun download(modelId: ModelId) = launchOperation("download") {
+        Log.i(TAG, "Models UI download requested: modelId=${modelId.value}")
         modelTransfers.download(modelId).getOrThrow()
+        Log.i(TAG, "Models UI download scheduled: modelId=${modelId.value}")
         "Download scheduled."
     }
 
     fun validate(modelId: ModelId) {
-        if (modelId in mutableUiState.value.validatingModelIds) return
+        if (modelId in mutableUiState.value.validatingModelIds) {
+            Log.w(TAG, "Ignoring duplicate model validation request: modelId=${modelId.value}")
+            return
+        }
+        Log.i(TAG, "Models UI validation requested: modelId=${modelId.value}")
         mutableUiState.update {
             it.copy(
                 validatingModelIds = it.validatingModelIds + modelId,
@@ -72,6 +81,7 @@ class ModelsViewModel(
             val feedback = modelLibrary.validate(modelId).fold(
                 onSuccess = { model ->
                     val ready = model.validationState == ModelValidationState.READY
+                    Log.i(TAG, "Models UI validation completed: modelId=${modelId.value}, state=${model.validationState}, bytes=${model.totalBytes}")
                     ModelValidationFeedback(
                         message = if (ready) {
                             "Validation passed."
@@ -82,6 +92,7 @@ class ModelsViewModel(
                     )
                 },
                 onFailure = { error ->
+                    Log.e(TAG, "Models UI validation failed: modelId=${modelId.value}, message=${error.message}", error)
                     ModelValidationFeedback(
                         message = error.message ?: "Validation failed.",
                         isError = true,
@@ -98,10 +109,14 @@ class ModelsViewModel(
     }
 
     fun requestDelete(modelId: ModelId) {
+        Log.i(TAG, "Models UI delete confirmation requested: modelId=${modelId.value}")
         mutableUiState.update { state -> state.copy(pendingDelete = state.installed.firstOrNull { it.manifest.modelId == modelId }) }
     }
 
-    fun cancelDelete() = mutableUiState.update { it.copy(pendingDelete = null) }
+    fun cancelDelete() {
+        Log.i(TAG, "Models UI delete confirmation cancelled.")
+        mutableUiState.update { it.copy(pendingDelete = null) }
+    }
 
     fun confirmDelete() {
         val model = mutableUiState.value.pendingDelete ?: return
@@ -111,23 +126,38 @@ class ModelsViewModel(
                 validationFeedback = it.validationFeedback - model.manifest.modelId,
             )
         }
-        launchOperation {
+        launchOperation("delete") {
+            Log.i(TAG, "Models UI delete confirmed: modelId=${model.manifest.modelId.value}, displayName=${model.manifest.displayName}, bytes=${model.totalBytes}")
             modelLibrary.delete(model.manifest.modelId).getOrThrow()
+            Log.i(TAG, "Models UI delete completed: modelId=${model.manifest.modelId.value}")
             "${model.manifest.displayName} was deleted."
         }
     }
 
     fun cancelTransfer(modelId: ModelId) {
-        viewModelScope.launch { modelTransfers.cancelTransfer(modelId) }
+        viewModelScope.launch {
+            Log.i(TAG, "Models UI transfer cancellation requested: modelId=${modelId.value}")
+            modelTransfers.cancelTransfer(modelId)
+        }
     }
 
-    private fun launchOperation(action: suspend () -> String) {
+    private fun launchOperation(operation: String, action: suspend () -> String) {
         viewModelScope.launch {
             mutableUiState.update { it.copy(message = null) }
             runCatching { action() }
-                .onSuccess { message -> mutableUiState.update { it.copy(message = message) } }
-                .onFailure { error -> mutableUiState.update { it.copy(message = error.message ?: "The operation failed.") } }
+                .onSuccess { message ->
+                    Log.i(TAG, "Models UI operation succeeded: operation=$operation")
+                    mutableUiState.update { it.copy(message = message) }
+                }
+                .onFailure { error ->
+                    Log.e(TAG, "Models UI operation failed: operation=$operation, message=${error.message}", error)
+                    mutableUiState.update { it.copy(message = error.message ?: "The operation failed.") }
+                }
         }
+    }
+
+    private companion object {
+        const val TAG = "AiP123Models"
     }
 }
 

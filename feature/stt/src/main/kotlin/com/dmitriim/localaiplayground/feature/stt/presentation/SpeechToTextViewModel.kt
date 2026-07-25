@@ -1,6 +1,7 @@
 package com.dmitriim.localaiplayground.feature.stt.presentation
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
@@ -78,20 +79,27 @@ class SpeechToTextViewModel(
     fun updateThreadCount(value: String) = mutableState.update { it.copy(threadCount = value.filter(Char::isDigit), errorMessage = null) }
 
     fun startRecording() {
-        if (operationJob?.isActive == true) return
+        if (operationJob?.isActive == true) {
+            Log.w(TAG, "Ignoring recording request because an STT operation is already active.")
+            return
+        }
         if (!requireModel()) return
+        Log.i(TAG, "STT UI recording started: language=${mutableState.value.language.whisperCode}, threads=${mutableState.value.threadCount}")
         mutableState.update { it.copy(operation = SttOperation.RECORDING, transcript = "", metrics = null, errorMessage = null, level = null) }
         operationJob = viewModelScope.launch(Dispatchers.Default) {
             try {
                 val input = audioInputStore.capture { level ->
                     mutableState.update { it.copy(level = level) }
                 }
+                Log.i(TAG, "STT UI recording captured: durationMs=${input.durationMs}, sampleRateHz=${input.sampleRateHz}")
                 replaceInput(input)
                 mutableState.update { it.copy(level = null, operation = SttOperation.IDLE) }
                 transcribe(input)
             } catch (cancelled: CancellationException) {
+                Log.i(TAG, "STT UI recording cancelled.")
                 mutableState.update { it.copy(operation = SttOperation.IDLE, level = null) }
             } catch (error: Throwable) {
+                Log.e(TAG, "STT UI recording failed: ${error.message}", error)
                 mutableState.update { it.copy(operation = SttOperation.IDLE, level = null, errorMessage = error.message ?: "Microphone capture failed.") }
             }
         }.also(::registerForegroundCancellation)
@@ -99,35 +107,48 @@ class SpeechToTextViewModel(
 
     fun stopRecording() {
         if (mutableState.value.operation != SttOperation.RECORDING) return
+        Log.i(TAG, "STT UI recording stop requested.")
         mutableState.update { it.copy(operation = SttOperation.STOPPING) }
         audioInputStore.stopCapture()
     }
 
     fun importAudio(uri: Uri) {
-        if (operationJob?.isActive == true) return
+        if (operationJob?.isActive == true) {
+            Log.w(TAG, "Ignoring import request because an STT operation is already active.")
+            return
+        }
         if (!requireModel()) return
+        Log.i(TAG, "STT UI import started: uriScheme=${uri.scheme}")
         mutableState.update { it.copy(operation = SttOperation.IMPORTING, transcript = "", metrics = null, errorMessage = null) }
         operationJob = viewModelScope.launch(Dispatchers.Default) {
             try {
                 val input = audioInputStore.importAudio(uri)
+                Log.i(TAG, "STT UI import completed: durationMs=${input.durationMs}, sampleRateHz=${input.sampleRateHz}")
                 replaceInput(input)
                 mutableState.update { it.copy(operation = SttOperation.IDLE) }
                 transcribe(input)
             } catch (cancelled: CancellationException) {
+                Log.i(TAG, "STT UI import cancelled.")
                 mutableState.update { it.copy(operation = SttOperation.IDLE) }
             } catch (error: Throwable) {
+                Log.e(TAG, "STT UI import failed: ${error.message}", error)
                 mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = error.message ?: "Audio import failed.") }
             }
         }.also(::registerForegroundCancellation)
     }
 
     fun repeatTranscription() {
-        if (operationJob?.isActive == true) return
+        if (operationJob?.isActive == true) {
+            Log.w(TAG, "Ignoring repeat-transcription request because an STT operation is already active.")
+            return
+        }
+        Log.i(TAG, "STT UI repeat transcription requested.")
         mutableState.value.input?.let(::transcribe)
     }
 
     fun cancel() {
         if (operationJob?.isActive != true) return
+        Log.i(TAG, "STT UI cancellation requested: operation=${mutableState.value.operation}")
         mutableState.update { it.copy(operation = SttOperation.CANCELLING) }
         audioInputStore.stopCapture()
         transcribeAudio.cancel()
@@ -135,6 +156,7 @@ class SpeechToTextViewModel(
     }
 
     fun clear() {
+        Log.i(TAG, "STT UI clear requested.")
         if (operationJob?.isActive == true) cancel()
         val input = mutableState.value.input
         audioInputStore.clear(input)
@@ -142,6 +164,7 @@ class SpeechToTextViewModel(
     }
 
     fun microphonePermissionDenied() = mutableState.update {
+        Log.w(TAG, "STT microphone permission denied.")
         it.copy(errorMessage = "Microphone permission was denied. You can allow it in Android settings and try again.")
     }
 
@@ -150,6 +173,11 @@ class SpeechToTextViewModel(
         val modelId = snapshot.selectedModelId ?: return
         val startedAt = System.currentTimeMillis()
         val model = snapshot.selectedModel
+        Log.i(
+            TAG,
+            "STT UI transcription started: model=${model?.displayName}, durationMs=${input.durationMs}, " +
+                "sampleRateHz=${input.sampleRateHz}, language=${snapshot.language.whisperCode}, threads=${snapshot.threadCount}",
+        )
         mutableState.update { it.copy(operation = SttOperation.TRANSCRIBING, transcript = "", metrics = null, errorMessage = null) }
         operationJob = viewModelScope.launch(Dispatchers.Default) {
             try {
@@ -164,7 +192,10 @@ class SpeechToTextViewModel(
                     ),
                 ).collect { event ->
                     when (event) {
-                        is SpeechTranscriptionEvent.Prepared -> Unit
+                        is SpeechTranscriptionEvent.Prepared -> Log.i(
+                            TAG,
+                            "STT UI received prepared event: model=${event.modelName}, loadMs=${event.loadDurationMs}, threads=${event.effectiveThreadCount}",
+                        )
                         is SpeechTranscriptionEvent.Completed -> mutableState.update {
                             it.copy(
                                 operation = SttOperation.IDLE,
@@ -172,14 +203,17 @@ class SpeechToTextViewModel(
                                 metrics = event.metrics,
                             )
                         }.also {
+                            Log.i(TAG, "STT UI received completed event: transcriptLength=${event.transcript.length}, segments=${event.metrics.segmentCount}, totalMs=${event.metrics.timeToFinalMs}")
                             persistSttRun(snapshotForPersistence(RunStatus.SUCCEEDED, startedAt, model, input, event.transcript, snapshot, event.metrics, null))
                         }
                     }
                 }
             } catch (cancelled: CancellationException) {
+                Log.i(TAG, "STT UI transcription cancelled.")
                 mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = "Transcription cancelled.") }
                 persistSttRun(snapshotForPersistence(RunStatus.CANCELLED, startedAt, model, input, null, snapshot, null, "Transcription cancelled."))
             } catch (error: Throwable) {
+                Log.e(TAG, "STT UI transcription failed: ${error.message}", error)
                 mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = error.message ?: "Local transcription failed.") }
                 persistSttRun(snapshotForPersistence(RunStatus.FAILED, startedAt, model, input, null, snapshot, null, error.message ?: "Local transcription failed."))
             }
@@ -188,6 +222,7 @@ class SpeechToTextViewModel(
 
     private fun requireModel(): Boolean {
         if (mutableState.value.selectedModelId != null) return true
+        Log.w(TAG, "STT cannot start because no compatible model is selected.")
         mutableState.update { it.copy(errorMessage = "Install a compatible Whisper speech model before recording or importing audio.") }
         return false
     }
@@ -204,11 +239,13 @@ class SpeechToTextViewModel(
     }
 
     override fun onCleared() {
+        Log.i(TAG, "STT ViewModel cleared; cancelling active work.")
         cancel()
         super.onCleared()
     }
 
     private fun applyReplay(run: RunRecord) {
+        Log.i(TAG, "STT replay configuration received: runId=${run.id}")
         val modelId = run.model?.modelId?.let(::ModelId)
         val selected = modelId?.takeIf { id -> mutableState.value.models.any { it.id == id } }
         val parameters = runCatching { Json.parseToJsonElement(run.parametersJson).jsonObject }.getOrNull()
@@ -246,4 +283,8 @@ class SpeechToTextViewModel(
         metrics = metrics,
         errorMessage = error,
     )
+
+    private companion object {
+        const val TAG = "AiP123Stt"
+    }
 }

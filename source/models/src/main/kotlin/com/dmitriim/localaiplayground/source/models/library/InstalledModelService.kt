@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.source.models.library
 
 import android.app.Application
 import android.provider.OpenableColumns
+import android.util.Log
 import androidx.core.net.toUri
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.di.ApplicationCoroutineScope
@@ -62,11 +63,13 @@ class InstalledModelService(
     init {
         rootDirectory.mkdirs()
         cleanupInterruptedInstallations()
+        Log.i(TAG, "Model library initialized: rootDirectory=${rootDirectory.name}")
         applicationScope.launch(Dispatchers.IO) { reconcileInstalledModels() }
     }
 
     override suspend fun import(request: ModelImportRequest): Result<ModelId> = runCatching {
         require(request.documentUris.isNotEmpty()) { "Select at least one model file." }
+        Log.i(TAG, "Model import started: profile=${request.profileType}, engine=${request.engineId.value}, documentCount=${request.documentUris.size}")
         withContext(Dispatchers.IO) {
             val modelId = ModelId("import-${UUID.randomUUID()}")
             val temporary = temporaryDirectory(modelId)
@@ -78,13 +81,17 @@ class InstalledModelService(
                     require(copiedNamesSafe(temporary, name)) { "More than one selected document is named $name." }
                     application.contentResolver.openInputStream(uri).use { input ->
                         requireNotNull(input) { "The selected document is no longer readable." }
-                        FileOutputStream(File(temporary, name)).use { output -> input.copyTo(output) }
+                        val destination = File(temporary, name)
+                        FileOutputStream(destination).use { output -> input.copyTo(output) }
+                        Log.i(TAG, "Model import file copied: name=$name, bytes=${destination.length()}")
                     }
                     name
                 }
                 installDirectory(importedManifest(modelId, request, copiedNames), temporary)
+                Log.i(TAG, "Model import completed: modelId=${modelId.value}, files=${copiedNames.size}")
                 modelId
             } catch (error: Throwable) {
+                Log.e(TAG, "Model import failed: modelId=${modelId.value}, message=${error.message}", error)
                 temporary.deleteRecursively()
                 throw error
             }
@@ -93,6 +100,7 @@ class InstalledModelService(
 
     override suspend fun validate(modelId: ModelId): Result<InstalledModel> = runCatching {
         withContext(Dispatchers.IO) {
+            Log.i(TAG, "Installed model validation started: modelId=${modelId.value}")
             val record = requireNotNull(dao.find(modelId.value)) { "This model is not installed." }
             val manifest = json.decodeFromString<ModelManifest>(record.manifestJson)
             val directory = File(rootDirectory, record.localDirectoryName)
@@ -103,6 +111,7 @@ class InstalledModelService(
                 totalBytes = directory.totalFileBytes(),
             )
             dao.upsert(updated)
+            Log.i(TAG, "Installed model validation completed: modelId=${modelId.value}, state=${validation.first}, bytes=${updated.totalBytes}, message=${validation.second}")
             updated.toDomainOrNull() ?: error("The saved model manifest is invalid.")
         }
     }
@@ -110,10 +119,12 @@ class InstalledModelService(
     override suspend fun delete(modelId: ModelId): Result<Unit> = runCatching {
         val record = requireNotNull(dao.find(modelId.value)) { "This model is not installed." }
         val directory = File(rootDirectory, record.localDirectoryName)
+        Log.i(TAG, "Installed model deletion started: modelId=${modelId.value}, directory=${directory.name}, bytes=${directory.totalFileBytes()}")
         require(directory.canonicalFile.parentFile == rootDirectory.canonicalFile) { "Invalid model directory." }
         if (directory.exists()) require(directory.deleteRecursively()) { "Could not delete model files." }
         dao.delete(modelId.value)
         transferState.update { it + (modelId to ModelTransferState.Idle) }
+        Log.i(TAG, "Installed model deletion completed: modelId=${modelId.value}")
     }
 
     internal suspend fun requireReadyModel(modelId: ModelId): InstalledModelLocation = withContext(Dispatchers.IO) {
@@ -132,6 +143,7 @@ class InstalledModelService(
         temporary: File,
         verifyChecksums: Boolean = true,
     ) {
+        Log.i(TAG, "Model installation validation started: modelId=${manifest.modelId.value}, profile=${manifest.profileType}, verifyChecksums=$verifyChecksums")
         val validation = validator.validate(manifest, temporary, verifyChecksums)
         require(validation.first == ModelValidationState.READY) { validation.second ?: "Model validation failed." }
         val enriched = validator.enrichChecksums(manifest, temporary)
@@ -142,7 +154,9 @@ class InstalledModelService(
             require(temporary.renameTo(finalDirectory)) { "Could not complete the model installation transaction." }
             try {
                 dao.upsert(enriched.toEntity(finalDirectory))
+                Log.i(TAG, "Model installation completed: modelId=${enriched.modelId.value}, directory=${finalDirectory.name}, bytes=${finalDirectory.totalFileBytes()}, files=${enriched.files.size}")
             } catch (error: Throwable) {
+                Log.e(TAG, "Model installation database registration failed: modelId=${enriched.modelId.value}, message=${error.message}", error)
                 finalDirectory.deleteRecursively()
                 throw error
             }
@@ -160,6 +174,7 @@ class InstalledModelService(
         val validation = validator.validate(manifest, directory)
         if (validation.first != ModelValidationState.READY) return@withContext false
         dao.upsert(manifest.toEntity(directory, validation))
+        Log.i(TAG, "Existing model directory registered: modelId=${modelId.value}, directory=${directory.name}")
         true
     }
 
@@ -235,7 +250,9 @@ class InstalledModelService(
     private fun cleanupInterruptedInstallations() {
         rootDirectory.parentFile
             ?.listFiles { file -> file.isDirectory && file.name.startsWith("model-installing-") }
-            ?.forEach(File::deleteRecursively)
+            ?.forEach { directory ->
+                if (directory.deleteRecursively()) Log.i(TAG, "Removed interrupted model installation staging directory.")
+            }
     }
 
     private fun documentName(uri: android.net.Uri): String = application.contentResolver.query(
@@ -275,6 +292,10 @@ class InstalledModelService(
         RuntimeProfileType.WHISPER_STT -> setOf(AiCapability.SPEECH_TO_TEXT)
         RuntimeProfileType.SILERO_VAD -> setOf(AiCapability.SPEECH_TO_TEXT, AiCapability.VOICE_ASSISTANT)
         RuntimeProfileType.SUPERTONIC_TTS -> setOf(AiCapability.TEXT_TO_SPEECH, AiCapability.VOICE_ASSISTANT)
+    }
+
+    private companion object {
+        const val TAG = "AiP123Models"
     }
 }
 

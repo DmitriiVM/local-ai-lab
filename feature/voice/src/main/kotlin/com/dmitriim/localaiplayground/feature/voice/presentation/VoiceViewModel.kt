@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.feature.voice.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.di.AppScope
@@ -74,14 +75,19 @@ class VoiceViewModel(
     }
 
     fun startListening() {
-        if (turnJob?.isActive == true) return
+        if (turnJob?.isActive == true) {
+            Log.w(TAG, "Ignoring voice start request because a turn is already active.")
+            return
+        }
         val snapshot = mutableState.value
         val configurationError = snapshot.configurationError
         if (configurationError != null) {
+            Log.w(TAG, "Voice start blocked by configuration: $configurationError")
             mutableState.update { it.copy(errorMessage = configurationError, phase = VoicePhase.ERROR) }
             return
         }
         val request = snapshot.toVoiceTurnRequest().getOrElse { error ->
+            Log.e(TAG, "Voice settings are invalid: ${error.message}", error)
             mutableState.update {
                 it.copy(
                     phase = VoicePhase.ERROR,
@@ -91,6 +97,12 @@ class VoiceViewModel(
             return
         }
         val startedAt = System.currentTimeMillis()
+        Log.i(
+            TAG,
+            "Voice UI turn started: stt=${snapshot.selectedSpeechModel?.displayName}, chat=${snapshot.selectedChatModel?.displayName}, " +
+                "tts=${snapshot.selectedVoiceModel?.displayName}, language=${request.languageCode}, " +
+                "historyTurns=${request.history.size}, contextSize=${request.contextSize}, maxOutputTokens=${request.maxOutputTokens}",
+        )
         mutableState.update {
             it.copy(
                 phase = VoicePhase.FINALIZING,
@@ -105,7 +117,27 @@ class VoiceViewModel(
         }
         turnJob = viewModelScope.launch(Dispatchers.Default) {
             try {
+                var assistantTokenEvents = 0
                 coordinator.execute(request).collect { event ->
+                    when (event) {
+                        is com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent.Prepared ->
+                            Log.i(TAG, "Voice UI pipeline prepared: stt=${event.pipeline.speechModel}, chat=${event.pipeline.chatModel}, tts=${event.pipeline.voiceModel}")
+                        is com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent.Phase ->
+                            Log.i(TAG, "Voice UI phase changed: ${event.value}")
+                        is com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent.FinalTranscript ->
+                            Log.i(TAG, "Voice UI received final transcript: length=${event.value.length}")
+                        is com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent.ContextPrepared ->
+                            Log.i(TAG, "Voice UI context prepared: promptTokens=${event.value.promptTokens}, omittedTurns=${event.value.omittedTurnCount}")
+                        is com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent.AssistantToken -> {
+                            assistantTokenEvents++
+                            if (assistantTokenEvents == 1) Log.i(TAG, "Voice UI received first assistant token: chars=${event.value.length}")
+                        }
+                        is com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent.AssistantCompleted ->
+                            Log.i(TAG, "Voice UI assistant response completed: length=${event.value.length}, tokenEvents=$assistantTokenEvents")
+                        is com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent.Completed ->
+                            Log.i(TAG, "Voice UI turn metrics received: listeningMs=${event.metrics.listeningDurationMs}, sttMs=${event.metrics.sttProcessingDurationMs}, llmMs=${event.metrics.llmCompletionDurationMs}, ttsMs=${event.metrics.ttsCompletionDurationMs}")
+                        is com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent.Level -> Unit
+                    }
                     mutableState.update { it.reduce(event) }
                 }
                 mutableState.update { state ->
@@ -122,13 +154,16 @@ class VoiceViewModel(
                 }
                 completedVoiceTurn(startedAt, snapshot, request)?.let { completed ->
                     persistVoiceTurn(completed)
+                    Log.i(TAG, "Voice UI completed turn persisted.")
                 }
             } catch (cancelled: CancellationException) {
+                Log.i(TAG, "Voice UI turn cancelled.")
                 mutableState.update {
                     it.copy(phase = VoicePhase.IDLE, level = null, statusMessage = "Voice turn cancelled.")
                 }
                 persistTerminalTurn(RunStatus.CANCELLED, startedAt, snapshot, "Voice turn cancelled.")
             } catch (error: Throwable) {
+                Log.e(TAG, "Voice UI turn failed: ${error.message}", error)
                 mutableState.update {
                     it.copy(
                         phase = VoicePhase.ERROR,
@@ -144,12 +179,14 @@ class VoiceViewModel(
 
     fun stopListening() {
         if (mutableState.value.phase != VoicePhase.LISTENING) return
+        Log.i(TAG, "Voice UI stop-listening requested.")
         mutableState.update { it.copy(phase = VoicePhase.FINALIZING, level = null, statusMessage = "Finalizing recorded speech…") }
         coordinator.stopListening()
     }
 
     fun cancel() {
         if (turnJob?.isActive != true) return
+        Log.i(TAG, "Voice UI cancellation requested: phase=${mutableState.value.phase}")
         mutableState.update { it.copy(phase = VoicePhase.CANCELLING, statusMessage = "Stopping local engines and audio…") }
         coordinator.cancel()
         turnJob?.cancel()
@@ -159,6 +196,7 @@ class VoiceViewModel(
         if (turnJob?.isActive == true) return
         val previous = conversationId
         conversationId = java.util.UUID.randomUUID().toString()
+        Log.i(TAG, "Voice UI started a new conversation.")
         mutableState.update {
             it.copy(
                 phase = VoicePhase.IDLE,
@@ -175,11 +213,15 @@ class VoiceViewModel(
     }
 
     fun microphonePermissionDenied() = mutableState.update {
+        Log.w(TAG, "Voice microphone permission denied.")
         it.copy(phase = VoicePhase.ERROR, errorMessage = "Microphone permission is required for push-to-talk.")
     }
 
     private fun selectWhenInactive(transform: (VoiceUiState) -> VoiceUiState) {
-        if (turnJob?.isActive == true) return
+        if (turnJob?.isActive == true) {
+            Log.w(TAG, "Ignoring voice configuration change while a turn is active.")
+            return
+        }
         mutableState.update { transform(it).copy(errorMessage = null, statusMessage = null) }
     }
 
@@ -189,12 +231,14 @@ class VoiceViewModel(
     }
 
     override fun onCleared() {
+        Log.i(TAG, "Voice ViewModel cleared; cancelling active turn.")
         coordinator.cancel()
         turnJob?.cancel()
         super.onCleared()
     }
 
     private fun applyReplay(run: RunRecord) {
+        Log.i(TAG, "Voice replay configuration received: runId=${run.id}")
         val parameters = runCatching { Json.parseToJsonElement(run.parametersJson).jsonObject }.getOrNull()
         mutableState.update { state ->
             state.copy(
@@ -240,6 +284,7 @@ class VoiceViewModel(
     }
 
     private suspend fun persistTerminalTurn(status: RunStatus, startedAt: Long, snapshot: VoiceUiState, error: String) {
+        Log.i(TAG, "Voice terminal turn persistence requested: status=$status, transcriptLength=${mutableState.value.finalTranscript.length}, responseLength=${mutableState.value.streamingResponse.length}")
         runRepository.saveRun(
             RunRecord(
                 id = java.util.UUID.randomUUID().toString(), capability = AiCapability.VOICE_ASSISTANT,
@@ -250,4 +295,7 @@ class VoiceViewModel(
         )
     }
 
+    private companion object {
+        const val TAG = "AiP123Voice"
+    }
 }

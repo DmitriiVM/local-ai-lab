@@ -7,6 +7,7 @@ import android.media.AudioManager
 import android.media.AudioTimestamp
 import android.media.AudioTrack
 import android.os.SystemClock
+import android.util.Log
 import com.dmitriim.localaiplayground.core.audio.output.api.SpeechPlaybackSession
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackMetrics
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackState
@@ -77,6 +78,7 @@ internal class AndroidSpeechPlaybackSession(
             error("Android could not initialize speech playback at $sampleRateHz Hz.")
         }
         track.setVolume(volume)
+        Log.i(TAG, "AudioTrack initialized: sampleRateHz=$sampleRateHz, minBufferBytes=$minimum, bufferBytes=${max(minimum, capacity160Ms)}")
     }
 
     override fun write(samples: FloatArray): Boolean {
@@ -119,13 +121,17 @@ internal class AndroidSpeechPlaybackSession(
                     if (!playbackStarted) {
                         track.play()
                         playbackStarted = true
+                        Log.i(TAG, "AudioTrack playback started: firstWriteBytes=$count")
                         refresh(status = SpeechPlaybackStatus.PLAYING)
                     } else {
                         refresh()
                     }
                 }
                 count == 0 -> Thread.sleep(WRITE_POLL_MS)
-                else -> error("Android speech playback failed while writing PCM: $count.")
+                else -> {
+                    Log.e(TAG, "AudioTrack write failed: result=$count, offset=$offset, totalBytes=${pcm16.size}")
+                    error("Android speech playback failed while writing PCM: $count.")
+                }
             }
         }
         return offset == pcm16.size && !stopped.get() && !closed.get()
@@ -133,13 +139,18 @@ internal class AndroidSpeechPlaybackSession(
 
     override suspend fun awaitDrained() {
         if (!playbackStarted || stopped.get()) return
+        Log.i(TAG, "Waiting for AudioTrack drain: framesWritten=$framesWritten")
         while (!stopped.get() && !closed.get()) {
             refresh()
-            if (!paused && presentedFrames() >= framesWritten) return
+            if (!paused && presentedFrames() >= framesWritten) {
+                Log.i(TAG, "AudioTrack drained: framesPresented=${presentedFrames()}, underruns=${track.underrunCount - underrunsAtStart}")
+                return
+            }
             if (
                 !paused &&
                 SystemClock.elapsedRealtimeNanos() - lastProgressNanos > STALL_TIMEOUT_NANOS
             ) {
+                Log.e(TAG, "AudioTrack drain stalled: framesWritten=$framesWritten, framesPresented=${presentedFrames()}, paused=$paused")
                 error("Android speech playback stopped making progress.")
             }
             delay(DRAIN_POLL_MS)
@@ -162,6 +173,7 @@ internal class AndroidSpeechPlaybackSession(
         paused = true
         pausedByFocus = pausedForFocus
         track.pause()
+        Log.i(TAG, "AudioTrack paused: byFocus=$pausedForFocus")
         refresh(
             status = SpeechPlaybackStatus.PAUSED,
             focusMessage = if (pausedForFocus) {
@@ -179,6 +191,7 @@ internal class AndroidSpeechPlaybackSession(
         pausedByFocus = false
         lastProgressNanos = SystemClock.elapsedRealtimeNanos()
         track.play()
+        Log.i(TAG, "AudioTrack resumed: fromFocus=$fromFocus")
         refresh(status = SpeechPlaybackStatus.PLAYING, focusMessage = null)
     }
 
@@ -190,6 +203,7 @@ internal class AndroidSpeechPlaybackSession(
         } catch (_: IllegalStateException) {
         }
         refresh(status = SpeechPlaybackStatus.STOPPED, focusMessage = message)
+        Log.i(TAG, "AudioTrack stopped: message=$message")
     }
 
     fun close() {
@@ -204,10 +218,12 @@ internal class AndroidSpeechPlaybackSession(
             audioManager.abandonAudioFocusRequest(focusRequest)
             focusGranted = false
         }
+        Log.i(TAG, "AudioTrack released.")
     }
 
     private fun prepareStart() {
         val focusResult = audioManager.requestAudioFocus(focusRequest)
+        Log.i(TAG, "Audio focus requested: result=$focusResult")
         require(focusResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             "Another app currently owns audio playback."
         }
@@ -220,6 +236,7 @@ internal class AndroidSpeechPlaybackSession(
 
     private fun onAudioFocusChange(change: Int) {
         if (!isActive()) return
+        Log.i(TAG, "Audio focus changed: change=$change")
         when (change) {
             AudioManager.AUDIOFOCUS_GAIN -> resume(fromFocus = true)
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
@@ -258,6 +275,7 @@ internal class AndroidSpeechPlaybackSession(
             val presentedFrames = timestamp.framePosition - framePositionAtStart
             val elapsedForFrames = presentedFrames * NANOS_PER_SECOND / sampleRateHz
             firstPresentationNanos = timestamp.nanoTime - elapsedForFrames
+            Log.i(TAG, "AudioTrack first presentation timestamp received: framePosition=${timestamp.framePosition}")
         }
     }
 
@@ -268,6 +286,7 @@ internal class AndroidSpeechPlaybackSession(
     }
 
     private companion object {
+        const val TAG = "AiP123Tts"
         const val PCM_BYTES_PER_FRAME = 2
         const val WRITE_POLL_MS = 4L
         const val PAUSE_POLL_MS = 10L

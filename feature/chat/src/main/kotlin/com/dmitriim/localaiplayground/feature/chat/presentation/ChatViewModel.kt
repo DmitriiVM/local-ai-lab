@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.feature.chat.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.ChatEngine
@@ -84,7 +85,10 @@ class ChatViewModel(
     }
 
     fun selectModel(modelId: ModelId) {
-        if (generationJob?.isActive == true) return
+        if (generationJob?.isActive == true) {
+            Log.w(TAG, "Ignoring chat model selection while generation is active.")
+            return
+        }
         val model = mutableState.value.availableModels.firstOrNull { it.id == modelId } ?: return
         mutableState.update {
             it.copy(
@@ -110,12 +114,21 @@ class ChatViewModel(
     fun send() {
         val snapshot = mutableState.value
         val input = snapshot.input.trim()
-        if (input.isEmpty() || generationJob?.isActive == true) return
+        if (input.isEmpty()) {
+            Log.w(TAG, "Ignoring empty chat submission.")
+            return
+        }
+        if (generationJob?.isActive == true) {
+            Log.w(TAG, "Ignoring chat submission while generation is active.")
+            return
+        }
+        Log.i(TAG, "Chat UI send requested: inputChars=${input.length}, historyMessages=${snapshot.messages.size}")
         startGeneration(snapshot.messages, input, appendUser = true)
     }
 
     fun stop() {
         if (generationJob?.isActive != true) return
+        Log.i(TAG, "Chat UI stop requested: operation=${mutableState.value.operation}")
         mutableState.update { it.copy(operation = ChatOperation.CANCELLING) }
         chatEngine.cancel()
     }
@@ -125,6 +138,7 @@ class ChatViewModel(
         val assistantIndex = messages.indexOfLast { it.role == ChatMessageRole.ASSISTANT }
         if (assistantIndex < 0 || generationJob?.isActive == true) return
         val user = messages.subList(0, assistantIndex).lastOrNull { it.role == ChatMessageRole.USER } ?: return
+        Log.i(TAG, "Chat UI regenerate requested: historyMessages=$assistantIndex, userInputChars=${user.content.length}")
         startGeneration(messages.take(assistantIndex), user.content, appendUser = false)
     }
 
@@ -134,6 +148,7 @@ class ChatViewModel(
         val messages = mutableState.value.messages
         val index = messages.indexOfFirst { it.id == messageId && it.role == ChatMessageRole.USER }
         if (index < 0) return
+        Log.i(TAG, "Chat UI edit-and-retry requested: retainedMessages=$index")
         mutableState.update {
             it.copy(messages = messages.take(index), input = messages[index].content, metrics = null, errorMessage = null)
         }
@@ -143,16 +158,24 @@ class ChatViewModel(
         if (generationJob?.isActive == true) return
         val deleted = conversationId
         conversationId = UUID.randomUUID().toString()
+        Log.i(TAG, "Chat UI conversation cleared.")
         mutableState.update { it.copy(messages = emptyList(), metrics = null, contextUsage = null, errorMessage = null) }
         viewModelScope.launch(Dispatchers.IO) { runRepository.deleteConversation(deleted) }
     }
 
     fun unloadModel() {
         if (generationJob?.isActive == true) return
+        Log.i(TAG, "Chat UI model unload requested.")
         viewModelScope.launch(Dispatchers.Default) {
             runCatching { chatEngine.unload() }
-                .onSuccess { mutableState.update { it.copy(errorMessage = null) } }
-                .onFailure { error -> mutableState.update { it.copy(errorMessage = error.message ?: "Could not unload the model.") } }
+                .onSuccess {
+                    Log.i(TAG, "Chat UI model unload completed.")
+                    mutableState.update { it.copy(errorMessage = null) }
+                }
+                .onFailure { error ->
+                    Log.e(TAG, "Chat UI model unload failed: ${error.message}", error)
+                    mutableState.update { it.copy(errorMessage = error.message ?: "Could not unload the model.") }
+                }
         }
     }
 
@@ -164,12 +187,20 @@ class ChatViewModel(
             return
         }
         val settings = runCatching { snapshot.settings.toEffective() }.getOrElse { error ->
+            Log.e(TAG, "Chat generation settings are invalid: ${error.message}", error)
             mutableState.update { it.copy(errorMessage = error.message ?: "Generation settings are invalid.") }
             return
         }
         val visibleMessages = if (appendUser) base + ChatMessage.user(userText) else base
         val startedAt = System.currentTimeMillis()
         val model = snapshot.availableModels.firstOrNull { it.id == selectedId }
+        Log.i(
+            TAG,
+            "Chat UI generation started: model=${model?.displayName}, inputChars=${userText.length}, " +
+                "historyMessages=${visibleMessages.size}, contextSize=${settings.contextSize}, " +
+                "maxOutputTokens=${settings.maxOutputTokens}, temperature=${settings.temperature}, " +
+                "topK=${settings.topK}, topP=${settings.topP}, seed=${settings.seed}, threads=${settings.threadCount}",
+        )
         mutableState.update {
             it.copy(
                 input = if (appendUser) "" else it.input,
@@ -182,6 +213,7 @@ class ChatViewModel(
         val job = viewModelScope.launch(Dispatchers.Default) {
             try {
                 var assistantId: String? = null
+                var receivedTokenEvents = 0
                 generateChatResponse.execute(
                     ChatGenerationRequest(
                         modelId = selectedId,
@@ -191,6 +223,7 @@ class ChatViewModel(
                 ).collect { event ->
                     when (event) {
                         is ChatGenerationEvent.Prepared -> {
+                            Log.i(TAG, "Chat UI received prepared event: promptTokens=${event.contextUsage.promptTokens}, omittedMessages=${event.contextUsage.omittedTurnCount}")
                             assistantId = UUID.randomUUID().toString()
                             mutableState.update {
                                 it.copy(
@@ -201,6 +234,8 @@ class ChatViewModel(
                             }
                         }
                         is ChatGenerationEvent.Token -> {
+                            receivedTokenEvents += 1
+                            if (receivedTokenEvents == 1) Log.i(TAG, "Chat UI received first token event: tokenChars=${event.text.length}")
                             assistantId?.let { id ->
                                 mutableState.update { state -> state.replaceAssistantText(id, event.text, append = true) }
                             }
@@ -222,6 +257,7 @@ class ChatViewModel(
                                 effectiveSettings = settings,
                                 effectiveThreadCount = event.load.effectiveThreadCount,
                             )
+                            Log.i(TAG, "Chat UI received completed event: tokenEvents=$receivedTokenEvents, outputChars=${result.text.length}, generatedTokens=${result.generatedTokenCount}, totalMs=${result.totalDurationMs}, finishReason=${result.finishReason}")
                             mutableState.update { state ->
                                 state.replaceAssistantText(id, result.text, append = false).copy(
                                     operation = ChatOperation.IDLE,
@@ -245,10 +281,12 @@ class ChatViewModel(
                     }
                 }
             } catch (cancelled: CancellationException) {
+                Log.i(TAG, "Chat UI generation cancelled.")
                 mutableState.update { it.copy(operation = ChatOperation.IDLE, errorMessage = "Generation cancelled.") }
                 val partial = mutableState.value.messages.lastOrNull { it.role == ChatMessageRole.ASSISTANT }?.content
                 persistChatTurn(snapshotForPersistence(RunStatus.CANCELLED, startedAt, model, userText, partial, settings, null, "Generation cancelled.", mutableState.value.messages, true))
             } catch (error: Throwable) {
+                Log.e(TAG, "Chat UI generation failed: ${error.message}", error)
                 mutableState.update { state ->
                     state.copy(
                         operation = ChatOperation.IDLE,
@@ -267,11 +305,13 @@ class ChatViewModel(
     }
 
     override fun onCleared() {
+        Log.i(TAG, "Chat ViewModel cleared; cancelling active generation.")
         chatEngine.cancel()
         super.onCleared()
     }
 
     private fun applyReplay(run: RunRecord) {
+        Log.i(TAG, "Chat replay configuration received: runId=${run.id}")
         val modelId = run.model?.modelId?.let(::ModelId)
         val available = mutableState.value.availableModels
         val selected = modelId?.takeIf { candidate -> available.any { it.id == candidate } }
@@ -331,6 +371,10 @@ class ChatViewModel(
             )
         },
     )
+
+    private companion object {
+        const val TAG = "AiP123Chat"
+    }
 }
 
 private fun rate(tokens: Int, durationMs: Long): Double? = durationMs.takeIf { it > 0 }?.let { tokens * 1_000.0 / it }

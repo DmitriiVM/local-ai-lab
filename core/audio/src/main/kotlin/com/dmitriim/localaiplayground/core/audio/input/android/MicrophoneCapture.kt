@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.util.Log
 import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import java.io.BufferedOutputStream
@@ -36,6 +37,7 @@ internal class MicrophoneCapture(private val application: Application) {
                 AudioFormat.ENCODING_PCM_16BIT,
             )
             require(minBufferBytes > 0) { "This device cannot capture mono PCM audio at $sampleRateHz Hz." }
+            Log.i(TAG, "Microphone capture preparing: sampleRateHz=$sampleRateHz, minBufferBytes=$minBufferBytes")
             val record = AudioRecord(
                 MediaRecorder.AudioSource.VOICE_RECOGNITION,
                 sampleRateHz,
@@ -53,6 +55,7 @@ internal class MicrophoneCapture(private val application: Application) {
             var frameCount = 0L
             try {
                 record.startRecording()
+                Log.i(TAG, "Microphone capture started: audioSource=VOICE_RECOGNITION")
                 BufferedOutputStream(FileOutputStream(output)).use { stream ->
                     while (capturing) {
                         coroutineContext.ensureActive()
@@ -69,8 +72,10 @@ internal class MicrophoneCapture(private val application: Application) {
                     }
                 }
                 require(frameCount > 0) { "No audio was captured." }
+                Log.i(TAG, "Microphone capture completed: frames=$frameCount, durationMs=${frameCount * 1_000 / sampleRateHz}")
                 PcmAudioInput(output, "Microphone recording", frameCount * 1_000 / sampleRateHz, sampleRateHz, "Live microphone")
             } catch (error: Throwable) {
+                Log.e(TAG, "Microphone capture failed: ${error.message}", error)
                 output.delete()
                 throw error
             } finally {
@@ -80,16 +85,19 @@ internal class MicrophoneCapture(private val application: Application) {
                     if (activeRecord === record) activeRecord = null
                     capturing = false
                 }
+                Log.i(TAG, "Microphone capture resources released.")
             }
         }
 
     fun stop() {
+        Log.i(TAG, "Microphone capture stop requested.")
         capturing = false
         activeRecord?.let { record -> runCatching { record.stop() } }
     }
 }
 
 private const val PCM16_BYTES = 2
+private const val TAG = "AiP123Stt"
 
 private fun BufferedOutputStream.writePcm16(samples: ShortArray, count: Int) {
     for (index in 0 until count) {

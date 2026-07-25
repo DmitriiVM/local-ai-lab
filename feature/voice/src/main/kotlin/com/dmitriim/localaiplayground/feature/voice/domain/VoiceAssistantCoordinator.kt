@@ -1,6 +1,7 @@
 package com.dmitriim.localaiplayground.feature.voice.domain
 
 import android.os.SystemClock
+import android.util.Log
 import com.dmitriim.localaiplayground.ai.api.ChatEngine
 import com.dmitriim.localaiplayground.ai.api.SpeechToTextEngine
 import com.dmitriim.localaiplayground.ai.api.TextToSpeechEngine
@@ -30,22 +31,34 @@ class VoiceAssistantCoordinator(
 
     fun execute(request: VoiceTurnRequest): Flow<VoicePipelineEvent> = channelFlow {
         cancelled.set(false)
+        Log.i(
+            TAG,
+            "Voice turn requested: language=${request.languageCode}, historyTurns=${request.history.size}, " +
+                "contextSize=${request.contextSize}, maxOutputTokens=${request.maxOutputTokens}, " +
+                "temperature=${request.temperature}, sttThreads=${request.sttThreadCount}, " +
+                "llmThreads=${request.llmThreadCount}, ttsThreads=${request.ttsThreadCount}, " +
+                "speaker=${request.speakerId}, speechRate=${request.speechRate}, volume=${request.volume}",
+        )
         val anchorNanos = System.nanoTime()
         val componentIds = VoiceComponentRunIds.newIds()
         var input: PcmAudioInput? = null
         var playbackOpen = false
         try {
             val prepared = modelResolver.preflightVoicePipeline(request)
+            Log.i(TAG, "Voice pipeline preflight succeeded: stt=${prepared.speech.displayName}, chat=${prepared.chat.displayName}, tts=${prepared.voice.displayName}")
             trySend(VoicePipelineEvent.Prepared(prepared.toInfo(), componentIds))
             checkNotCancelled()
 
             trySend(VoicePipelineEvent.Phase(VoiceTurnPhase.LISTENING))
+            Log.i(TAG, "Voice phase started: LISTENING")
             input = audioInputStore.capture(prepared.speech.sampleRateHz) { level ->
                 trySend(VoicePipelineEvent.Level(level))
             }
             checkNotCancelled()
+            Log.i(TAG, "Voice capture completed: durationMs=${input.durationMs}, sampleRateHz=${input.sampleRateHz}")
 
             trySend(VoicePipelineEvent.Phase(VoiceTurnPhase.FINALIZING))
+            Log.i(TAG, "Voice phase started: FINALIZING")
             val finalizationStartedMs = SystemClock.elapsedRealtime()
             val transcription = transcribeVoiceInput(
                 audioInputStore = audioInputStore,
@@ -58,10 +71,12 @@ class VoiceAssistantCoordinator(
             )
             val speechFinalizationDurationMs = SystemClock.elapsedRealtime() - finalizationStartedMs
             require(transcription.text.isNotBlank()) { "No speech was recognized. Record another turn and try again." }
+            Log.i(TAG, "Voice transcription completed: transcriptLength=${transcription.text.length}, processingMs=${transcription.processingDurationMs}, finalizationMs=$speechFinalizationDurationMs")
             trySend(VoicePipelineEvent.FinalTranscript(transcription.text))
             checkNotCancelled()
 
             trySend(VoicePipelineEvent.Phase(VoiceTurnPhase.THINKING))
+            Log.i(TAG, "Voice phase started: THINKING")
             val response = generateVoiceResponse(
                 engine = chatEngine,
                 request = request,
@@ -71,10 +86,12 @@ class VoiceAssistantCoordinator(
                 onToken = { token -> trySend(VoicePipelineEvent.AssistantToken(token)) },
                 ensureNotCancelled = ::checkNotCancelled,
             )
+            Log.i(TAG, "Voice response generation completed: responseLength=${response.text.length}, firstTokenMs=${response.llmTimeToFirstTokenMs}, completionMs=${response.llmCompletionDurationMs}")
             trySend(VoicePipelineEvent.AssistantCompleted(response.text))
             checkNotCancelled()
 
             trySend(VoicePipelineEvent.Phase(VoiceTurnPhase.SPEAKING))
+            Log.i(TAG, "Voice phase started: SPEAKING")
             val speechMetrics = synthesizeAndPlayVoiceResponse(
                 engine = textToSpeechEngine,
                 player = player,
@@ -87,6 +104,13 @@ class VoiceAssistantCoordinator(
                 onPlaybackOpened = { playbackOpen = true },
             )
             playbackOpen = false
+            Log.i(
+                TAG,
+                "Voice speech completed: firstChunkMs=${speechMetrics.timeToFirstChunkMs}, " +
+                    "firstWriteMs=${speechMetrics.timeToFirstWriteMs}, " +
+                    "firstPresentationMs=${speechMetrics.timeToFirstPresentationMs}, " +
+                    "completionMs=${speechMetrics.completionDurationMs}",
+            )
             trySend(
                 VoicePipelineEvent.Completed(
                     VoicePipelineMetrics(
@@ -108,18 +132,27 @@ class VoiceAssistantCoordinator(
                     ),
                 ),
             )
+            Log.i(TAG, "Voice turn completed successfully: listeningMs=${input.durationMs}, endToEndFirstOutputMs=${speechMetrics.timeToFirstPresentationMs ?: speechMetrics.timeToFirstWriteMs}")
+        } catch (error: Throwable) {
+            Log.e(TAG, "Voice turn failed: ${error.message}", error)
+            throw error
         } finally {
             audioInputStore.clear(input)
             runCatching { speechEngine.unload() }
             runCatching { chatEngine.unload() }
             runCatching { textToSpeechEngine.unload() }
             if (playbackOpen) player.release(completed = false)
+            Log.i(TAG, "Voice turn cleanup completed: cancelled=${cancelled.get()}, playbackOpen=$playbackOpen")
         }
     }.flowOn(Dispatchers.Default)
 
-    fun stopListening() = audioInputStore.stopCapture()
+    fun stopListening() {
+        Log.i(TAG, "Voice stop-listening requested.")
+        audioInputStore.stopCapture()
+    }
 
     fun cancel() {
+        Log.i(TAG, "Voice cancellation requested: stopping capture, STT, LLM, TTS, and playback.")
         cancelled.set(true)
         audioInputStore.stopCapture()
         speechEngine.cancel()
@@ -129,6 +162,13 @@ class VoiceAssistantCoordinator(
     }
 
     private fun checkNotCancelled() {
-        if (cancelled.get()) throw CancellationException("Voice turn cancelled")
+        if (cancelled.get()) {
+            Log.i(TAG, "Voice cancellation observed by pipeline.")
+            throw CancellationException("Voice turn cancelled")
+        }
+    }
+
+    private companion object {
+        const val TAG = "AiP123Voice"
     }
 }

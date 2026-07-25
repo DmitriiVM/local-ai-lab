@@ -1,6 +1,7 @@
 package com.dmitriim.localaiplayground.feature.tts.presentation
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
@@ -120,7 +121,10 @@ class TextToSpeechViewModel(
     }
 
     fun synthesize() {
-        if (isActive()) return
+        if (isActive()) {
+            Log.w(TAG, "Ignoring synthesis request because a TTS operation is already active.")
+            return
+        }
         val snapshot = mutableState.value
         val modelId = snapshot.selectedModelId ?: run {
             mutableState.update {
@@ -134,6 +138,12 @@ class TextToSpeechViewModel(
         }
         val startedAt = System.currentTimeMillis()
         val model = snapshot.selectedModel
+        Log.i(
+            TAG,
+            "TTS UI synthesis started: model=${model?.displayName}, textLength=${snapshot.text.length}, " +
+                "language=${snapshot.language.code}, speaker=${snapshot.speakerId}, speed=${snapshot.speed}, " +
+                "silenceScale=${snapshot.sentenceSilenceScale}, volume=${snapshot.volume}, threads=$threads",
+        )
         mutableState.update {
             it.copy(
                 operation = TtsOperation.SYNTHESIZING,
@@ -159,15 +169,19 @@ class TextToSpeechViewModel(
                     ),
                 ).collect { event ->
                     when (event) {
-                        is SpeechSynthesisEvent.Prepared -> mutableState.update {
-                            it.copy(speakerCount = event.speakerCount)
+                        is SpeechSynthesisEvent.Prepared -> {
+                            Log.i(TAG, "TTS UI received prepared event: loadMs=${event.loadDurationMs}, sampleRateHz=${event.sampleRateHz}, speakers=${event.speakerCount}")
+                            mutableState.update { it.copy(speakerCount = event.speakerCount) }
                         }
-                        is SpeechSynthesisEvent.Synthesized -> mutableState.update {
-                            it.copy(
-                                operation = TtsOperation.IDLE,
-                                output = event.output,
-                                statusMessage = "Synthesis completed; playback is draining by presented frames.",
-                            )
+                        is SpeechSynthesisEvent.Synthesized -> {
+                            Log.i(TAG, "TTS UI received synthesized event: durationMs=${event.synthesisDurationMs}, outputDurationMs=${event.output.durationMs}")
+                            mutableState.update {
+                                it.copy(
+                                    operation = TtsOperation.IDLE,
+                                    output = event.output,
+                                    statusMessage = "Synthesis completed; playback is draining by presented frames.",
+                                )
+                            }
                         }
                         is SpeechSynthesisEvent.Completed -> mutableState.update {
                             it.copy(
@@ -177,16 +191,19 @@ class TextToSpeechViewModel(
                                 statusMessage = "Latest WAV retained in app-private storage until the next successful synthesis.",
                             )
                         }.also {
+                            Log.i(TAG, "TTS UI received completed event: synthesisMs=${event.metrics.synthesisDurationMs}, underruns=${event.metrics.playbackUnderrunCount}")
                             persistTtsRun(snapshotForPersistence(RunStatus.SUCCEEDED, startedAt, model, snapshot, event.metrics, null))
                         }
                     }
                 }
             } catch (cancelled: CancellationException) {
+                Log.i(TAG, "TTS UI operation cancelled.")
                 mutableState.update {
                     it.copy(operation = TtsOperation.IDLE, statusMessage = "Speech operation stopped.")
                 }
                 persistTtsRun(snapshotForPersistence(RunStatus.CANCELLED, startedAt, model, snapshot, null, "Speech operation stopped."))
             } catch (error: Throwable) {
+                Log.e(TAG, "TTS UI operation failed: ${error.message}", error)
                 mutableState.update {
                     it.copy(
                         operation = TtsOperation.IDLE,
@@ -199,29 +216,43 @@ class TextToSpeechViewModel(
         }.also(::registerForegroundCancellation)
     }
 
-    fun pausePlayback() = synthesizeSpeech.pausePlayback()
+    fun pausePlayback() {
+        Log.i(TAG, "TTS UI pause requested.")
+        synthesizeSpeech.pausePlayback()
+    }
 
-    fun resumePlayback() = synthesizeSpeech.resumePlayback()
+    fun resumePlayback() {
+        Log.i(TAG, "TTS UI resume requested.")
+        synthesizeSpeech.resumePlayback()
+    }
 
     fun stop() {
         if (!isActive() && mutableState.value.playback.status !in activePlaybackStatuses) return
+        Log.i(TAG, "TTS UI stop requested: operation=${mutableState.value.operation}, playback=${mutableState.value.playback.status}")
         mutableState.update { it.copy(operation = TtsOperation.CANCELLING) }
         synthesizeSpeech.cancel()
         operationJob?.cancel()
     }
 
     fun replay() {
-        if (isActive()) return
+        if (isActive()) {
+            Log.w(TAG, "Ignoring replay request because a TTS operation is already active.")
+            return
+        }
         val output = mutableState.value.output ?: return
         val volume = mutableState.value.volume
+        Log.i(TAG, "TTS UI replay started: durationMs=${output.durationMs}, volume=$volume")
         mutableState.update { it.copy(errorMessage = null, statusMessage = "Replaying the retained WAV.") }
         operationJob = viewModelScope.launch(Dispatchers.Default) {
             try {
                 synthesizeSpeech.replay(output, volume)
+                Log.i(TAG, "TTS UI replay completed.")
                 mutableState.update { it.copy(statusMessage = "Replay completed.") }
             } catch (cancelled: CancellationException) {
+                Log.i(TAG, "TTS UI replay cancelled.")
                 mutableState.update { it.copy(statusMessage = "Playback stopped.") }
             } catch (error: Throwable) {
+                Log.e(TAG, "TTS UI replay failed: ${error.message}", error)
                 mutableState.update {
                     it.copy(errorMessage = error.message ?: "Could not replay generated speech.")
                 }
@@ -231,14 +262,17 @@ class TextToSpeechViewModel(
 
     fun export(destination: Uri) {
         val output = mutableState.value.output ?: return
+        Log.i(TAG, "TTS UI export started: destinationScheme=${destination.scheme}, durationMs=${output.durationMs}")
         viewModelScope.launch(Dispatchers.IO) {
             runCatching { generatedAudioStore.export(output, destination) }
                 .onSuccess {
+                    Log.i(TAG, "TTS UI export completed.")
                     mutableState.update {
                         it.copy(statusMessage = "WAV exported successfully.", errorMessage = null)
                     }
                 }
                 .onFailure { error ->
+                    Log.e(TAG, "TTS UI export failed: ${error.message}", error)
                     mutableState.update {
                         it.copy(errorMessage = error.message ?: "Could not export the WAV file.")
                     }
@@ -256,6 +290,7 @@ class TextToSpeechViewModel(
     }
 
     override fun onCleared() {
+        Log.i(TAG, "TTS ViewModel cleared; cancelling active work.")
         synthesizeSpeech.cancel()
         operationJob?.cancel()
         super.onCleared()
@@ -281,6 +316,7 @@ class TextToSpeechViewModel(
     }
 
     private companion object {
+        const val TAG = "AiP123Tts"
         val activePlaybackStatuses = setOf(
             SpeechPlaybackStatus.READY,
             SpeechPlaybackStatus.PLAYING,

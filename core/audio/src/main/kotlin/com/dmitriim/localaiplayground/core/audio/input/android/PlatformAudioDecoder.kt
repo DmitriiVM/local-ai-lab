@@ -6,6 +6,7 @@ import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.net.Uri
+import android.util.Log
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -17,6 +18,7 @@ internal data class DecodedAudio(val frames: Long, val mimeType: String)
 /** Decodes a document with platform codecs, downmixes it, then resamples it to PCM16. */
 internal class PlatformAudioDecoder(private val application: Application) {
     fun decodeToMonoPcm(uri: Uri, output: File, targetRateHz: Int): DecodedAudio {
+        Log.i(TAG, "Audio import decode requested: uriScheme=${uri.scheme}, targetRateHz=$targetRateHz")
         val extractor = MediaExtractor()
         var codec: MediaCodec? = null
         try {
@@ -26,6 +28,7 @@ internal class PlatformAudioDecoder(private val application: Application) {
             } ?: error("The selected file has no supported audio track.")
             val format = extractor.getTrackFormat(track)
             val mime = requireNotNull(format.getString(MediaFormat.KEY_MIME))
+            Log.i(TAG, "Audio import track selected: track=$track, mimeType=$mime, sourceRateHz=${format.getInteger(MediaFormat.KEY_SAMPLE_RATE)}, channels=${format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)}")
             extractor.selectTrack(track)
             codec = MediaCodec.createDecoderByType(mime).also { it.configure(format, null, null, 0); it.start() }
             var inputEnded = false
@@ -65,8 +68,13 @@ internal class PlatformAudioDecoder(private val application: Application) {
                         }
                     }
                 }
-                return DecodedAudio(requireNotNull(writer) { "No decoded PCM was produced." }.writtenFrames, mime)
+                return DecodedAudio(requireNotNull(writer) { "No decoded PCM was produced." }.writtenFrames, mime).also {
+                    Log.i(TAG, "Audio import decode completed: frames=${it.frames}, mimeType=${it.mimeType}")
+                }
             }
+        } catch (error: Throwable) {
+            Log.e(TAG, "Audio import decode failed: ${error.message}", error)
+            throw error
         } finally {
             runCatching { codec?.stop() }
             codec?.release()
@@ -74,7 +82,10 @@ internal class PlatformAudioDecoder(private val application: Application) {
         }
     }
 
-    private companion object { const val CODEC_TIMEOUT_US = 10_000L }
+    private companion object {
+        const val CODEC_TIMEOUT_US = 10_000L
+        const val TAG = "AiP123Stt"
+    }
 }
 
 private class PcmResamplingWriter(

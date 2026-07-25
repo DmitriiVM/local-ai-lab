@@ -3,6 +3,7 @@ package com.dmitriim.localaiplayground.core.audio.output.android
 import android.app.Application
 import android.content.Context
 import android.media.AudioManager
+import android.util.Log
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.audio.output.api.SpeechPlaybackSession
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
@@ -32,6 +33,7 @@ class AndroidStreamingSpeechPlayer(
         volume: Float,
         runAnchorNanos: Long,
     ): SpeechPlaybackSession = synchronized(lock) {
+        Log.i(TAG, "Opening speech playback: sampleRateHz=$sampleRateHz, volume=$volume")
         releaseLocked(completed = false, updateState = false)
         lateinit var session: AndroidSpeechPlaybackSession
         session = AndroidSpeechPlaybackSession(
@@ -49,14 +51,17 @@ class AndroidStreamingSpeechPlayer(
     }
 
     override fun pause() {
+        Log.i(TAG, "Speech playback pause requested.")
         synchronized(lock) { active?.pause(pausedForFocus = false) }
     }
 
     override fun resume() {
+        Log.i(TAG, "Speech playback resume requested.")
         synchronized(lock) { active?.resume(fromFocus = false) }
     }
 
     override fun stop() {
+        Log.i(TAG, "Speech playback stop requested.")
         synchronized(lock) {
             active?.stop("Playback stopped.")
             releaseLocked(completed = false, updateState = true)
@@ -64,6 +69,7 @@ class AndroidStreamingSpeechPlayer(
     }
 
     override fun release(completed: Boolean) {
+        Log.i(TAG, "Speech playback release requested: completed=$completed")
         synchronized(lock) { releaseLocked(completed, updateState = true) }
     }
 
@@ -76,5 +82,9 @@ class AndroidStreamingSpeechPlayer(
                 status = if (completed) SpeechPlaybackStatus.COMPLETED else SpeechPlaybackStatus.STOPPED,
             )
         }
+    }
+
+    private companion object {
+        const val TAG = "AiP123Tts"
     }
 }
