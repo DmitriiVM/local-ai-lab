@@ -6,7 +6,8 @@ import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.EngineId
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelImportRequest
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.ModelLibrary
+import com.dmitriim.localaiplayground.core.model.ModelTransfers
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.RuntimeProfileType
 import dev.zacsweers.metro.ContributesIntoMap
@@ -23,14 +24,15 @@ import kotlinx.coroutines.launch
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
 class ModelsViewModel(
-    private val repository: ModelRepository,
+    private val modelLibrary: ModelLibrary,
+    private val modelTransfers: ModelTransfers,
 ) : ViewModel() {
     private val mutableUiState = MutableStateFlow(ModelsUiState())
     val uiState: StateFlow<ModelsUiState> = mutableUiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            combine(repository.installedModels, repository.catalog, repository.transfers) { installed, catalog, transfers ->
+            combine(modelLibrary.installedModels, modelTransfers.catalog, modelTransfers.transfers) { installed, catalog, transfers ->
                 Triple(installed, catalog, transfers)
             }.collect { (installed, catalog, transfers) ->
                 mutableUiState.update { current ->
@@ -42,7 +44,7 @@ class ModelsViewModel(
 
     fun import(profile: RuntimeProfileType, uris: List<String>) = launchOperation {
         val engine = if (profile == RuntimeProfileType.LLM) EngineId("llama.cpp") else EngineId("sherpa-onnx")
-        repository.import(
+        modelLibrary.import(
             ModelImportRequest(
                 displayName = "Imported ${profile.displayName}",
                 engineId = engine,
@@ -54,7 +56,7 @@ class ModelsViewModel(
     }
 
     fun download(modelId: ModelId) = launchOperation {
-        repository.download(modelId).getOrThrow()
+        modelTransfers.download(modelId).getOrThrow()
         "Download scheduled."
     }
 
@@ -67,7 +69,7 @@ class ModelsViewModel(
             )
         }
         viewModelScope.launch {
-            val feedback = repository.validate(modelId).fold(
+            val feedback = modelLibrary.validate(modelId).fold(
                 onSuccess = { model ->
                     val ready = model.validationState == ModelValidationState.READY
                     ModelValidationFeedback(
@@ -110,13 +112,13 @@ class ModelsViewModel(
             )
         }
         launchOperation {
-            repository.delete(model.manifest.modelId).getOrThrow()
+            modelLibrary.delete(model.manifest.modelId).getOrThrow()
             "${model.manifest.displayName} was deleted."
         }
     }
 
     fun cancelTransfer(modelId: ModelId) {
-        viewModelScope.launch { repository.cancelTransfer(modelId) }
+        viewModelScope.launch { modelTransfers.cancelTransfer(modelId) }
     }
 
     private fun launchOperation(action: suspend () -> String) {

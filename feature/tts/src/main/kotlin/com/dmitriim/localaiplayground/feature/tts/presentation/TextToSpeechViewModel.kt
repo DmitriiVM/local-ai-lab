@@ -8,7 +8,7 @@ import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStat
 import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.ModelLibrary
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.RunRecord
@@ -42,7 +42,7 @@ import kotlinx.serialization.json.floatOrNull
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
 class TextToSpeechViewModel(
-    private val modelRepository: ModelRepository,
+    private val modelLibrary: ModelLibrary,
     private val synthesizeSpeech: SynthesizeSpeech,
     private val streamingSpeechPlayer: StreamingSpeechPlayer,
     private val generatedAudioStore: GeneratedAudioStore,
@@ -56,7 +56,7 @@ class TextToSpeechViewModel(
 
     init {
         viewModelScope.launch {
-            modelRepository.installedModels.collectLatest { installed ->
+            modelLibrary.installedModels.collectLatest { installed ->
                 val models = installed.filter { it.isReadyTtsModel() }.map { it.toTtsModelOption() }
                 mutableState.update { current ->
                     val selected = current.selectedModelId

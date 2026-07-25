@@ -7,7 +7,7 @@ import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.ModelLibrary
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.RunRecord
@@ -40,7 +40,7 @@ import kotlinx.serialization.json.jsonPrimitive
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
 class SpeechToTextViewModel(
-    private val modelRepository: ModelRepository,
+    private val modelLibrary: ModelLibrary,
     private val audioInputStore: AudioInputStore,
     private val transcribeAudio: TranscribeAudio,
     private val operationCoordinator: ForegroundOperationCoordinator,
@@ -53,7 +53,7 @@ class SpeechToTextViewModel(
 
     init {
         viewModelScope.launch {
-            modelRepository.installedModels.collectLatest { installed ->
+            modelLibrary.installedModels.collectLatest { installed ->
                 val models = installed.filter { it.isReadySpeechModel() }.map { it.toSpeechModelOption() }
                 mutableState.update { current ->
                     val selected = current.selectedModelId?.takeIf { id -> models.any { it.id == id } } ?: models.firstOrNull()?.id

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.ModelLibrary
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.RunRecord
@@ -36,7 +36,7 @@ import kotlinx.serialization.json.jsonPrimitive
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
 class VoiceViewModel(
-    private val modelRepository: ModelRepository,
+    private val modelLibrary: ModelLibrary,
     private val coordinator: VoiceAssistantCoordinator,
     private val operationCoordinator: ForegroundOperationCoordinator,
     private val runRepository: RunRepository,
@@ -50,7 +50,7 @@ class VoiceViewModel(
 
     init {
         viewModelScope.launch {
-            modelRepository.installedModels.collectLatest { installed ->
+            modelLibrary.installedModels.collectLatest { installed ->
                 mutableState.update { it.withAvailableModels(installed) }
             }
         }

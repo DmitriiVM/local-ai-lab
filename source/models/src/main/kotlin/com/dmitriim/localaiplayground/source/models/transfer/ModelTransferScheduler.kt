@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.source.models
+package com.dmitriim.localaiplayground.source.models.transfer
 
 import android.app.Application
 import android.app.job.JobInfo

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.EngineAvailabilitySource
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.ModelLibrary
 import com.dmitriim.localaiplayground.core.model.RunRepository
 import com.dmitriim.localaiplayground.core.result.DomainError
 import com.dmitriim.localaiplayground.core.result.DomainErrorCategory
@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 @ContributesIntoMap(AppScope::class)
 class PlaygroundViewModel(
     private val availabilitySource: EngineAvailabilitySource,
-    private val modelRepository: ModelRepository,
+    private val modelLibrary: ModelLibrary,
     private val operationCoordinator: ForegroundOperationCoordinator,
     private val runRepository: RunRepository,
 ) : ViewModel() {
@@ -39,7 +39,7 @@ class PlaygroundViewModel(
 
     init {
         viewModelScope.launch {
-            combine(availabilitySource.availability, modelRepository.installedModels) { availability, installed ->
+            combine(availabilitySource.availability, modelLibrary.installedModels) { availability, installed ->
                 availability to installed
             }.collectLatest { (availability, installed) ->
                 if (availability.isNotEmpty()) {

@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.source.models
+package com.dmitriim.localaiplayground.source.models.transfer
 
 import android.app.job.JobParameters
 import android.app.job.JobService
@@ -26,7 +26,7 @@ class ModelDownloadJobService : JobService() {
             )
         }
         runningJob = scope.launch {
-            val success = ModelDownloadRuntime.repository
+            val success = ModelDownloadRuntime.executor
                 ?.executeScheduledDownload(ModelId(modelId))
                 ?.isSuccess == true
             jobFinished(params, !success)

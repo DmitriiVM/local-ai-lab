@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.source.models
+package com.dmitriim.localaiplayground.source.models.catalog
 
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.CatalogDownload

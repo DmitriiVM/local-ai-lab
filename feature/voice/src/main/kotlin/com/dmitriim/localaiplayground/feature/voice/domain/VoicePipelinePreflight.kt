@@ -1,9 +1,9 @@
 package com.dmitriim.localaiplayground.feature.voice.domain
 
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.LocalModelResolver
 
 /** Revalidates the selected profiles before the microphone is opened. */
-internal suspend fun ModelRepository.preflightVoicePipeline(request: VoiceTurnRequest): PreparedVoicePipeline {
+internal suspend fun LocalModelResolver.preflightVoicePipeline(request: VoiceTurnRequest): PreparedVoicePipeline {
     request.validate()
     val speech = resolveSpeechToTextModel(request.speechModelId).getOrThrow()
     val chat = resolveChatModel(request.chatModelId).getOrThrow()

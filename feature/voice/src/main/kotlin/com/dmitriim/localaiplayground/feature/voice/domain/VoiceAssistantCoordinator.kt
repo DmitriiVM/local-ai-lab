@@ -7,7 +7,7 @@ import com.dmitriim.localaiplayground.ai.api.TextToSpeechEngine
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.LocalModelResolver
 import dev.zacsweers.metro.Inject
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CancellationException
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.flowOn
 /** Owns one foreground turn's sequencing, cancellation, and cleanup. */
 @Inject
 class VoiceAssistantCoordinator(
-    private val modelRepository: ModelRepository,
+    private val modelResolver: LocalModelResolver,
     private val audioInputStore: AudioInputStore,
     private val speechEngine: SpeechToTextEngine,
     private val chatEngine: ChatEngine,
@@ -35,7 +35,7 @@ class VoiceAssistantCoordinator(
         var input: PcmAudioInput? = null
         var playbackOpen = false
         try {
-            val prepared = modelRepository.preflightVoicePipeline(request)
+            val prepared = modelResolver.preflightVoicePipeline(request)
             trySend(VoicePipelineEvent.Prepared(prepared.toInfo(), componentIds))
             checkNotCancelled()
 

@@ -29,7 +29,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
         <service
-            android:name="com.dmitriim.localaiplayground.source.models.ModelDownloadJobService"
+            android:name="com.dmitriim.localaiplayground.source.models.transfer.ModelDownloadJobService"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false" />
         <service

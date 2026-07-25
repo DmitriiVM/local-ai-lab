@@ -19,7 +19,7 @@ class LocalAiPlaygroundApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        graph.modelRepository
+        graph.modelTransfers
     }
 
 }

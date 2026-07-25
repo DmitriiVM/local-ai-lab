@@ -6,7 +6,7 @@ import com.dmitriim.localaiplayground.ai.api.LlmGenerationRequest
 import com.dmitriim.localaiplayground.ai.api.LlmGenerationResult
 import com.dmitriim.localaiplayground.ai.api.LlmLoadRequest
 import com.dmitriim.localaiplayground.ai.api.LlmLoadResult
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.LocalModelResolver
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -16,13 +16,13 @@ import kotlinx.coroutines.flow.channelFlow
 /** Runs one local chat turn and emits progress without imposing presentation state. */
 @Inject
 class GenerateChatResponse(
-    private val modelRepository: ModelRepository,
+    private val modelResolver: LocalModelResolver,
     private val chatEngine: ChatEngine,
 ) {
     private val promptPreparer = ChatPromptPreparer(chatEngine)
 
     internal fun execute(request: ChatGenerationRequest): Flow<ChatGenerationEvent> = channelFlow {
-        val model = modelRepository.resolveChatModel(request.modelId).getOrThrow()
+        val model = modelResolver.resolveChatModel(request.modelId).getOrThrow()
         val load = chatEngine.load(
             LlmLoadRequest(
                 modelPath = model.modelPath,

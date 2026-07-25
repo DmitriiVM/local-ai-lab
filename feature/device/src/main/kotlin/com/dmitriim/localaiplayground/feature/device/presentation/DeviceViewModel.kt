@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.EngineAvailabilitySource
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.ModelDiagnostics
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -28,7 +28,7 @@ import kotlinx.coroutines.withContext
 class DeviceViewModel(
     private val application: Application,
     private val availabilitySource: EngineAvailabilitySource,
-    private val modelRepository: ModelRepository,
+    private val modelDiagnostics: ModelDiagnostics,
     private val operationCoordinator: ForegroundOperationCoordinator,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(DeviceUiState())
@@ -52,7 +52,7 @@ class DeviceViewModel(
             mutableState.update { it.copy(refreshing = true, interruptionMessage = null) }
             try {
                 val snapshot = withContext(Dispatchers.Default) { readDeviceSnapshot(application) }
-                val diagnostics = withContext(Dispatchers.IO) { modelRepository.runDiagnostics() }
+                val diagnostics = withContext(Dispatchers.IO) { modelDiagnostics.runDiagnostics() }
                 availabilitySource.refresh()
                 mutableState.update { it.copy(snapshot = snapshot, diagnostics = diagnostics, refreshing = false) }
             } catch (cancelled: CancellationException) {

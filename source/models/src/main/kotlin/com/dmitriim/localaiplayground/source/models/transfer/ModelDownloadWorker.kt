@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.source.models
+package com.dmitriim.localaiplayground.source.models.transfer
 
 import android.content.Context
 import androidx.work.CoroutineWorker
@@ -18,7 +18,7 @@ class ModelDownloadWorker(
                 modelDownloadNotification(applicationContext, "Downloading model"),
             ),
         )
-        return ModelDownloadRuntime.repository
+        return ModelDownloadRuntime.executor
             ?.executeScheduledDownload(ModelId(modelId))
             ?.fold(
                 onSuccess = { Result.success() },

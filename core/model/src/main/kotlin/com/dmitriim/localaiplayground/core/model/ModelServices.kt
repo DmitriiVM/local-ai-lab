@@ -2,23 +2,34 @@ package com.dmitriim.localaiplayground.core.model
 
 import kotlinx.coroutines.flow.Flow
 
-interface ModelRepository {
+/** Owns the user-visible library of installed local models. */
+interface ModelLibrary {
     val installedModels: Flow<List<InstalledModel>>
+
+    suspend fun import(request: ModelImportRequest): Result<ModelId>
+    suspend fun validate(modelId: ModelId): Result<InstalledModel>
+    suspend fun delete(modelId: ModelId): Result<Unit>
+}
+
+/** Exposes the bundled catalog and its persisted download operations. */
+interface ModelTransfers {
     val catalog: Flow<List<CatalogModel>>
     val transfers: Flow<Map<ModelId, ModelTransferState>>
 
-    suspend fun import(request: ModelImportRequest): Result<ModelId>
     suspend fun download(modelId: ModelId): Result<Unit>
     suspend fun cancelTransfer(modelId: ModelId)
-    suspend fun validate(modelId: ModelId): Result<InstalledModel>
-    /** Resolves an app-private primary GGUF path after revalidating the installed model. */
+}
+
+/** Resolves validated app-private model locations for the runtime-specific features. */
+interface LocalModelResolver {
     suspend fun resolveChatModel(modelId: ModelId): Result<ChatModelReference>
-    /** Resolves a validated app-private STT model directory. */
     suspend fun resolveSpeechToTextModel(modelId: ModelId): Result<SpeechToTextModelReference>
-    /** Resolves a validated app-private TTS model directory. */
     suspend fun resolveTextToSpeechModel(modelId: ModelId): Result<TextToSpeechModelReference>
+}
+
+/** Checks model requirements against the device and reports local model health. */
+interface ModelDiagnostics {
     suspend fun compatibility(model: ModelManifest): ModelCompatibility
-    suspend fun delete(modelId: ModelId): Result<Unit>
     suspend fun runDiagnostics(): DeviceDiagnostics
 }
 

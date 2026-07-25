@@ -6,7 +6,7 @@ import com.dmitriim.localaiplayground.ai.api.TextToSpeechRequest
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
 import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
 import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioStore
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.LocalModelResolver
 import dev.zacsweers.metro.Inject
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 /** Coordinates one bounded native synthesis stream, Android playback, and WAV retention. */
 @Inject
 class SynthesizeSpeech(
-    private val modelRepository: ModelRepository,
+    private val modelResolver: LocalModelResolver,
     private val textToSpeechEngine: TextToSpeechEngine,
     private val player: StreamingSpeechPlayer,
     private val generatedAudioStore: GeneratedAudioStore,
@@ -41,7 +41,7 @@ class SynthesizeSpeech(
         val runAnchorNanos = System.nanoTime()
         var completed = false
         try {
-            val model = modelRepository.resolveTextToSpeechModel(request.modelId).getOrThrow()
+            val model = modelResolver.resolveTextToSpeechModel(request.modelId).getOrThrow()
             val load = textToSpeechEngine.load(
                 TextToSpeechLoadRequest(
                     modelDirectory = model.modelDirectory,

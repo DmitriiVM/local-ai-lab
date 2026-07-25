@@ -5,7 +5,7 @@ import com.dmitriim.localaiplayground.ai.api.SpeechToTextEngine
 import com.dmitriim.localaiplayground.ai.api.SpeechToTextLoadRequest
 import com.dmitriim.localaiplayground.ai.api.SpeechToTextRequest
 import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.LocalModelResolver
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.flowOn
 /** Runs one complete local Whisper transcription and reports domain events. */
 @Inject
 class TranscribeAudio(
-    private val modelRepository: ModelRepository,
+    private val modelResolver: LocalModelResolver,
     private val speechEngine: SpeechToTextEngine,
     private val audioInputStore: AudioInputStore,
 ) {
@@ -23,7 +23,7 @@ class TranscribeAudio(
         val effectiveSettings = request.settings.toEffective()
         val startedAt = SystemClock.elapsedRealtime()
         try {
-            val model = modelRepository.resolveSpeechToTextModel(request.modelId).getOrThrow()
+            val model = modelResolver.resolveSpeechToTextModel(request.modelId).getOrThrow()
             val load = speechEngine.load(
                 SpeechToTextLoadRequest(
                     modelDirectory = model.modelDirectory,

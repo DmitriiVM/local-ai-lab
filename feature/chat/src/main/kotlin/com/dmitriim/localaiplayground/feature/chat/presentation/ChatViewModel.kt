@@ -7,7 +7,7 @@ import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ConversationMessageRole
 import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.ModelLibrary
 import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.RunRecord
 import com.dmitriim.localaiplayground.core.model.RunRepository
@@ -43,7 +43,7 @@ import java.util.UUID
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
 class ChatViewModel(
-    private val modelRepository: ModelRepository,
+    private val modelLibrary: ModelLibrary,
     private val chatEngine: ChatEngine,
     private val generateChatResponse: GenerateChatResponse,
     private val operationCoordinator: ForegroundOperationCoordinator,
@@ -58,7 +58,7 @@ class ChatViewModel(
 
     init {
         viewModelScope.launch {
-            modelRepository.installedModels.collectLatest { installed ->
+            modelLibrary.installedModels.collectLatest { installed ->
                 val models = installed.filter(::isReadyChatModel).map(InstalledModel::toChatModelOption)
                 mutableState.update { current ->
                     val selected = current.selectedModelId?.takeIf { id -> models.any { it.id == id } }
