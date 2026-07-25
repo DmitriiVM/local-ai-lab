@@ -13,10 +13,16 @@ enum class ModelCatalogState {
 
 @Serializable
 data class CatalogDownload(
-    val url: String,
+    val url: String? = null,
     val expectedBytes: Long,
-    val sha256: String,
-    val archive: Boolean = false,
+    val sha256: String? = null,
+    val files: List<CatalogDownloadFile> = emptyList(),
+)
+
+@Serializable
+data class CatalogDownloadFile(
+    val relativePath: String,
+    val url: String,
 )
 
 @Serializable

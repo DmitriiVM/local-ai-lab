@@ -5,12 +5,12 @@ import android.app.Application
 import android.os.Build
 import android.os.StatFs
 import android.provider.OpenableColumns
-import com.dmitriim.localaiplayground.ai.api.ModelRuntimeLoader
 import com.dmitriim.localaiplayground.ai.api.ModelRuntimeValidator
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.di.ApplicationCoroutineScope
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.ChatModelReference
+import com.dmitriim.localaiplayground.core.model.CatalogDownloadFile
 import com.dmitriim.localaiplayground.core.model.CatalogModel
 import com.dmitriim.localaiplayground.core.model.DeviceDiagnostics
 import com.dmitriim.localaiplayground.core.model.EngineId
@@ -45,6 +45,7 @@ import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,12 +53,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import kotlin.coroutines.coroutineContext
 import androidx.core.net.toUri
 
@@ -68,28 +65,27 @@ class ModelRepositoryImpl(
     private val application: Application,
     private val databaseProvider: ModelDatabaseProvider,
     private val validators: Set<ModelRuntimeValidator>,
-    private val loaders: Set<ModelRuntimeLoader>,
     @ApplicationCoroutineScope private val applicationScope: CoroutineScope,
 ) : ModelRepository {
     private val dao = databaseProvider.database.installedModelDao()
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val rootDirectory = File(application.filesDir, "models")
     private val transferDirectory = File(application.cacheDir, "model-downloads")
-    private val lifecycleMutex = Mutex()
-    private val loadedHandles = linkedMapOf<ModelId, AutoCloseable>()
     private val mutableTransfers = MutableStateFlow<Map<ModelId, ModelTransferState>>(emptyMap())
 
     override val catalog: Flow<List<CatalogModel>> = MutableStateFlow(ModelCatalog.entries).asStateFlow()
     override val transfers: Flow<Map<ModelId, ModelTransferState>> = mutableTransfers.asStateFlow()
     override val installedModels: Flow<List<InstalledModel>> = dao.observeAll().map { records ->
-        records.mapNotNull { record -> record.toDomainOrNull() }.map { installed ->
-            installed.copy(loaded = synchronized(loadedHandles) { installed.manifest.modelId in loadedHandles })
+        records.mapNotNull { record ->
+            val directory = File(rootDirectory, record.localDirectoryName)
+            record.toDomainOrNull()?.takeIf { directory.isDirectory }
         }
     }
 
     init {
         rootDirectory.mkdirs()
         transferDirectory.mkdirs()
+        cleanupInterruptedInstallations()
         ModelDownloadRuntime.repository = this
         applicationScope.launch(Dispatchers.IO) { reconcileInstalledModels() }
     }
@@ -124,14 +120,32 @@ class ModelRepositoryImpl(
     override suspend fun download(modelId: ModelId): Result<Unit> = runCatching {
         val entry = ModelCatalog.entries.firstOrNull { it.manifest.modelId == modelId }
             ?: error("This catalog model is no longer available in the bundled catalog.")
+        if (registerInstalledDirectory(modelId)) {
+            mutableTransfers.update { it + (modelId to ModelTransferState.Completed) }
+            return@runCatching
+        }
+        when (mutableTransfers.value[modelId]) {
+            ModelTransferState.Queued,
+            is ModelTransferState.Running,
+            ModelTransferState.Installing,
+            -> return@runCatching
+            else -> Unit
+        }
         val compatibility = compatibility(entry.manifest)
         require(compatibility.state != ModelCompatibilityState.INCOMPATIBLE) {
             compatibility.reasons.joinToString()
         }
-        ModelTransferScheduler(application).schedule(entry)
+        mutableTransfers.update { it + (modelId to ModelTransferState.Queued) }
+        try {
+            ModelTransferScheduler(application).schedule(entry)
+        } catch (error: Throwable) {
+            mutableTransfers.update { it + (modelId to ModelTransferState.Failed(error.message ?: "Download could not be scheduled.")) }
+            throw error
+        }
     }
 
     override suspend fun cancelTransfer(modelId: ModelId) {
+        if (mutableTransfers.value[modelId] == ModelTransferState.Installing) return
         ModelTransferScheduler(application).cancel(modelId)
         mutableTransfers.update { it + (modelId to ModelTransferState.Cancelled) }
     }
@@ -140,6 +154,10 @@ class ModelRepositoryImpl(
     internal suspend fun executeScheduledDownload(modelId: ModelId): Result<Unit> = runCatching {
         val entry = ModelCatalog.entries.firstOrNull { it.manifest.modelId == modelId }
             ?: error("The requested catalog entry is not bundled with this app version.")
+        if (registerInstalledDirectory(modelId)) {
+            mutableTransfers.update { it + (modelId to ModelTransferState.Completed) }
+            return@runCatching
+        }
         withContext(Dispatchers.IO) { downloadAndInstall(entry) }
     }
 
@@ -258,39 +276,13 @@ class ModelRepositoryImpl(
         }
     }
 
-    override suspend fun load(modelId: ModelId): Result<Unit> = runCatching {
-        lifecycleMutex.withLock {
-            if (loadedHandles.containsKey(modelId)) return@withLock
-            val record = requireNotNull(dao.find(modelId.value)) { "This model is not installed." }
-            val manifest = json.decodeFromString<ModelManifest>(record.manifestJson)
-            val directory = File(rootDirectory, record.localDirectoryName)
-            val check = validateManifest(manifest, directory)
-            require(check.first == ModelValidationState.READY) { check.second ?: "Model validation failed." }
-            val compatibility = compatibility(manifest)
-            require(compatibility.state != ModelCompatibilityState.INCOMPATIBLE) { compatibility.reasons.joinToString() }
-            val loader = loaders.firstOrNull { it.engineId == manifest.engineId }
-                ?: error("No loader is available for ${manifest.engineId.value}.")
-            val handle = withContext(Dispatchers.IO) { loader.load(manifest, directory) }
-            loadedHandles[modelId] = handle
-            dao.upsert(record.copy(lastUsedAtEpochMs = System.currentTimeMillis()))
-        }
-    }
-
-    override suspend fun unload(modelId: ModelId): Result<Unit> = runCatching {
-        lifecycleMutex.withLock {
-            loadedHandles.remove(modelId)?.close()
-        }
-    }
-
     override suspend fun delete(modelId: ModelId): Result<Unit> = runCatching {
-        lifecycleMutex.withLock {
-            val record = requireNotNull(dao.find(modelId.value)) { "This model is not installed." }
-            loadedHandles.remove(modelId)?.close()
-            val directory = File(rootDirectory, record.localDirectoryName)
-            require(directory.canonicalFile.parentFile == rootDirectory.canonicalFile) { "Invalid model directory." }
-            if (directory.exists()) require(directory.deleteRecursively()) { "Could not delete model files." }
-            dao.delete(modelId.value)
-        }
+        val record = requireNotNull(dao.find(modelId.value)) { "This model is not installed." }
+        val directory = File(rootDirectory, record.localDirectoryName)
+        require(directory.canonicalFile.parentFile == rootDirectory.canonicalFile) { "Invalid model directory." }
+        if (directory.exists()) require(directory.deleteRecursively()) { "Could not delete model files." }
+        dao.delete(modelId.value)
+        mutableTransfers.update { it + (modelId to ModelTransferState.Idle) }
     }
 
     override suspend fun runDiagnostics(): DeviceDiagnostics = withContext(Dispatchers.IO) {
@@ -330,16 +322,66 @@ class ModelRepositoryImpl(
         val temporary = temporaryDirectory(modelId)
         mutableTransfers.update { it + (modelId to ModelTransferState.Running(0, entry.download.expectedBytes)) }
         try {
-            val payload = File(temporary, "payload")
-            downloadTo(entry, payload)
-            require(payload.length() == entry.download.expectedBytes) { "Downloaded size does not match the catalog." }
-            require(payload.sha256().equals(entry.download.sha256, ignoreCase = true)) { "Downloaded checksum does not match the catalog." }
-            if (entry.download.archive) extractArchivePayload(payload, temporary, entry.manifest)
-            else {
-                val destination = File(temporary, entry.manifest.files.single().relativePath)
-                require(payload.renameTo(destination)) { "Could not prepare the downloaded model file." }
+            val downloads = entry.download.files.ifEmpty {
+                val file = entry.manifest.files.single()
+                listOf(
+                    CatalogDownloadFile(
+                        relativePath = file.relativePath,
+                        url = requireNotNull(entry.download.url) { "The catalog download URL is missing." },
+                    ),
+                )
             }
-            installDirectory(entry.manifest.copy(installedAtEpochMs = System.currentTimeMillis()), temporary)
+            val specifications = entry.manifest.files.associateBy(ModelFileSpec::relativePath)
+            val expectedTotal = downloads.sumOf { download ->
+                requireNotNull(specifications[download.relativePath]?.expectedBytes) {
+                    "The catalog size for ${download.relativePath} is missing."
+                }
+            }
+            require(expectedTotal == entry.download.expectedBytes) {
+                "The catalog's total download size does not match its files."
+            }
+            var completedBeforeFile = 0L
+            downloads.forEach { download ->
+                coroutineContext.ensureActive()
+                val specification = requireNotNull(specifications[download.relativePath]) {
+                    "The catalog download ${download.relativePath} is not declared by the model."
+                }
+                val expectedBytes = requireNotNull(specification.expectedBytes) {
+                    "The catalog size for ${download.relativePath} is missing."
+                }
+                val expectedSha256 = requireNotNull(specification.sha256) {
+                    "The catalog checksum for ${download.relativePath} is missing."
+                }
+                val destination = File(temporary, download.relativePath)
+                require(destination.canonicalPath.startsWith(temporary.canonicalPath + File.separator)) {
+                    "The model manifest contains an unsafe path."
+                }
+                val parent = requireNotNull(destination.parentFile)
+                require(parent.isDirectory || parent.mkdirs()) {
+                    "Could not prepare the model installation directory."
+                }
+                downloadTo(
+                    url = download.url,
+                    destination = destination,
+                    expectedBytes = expectedBytes,
+                    modelId = modelId,
+                    completedBeforeFile = completedBeforeFile,
+                    totalBytes = entry.download.expectedBytes,
+                )
+                require(destination.length() == expectedBytes) {
+                    "Downloaded size for ${download.relativePath} does not match the catalog."
+                }
+                require(destination.sha256().equals(expectedSha256, ignoreCase = true)) {
+                    "Downloaded checksum for ${download.relativePath} does not match the catalog."
+                }
+                completedBeforeFile += expectedBytes
+            }
+            mutableTransfers.update { it + (modelId to ModelTransferState.Installing) }
+            installDirectory(
+                manifest = entry.manifest.copy(installedAtEpochMs = System.currentTimeMillis()),
+                temporary = temporary,
+                verifyChecksums = false,
+            )
             mutableTransfers.update { it + (modelId to ModelTransferState.Completed) }
         } catch (cancelled: CancellationException) {
             temporary.deleteRecursively()
@@ -352,11 +394,18 @@ class ModelRepositoryImpl(
         }
     }
 
-    private suspend fun downloadTo(entry: CatalogModel, destination: File) {
-        var url = entry.download.url
+    private suspend fun downloadTo(
+        url: String,
+        destination: File,
+        expectedBytes: Long,
+        modelId: ModelId,
+        completedBeforeFile: Long,
+        totalBytes: Long,
+    ) {
+        var currentUrl = url
         repeat(5) {
             coroutineContext.ensureActive()
-            val connection = (URI(url).toURL().openConnection() as HttpURLConnection).apply {
+            val connection = (URI(currentUrl).toURL().openConnection() as HttpURLConnection).apply {
                 instanceFollowRedirects = false
                 connectTimeout = 15_000
                 readTimeout = 30_000
@@ -364,12 +413,15 @@ class ModelRepositoryImpl(
             try {
                 val status = connection.responseCode
                 if (status in 300..399) {
-                    url = requireNotNull(connection.getHeaderField("Location")) { "Redirect without a target." }
+                    val location = requireNotNull(connection.getHeaderField("Location")) {
+                        "Redirect without a target."
+                    }
+                    currentUrl = URI(currentUrl).resolve(location).toString()
                     return@repeat
                 }
                 require(status in 200..299) { "Download failed with HTTP $status." }
                 connection.getHeaderFieldLong("Content-Length", -1).takeIf { it >= 0 }?.let { announced ->
-                    require(announced == entry.download.expectedBytes) { "Server response length does not match the catalog." }
+                    require(announced == expectedBytes) { "Server response length does not match the catalog." }
                 }
                 connection.inputStream.use { input ->
                     FileOutputStream(destination).use { output ->
@@ -381,7 +433,14 @@ class ModelRepositoryImpl(
                             if (read < 0) break
                             output.write(buffer, 0, read)
                             completed += read
-                            mutableTransfers.update { states -> states + (entry.manifest.modelId to ModelTransferState.Running(completed, entry.download.expectedBytes)) }
+                            mutableTransfers.update { states ->
+                                states + (
+                                    modelId to ModelTransferState.Running(
+                                        completedBytes = completedBeforeFile + completed,
+                                        totalBytes = totalBytes,
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -393,56 +452,35 @@ class ModelRepositoryImpl(
         error("The download redirected too many times.")
     }
 
-    private fun extractArchivePayload(payload: File, temporary: File, manifest: ModelManifest) {
-        val extracted = File(temporary, "extracted").also { it.mkdirs() }
-        FileInputStream(payload).use { fileInput ->
-            BZip2CompressorInputStream(fileInput).use { bzip ->
-                TarArchiveInputStream(bzip).use { tar ->
-                    while (true) {
-                        val entry = tar.nextTarEntry ?: break
-                        if (entry.isDirectory) continue
-                        val out = File(extracted, entry.name)
-                        require(out.canonicalPath.startsWith(extracted.canonicalPath + File.separator)) { "Archive contains an unsafe path." }
-                        out.parentFile?.mkdirs()
-                        FileOutputStream(out).use { tar.copyTo(it) }
-                    }
-                }
-            }
-        }
-        manifest.files.filter { it.required }.forEach { spec ->
-            val source = extracted.walkTopDown().firstOrNull { it.isFile && it.name == File(spec.relativePath).name }
-                ?: error("Archive does not contain ${spec.relativePath}.")
-            val destination = File(temporary, spec.relativePath)
-            destination.parentFile?.mkdirs()
-            source.copyTo(destination, overwrite = true)
-        }
-        extracted.deleteRecursively()
-        payload.delete()
-    }
-
-    private suspend fun installDirectory(manifest: ModelManifest, temporary: File) {
-        val enriched = enrichFileChecksums(manifest, temporary)
-        val validation = validateManifest(enriched, temporary)
+    private suspend fun installDirectory(
+        manifest: ModelManifest,
+        temporary: File,
+        verifyChecksums: Boolean = true,
+    ) {
+        val validation = validateManifest(manifest, temporary, verifyChecksums)
         require(validation.first == ModelValidationState.READY) { validation.second ?: "Model validation failed." }
+        val enriched = enrichFileChecksums(manifest, temporary)
         File(temporary, "manifest.json").writeText(json.encodeToString(enriched))
         val finalDirectory = File(rootDirectory, directoryName(enriched.modelId))
-        require(!finalDirectory.exists()) { "A model with this ID is already installed." }
-        require(temporary.renameTo(finalDirectory)) { "Could not complete the model installation transaction." }
-        try {
-            dao.upsert(
-                InstalledModelEntity(
-                    modelId = enriched.modelId.value,
-                    manifestJson = json.encodeToString(enriched),
-                    localDirectoryName = finalDirectory.name,
-                    totalBytes = finalDirectory.walkTopDown().filter { it.isFile }.sumOf { it.length() },
-                    validationState = ModelValidationState.READY.name,
-                    validationMessage = null,
-                    lastUsedAtEpochMs = null,
-                ),
-            )
-        } catch (error: Throwable) {
-            finalDirectory.deleteRecursively()
-            throw error
+        withContext(NonCancellable) {
+            require(!finalDirectory.exists()) { "A model with this ID is already installed." }
+            require(temporary.renameTo(finalDirectory)) { "Could not complete the model installation transaction." }
+            try {
+                dao.upsert(
+                    InstalledModelEntity(
+                        modelId = enriched.modelId.value,
+                        manifestJson = json.encodeToString(enriched),
+                        localDirectoryName = finalDirectory.name,
+                        totalBytes = finalDirectory.walkTopDown().filter { it.isFile }.sumOf { it.length() },
+                        validationState = ModelValidationState.READY.name,
+                        validationMessage = null,
+                        lastUsedAtEpochMs = null,
+                    ),
+                )
+            } catch (error: Throwable) {
+                finalDirectory.deleteRecursively()
+                throw error
+            }
         }
     }
 
@@ -491,7 +529,11 @@ class ModelRepositoryImpl(
         }
     }
 
-    private fun validateManifest(manifest: ModelManifest, directory: File): Pair<ModelValidationState, String?> {
+    private fun validateManifest(
+        manifest: ModelManifest,
+        directory: File,
+        verifyChecksums: Boolean = true,
+    ): Pair<ModelValidationState, String?> {
         if (!directory.isDirectory) return ModelValidationState.MISSING_FILES to "The installed model directory is missing."
         manifest.files.filter { it.required }.forEach { spec ->
             val file = File(directory, spec.relativePath)
@@ -499,7 +541,7 @@ class ModelRepositoryImpl(
             if (spec.expectedBytes != null && file.length() != spec.expectedBytes) {
                 return ModelValidationState.INVALID to "${spec.relativePath} has an unexpected size."
             }
-            if (spec.sha256 != null && !file.sha256().equals(spec.sha256, ignoreCase = true)) {
+            if (verifyChecksums && spec.sha256 != null && !file.sha256().equals(spec.sha256, ignoreCase = true)) {
                 return ModelValidationState.INVALID to "${spec.relativePath} has an unexpected checksum."
             }
         }
@@ -513,7 +555,14 @@ class ModelRepositoryImpl(
     private fun enrichFileChecksums(manifest: ModelManifest, directory: File): ModelManifest = manifest.copy(
         files = manifest.files.map { spec ->
             val file = File(directory, spec.relativePath)
-            if (file.isFile) spec.copy(expectedBytes = file.length(), sha256 = file.sha256()) else spec
+            if (!file.isFile) {
+                spec
+            } else {
+                spec.copy(
+                    expectedBytes = spec.expectedBytes ?: file.length(),
+                    sha256 = spec.sha256 ?: file.sha256(),
+                )
+            }
         },
     )
 
@@ -528,6 +577,12 @@ class ModelRepositoryImpl(
         "model-installing-${modelId.value}-${UUID.randomUUID()}",
     ).also { require(it.mkdirs()) { "Could not create the installation staging directory." } }
 
+    private fun cleanupInterruptedInstallations() {
+        rootDirectory.parentFile
+            ?.listFiles { file -> file.isDirectory && file.name.startsWith("model-installing-") }
+            ?.forEach(File::deleteRecursively)
+    }
+
     private fun directoryName(id: ModelId): String = id.value.replace(Regex("[^A-Za-z0-9._-]"), "_")
     private fun isSafeName(name: String): Boolean = name.isNotBlank() && !name.contains('/') && !name.contains('\\') && name != "." && name != ".."
     private fun copiedNamesSafe(directory: File, name: String): Boolean = !File(directory, name).exists()
@@ -541,13 +596,58 @@ class ModelRepositoryImpl(
     /** Rebuilds reliable state after process restart without allocating any native model. */
     private suspend fun reconcileInstalledModels() {
         dao.all().forEach { record ->
+            val directory = File(rootDirectory, record.localDirectoryName)
+            if (!directory.isDirectory) {
+                dao.delete(record.modelId)
+                return@forEach
+            }
             val manifest = runCatching { json.decodeFromString<ModelManifest>(record.manifestJson) }.getOrNull()
-            val result = manifest?.let { validateManifest(it, File(rootDirectory, record.localDirectoryName)) }
+            val result = manifest?.let { validateManifest(it, directory) }
                 ?: (ModelValidationState.INVALID to "The saved model manifest is unreadable.")
             if (record.validationState != result.first.name || record.validationMessage != result.second) {
                 dao.upsert(record.copy(validationState = result.first.name, validationMessage = result.second))
             }
         }
+        rootDirectory.listFiles { file -> file.isDirectory }?.forEach { directory ->
+            val manifest = readInstalledManifest(directory) ?: return@forEach
+            if (dao.find(manifest.modelId.value) == null) {
+                registerInstalledDirectory(manifest.modelId)
+            }
+        }
+    }
+
+    /** Recovers a committed model directory if process death interrupted its Room registration. */
+    private suspend fun registerInstalledDirectory(modelId: ModelId): Boolean = withContext(Dispatchers.IO) {
+        dao.find(modelId.value)?.let { record ->
+            if (File(rootDirectory, record.localDirectoryName).isDirectory) {
+                return@withContext true
+            }
+            dao.delete(modelId.value)
+        }
+        val directory = File(rootDirectory, directoryName(modelId))
+        val manifest = readInstalledManifest(directory) ?: return@withContext false
+        if (manifest.modelId != modelId) return@withContext false
+        val validation = validateManifest(manifest, directory)
+        if (validation.first != ModelValidationState.READY) return@withContext false
+        dao.upsert(
+            InstalledModelEntity(
+                modelId = manifest.modelId.value,
+                manifestJson = json.encodeToString(manifest),
+                localDirectoryName = directory.name,
+                totalBytes = directory.walkTopDown().filter { it.isFile }.sumOf { it.length() },
+                validationState = validation.first.name,
+                validationMessage = validation.second,
+                lastUsedAtEpochMs = null,
+            ),
+        )
+        true
+    }
+
+    private fun readInstalledManifest(directory: File): ModelManifest? {
+        if (!directory.isDirectory) return null
+        return runCatching {
+            json.decodeFromString<ModelManifest>(File(directory, "manifest.json").readText())
+        }.getOrNull()
     }
 
     private fun InstalledModelEntity.toDomainOrNull(): InstalledModel? = runCatching {
@@ -564,7 +664,7 @@ class ModelRepositoryImpl(
 
 private fun File.sha256(): String = FileInputStream(this).use { input ->
     val digest = MessageDigest.getInstance("SHA-256")
-    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+    val buffer = ByteArray(FILE_IO_BUFFER_BYTES)
     while (true) {
         val read = input.read(buffer)
         if (read < 0) break
@@ -574,3 +674,5 @@ private fun File.sha256(): String = FileInputStream(this).use { input ->
 }
 
 private fun Long.toReadableBytes(): String = "%.1f GiB".format(toDouble() / 1024 / 1024 / 1024)
+
+private const val FILE_IO_BUFFER_BYTES = 256 * 1024

@@ -16,7 +16,6 @@ data class InstalledModel(
     val totalBytes: Long,
     val validationState: ModelValidationState,
     val validationMessage: String? = null,
-    val loaded: Boolean = false,
     val lastUsedAtEpochMs: Long? = null,
 )
 

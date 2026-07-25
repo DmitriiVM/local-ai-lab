@@ -29,8 +29,6 @@ fun ModelsRoute(
         },
         onDownload = viewModel::download,
         onCancelTransfer = viewModel::cancelTransfer,
-        onLoad = viewModel::load,
-        onUnload = viewModel::unload,
         onValidate = viewModel::validate,
         onDelete = viewModel::requestDelete,
         onConfirmDelete = viewModel::confirmDelete,

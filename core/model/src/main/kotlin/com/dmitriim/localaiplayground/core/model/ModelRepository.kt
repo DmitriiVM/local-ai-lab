@@ -18,8 +18,6 @@ interface ModelRepository {
     /** Resolves a validated app-private TTS model directory. */
     suspend fun resolveTextToSpeechModel(modelId: ModelId): Result<TextToSpeechModelReference>
     suspend fun compatibility(model: ModelManifest): ModelCompatibility
-    suspend fun load(modelId: ModelId): Result<Unit>
-    suspend fun unload(modelId: ModelId): Result<Unit>
     suspend fun delete(modelId: ModelId): Result<Unit>
     suspend fun runDiagnostics(): DeviceDiagnostics
 }

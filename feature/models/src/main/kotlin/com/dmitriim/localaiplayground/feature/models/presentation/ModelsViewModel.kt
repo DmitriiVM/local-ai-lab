@@ -7,6 +7,7 @@ import com.dmitriim.localaiplayground.core.model.EngineId
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelImportRequest
 import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.RuntimeProfileType
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -57,19 +58,41 @@ class ModelsViewModel(
         "Download scheduled."
     }
 
-    fun load(modelId: ModelId) = launchOperation {
-        repository.load(modelId).getOrThrow()
-        "Model loaded."
-    }
-
-    fun unload(modelId: ModelId) = launchOperation {
-        repository.unload(modelId).getOrThrow()
-        "Model unloaded."
-    }
-
-    fun validate(modelId: ModelId) = launchOperation {
-        repository.validate(modelId).getOrThrow()
-        "Validation completed."
+    fun validate(modelId: ModelId) {
+        if (modelId in mutableUiState.value.validatingModelIds) return
+        mutableUiState.update {
+            it.copy(
+                validatingModelIds = it.validatingModelIds + modelId,
+                validationFeedback = it.validationFeedback - modelId,
+            )
+        }
+        viewModelScope.launch {
+            val feedback = repository.validate(modelId).fold(
+                onSuccess = { model ->
+                    val ready = model.validationState == ModelValidationState.READY
+                    ModelValidationFeedback(
+                        message = if (ready) {
+                            "Validation passed."
+                        } else {
+                            model.validationMessage ?: "Validation found a problem."
+                        },
+                        isError = !ready,
+                    )
+                },
+                onFailure = { error ->
+                    ModelValidationFeedback(
+                        message = error.message ?: "Validation failed.",
+                        isError = true,
+                    )
+                },
+            )
+            mutableUiState.update {
+                it.copy(
+                    validatingModelIds = it.validatingModelIds - modelId,
+                    validationFeedback = it.validationFeedback + (modelId to feedback),
+                )
+            }
+        }
     }
 
     fun requestDelete(modelId: ModelId) {
@@ -80,7 +103,12 @@ class ModelsViewModel(
 
     fun confirmDelete() {
         val model = mutableUiState.value.pendingDelete ?: return
-        mutableUiState.update { it.copy(pendingDelete = null) }
+        mutableUiState.update {
+            it.copy(
+                pendingDelete = null,
+                validationFeedback = it.validationFeedback - model.manifest.modelId,
+            )
+        }
         launchOperation {
             repository.delete(model.manifest.modelId).getOrThrow()
             "${model.manifest.displayName} was deleted."
