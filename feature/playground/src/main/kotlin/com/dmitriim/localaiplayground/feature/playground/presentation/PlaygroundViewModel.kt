@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.EngineAvailabilitySource
 import com.dmitriim.localaiplayground.core.di.AppScope
+import com.dmitriim.localaiplayground.core.model.ModelRepository
 import com.dmitriim.localaiplayground.core.result.DomainError
 import com.dmitriim.localaiplayground.core.result.DomainErrorCategory
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -26,6 +28,7 @@ import kotlinx.coroutines.launch
 @ContributesIntoMap(AppScope::class)
 class PlaygroundViewModel(
     private val availabilitySource: EngineAvailabilitySource,
+    private val modelRepository: ModelRepository,
     private val operationCoordinator: ForegroundOperationCoordinator,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(PlaygroundUiState())
@@ -34,12 +37,14 @@ class PlaygroundViewModel(
 
     init {
         viewModelScope.launch {
-            availabilitySource.availability.collectLatest { availability ->
+            combine(availabilitySource.availability, modelRepository.installedModels) { availability, installed ->
+                availability to installed
+            }.collectLatest { (availability, installed) ->
                 if (availability.isNotEmpty()) {
                     mutableState.update {
                         it.copy(
                             operation = OperationState.Completed(Unit),
-                            capabilities = buildCapabilityReadiness(availability),
+                            capabilities = buildCapabilityReadiness(availability, installed),
                         )
                     }
                 }

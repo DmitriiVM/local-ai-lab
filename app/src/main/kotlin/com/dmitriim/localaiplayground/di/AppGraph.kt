@@ -4,6 +4,7 @@ import android.app.Application
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.di.ApplicationCoroutineScope
 import com.dmitriim.localaiplayground.core.navigation.NavigationEntryProvider
+import com.dmitriim.localaiplayground.core.model.ModelRepository
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
@@ -14,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 interface AppGraph : ViewModelGraph {
     val navigationEntryProviders: Set<NavigationEntryProvider>
     val foregroundOperationCoordinator: ForegroundOperationCoordinator
+    val modelRepository: ModelRepository
 
     @get:ApplicationCoroutineScope
     val applicationScope: CoroutineScope

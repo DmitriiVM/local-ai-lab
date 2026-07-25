@@ -48,6 +48,9 @@ fun DeviceScreen(
                         "ABIs: ${snapshot.abis}",
                         "Memory: ${snapshot.availableMemory} available / ${snapshot.totalMemory} total",
                         "App storage available: ${snapshot.availableStorage}",
+                        snapshot.cpuInfo,
+                        snapshot.batteryState,
+                        snapshot.thermalState,
                     ),
                 )
             }
@@ -84,6 +87,10 @@ fun DeviceScreen(
                             "Temporarily unavailable • ${engine.reason}"
                     },
                     "Capabilities: ${engine.descriptor.capabilities.joinToString()}",
+                    (engine as? EngineAvailability.Available)?.let {
+                        "Requested: ${it.requestedBackend}; effective: ${it.effectiveBackend}; threads: ${it.effectiveThreadCount ?: "runtime default"}" +
+                            (it.fallbackReason?.let { reason -> "; fallback: $reason" } ?: "")
+                    } ?: "No active backend is available.",
                     if (engine.descriptor.bundledRuntime) {
                         "Runtime is bundled with the app."
                     } else {
@@ -92,6 +99,20 @@ fun DeviceScreen(
                 ),
                 isError = engine !is EngineAvailability.Available,
             )
+        }
+        state.diagnostics?.let { diagnostics ->
+            item {
+                DeviceInfoCard(
+                    title = "Non-destructive diagnostics",
+                    lines = listOf(
+                        "Model storage writable: ${diagnostics.modelDirectoryWritable}",
+                        "Temporary storage: ${diagnostics.availableTemporaryBytes / 1024 / 1024} MiB available",
+                        "Installed files valid: ${diagnostics.installedFilesValid}",
+                        "Offline-ready capabilities: ${diagnostics.offlineReadyCapabilities.joinToString().ifBlank { "None" }}",
+                    ) + diagnostics.detail,
+                    isError = !diagnostics.modelDirectoryWritable || !diagnostics.installedFilesValid,
+                )
+            }
         }
         item {
             OutlinedButton(

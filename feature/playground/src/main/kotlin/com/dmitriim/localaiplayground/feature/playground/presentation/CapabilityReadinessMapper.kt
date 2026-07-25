@@ -4,9 +4,12 @@ import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.CapabilityReadiness
 import com.dmitriim.localaiplayground.core.model.CapabilityReadinessState
 import com.dmitriim.localaiplayground.core.model.EngineAvailability
+import com.dmitriim.localaiplayground.core.model.InstalledModel
+import com.dmitriim.localaiplayground.core.model.ModelValidationState
 
 internal fun buildCapabilityReadiness(
     availability: List<EngineAvailability>,
+    installed: List<InstalledModel> = emptyList(),
 ): List<CapabilityReadiness> = AiCapability.entries.map { capability ->
     val relevant = when (capability) {
         AiCapability.VOICE_ASSISTANT -> availability.filter { result ->
@@ -52,11 +55,23 @@ internal fun buildCapabilityReadiness(
                     .joinToString(" ") { it.reason },
                 engines = relevant,
             )
-        else -> CapabilityReadiness(
-            capability = capability,
-            state = CapabilityReadinessState.MODEL_REQUIRED,
-            explanation = "The local runtime is available. Import a compatible model in Models.",
-            engines = relevant,
-        )
+        else -> {
+            val installedCapabilities = installed
+                .filter { it.validationState == ModelValidationState.READY }
+                .flatMapTo(mutableSetOf()) { it.manifest.capabilities }
+            if (installedCapabilities.containsAll(requiredCapabilities)) {
+                CapabilityReadiness(
+                    capability = capability,
+                    state = CapabilityReadinessState.READY,
+                    explanation = "A compatible validated local model is installed.",
+                    engines = relevant,
+                )
+            } else CapabilityReadiness(
+                capability = capability,
+                state = CapabilityReadinessState.MODEL_REQUIRED,
+                explanation = "The local runtime is available. Import a compatible model in Models.",
+                engines = relevant,
+            )
+        }
     }
 }

@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.metro)
 }
 
@@ -13,4 +14,9 @@ android {
 
 dependencies {
     implementation(project(":core:di"))
+    implementation(project(":core:model"))
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.metro.runtime)
 }

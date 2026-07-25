@@ -44,6 +44,9 @@ sealed interface EngineAvailability {
         override val descriptor: EngineDescriptor,
         val effectiveBackend: RuntimeBackend,
         val detail: String,
+        val requestedBackend: RuntimeBackend = effectiveBackend,
+        val effectiveThreadCount: Int? = null,
+        val fallbackReason: String? = null,
     ) : EngineAvailability
 
     data class Unsupported(

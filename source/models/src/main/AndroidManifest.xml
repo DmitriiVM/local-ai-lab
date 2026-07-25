@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Declared here so lint can validate the UIDT scheduler in this owning module. -->
+    <uses-permission android:name="android.permission.RUN_USER_INITIATED_JOBS" />
+    <application>
+        <!-- WorkManager's JobScheduler IDs cannot overlap direct UIDT JobService IDs. -->
+        <meta-data
+            android:name="androidx.work.default_job_scheduler_id_range"
+            android:value="1000-1999" />
+    </application>
+</manifest>

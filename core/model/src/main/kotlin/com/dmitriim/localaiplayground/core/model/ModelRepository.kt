@@ -1,0 +1,19 @@
+package com.dmitriim.localaiplayground.core.model
+
+import kotlinx.coroutines.flow.Flow
+
+interface ModelRepository {
+    val installedModels: Flow<List<InstalledModel>>
+    val catalog: Flow<List<CatalogModel>>
+    val transfers: Flow<Map<ModelId, ModelTransferState>>
+
+    suspend fun import(request: ModelImportRequest): Result<ModelId>
+    suspend fun download(modelId: ModelId): Result<Unit>
+    suspend fun cancelTransfer(modelId: ModelId)
+    suspend fun validate(modelId: ModelId): Result<InstalledModel>
+    suspend fun compatibility(model: ModelManifest): ModelCompatibility
+    suspend fun load(modelId: ModelId): Result<Unit>
+    suspend fun unload(modelId: ModelId): Result<Unit>
+    suspend fun delete(modelId: ModelId): Result<Unit>
+    suspend fun runDiagnostics(): DeviceDiagnostics
+}

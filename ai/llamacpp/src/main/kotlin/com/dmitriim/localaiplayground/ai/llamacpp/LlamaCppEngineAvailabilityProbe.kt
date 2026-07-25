@@ -31,6 +31,8 @@ class LlamaCppEngineAvailabilityProbe : EngineAvailabilityProbe {
                     descriptor = descriptor,
                     effectiveBackend = RuntimeBackend.CPU,
                     detail = "Bundled arm64 CPU runtime is available.",
+                    requestedBackend = RuntimeBackend.CPU,
+                    effectiveThreadCount = Runtime.getRuntime().availableProcessors(),
                 )
             },
             onFailure = { error ->

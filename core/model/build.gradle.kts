@@ -16,4 +16,5 @@ android {
 
 dependencies {
     api(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.coroutines.android)
 }
