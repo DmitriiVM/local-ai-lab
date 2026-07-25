@@ -8,11 +8,18 @@ import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.AiCapability
+import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
+import com.dmitriim.localaiplayground.core.model.RunRecord
+import com.dmitriim.localaiplayground.core.model.RunStatus
+import com.dmitriim.localaiplayground.source.runs.RunReplayStore
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
 import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionEvent
 import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionRequest
 import com.dmitriim.localaiplayground.feature.stt.domain.SttTranscriptionSettings
 import com.dmitriim.localaiplayground.feature.stt.domain.TranscribeAudio
+import com.dmitriim.localaiplayground.feature.stt.domain.PersistSttRun
+import com.dmitriim.localaiplayground.feature.stt.domain.SttRunSnapshot
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -25,6 +32,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 @Inject
 @ViewModelKey
@@ -34,6 +44,8 @@ class SpeechToTextViewModel(
     private val audioInputStore: AudioInputStore,
     private val transcribeAudio: TranscribeAudio,
     private val operationCoordinator: ForegroundOperationCoordinator,
+    private val persistSttRun: PersistSttRun,
+    private val replayStore: RunReplayStore,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(SpeechToTextUiState())
     val state: StateFlow<SpeechToTextUiState> = mutableState.asStateFlow()
@@ -47,6 +59,11 @@ class SpeechToTextViewModel(
                     val selected = current.selectedModelId?.takeIf { id -> models.any { it.id == id } } ?: models.firstOrNull()?.id
                     current.copy(models = models, selectedModelId = selected)
                 }
+            }
+        }
+        viewModelScope.launch {
+            replayStore.pending.collectLatest { run ->
+                if (run?.capability == AiCapability.SPEECH_TO_TEXT) applyReplay(run)
             }
         }
     }
@@ -131,6 +148,8 @@ class SpeechToTextViewModel(
     private fun transcribe(input: PcmAudioInput) {
         val snapshot = mutableState.value
         val modelId = snapshot.selectedModelId ?: return
+        val startedAt = System.currentTimeMillis()
+        val model = snapshot.selectedModel
         mutableState.update { it.copy(operation = SttOperation.TRANSCRIBING, transcript = "", metrics = null, errorMessage = null) }
         operationJob = viewModelScope.launch(Dispatchers.Default) {
             try {
@@ -152,13 +171,17 @@ class SpeechToTextViewModel(
                                 transcript = event.transcript,
                                 metrics = event.metrics,
                             )
+                        }.also {
+                            persistSttRun(snapshotForPersistence(RunStatus.SUCCEEDED, startedAt, model, input, event.transcript, snapshot, event.metrics, null))
                         }
                     }
                 }
             } catch (cancelled: CancellationException) {
                 mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = "Transcription cancelled.") }
+                persistSttRun(snapshotForPersistence(RunStatus.CANCELLED, startedAt, model, input, null, snapshot, null, "Transcription cancelled."))
             } catch (error: Throwable) {
                 mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = error.message ?: "Local transcription failed.") }
+                persistSttRun(snapshotForPersistence(RunStatus.FAILED, startedAt, model, input, null, snapshot, null, error.message ?: "Local transcription failed."))
             }
         }.also(::registerForegroundCancellation)
     }
@@ -184,4 +207,43 @@ class SpeechToTextViewModel(
         cancel()
         super.onCleared()
     }
+
+    private fun applyReplay(run: RunRecord) {
+        val modelId = run.model?.modelId?.let(::ModelId)
+        val selected = modelId?.takeIf { id -> mutableState.value.models.any { it.id == id } }
+        val parameters = runCatching { Json.parseToJsonElement(run.parametersJson).jsonObject }.getOrNull()
+        mutableState.update { state ->
+            state.copy(
+                selectedModelId = selected ?: state.selectedModelId,
+                language = parameters?.get("language")?.jsonPrimitive?.content?.let { code -> SttLanguage.entries.firstOrNull { it.whisperCode == code } } ?: state.language,
+                threadCount = parameters?.get("threadCount")?.jsonPrimitive?.content ?: state.threadCount,
+                errorMessage = when {
+                    modelId != null && selected == null -> "Saved model ${run.model?.displayName.orEmpty()} is no longer installed. Select a compatible model."
+                    else -> "Saved configuration restored. Recording audio was session-only, so record or import audio before repeating."
+                },
+            )
+        }
+        replayStore.consume(run.id)
+    }
+
+    private fun snapshotForPersistence(
+        status: RunStatus,
+        startedAt: Long,
+        model: SpeechModelOption?,
+        input: PcmAudioInput,
+        transcript: String?,
+        state: SpeechToTextUiState,
+        metrics: com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionMetrics?,
+        error: String?,
+    ) = SttRunSnapshot(
+        status = status,
+        startedAtEpochMs = startedAt,
+        model = model?.let { RunModelSnapshot(it.id.value, it.displayName, "sherpa-onnx") },
+        inputDescription = "${input.displayName} (${input.durationMs} ms; ${input.sourceDescription})",
+        transcript = transcript,
+        languageCode = state.language.whisperCode,
+        threadCount = state.threadCount,
+        metrics = metrics,
+        errorMessage = error,
+    )
 }

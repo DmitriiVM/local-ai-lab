@@ -1,0 +1,75 @@
+package com.dmitriim.localaiplayground.source.settings
+
+import android.app.Application
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStoreFile
+import com.dmitriim.localaiplayground.core.di.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+@Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
+class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepository {
+    private val store: DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        produceFile = { application.preferencesDataStoreFile("app-settings") },
+    )
+
+    override val settings: Flow<AppSettings> = store.data.map { values ->
+        AppSettings(
+            theme = values[THEME]?.asEnum(ThemePreference.SYSTEM) ?: ThemePreference.SYSTEM,
+            keepScreenAwake = values[KEEP_AWAKE] ?: true,
+            confirmDestructiveActions = values[CONFIRM_DESTRUCTIVE] ?: true,
+            recordingRetention = values[RECORDING_RETENTION]?.asEnum(AudioRetention.SESSION_ONLY) ?: AudioRetention.SESSION_ONLY,
+            generatedAudioRetention = values[GENERATED_RETENTION]?.asEnum(AudioRetention.LATEST_SUCCESSFUL) ?: AudioRetention.LATEST_SUCCESSFUL,
+            showAdvancedControls = values[SHOW_ADVANCED] ?: false,
+            threadCountPolicy = values[THREAD_POLICY]?.asEnum(ThreadCountPolicy.ENGINE_DEFAULT) ?: ThreadCountPolicy.ENGINE_DEFAULT,
+            fixedThreadCount = values[FIXED_THREADS] ?: 0,
+            modelUnloadPolicy = values[UNLOAD_POLICY]?.asEnum(ModelUnloadPolicy.WHEN_IDLE) ?: ModelUnloadPolicy.WHEN_IDLE,
+            warmUpSelectedModel = values[WARM_UP] ?: false,
+            metricDetail = values[METRIC_DETAIL]?.asEnum(MetricDetail.STANDARD) ?: MetricDetail.STANDARD,
+        )
+    }
+
+    override suspend fun update(settings: AppSettings) {
+        store.edit { values ->
+            values[THEME] = settings.theme.name
+            values[KEEP_AWAKE] = settings.keepScreenAwake
+            values[CONFIRM_DESTRUCTIVE] = settings.confirmDestructiveActions
+            values[RECORDING_RETENTION] = settings.recordingRetention.name
+            values[GENERATED_RETENTION] = settings.generatedAudioRetention.name
+            values[SHOW_ADVANCED] = settings.showAdvancedControls
+            values[THREAD_POLICY] = settings.threadCountPolicy.name
+            values[FIXED_THREADS] = settings.fixedThreadCount.coerceIn(0, 64)
+            values[UNLOAD_POLICY] = settings.modelUnloadPolicy.name
+            values[WARM_UP] = settings.warmUpSelectedModel
+            values[METRIC_DETAIL] = settings.metricDetail.name
+        }
+    }
+
+    private inline fun <reified T : Enum<T>> String.asEnum(default: T): T =
+        enumValues<T>().firstOrNull { it.name == this } ?: default
+
+    private companion object {
+        val THEME = stringPreferencesKey("theme")
+        val KEEP_AWAKE = booleanPreferencesKey("keep_screen_awake")
+        val CONFIRM_DESTRUCTIVE = booleanPreferencesKey("confirm_destructive_actions")
+        val RECORDING_RETENTION = stringPreferencesKey("recording_retention")
+        val GENERATED_RETENTION = stringPreferencesKey("generated_retention")
+        val SHOW_ADVANCED = booleanPreferencesKey("show_advanced_controls")
+        val THREAD_POLICY = stringPreferencesKey("thread_count_policy")
+        val FIXED_THREADS = intPreferencesKey("fixed_thread_count")
+        val UNLOAD_POLICY = stringPreferencesKey("model_unload_policy")
+        val WARM_UP = booleanPreferencesKey("warm_up_selected_model")
+        val METRIC_DETAIL = stringPreferencesKey("metric_detail")
+    }
+}

@@ -4,28 +4,40 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.ChatEngine
 import com.dmitriim.localaiplayground.core.di.AppScope
+import com.dmitriim.localaiplayground.core.model.ConversationMessageRole
 import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelRepository
-import com.dmitriim.localaiplayground.core.model.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
+import com.dmitriim.localaiplayground.core.model.RunRecord
+import com.dmitriim.localaiplayground.core.model.RunRepository
+import com.dmitriim.localaiplayground.core.model.RunStatus
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
 import com.dmitriim.localaiplayground.feature.chat.domain.ChatGenerationEvent
 import com.dmitriim.localaiplayground.feature.chat.domain.ChatGenerationRequest
 import com.dmitriim.localaiplayground.feature.chat.domain.GenerateChatResponse
+import com.dmitriim.localaiplayground.feature.chat.domain.PersistChatTurn
+import com.dmitriim.localaiplayground.feature.chat.domain.ChatConversationSnapshot
+import com.dmitriim.localaiplayground.feature.chat.domain.ChatPersistenceSnapshot
+import com.dmitriim.localaiplayground.feature.chat.domain.ChatRunMetrics
+import com.dmitriim.localaiplayground.feature.chat.domain.ChatRunSettings
+import com.dmitriim.localaiplayground.source.runs.RunReplayStore
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import java.util.UUID
 
 @Inject
 @ViewModelKey
@@ -35,10 +47,14 @@ class ChatViewModel(
     private val chatEngine: ChatEngine,
     private val generateChatResponse: GenerateChatResponse,
     private val operationCoordinator: ForegroundOperationCoordinator,
+    private val runRepository: RunRepository,
+    private val persistChatTurn: PersistChatTurn,
+    private val replayStore: RunReplayStore,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(ChatUiState())
     val state: StateFlow<ChatUiState> = mutableState.asStateFlow()
     private var generationJob: Job? = null
+    private var conversationId = UUID.randomUUID().toString()
 
     init {
         viewModelScope.launch {
@@ -58,6 +74,11 @@ class ChatViewModel(
                         },
                     )
                 }
+            }
+        }
+        viewModelScope.launch {
+            replayStore.pending.collectLatest { run ->
+                if (run?.capability == com.dmitriim.localaiplayground.core.model.AiCapability.CHAT) applyReplay(run)
             }
         }
     }
@@ -120,7 +141,10 @@ class ChatViewModel(
 
     fun clearConversation() {
         if (generationJob?.isActive == true) return
+        val deleted = conversationId
+        conversationId = UUID.randomUUID().toString()
         mutableState.update { it.copy(messages = emptyList(), metrics = null, contextUsage = null, errorMessage = null) }
+        viewModelScope.launch(Dispatchers.IO) { runRepository.deleteConversation(deleted) }
     }
 
     fun unloadModel() {
@@ -144,6 +168,8 @@ class ChatViewModel(
             return
         }
         val visibleMessages = if (appendUser) base + ChatMessage.user(userText) else base
+        val startedAt = System.currentTimeMillis()
+        val model = snapshot.availableModels.firstOrNull { it.id == selectedId }
         mutableState.update {
             it.copy(
                 input = if (appendUser) "" else it.input,
@@ -202,11 +228,26 @@ class ChatViewModel(
                                     metrics = metrics,
                                 )
                             }
+                            persistChatTurn(
+                                snapshotForPersistence(
+                                    status = RunStatus.SUCCEEDED,
+                                    startedAt = startedAt,
+                                    model = model,
+                                    input = userText,
+                                    output = result.text,
+                                    settings = settings,
+                                    metrics = metrics,
+                                    error = null,
+                                    messages = mutableState.value.messages,
+                                ),
+                            )
                         }
                     }
                 }
             } catch (cancelled: CancellationException) {
                 mutableState.update { it.copy(operation = ChatOperation.IDLE, errorMessage = "Generation cancelled.") }
+                val partial = mutableState.value.messages.lastOrNull { it.role == ChatMessageRole.ASSISTANT }?.content
+                persistChatTurn(snapshotForPersistence(RunStatus.CANCELLED, startedAt, model, userText, partial, settings, null, "Generation cancelled.", mutableState.value.messages, true))
             } catch (error: Throwable) {
                 mutableState.update { state ->
                     state.copy(
@@ -217,6 +258,7 @@ class ChatViewModel(
                         },
                     )
                 }
+                persistChatTurn(snapshotForPersistence(RunStatus.FAILED, startedAt, model, userText, null, settings, null, error.message ?: "Local generation failed.", mutableState.value.messages, true))
             }
         }
         generationJob = job
@@ -228,6 +270,67 @@ class ChatViewModel(
         chatEngine.cancel()
         super.onCleared()
     }
+
+    private fun applyReplay(run: RunRecord) {
+        val modelId = run.model?.modelId?.let(::ModelId)
+        val available = mutableState.value.availableModels
+        val selected = modelId?.takeIf { candidate -> available.any { it.id == candidate } }
+        val parameters = runCatching { Json.parseToJsonElement(run.parametersJson).jsonObject }.getOrNull()
+        mutableState.update { state ->
+            state.copy(
+                selectedModelId = selected ?: state.selectedModelId,
+                input = run.input.orEmpty(),
+                settings = state.settings.copy(
+                    systemPrompt = parameters?.get("systemPrompt")?.jsonPrimitive?.content ?: state.settings.systemPrompt,
+                    temperature = parameters?.get("temperature")?.jsonPrimitive?.content ?: state.settings.temperature,
+                    topK = parameters?.get("topK")?.jsonPrimitive?.content ?: state.settings.topK,
+                    topP = parameters?.get("topP")?.jsonPrimitive?.content ?: state.settings.topP,
+                    maxOutputTokens = parameters?.get("maxOutputTokens")?.jsonPrimitive?.content ?: state.settings.maxOutputTokens,
+                    seed = parameters?.get("seed")?.jsonPrimitive?.content ?: state.settings.seed,
+                    contextSize = parameters?.get("contextSize")?.jsonPrimitive?.content ?: state.settings.contextSize,
+                    threadCount = parameters?.get("threadCount")?.jsonPrimitive?.content ?: state.settings.threadCount,
+                ),
+                errorMessage = if (modelId != null && selected == null) "Saved model ${run.model?.displayName.orEmpty()} is no longer installed. Select a compatible model before running." else null,
+            )
+        }
+        replayStore.consume(run.id)
+    }
+
+    private fun snapshotForPersistence(
+        status: RunStatus,
+        startedAt: Long,
+        model: ChatModelOption?,
+        input: String,
+        output: String?,
+        settings: EffectiveChatSettings,
+        metrics: ChatMetrics?,
+        error: String?,
+        messages: List<ChatMessage>,
+        incompleteAssistant: Boolean = false,
+    ) = ChatPersistenceSnapshot(
+        conversationId = conversationId,
+        status = status,
+        startedAtEpochMs = startedAt,
+        model = model?.let { RunModelSnapshot(it.id.value, it.displayName, "llama.cpp") },
+        input = input,
+        output = output,
+        settings = ChatRunSettings(
+            settings.systemPrompt, settings.temperature, settings.topK, settings.topP,
+            settings.maxOutputTokens, settings.seed, settings.contextSize, settings.threadCount,
+        ),
+        metrics = metrics?.let {
+            ChatRunMetrics(it.coldStart, it.loadDurationMs, it.promptTokens, it.timeToFirstTokenMs, it.generatedTokens, it.totalDurationMs, it.finishReason.name, it.effectiveThreadCount)
+        },
+        errorMessage = error,
+        messages = messages.map { message ->
+            ChatConversationSnapshot(
+                id = message.id,
+                role = if (message.role == ChatMessageRole.USER) ConversationMessageRole.USER else ConversationMessageRole.ASSISTANT,
+                content = message.content,
+                incomplete = message.streaming || (incompleteAssistant && message.role == ChatMessageRole.ASSISTANT && message.failed),
+            )
+        },
+    )
 }
 
 private fun rate(tokens: Int, durationMs: Long): Double? = durationMs.takeIf { it > 0 }?.let { tokens * 1_000.0 / it }

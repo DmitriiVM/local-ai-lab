@@ -1,10 +1,20 @@
 package com.dmitriim.localaiplayground.feature.settings.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localaiplayground.feature.settings.presentation.ui.SettingsScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 @Composable
 fun SettingsRoute(viewModel: SettingsViewModel = metroViewModel()) {
-    SettingsScreen()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    SettingsScreen(
+        state = state,
+        onUpdate = viewModel::update,
+        onClearTemporaryMedia = viewModel::clearTemporaryMedia,
+        onRequestClearHistory = viewModel::requestClearHistory,
+        onDismissClearHistory = viewModel::dismissClearHistory,
+        onClearHistory = viewModel::clearHistory,
+    )
 }

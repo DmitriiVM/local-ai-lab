@@ -1,0 +1,67 @@
+package com.dmitriim.localaiplayground.feature.tts.domain
+
+import com.dmitriim.localaiplayground.core.model.AiCapability
+import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
+import com.dmitriim.localaiplayground.core.model.RunRecord
+import com.dmitriim.localaiplayground.core.model.RunRepository
+import com.dmitriim.localaiplayground.core.model.RunStatus
+import dev.zacsweers.metro.Inject
+import java.util.UUID
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+
+@Inject
+class PersistTtsRun(private val runRepository: RunRepository) {
+    suspend operator fun invoke(snapshot: TtsRunSnapshot) {
+        runRepository.saveRun(
+            RunRecord(
+                id = UUID.randomUUID().toString(),
+                capability = AiCapability.TEXT_TO_SPEECH,
+                status = snapshot.status,
+                startedAtEpochMs = snapshot.startedAtEpochMs,
+                completedAtEpochMs = System.currentTimeMillis(),
+                model = snapshot.model,
+                input = snapshot.input,
+                output = snapshot.metrics?.let { "Generated ${it.generatedAudioDurationMs} ms WAV at ${it.sampleRateHz} Hz." },
+                parametersJson = Json.encodeToString(buildJsonObject {
+                    put("language", snapshot.languageCode)
+                    put("speakerId", snapshot.speakerId)
+                    put("speed", snapshot.speed)
+                    put("sentenceSilenceScale", snapshot.sentenceSilenceScale)
+                    put("volume", snapshot.volume)
+                    put("threadCount", snapshot.threadCount)
+                }),
+                metricsJson = snapshot.metrics?.let { metrics ->
+                    Json.encodeToString(buildJsonObject {
+                        put("timeToFirstChunkMs", metrics.timeToFirstChunkMs)
+                        put("timeToFirstWriteMs", metrics.timeToFirstWriteMs)
+                        put("timeToFirstPresentationMs", metrics.timeToFirstPresentationMs)
+                        put("synthesisDurationMs", metrics.synthesisDurationMs)
+                        put("generatedAudioDurationMs", metrics.generatedAudioDurationMs)
+                        put("sampleRateHz", metrics.sampleRateHz)
+                        put("playbackUnderrunCount", metrics.playbackUnderrunCount)
+                        put("effectiveThreadCount", metrics.effectiveThreadCount)
+                    })
+                } ?: "{}",
+                errorMessage = snapshot.errorMessage,
+            ),
+        )
+    }
+}
+
+data class TtsRunSnapshot(
+    val status: RunStatus,
+    val startedAtEpochMs: Long,
+    val model: RunModelSnapshot?,
+    val input: String,
+    val languageCode: String,
+    val speakerId: Int,
+    val speed: Float,
+    val sentenceSilenceScale: Float,
+    val volume: Float,
+    val threadCount: String,
+    val metrics: SpeechSynthesisMetrics?,
+    val errorMessage: String?,
+)

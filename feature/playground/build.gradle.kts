@@ -21,6 +21,7 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:result"))
     implementation(project(":source:models"))
+    implementation(project(":source:runs"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)

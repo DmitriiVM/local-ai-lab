@@ -12,7 +12,5 @@ fun DeviceRoute(viewModel: DeviceViewModel = metroViewModel()) {
     DeviceScreen(
         state = state,
         onRefresh = viewModel::refresh,
-        onRunFoundationLifecycleCheck = viewModel::runFoundationLifecycleCheck,
-        onCancelFoundationLifecycleCheck = viewModel::cancelFoundationLifecycleCheck,
     )
 }

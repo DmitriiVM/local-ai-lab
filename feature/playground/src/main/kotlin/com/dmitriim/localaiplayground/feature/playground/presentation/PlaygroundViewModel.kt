@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.EngineAvailabilitySource
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelRepository
+import com.dmitriim.localaiplayground.core.model.RunRepository
 import com.dmitriim.localaiplayground.core.result.DomainError
 import com.dmitriim.localaiplayground.core.result.DomainErrorCategory
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
@@ -30,6 +31,7 @@ class PlaygroundViewModel(
     private val availabilitySource: EngineAvailabilitySource,
     private val modelRepository: ModelRepository,
     private val operationCoordinator: ForegroundOperationCoordinator,
+    private val runRepository: RunRepository,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(PlaygroundUiState())
     val state: StateFlow<PlaygroundUiState> = mutableState.asStateFlow()
@@ -51,6 +53,11 @@ class PlaygroundViewModel(
             }
         }
         refresh()
+        viewModelScope.launch {
+            runRepository.runs.collectLatest { runs ->
+                mutableState.update { it.copy(recentRuns = runs.take(4)) }
+            }
+        }
     }
 
     fun refresh() {

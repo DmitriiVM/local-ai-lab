@@ -69,6 +69,15 @@ class GeneratedAudioStore(private val application: Application) {
         synchronized(this) { partialFile.delete() }
     }
 
+    /** Clears only app-private retained output; previously exported documents are unaffected. */
+    fun clearLatest() {
+        synchronized(this) {
+            partialFile.delete()
+            backupFile.delete()
+            latestFile.delete()
+        }
+    }
+
     fun export(audio: GeneratedAudioFile, destination: Uri) {
         val source = checkedFile(audio)
         application.contentResolver.openOutputStream(destination, "w")?.use { output ->

@@ -13,4 +13,7 @@ android {
 
 dependencies {
     implementation(project(":core:di"))
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.metro.runtime)
 }

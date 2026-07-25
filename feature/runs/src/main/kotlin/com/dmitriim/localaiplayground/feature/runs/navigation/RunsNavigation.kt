@@ -24,5 +24,5 @@ class RunsNavigationEntryProvider : NavigationEntryProvider {
     override val startKey: NavKey = RunsKey
 
     override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? =
-        if (key == RunsKey) NavEntry(key) { RunsRoute() } else null
+        if (key == RunsKey) NavEntry(key) { RunsRoute(navigator) } else null
 }

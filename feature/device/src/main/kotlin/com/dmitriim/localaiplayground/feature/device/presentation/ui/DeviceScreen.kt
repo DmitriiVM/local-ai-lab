@@ -19,8 +19,6 @@ import com.dmitriim.localaiplayground.feature.device.presentation.DeviceUiState
 fun DeviceScreen(
     state: DeviceUiState,
     onRefresh: () -> Unit,
-    onRunFoundationLifecycleCheck: () -> Unit,
-    onCancelFoundationLifecycleCheck: () -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
 
@@ -63,13 +61,6 @@ fun DeviceScreen(
                     isError = true,
                 )
             }
-        }
-        item {
-            FoundationLifecycleCard(
-                operation = state.foundationOperation,
-                onRun = onRunFoundationLifecycleCheck,
-                onCancel = onCancelFoundationLifecycleCheck,
-            )
         }
         items(
             count = state.engines.size,

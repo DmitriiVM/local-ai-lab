@@ -61,6 +61,11 @@ class AudioInputStore(private val application: Application) {
         input?.file?.takeIf { it.parentFile == directory }?.delete()
     }
 
+    fun clearAll() {
+        microphoneCapture.stop()
+        directory.listFiles()?.forEach(File::delete)
+    }
+
     private fun newInputFile(): File = File(directory, "stt-${UUID.randomUUID()}.pcm")
 
     private fun displayName(uri: Uri): String = application.contentResolver.query(

@@ -3,4 +3,7 @@
     <files-path
         name="generated_audio"
         path="generated-audio/" />
+    <cache-path
+        name="run_exports"
+        path="run-exports/" />
 </paths>

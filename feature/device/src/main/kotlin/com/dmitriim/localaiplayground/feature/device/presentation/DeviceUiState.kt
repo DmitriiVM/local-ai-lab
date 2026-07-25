@@ -2,7 +2,6 @@ package com.dmitriim.localaiplayground.feature.device.presentation
 
 import com.dmitriim.localaiplayground.core.model.EngineAvailability
 import com.dmitriim.localaiplayground.core.model.DeviceDiagnostics
-import com.dmitriim.localaiplayground.core.result.OperationState
 
 data class DeviceSnapshot(
     val deviceName: String,
@@ -21,6 +20,5 @@ data class DeviceUiState(
     val engines: List<EngineAvailability> = emptyList(),
     val refreshing: Boolean = true,
     val interruptionMessage: String? = null,
-    val foundationOperation: OperationState<Unit> = OperationState.Idle,
     val diagnostics: DeviceDiagnostics? = null,
 )

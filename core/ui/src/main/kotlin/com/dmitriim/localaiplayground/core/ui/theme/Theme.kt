@@ -4,6 +4,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import com.dmitriim.localaiplayground.core.result.AppDimensions
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
@@ -36,11 +39,29 @@ private val BlackColorScheme = darkColorScheme(
     onErrorContainer = Color(0xFFFFDAD6),
 )
 
+private val LightColorScheme = lightColorScheme(
+    primary = Color(0xFF202020),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFE8E8E8),
+    onPrimaryContainer = Color(0xFF1A1A1A),
+    secondary = Color(0xFF535353),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFE8E8E8),
+    onSecondaryContainer = Color(0xFF242424),
+    background = Color(0xFFFFFBFF),
+    onBackground = Color(0xFF1B1B1F),
+    surface = Color(0xFFFFFBFF),
+    onSurface = Color(0xFF1B1B1F),
+)
+
 @Composable
-fun LocalAiPlaygroundTheme(content: @Composable () -> Unit) {
+fun LocalAiPlaygroundTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
+) {
     CompositionLocalProvider(LocalAppDimensions provides AppDimensions()) {
         MaterialTheme(
-            colorScheme = BlackColorScheme,
+            colorScheme = if (darkTheme) BlackColorScheme else LightColorScheme,
             typography = Typography,
             content = content,
         )

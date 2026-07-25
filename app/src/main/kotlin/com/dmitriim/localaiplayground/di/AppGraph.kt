@@ -6,6 +6,7 @@ import com.dmitriim.localaiplayground.core.di.ApplicationCoroutineScope
 import com.dmitriim.localaiplayground.core.navigation.NavigationEntryProvider
 import com.dmitriim.localaiplayground.core.model.ModelRepository
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
+import com.dmitriim.localaiplayground.source.settings.AppSettingsRepository
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
@@ -16,6 +17,7 @@ interface AppGraph : ViewModelGraph {
     val navigationEntryProviders: Set<NavigationEntryProvider>
     val foregroundOperationCoordinator: ForegroundOperationCoordinator
     val modelRepository: ModelRepository
+    val settingsRepository: AppSettingsRepository
 
     @get:ApplicationCoroutineScope
     val applicationScope: CoroutineScope
