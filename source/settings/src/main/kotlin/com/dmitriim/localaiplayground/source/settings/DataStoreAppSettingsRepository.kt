@@ -40,6 +40,8 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
         )
     }
 
+    override val ttsDraft: Flow<String?> = store.data.map { values -> values[TTS_DRAFT] }
+
     override suspend fun update(settings: AppSettings) {
         store.edit { values ->
             values[THEME] = settings.theme.name
@@ -54,6 +56,10 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
             values[WARM_UP] = settings.warmUpSelectedModel
             values[METRIC_DETAIL] = settings.metricDetail.name
         }
+    }
+
+    override suspend fun updateTtsDraft(text: String) {
+        store.edit { values -> values[TTS_DRAFT] = text }
     }
 
     private inline fun <reified T : Enum<T>> String.asEnum(default: T): T =
@@ -71,5 +77,6 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
         val UNLOAD_POLICY = stringPreferencesKey("model_unload_policy")
         val WARM_UP = booleanPreferencesKey("warm_up_selected_model")
         val METRIC_DETAIL = stringPreferencesKey("metric_detail")
+        val TTS_DRAFT = stringPreferencesKey("tts_draft")
     }
 }

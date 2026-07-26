@@ -15,6 +15,7 @@ import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.RunRecord
 import com.dmitriim.localaiplayground.core.model.RunStatus
 import com.dmitriim.localaiplayground.source.runs.RunReplayStore
+import com.dmitriim.localaiplayground.source.settings.AppSettingsRepository
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
 import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisEvent
 import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisRequest
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -50,12 +52,21 @@ class TextToSpeechViewModel(
     private val operationCoordinator: ForegroundOperationCoordinator,
     private val persistTtsRun: PersistTtsRun,
     private val replayStore: RunReplayStore,
+    private val settingsRepository: AppSettingsRepository,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(TextToSpeechUiState())
     val state: StateFlow<TextToSpeechUiState> = mutableState.asStateFlow()
     private var operationJob: Job? = null
+    @Volatile private var hasTextInput = false
 
     init {
+        viewModelScope.launch {
+            settingsRepository.ttsDraft.first()?.let { savedText ->
+                if (!hasTextInput) {
+                    mutableState.update { it.copy(text = savedText.take(it.characterLimit)) }
+                }
+            }
+        }
         viewModelScope.launch {
             modelLibrary.installedModels.collectLatest { installed ->
                 val models = installed.filter { it.isReadyTtsModel() }.map { it.toTtsModelOption() }
@@ -94,8 +105,15 @@ class TextToSpeechViewModel(
         mutableState.update { it.copy(selectedModelId = modelId, errorMessage = null, metrics = null) }
     }
 
-    fun updateText(value: String) = mutableState.update {
-        it.copy(text = value.take(it.characterLimit), errorMessage = null, statusMessage = null)
+    fun updateText(value: String) {
+        hasTextInput = true
+        val text = value.take(mutableState.value.characterLimit)
+        mutableState.update {
+            it.copy(text = text, errorMessage = null, statusMessage = null)
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            settingsRepository.updateTtsDraft(text)
+        }
     }
 
     fun selectLanguage(language: TtsLanguage) {
