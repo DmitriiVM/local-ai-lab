@@ -25,6 +25,8 @@ import com.dmitriim.localaiplayground.feature.tts.presentation.TtsOperation
 fun TextToSpeechScreen(
     state: TextToSpeechUiState,
     onSelectModel: (ModelId) -> Unit,
+    onSelectVoice: (String) -> Unit,
+    onPreviewVoice: (String) -> Unit,
     onTextChange: (String) -> Unit,
     onSelectLanguage: (TtsLanguage) -> Unit,
     onApplySample: (TtsLanguage) -> Unit,
@@ -62,11 +64,24 @@ fun TextToSpeechScreen(
     ) {
         Text("Local text to speech", style = MaterialTheme.typography.headlineSmall)
         Text(
-            "Supertonic 3 synthesizes English or Russian entirely on-device. PCM streams through one retained Android output track while a replayable WAV is prepared.",
+            "Choose an installed local model and voice. PCM streams through one retained Android output track while a replayable WAV is prepared.",
             style = MaterialTheme.typography.bodyMedium,
         )
 
         TextToSpeechModelPicker(state.models, state.selectedModelId, !busy, onSelectModel)
+        TextToSpeechVoiceSelector(
+            visible = state.selectedModel?.voices?.size?.let { it > 1 } == true,
+            voices = state.compatibleVoices,
+            selectedId = state.selectedVoiceId,
+            language = state.language,
+            enabled = !busy,
+            operation = state.operation,
+            previewVoiceId = state.previewVoiceId,
+            hasPreviewText = state.text.isNotBlank(),
+            onSelect = onSelectVoice,
+            onPreview = onPreviewVoice,
+            onStopPreview = onStop,
+        )
 
         OutlinedTextField(
             value = state.text,

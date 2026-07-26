@@ -125,6 +125,17 @@ data class ModelSource(
     val attribution: String,
 )
 
+/** A stable, user-facing voice mapped to the speaker index expected by a TTS runtime. */
+@Serializable
+data class TtsVoiceDescriptor(
+    val id: String,
+    val displayName: String,
+    val speakerId: Int,
+    val languages: Set<String> = emptySet(),
+    /** Display-only upstream metadata. Selection and synthesis logic must not parse this value. */
+    val description: String? = null,
+)
+
 /** Versioned manifest stored beside a model bundle in app-private storage. */
 @Serializable
 data class ModelManifest(
@@ -147,6 +158,7 @@ data class ModelManifest(
     val supportedLanguageCount: Int? = null,
     val sampleRateHz: Int? = null,
     val speakerCount: Int? = null,
+    val voices: List<TtsVoiceDescriptor> = emptyList(),
     val contextSize: Int? = null,
     val approximateRamBytes: Long? = null,
     val catalogVersion: Int? = null,

@@ -27,6 +27,8 @@ class PersistTtsRun(private val runRepository: RunRepository) {
                 output = snapshot.metrics?.let { "Generated ${it.generatedAudioDurationMs} ms WAV at ${it.sampleRateHz} Hz." },
                 parametersJson = Json.encodeToString(buildJsonObject {
                     put("language", snapshot.languageCode)
+                    put("voiceId", snapshot.voiceId)
+                    put("voiceName", snapshot.voiceName)
                     put("speakerId", snapshot.speakerId)
                     put("speed", snapshot.speed)
                     put("sentenceSilenceScale", snapshot.sentenceSilenceScale)
@@ -57,6 +59,8 @@ data class TtsRunSnapshot(
     val model: RunModelSnapshot?,
     val input: String,
     val languageCode: String,
+    val voiceId: String,
+    val voiceName: String,
     val speakerId: Int,
     val speed: Float,
     val sentenceSilenceScale: Float,

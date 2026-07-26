@@ -1,18 +1,27 @@
 package com.dmitriim.localaiplayground.feature.tts.presentation.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
@@ -30,6 +40,7 @@ import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechUiSta
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsLanguage
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsModelOption
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsOperation
+import com.dmitriim.localaiplayground.feature.tts.presentation.TtsVoiceOption
 
 @Composable
 internal fun TextToSpeechModelPicker(
@@ -51,6 +62,131 @@ internal fun TextToSpeechModelPicker(
                     text = { Text("${model.displayName} (${model.languages.joinToString()})") },
                     onClick = { onSelect(model.id); expanded = false },
                 )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun TextToSpeechVoiceSelector(
+    visible: Boolean,
+    voices: List<TtsVoiceOption>,
+    selectedId: String?,
+    language: TtsLanguage,
+    enabled: Boolean,
+    operation: TtsOperation,
+    previewVoiceId: String?,
+    hasPreviewText: Boolean,
+    onSelect: (String) -> Unit,
+    onPreview: (String) -> Unit,
+    onStopPreview: () -> Unit,
+) {
+    if (!visible) return
+    var sheetVisible by remember { mutableStateOf(false) }
+    val selected = voices.firstOrNull { it.id == selectedId }
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("Voice", style = MaterialTheme.typography.labelLarge)
+        OutlinedButton(
+            onClick = { sheetVisible = true },
+            enabled = enabled && selected != null,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(selected?.displayName ?: "No voice available for ${language.label}")
+        }
+    }
+    if (sheetVisible) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                if (operation in setOf(TtsOperation.PREVIEWING, TtsOperation.CANCELLING)) {
+                    onStopPreview()
+                }
+                sheetVisible = false
+            },
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(bottom = 24.dp),
+            ) {
+                Text(
+                    text = "Choose a voice",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                )
+                Text(
+                    text = "Play previews the current text without changing the selected voice.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 24.dp, top = 4.dp, end = 24.dp, bottom = 12.dp),
+                )
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 560.dp),
+                ) {
+                    items(voices, key = TtsVoiceOption::id) { voice ->
+                        val previewingThisVoice =
+                            previewVoiceId == voice.id &&
+                                operation in setOf(TtsOperation.PREVIEWING, TtsOperation.CANCELLING)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(enabled = enabled) {
+                                    onSelect(voice.id)
+                                    sheetVisible = false
+                                }
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(
+                                selected = selectedId == voice.id,
+                                onClick = null,
+                                enabled = enabled,
+                            )
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                Text(
+                                    text = voice.displayName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                                voice.description?.takeIf(String::isNotBlank)?.let { description ->
+                                    Text(
+                                        text = description,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                            TextButton(
+                                onClick = {
+                                    if (previewingThisVoice) {
+                                        onStopPreview()
+                                    } else {
+                                        onPreview(voice.id)
+                                    }
+                                },
+                                enabled = hasPreviewText &&
+                                    operation !in setOf(
+                                        TtsOperation.SYNTHESIZING,
+                                        TtsOperation.CANCELLING,
+                                    ),
+                            ) {
+                                Text(
+                                    when {
+                                        previewingThisVoice &&
+                                            operation == TtsOperation.CANCELLING -> "Stopping…"
+                                        previewingThisVoice -> "Stop"
+                                        else -> "Play"
+                                    },
+                                )
+                            }
+                        }
+                        HorizontalDivider()
+                    }
+                }
             }
         }
     }
@@ -94,10 +230,6 @@ internal fun TextToSpeechSettings(
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("Supported controls", style = MaterialTheme.typography.titleMedium)
-            Text(
-                "Bundled voice style · speaker ${state.speakerId} of ${state.speakerCount.coerceAtLeast(1)}",
-                style = MaterialTheme.typography.bodyMedium,
-            )
             TextToSpeechParameterSlider("Speech rate", state.speed, "%.2f×".format(state.speed), 0.5f..2f, enabled, onSpeedChange)
             TextToSpeechParameterSlider("Sentence silence", state.sentenceSilenceScale, "%.2f×".format(state.sentenceSilenceScale), 0f..2f, enabled, onSentenceSilenceChange)
             TextToSpeechParameterSlider("Playback volume", state.volume, "${(state.volume * 100).toInt()}%", 0f..1f, enabled, onVolumeChange)
@@ -110,7 +242,7 @@ internal fun TextToSpeechSettings(
                 modifier = Modifier.fillMaxWidth(),
             )
             Text(
-                "Pitch is not shown because this Supertonic profile does not expose a pitch control.",
+                "Pitch is not shown because the selected runtime profiles do not expose a pitch control.",
                 style = MaterialTheme.typography.bodySmall,
             )
         }
@@ -131,6 +263,7 @@ internal fun TextToSpeechPlaybackControls(
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             when {
+                state.operation == TtsOperation.PREVIEWING -> Unit
                 state.operation in setOf(TtsOperation.SYNTHESIZING, TtsOperation.CANCELLING) -> {
                     Button(onClick = onStop, enabled = state.operation != TtsOperation.CANCELLING) {
                         Text(if (state.operation == TtsOperation.CANCELLING) "Stopping…" else "Stop")
@@ -145,7 +278,7 @@ internal fun TextToSpeechPlaybackControls(
                     OutlinedButton(onClick = onStop) { Text("Stop") }
                 }
                 else -> {
-                    Button(onClick = onSynthesize, enabled = state.selectedModelId != null && state.text.isNotBlank()) {
+                    Button(onClick = onSynthesize, enabled = state.selectedVoice != null && state.text.isNotBlank()) {
                         Text("Synthesize & play")
                     }
                     if (state.output != null) OutlinedButton(onClick = onReplay) { Text("Replay") }

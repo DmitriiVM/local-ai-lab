@@ -64,8 +64,11 @@ class SynthesizeSpeech(
                     "threads=${load.effectiveThreadCount}, sampleRateHz=${load.sampleRateHz}, " +
                     "speakers=${load.speakerCount}",
             )
-            require(request.settings.speakerId < load.speakerCount) {
-                "Speaker ${request.settings.speakerId} is unavailable; this voice has ${load.speakerCount} speaker(s)."
+            require(
+                request.settings.expectedSpeakerCount?.let { it == load.speakerCount } != false &&
+                    request.settings.speakerId < load.speakerCount,
+            ) {
+                "${request.settings.voiceName ?: "The selected voice"} is unavailable in the installed ${model.displayName} bundle."
             }
             emit(
                 SpeechSynthesisEvent.Prepared(

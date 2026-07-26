@@ -25,6 +25,8 @@ fun TextToSpeechRoute(viewModel: TextToSpeechViewModel = metroViewModel()) {
     TextToSpeechScreen(
         state = state,
         onSelectModel = viewModel::selectModel,
+        onSelectVoice = viewModel::selectVoice,
+        onPreviewVoice = viewModel::previewVoice,
         onTextChange = viewModel::updateText,
         onSelectLanguage = viewModel::selectLanguage,
         onApplySample = viewModel::applySample,
