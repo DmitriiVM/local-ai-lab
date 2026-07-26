@@ -2,15 +2,16 @@ package com.dmitriim.localaiplayground.source.models.library
 
 import android.app.Application
 import android.provider.OpenableColumns
+import android.provider.DocumentsContract
 import android.util.Log
 import androidx.core.net.toUri
+import com.dmitriim.localaiplayground.ai.api.ModelAdapter
+import com.dmitriim.localaiplayground.ai.api.ModelAdapterRegistry
+import com.dmitriim.localaiplayground.ai.api.ModelImportDefinition
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.di.ApplicationCoroutineScope
-import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.InstalledModel
-import com.dmitriim.localaiplayground.core.model.ModelFileRole
 import com.dmitriim.localaiplayground.core.model.ModelFileSpec
-import com.dmitriim.localaiplayground.core.model.ModelFormat
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelImportRequest
 import com.dmitriim.localaiplayground.core.model.ModelLibrary
@@ -18,7 +19,6 @@ import com.dmitriim.localaiplayground.core.model.ModelManifest
 import com.dmitriim.localaiplayground.core.model.ModelSource
 import com.dmitriim.localaiplayground.core.model.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
-import com.dmitriim.localaiplayground.core.model.RuntimeProfileType
 import com.dmitriim.localaiplayground.source.database.InstalledModelEntity
 import com.dmitriim.localaiplayground.source.database.ModelDatabaseProvider
 import com.dmitriim.localaiplayground.source.models.transfer.ModelTransferStateStore
@@ -45,6 +45,7 @@ import kotlinx.serialization.json.Json
 class InstalledModelService(
     private val application: Application,
     private val databaseProvider: ModelDatabaseProvider,
+    private val adapters: ModelAdapterRegistry,
     private val validator: ModelFileValidator,
     private val transferState: ModelTransferStateStore,
     @param:ApplicationCoroutineScope private val applicationScope: CoroutineScope,
@@ -68,7 +69,14 @@ class InstalledModelService(
     }
 
     override suspend fun import(request: ModelImportRequest): Result<ModelId> = runCatching {
-        require(request.documentUris.isNotEmpty()) { "Select at least one model file." }
+        require(request.documentUris.isNotEmpty() || request.directoryUri != null) { "Select model files or an extracted model directory." }
+        val adapter = requireNotNull(adapters.find(request.profileType)) {
+            "No packaged adapter supports ${request.profileType.value}."
+        }
+        require(adapter.engineId == request.engineId) { "${request.profileType.value} requires ${adapter.engineId.value}." }
+        val importDefinition = requireNotNull(adapter.importDefinition(request.profileType)) {
+            "${adapter.id} does not support importing ${request.profileType.value}."
+        }
         Log.i(TAG, "Model import started: profile=${request.profileType}, engine=${request.engineId.value}, documentCount=${request.documentUris.size}")
         withContext(Dispatchers.IO) {
             val modelId = ModelId("import-${UUID.randomUUID()}")
@@ -86,8 +94,8 @@ class InstalledModelService(
                         Log.i(TAG, "Model import file copied: name=$name, bytes=${destination.length()}")
                     }
                     name
-                }
-                installDirectory(importedManifest(modelId, request, copiedNames), temporary)
+                } + request.directoryUri?.let { treeUri -> copyDirectoryTree(treeUri.toUri(), temporary) }.orEmpty()
+                installDirectory(importedManifest(modelId, request, adapter, importDefinition, copiedNames), temporary)
                 Log.i(TAG, "Model import completed: modelId=${modelId.value}, files=${copiedNames.size}")
                 modelId
             } catch (error: Throwable) {
@@ -185,42 +193,40 @@ class InstalledModelService(
         }.getOrNull()
     }
 
-    private fun importedManifest(modelId: ModelId, request: ModelImportRequest, copiedNames: List<String>) = ModelManifest(
+    private fun importedManifest(
+        modelId: ModelId,
+        request: ModelImportRequest,
+        adapter: ModelAdapter,
+        definition: ModelImportDefinition,
+        copiedNames: List<String>,
+    ) = ModelManifest(
         modelId = modelId,
-        displayName = request.displayName.ifBlank { "Imported model" },
+        displayName = request.displayName.ifBlank { definition.displayName },
         family = "Imported",
-        capabilities = capabilitiesFor(request.profileType),
+        capabilities = adapter.capabilitiesFor(request.profileType),
         engineId = request.engineId,
         profileType = request.profileType,
-        format = if (request.profileType == RuntimeProfileType.LLM) ModelFormat.GGUF else ModelFormat.ONNX,
-        files = roleSpecsForImport(request.profileType, copiedNames),
+        format = definition.format,
+        files = roleSpecsForImport(definition, copiedNames),
         source = ModelSource(null, licenseName = "User supplied", attribution = "Imported from a user-selected document."),
         installedAtEpochMs = System.currentTimeMillis(),
     )
 
-    private fun roleSpecsForImport(profile: RuntimeProfileType, names: List<String>): List<ModelFileSpec> {
-        fun name(required: String): String = names.firstOrNull { it == required }
-            ?: error("Missing $required. Select all required companion files.")
-        return when (profile) {
-            RuntimeProfileType.LLM -> listOf(ModelFileSpec(names.singleOrNull { it.endsWith(".gguf", true) }
-                ?: error("Select exactly one .gguf file."), ModelFileRole.PRIMARY_MODEL))
-            RuntimeProfileType.WHISPER_STT -> listOf(
-                ModelFileSpec(name("base-encoder.int8.onnx"), ModelFileRole.ENCODER),
-                ModelFileSpec(name("base-decoder.int8.onnx"), ModelFileRole.DECODER),
-                ModelFileSpec(name("base-tokens.txt"), ModelFileRole.TOKENS),
-            )
-            RuntimeProfileType.SILERO_VAD -> listOf(ModelFileSpec(name("silero_vad.onnx"), ModelFileRole.VAD_MODEL))
-            RuntimeProfileType.SUPERTONIC_TTS -> listOf(
-                ModelFileSpec(name("duration_predictor.int8.onnx"), ModelFileRole.DURATION_PREDICTOR),
-                ModelFileSpec(name("text_encoder.int8.onnx"), ModelFileRole.TEXT_ENCODER),
-                ModelFileSpec(name("vector_estimator.int8.onnx"), ModelFileRole.VECTOR_ESTIMATOR),
-                ModelFileSpec(name("vocoder.int8.onnx"), ModelFileRole.VOCODER),
-                ModelFileSpec(name("tts.json"), ModelFileRole.CONFIG),
-                ModelFileSpec(name("unicode_indexer.bin"), ModelFileRole.UNICODE_INDEXER),
-                ModelFileSpec(name("voice.bin"), ModelFileRole.VOICE_STYLE),
-            )
+    private fun roleSpecsForImport(definition: ModelImportDefinition, names: List<String>): List<ModelFileSpec> =
+        definition.files.map { file ->
+            val relativePath = when {
+                file.directory -> {
+                    val path = requireNotNull(file.relativePath)
+                    require(names.any { it.startsWith("$path/") }) { "Missing $path directory." }
+                    path
+                }
+                file.relativePath != null -> names.firstOrNull { it == file.relativePath }
+                    ?: error("Missing ${file.relativePath}. Select all required companion files.")
+                else -> names.singleOrNull { it.endsWith(requireNotNull(file.extension), ignoreCase = true) }
+                    ?: error("Select exactly one ${file.extension} file.")
+            }
+            ModelFileSpec(relativePath, file.role, directory = file.directory)
         }
-    }
 
     private suspend fun reconcileInstalledModels() {
         dao.all().forEach { record ->
@@ -287,13 +293,52 @@ class InstalledModelService(
     private fun directoryName(id: ModelId): String = id.value.replace(Regex("[^A-Za-z0-9._-]"), "_")
     private fun isSafeName(name: String) = name.isNotBlank() && !name.contains('/') && !name.contains('\\') && name != "." && name != ".."
     private fun copiedNamesSafe(directory: File, name: String) = !File(directory, name).exists()
-    private fun capabilitiesFor(profile: RuntimeProfileType): Set<AiCapability> = when (profile) {
-        RuntimeProfileType.LLM -> setOf(AiCapability.CHAT)
-        RuntimeProfileType.WHISPER_STT -> setOf(AiCapability.SPEECH_TO_TEXT)
-        RuntimeProfileType.SILERO_VAD -> setOf(AiCapability.SPEECH_TO_TEXT, AiCapability.VOICE_ASSISTANT)
-        RuntimeProfileType.SUPERTONIC_TTS -> setOf(AiCapability.TEXT_TO_SPEECH, AiCapability.VOICE_ASSISTANT)
-    }
 
+    private fun copyDirectoryTree(treeUri: android.net.Uri, destinationRoot: File): List<String> {
+        val rootId = DocumentsContract.getTreeDocumentId(treeUri)
+        val copied = mutableListOf<String>()
+        fun copyChildren(parentId: String, relativeParent: String) {
+            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, parentId)
+            application.contentResolver.query(
+                childrenUri,
+                arrayOf(
+                    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                    DocumentsContract.Document.COLUMN_MIME_TYPE,
+                ),
+                null,
+                null,
+                null,
+            )?.use { cursor ->
+                val idIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+                val nameIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                val mimeIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
+                while (cursor.moveToNext()) {
+                    val name = cursor.getString(nameIndex)
+                    require(isSafeName(name)) { "The selected directory contains an unsafe path." }
+                    val relative = listOfNotNull(relativeParent.takeIf(String::isNotBlank), name).joinToString(File.separator)
+                    val target = File(destinationRoot, relative)
+                    require(target.canonicalPath.startsWith(destinationRoot.canonicalPath + File.separator)) { "The selected directory contains an unsafe path." }
+                    val documentId = cursor.getString(idIndex)
+                    if (cursor.getString(mimeIndex) == DocumentsContract.Document.MIME_TYPE_DIR) {
+                        require(target.mkdirs() || target.isDirectory) { "Could not copy model directory $relative." }
+                        copyChildren(documentId, relative)
+                    } else {
+                        require(target.parentFile?.mkdirs() != false) { "Could not prepare model directory." }
+                        require(!target.exists()) { "The selected directory contains duplicate paths." }
+                        val documentUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, documentId)
+                        application.contentResolver.openInputStream(documentUri).use { input ->
+                            requireNotNull(input) { "A selected model file is no longer readable." }
+                            FileOutputStream(target).use { output -> input.copyTo(output) }
+                        }
+                        copied += relative
+                    }
+                }
+            } ?: error("The selected model directory is no longer readable.")
+        }
+        copyChildren(rootId, "")
+        return copied
+    }
     private companion object {
         const val TAG = "AiP123Models"
     }

@@ -1,7 +1,7 @@
 package com.dmitriim.localaiplayground.source.models.validation
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.ModelRuntimeValidator
+import com.dmitriim.localaiplayground.ai.api.ModelAdapterRegistry
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelFileSpec
 import com.dmitriim.localaiplayground.core.model.ModelManifest
@@ -14,7 +14,7 @@ import java.io.File
 @Inject
 @SingleIn(AppScope::class)
 class ModelFileValidator(
-    private val validators: Set<ModelRuntimeValidator>,
+    private val adapters: ModelAdapterRegistry,
 ) {
     fun validate(
         manifest: ModelManifest,
@@ -25,7 +25,9 @@ class ModelFileValidator(
         if (!directory.isDirectory) return validationFailure(manifest, ModelValidationState.MISSING_FILES, "The installed model directory is missing.")
         manifest.files.filter { it.required }.forEach { spec ->
             val file = File(directory, spec.relativePath)
-            if (!file.isFile || !file.canRead()) return validationFailure(manifest, ModelValidationState.MISSING_FILES, "Missing ${spec.relativePath}.")
+            val present = if (spec.directory) file.isDirectory && file.canRead() else file.isFile && file.canRead()
+            if (!present) return validationFailure(manifest, ModelValidationState.MISSING_FILES, "Missing ${spec.relativePath}.")
+            if (spec.directory) return@forEach
             if (spec.expectedBytes != null && file.length() != spec.expectedBytes) {
                 return validationFailure(manifest, ModelValidationState.INVALID, "${spec.relativePath} has an unexpected size.")
             }
@@ -33,9 +35,12 @@ class ModelFileValidator(
                 return validationFailure(manifest, ModelValidationState.INVALID, "${spec.relativePath} has an unexpected checksum.")
             }
         }
-        val validator = validators.firstOrNull { it.engineId == manifest.engineId }
-            ?: return validationFailure(manifest, ModelValidationState.INCOMPATIBLE, "No ${manifest.engineId.value} validator is packaged.")
-        val result = validator.validate(manifest, directory)
+        val adapter = adapters.find(manifest.profileType)
+            ?: return validationFailure(manifest, ModelValidationState.INCOMPATIBLE, "No packaged adapter supports ${manifest.profileType.value}.")
+        if (adapter.engineId != manifest.engineId) {
+            return validationFailure(manifest, ModelValidationState.INCOMPATIBLE, "${manifest.profileType.value} requires ${adapter.engineId.value}.")
+        }
+        val result = adapter.validate(manifest, directory)
         return if (result.valid) {
             Log.i(TAG, "Model file validation passed: modelId=${manifest.modelId.value}")
             ModelValidationState.READY to null
@@ -45,14 +50,14 @@ class ModelFileValidator(
     fun enrichChecksums(manifest: ModelManifest, directory: File): ModelManifest = manifest.copy(
         files = manifest.files.map { spec ->
             val file = File(directory, spec.relativePath)
-            if (!file.isFile) spec else spec.copy(
+            if (!file.isFile || spec.directory) spec else spec.copy(
                 expectedBytes = spec.expectedBytes ?: file.length(),
                 sha256 = spec.sha256 ?: file.sha256(),
             )
         },
     )
 
-    fun hasValidatorFor(manifest: ModelManifest): Boolean = validators.any { it.engineId == manifest.engineId }
+    fun hasValidatorFor(manifest: ModelManifest): Boolean = adapters.find(manifest.profileType)?.engineId == manifest.engineId
 
     private fun validationFailure(
         manifest: ModelManifest,

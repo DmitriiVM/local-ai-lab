@@ -56,6 +56,7 @@ private val AiCapability.displayName: String
         AiCapability.CHAT -> "Chat"
         AiCapability.SPEECH_TO_TEXT -> "Speech to Text"
         AiCapability.TEXT_TO_SPEECH -> "Text to Speech"
+        AiCapability.VOICE_ACTIVITY_DETECTION -> "Voice Activity Detection"
         AiCapability.VOICE_ASSISTANT -> "Voice Assistant"
     }
 

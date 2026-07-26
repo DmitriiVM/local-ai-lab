@@ -3,7 +3,6 @@ package com.dmitriim.localaiplayground.feature.voice.presentation
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
-import com.dmitriim.localaiplayground.core.model.RuntimeProfileType
 import com.dmitriim.localaiplayground.feature.voice.domain.VoiceContextUsage as DomainVoiceContextUsage
 import com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent
 import com.dmitriim.localaiplayground.feature.voice.domain.VoiceTurnPhase
@@ -94,16 +93,13 @@ private fun InstalledModel.toVoiceOption() = VoiceModelOption(
 )
 
 private fun isReadySpeech(model: InstalledModel) =
-    model.validationState == ModelValidationState.READY &&
-        AiCapability.SPEECH_TO_TEXT in model.manifest.capabilities &&
-        model.manifest.profileType == RuntimeProfileType.WHISPER_STT
+        model.validationState == ModelValidationState.READY &&
+        AiCapability.SPEECH_TO_TEXT in model.manifest.capabilities
 
 private fun isReadyChat(model: InstalledModel) =
-    model.validationState == ModelValidationState.READY &&
-        AiCapability.CHAT in model.manifest.capabilities &&
-        model.manifest.profileType == RuntimeProfileType.LLM
+        model.validationState == ModelValidationState.READY &&
+        AiCapability.CHAT in model.manifest.capabilities
 
 private fun isReadyVoice(model: InstalledModel) =
-    model.validationState == ModelValidationState.READY &&
-        AiCapability.TEXT_TO_SPEECH in model.manifest.capabilities &&
-        model.manifest.profileType == RuntimeProfileType.SUPERTONIC_TTS
+        model.validationState == ModelValidationState.READY &&
+        AiCapability.TEXT_TO_SPEECH in model.manifest.capabilities

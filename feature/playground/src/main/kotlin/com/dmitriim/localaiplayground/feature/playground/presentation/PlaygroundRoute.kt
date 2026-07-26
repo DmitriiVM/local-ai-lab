@@ -28,5 +28,6 @@ private val AiCapability.navigationTarget: NavigationTarget
         AiCapability.CHAT -> NavigationTarget.CHAT
         AiCapability.SPEECH_TO_TEXT -> NavigationTarget.SPEECH_TO_TEXT
         AiCapability.TEXT_TO_SPEECH -> NavigationTarget.TEXT_TO_SPEECH
+        AiCapability.VOICE_ACTIVITY_DETECTION -> NavigationTarget.SPEECH_TO_TEXT
         AiCapability.VOICE_ASSISTANT -> NavigationTarget.VOICE_ASSISTANT
     }

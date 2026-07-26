@@ -25,6 +25,7 @@ internal suspend fun transcribeVoiceInput(
     Log.i(TAG, "Voice STT stage loading: model=${model.displayName}, language=$languageCode, requestedThreads=$threadCount")
     val load = engine.load(
         SpeechToTextLoadRequest(
+            profileType = model.profileType,
             modelDirectory = model.modelDirectory,
             languageCode = languageCode,
             threadCount = threadCount,
@@ -73,7 +74,7 @@ internal suspend fun synthesizeAndPlayVoiceResponse(
 ): VoiceSpeechMetrics {
     require(text.isNotBlank()) { "The local model returned an empty response." }
     Log.i(TAG, "Voice TTS stage loading: model=${model.displayName}, textLength=${text.length}, requestedThreads=${request.ttsThreadCount}, speaker=${request.speakerId}, speed=${request.speechRate}, volume=${request.volume}")
-    val load = engine.load(TextToSpeechLoadRequest(model.modelDirectory, request.ttsThreadCount))
+    val load = engine.load(TextToSpeechLoadRequest(model.profileType, model.modelDirectory, request.ttsThreadCount))
     Log.i(TAG, "Voice TTS stage loaded: coldStart=${load.coldStart}, loadMs=${load.loadDurationMs}, sampleRateHz=${load.sampleRateHz}, speakers=${load.speakerCount}, effectiveThreads=${load.effectiveThreadCount}")
     require(request.speakerId < load.speakerCount) {
         "Speaker ${request.speakerId} is unavailable for ${model.displayName}."

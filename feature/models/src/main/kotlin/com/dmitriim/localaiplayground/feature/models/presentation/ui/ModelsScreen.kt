@@ -26,12 +26,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.CatalogModel
+import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelManifest
 import com.dmitriim.localaiplayground.core.model.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
-import com.dmitriim.localaiplayground.core.model.RuntimeProfileType
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
@@ -151,16 +151,16 @@ private fun ModelFilters(
 
 private enum class ModelTypeFilter(
     val label: String,
-    private val profileType: RuntimeProfileType? = null,
+    private val capability: AiCapability? = null,
 ) {
     ALL(label = "All"),
-    LLM(label = "LLM", profileType = RuntimeProfileType.LLM),
-    TTS(label = "TTS", profileType = RuntimeProfileType.SUPERTONIC_TTS),
-    STT(label = "STT", profileType = RuntimeProfileType.WHISPER_STT),
-    VAD(label = "VAD", profileType = RuntimeProfileType.SILERO_VAD),
+    LLM(label = "LLM", capability = AiCapability.CHAT),
+    TTS(label = "TTS", capability = AiCapability.TEXT_TO_SPEECH),
+    STT(label = "STT", capability = AiCapability.SPEECH_TO_TEXT),
+    VAD(label = "VAD", capability = AiCapability.VOICE_ACTIVITY_DETECTION),
     ;
 
-    fun matches(manifest: ModelManifest): Boolean = profileType == null || manifest.profileType == profileType
+    fun matches(manifest: ModelManifest): Boolean = capability == null || capability in manifest.capabilities
 }
 
 private enum class ModelInstallationFilter(val label: String) {
@@ -276,7 +276,7 @@ private fun ModelCardHeader(name: String, status: String) {
 @Composable
 private fun ModelCardMetadata(manifest: ModelManifest, size: String) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        TypeBadge(manifest.profileType.label)
+        TypeBadge(manifest.typeLabel)
         Text(manifest.engineId.value, style = MaterialTheme.typography.bodyMedium)
     }
     Text(
@@ -314,18 +314,19 @@ private fun StatusBadge(status: String) {
     }
 }
 
-private val RuntimeProfileType.label: String
-    get() = when (this) {
-        RuntimeProfileType.LLM -> "LLM"
-        RuntimeProfileType.WHISPER_STT -> "STT"
-        RuntimeProfileType.SILERO_VAD -> "VAD"
-        RuntimeProfileType.SUPERTONIC_TTS -> "TTS"
+private val ModelManifest.typeLabel: String
+    get() = when {
+        AiCapability.CHAT in capabilities -> "LLM"
+        AiCapability.TEXT_TO_SPEECH in capabilities -> "TTS"
+        AiCapability.SPEECH_TO_TEXT in capabilities -> "STT"
+        AiCapability.VOICE_ACTIVITY_DETECTION in capabilities -> "VAD"
+        else -> "Model"
     }
 
 private fun ModelManifest.languageSummary(): String {
     val totalLanguageCount = supportedLanguageCount
     return when {
-        profileType == RuntimeProfileType.SILERO_VAD -> "Language-independent"
+        AiCapability.VOICE_ACTIVITY_DETECTION in capabilities -> "Language-independent"
         languages.isEmpty() -> "Language not specified"
         totalLanguageCount != null && totalLanguageCount > languages.size ->
             "${languages.joinToString()} +${totalLanguageCount - languages.size}"

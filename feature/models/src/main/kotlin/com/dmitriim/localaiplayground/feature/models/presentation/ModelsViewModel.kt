@@ -8,9 +8,10 @@ import com.dmitriim.localaiplayground.core.model.EngineId
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelImportRequest
 import com.dmitriim.localaiplayground.core.model.ModelLibrary
+import com.dmitriim.localaiplayground.core.model.ModelProfileId
+import com.dmitriim.localaiplayground.core.model.ModelProfileIds
 import com.dmitriim.localaiplayground.core.model.ModelTransfers
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
-import com.dmitriim.localaiplayground.core.model.RuntimeProfileType
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -43,9 +44,9 @@ class ModelsViewModel(
         }
     }
 
-    fun import(profile: RuntimeProfileType, uris: List<String>) = launchOperation("import ${profile.name}") {
-        Log.i(TAG, "Models UI import requested: profile=$profile, documentCount=${uris.size}")
-        val engine = if (profile == RuntimeProfileType.LLM) EngineId("llama.cpp") else EngineId("sherpa-onnx")
+    fun import(profile: ModelProfileId, uris: List<String>) = launchOperation("import ${profile.value}") {
+        Log.i(TAG, "Models UI import requested: profile=${profile.value}, documentCount=${uris.size}")
+        val engine = if (profile == ModelProfileIds.LLM) EngineId("llama.cpp") else EngineId("sherpa-onnx")
         val modelId = modelLibrary.import(
             ModelImportRequest(
                 displayName = "Imported ${profile.displayName}",
@@ -161,10 +162,14 @@ class ModelsViewModel(
     }
 }
 
-private val RuntimeProfileType.displayName: String
+private val ModelProfileId.displayName: String
     get() = when (this) {
-        RuntimeProfileType.LLM -> "GGUF chat model"
-        RuntimeProfileType.WHISPER_STT -> "Whisper STT bundle"
-        RuntimeProfileType.SILERO_VAD -> "Silero VAD model"
-        RuntimeProfileType.SUPERTONIC_TTS -> "Supertonic TTS bundle"
+        ModelProfileIds.LLM -> "GGUF chat model"
+        ModelProfileIds.WHISPER_STT -> "Whisper STT bundle"
+        ModelProfileIds.SILERO_VAD -> "Silero VAD model"
+        ModelProfileIds.SUPERTONIC_TTS -> "Supertonic TTS bundle"
+        ModelProfileIds.PIPER_VITS_TTS -> "Piper/VITS TTS bundle"
+        ModelProfileIds.KOKORO_TTS -> "Kokoro TTS bundle"
+        ModelProfileIds.POCKET_TTS -> "Pocket TTS bundle"
+        else -> "Model bundle"
     }

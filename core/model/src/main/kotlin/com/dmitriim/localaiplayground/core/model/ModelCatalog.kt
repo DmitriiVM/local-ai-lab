@@ -17,6 +17,16 @@ data class CatalogDownload(
     val expectedBytes: Long,
     val sha256: String? = null,
     val files: List<CatalogDownloadFile> = emptyList(),
+    val archive: CatalogDownloadArchive? = null,
+)
+
+@Serializable
+data class CatalogDownloadArchive(
+    val url: String,
+    val expectedBytes: Long,
+    val sha256: String,
+    /** The required archive root, removed while installing to the model directory. */
+    val rootDirectory: String,
 )
 
 @Serializable

@@ -10,6 +10,7 @@ import com.dmitriim.localaiplayground.ai.api.LlmGenerationRequest
 import com.dmitriim.localaiplayground.ai.api.LlmGenerationResult
 import com.dmitriim.localaiplayground.ai.api.LlmLoadRequest
 import com.dmitriim.localaiplayground.ai.api.LlmLoadResult
+import com.dmitriim.localaiplayground.core.model.ModelProfileIds
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -25,6 +26,9 @@ class NativeLlama(context: Context) : ChatEngine {
         private set
 
     override fun load(request: LlmLoadRequest): LlmLoadResult = lock.withLock {
+        require(request.profileType == ModelProfileIds.LLM) {
+            "Unsupported chat profile: ${request.profileType.value}"
+        }
         Log.i(TAG, "llama.cpp load requested: model=${File(request.modelPath).name}, contextSize=${request.contextSize}, requestedThreads=${request.threadCount}, backend=${request.requestedBackend}")
         require(request.requestedBackend == LlmBackend.CPU) {
             "Only the CPU backend is enabled; ${request.requestedBackend} is experimental."

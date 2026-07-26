@@ -21,6 +21,7 @@ internal fun generateVoiceResponse(
     Log.i(TAG, "Voice LLM stage loading: model=${model.displayName}, contextSize=${request.contextSize}, requestedThreads=${request.llmThreadCount}")
     val load = engine.load(
         LlmLoadRequest(
+            profileType = model.profileType,
             modelPath = model.modelPath,
             contextSize = request.contextSize,
             threadCount = request.llmThreadCount,

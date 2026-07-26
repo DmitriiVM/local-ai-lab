@@ -53,6 +53,7 @@ class SynthesizeSpeech(
             Log.i(TAG, "TTS model resolved: name=${model.displayName}, directory=${model.modelDirectory}")
             val load = textToSpeechEngine.load(
                 TextToSpeechLoadRequest(
+                    profileType = model.profileType,
                     modelDirectory = model.modelDirectory,
                     threadCount = request.settings.threadCount,
                 ),

@@ -6,7 +6,6 @@ import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
-import com.dmitriim.localaiplayground.core.model.RuntimeProfileType
 import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisMetrics
 import com.dmitriim.localaiplayground.feature.tts.domain.SynthesizeSpeech
 
@@ -45,6 +44,7 @@ enum class TtsLanguage(
 ) {
     ENGLISH("English", "en", ENGLISH_SAMPLE),
     RUSSIAN("Russian", "ru", RUSSIAN_SAMPLE),
+    CHINESE("Chinese", "zh", CHINESE_SAMPLE),
 }
 
 enum class TtsOperation {
@@ -61,8 +61,8 @@ internal fun InstalledModel.toTtsModelOption(): TtsModelOption = TtsModelOption(
 
 internal fun InstalledModel.isReadyTtsModel(): Boolean =
     AiCapability.TEXT_TO_SPEECH in manifest.capabilities &&
-        validationState == ModelValidationState.READY &&
-        manifest.profileType == RuntimeProfileType.SUPERTONIC_TTS
+        validationState == ModelValidationState.READY
 
 private const val ENGLISH_SAMPLE = "Local speech synthesis is running entirely on this device."
 private const val RUSSIAN_SAMPLE = "Локальный синтез речи полностью выполняется на этом устройстве."
+private const val CHINESE_SAMPLE = "本地语音合成完全在这台设备上运行。"

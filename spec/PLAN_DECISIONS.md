@@ -187,6 +187,20 @@ replacement, and update the affected plan files.
 - **Consequence:** Profile readiness is independent. Shared file reuse is allowed
   only with persisted transactional ownership, and remote catalog changes never
   delete installed local data.
+- **Implementation update:** Runtime profile and file-role identifiers are persisted
+  strings rather than closed enums. Packaged adapters register the profiles they
+  validate and execute; a missing adapter makes a model incompatible rather than
+  silently selecting another runtime. Existing `LLM`, `WHISPER_STT`, `SILERO_VAD`,
+  and `SUPERTONIC_TTS` manifest values remain valid. `PIPER_VITS_TTS` supports
+  both directory import and a curated English Lessac download. `KOKORO_TTS`
+  registers the sherpa-onnx Kokoro v1.0 family: its model, 53-speaker voice data,
+  English/Chinese lexicons, frontend, dictionaries, and Chinese text rules are
+  validated before the shared TTS runtime is loaded. `POCKET_TTS` registers the
+  official Sherpa INT8 English package with its seven model/token files and one
+  bundled PCM reference voice, allowing immediate synthesis without a local model
+  or voice-file picker. The catalog pins official sherpa-onnx `.tar.bz2` packages
+  by size and SHA-256 and safely extracts their declared roots into the
+  installation transaction.
 
 ### D-019 — Synthesis and playback latency are separate measurements
 

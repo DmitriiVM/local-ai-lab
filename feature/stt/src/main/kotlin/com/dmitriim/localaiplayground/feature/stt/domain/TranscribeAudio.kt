@@ -34,6 +34,7 @@ class TranscribeAudio(
             Log.i(TAG, "STT model resolved: name=${model.displayName}, directory=${model.modelDirectory}")
             val load = speechEngine.load(
                 SpeechToTextLoadRequest(
+                    profileType = model.profileType,
                     modelDirectory = model.modelDirectory,
                     languageCode = effectiveSettings.languageCode,
                     threadCount = effectiveSettings.threadCount,

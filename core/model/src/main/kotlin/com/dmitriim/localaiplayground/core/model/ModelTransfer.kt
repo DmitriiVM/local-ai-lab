@@ -3,8 +3,9 @@ package com.dmitriim.localaiplayground.core.model
 data class ModelImportRequest(
     val displayName: String,
     val engineId: EngineId,
-    val profileType: RuntimeProfileType,
+    val profileType: ModelProfileId,
     val documentUris: List<String>,
+    val directoryUri: String? = null,
 )
 
 sealed interface ModelTransferState {

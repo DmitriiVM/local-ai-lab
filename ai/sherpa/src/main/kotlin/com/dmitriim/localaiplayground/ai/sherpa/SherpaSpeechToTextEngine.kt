@@ -7,6 +7,7 @@ import com.dmitriim.localaiplayground.ai.api.SpeechToTextLoadResult
 import com.dmitriim.localaiplayground.ai.api.SpeechToTextRequest
 import com.dmitriim.localaiplayground.ai.api.SpeechToTextResult
 import com.dmitriim.localaiplayground.core.di.AppScope
+import com.dmitriim.localaiplayground.core.model.ModelProfileIds
 import com.k2fsa.sherpa.onnx.OfflineModelConfig
 import com.k2fsa.sherpa.onnx.OfflineRecognizer
 import com.k2fsa.sherpa.onnx.OfflineRecognizerConfig
@@ -29,6 +30,9 @@ class SherpaSpeechToTextEngine : SpeechToTextEngine {
     override val isLoaded: Boolean get() = synchronized(lock) { recognizer != null }
 
     override fun load(request: SpeechToTextLoadRequest): SpeechToTextLoadResult = synchronized(lock) {
+        require(request.profileType == ModelProfileIds.WHISPER_STT) {
+            "Unsupported STT profile: ${request.profileType.value}"
+        }
         val requestedDirectory = File(request.modelDirectory).canonicalPath
         Log.i(TAG, "Sherpa STT load requested: directory=$requestedDirectory, language=${request.languageCode}, requestedThreads=${request.threadCount}")
         if (recognizer != null && loadedDirectory == requestedDirectory) {

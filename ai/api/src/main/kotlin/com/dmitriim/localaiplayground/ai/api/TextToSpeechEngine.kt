@@ -1,5 +1,7 @@
 package com.dmitriim.localaiplayground.ai.api
 
+import com.dmitriim.localaiplayground.core.model.ModelProfileId
+
 /**
  * Engine-neutral boundary for local text-to-speech. Incremental PCM is delivered
  * synchronously so the caller can apply bounded backpressure to native synthesis.
@@ -22,6 +24,7 @@ interface TextToSpeechEngine : AutoCloseable {
 }
 
 data class TextToSpeechLoadRequest(
+    val profileType: ModelProfileId,
     val modelDirectory: String,
     /** Zero selects an engine-safe default. */
     val threadCount: Int = 0,

@@ -35,6 +35,7 @@ class GenerateChatResponse(
             Log.i(TAG, "Chat model resolved: name=${model.displayName}, file=${model.modelPath.substringAfterLast('/')}")
             val load = chatEngine.load(
                 LlmLoadRequest(
+                    profileType = model.profileType,
                     modelPath = model.modelPath,
                     contextSize = request.config.contextSize,
                     threadCount = request.config.threadCount,

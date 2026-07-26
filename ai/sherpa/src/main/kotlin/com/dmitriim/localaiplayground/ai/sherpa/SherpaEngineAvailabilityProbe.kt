@@ -54,7 +54,7 @@ class SherpaEngineAvailabilityProbe : EngineAvailabilityProbe {
             capabilities = setOf(
                 AiCapability.SPEECH_TO_TEXT,
                 AiCapability.TEXT_TO_SPEECH,
-                AiCapability.VOICE_ASSISTANT,
+                AiCapability.VOICE_ACTIVITY_DETECTION,
             ),
             bundledRuntime = true,
         )

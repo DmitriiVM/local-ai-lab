@@ -36,12 +36,12 @@ data class VoiceUiState(
 
     val configurationError: String?
         get() = when {
-            selectedSpeechModel == null -> "Select an installed Whisper speech model."
-            selectedChatModel == null -> "Select an installed GGUF chat model."
-            selectedVoiceModel == null -> "Select an installed Supertonic voice model."
-            language.code !in selectedSpeechModel!!.languages ->
+            selectedSpeechModel == null -> "Select an installed speech model."
+            selectedChatModel == null -> "Select an installed chat model."
+            selectedVoiceModel == null -> "Select an installed voice model."
+            !selectedSpeechModel!!.languages.supports(language) ->
                 "${selectedSpeechModel!!.displayName} is not configured for ${language.label}."
-            language.code !in selectedVoiceModel!!.languages ->
+            !selectedVoiceModel!!.languages.supports(language) ->
                 "${selectedVoiceModel!!.displayName} is not configured for ${language.label}."
             else -> null
         }
@@ -60,6 +60,9 @@ enum class VoiceLanguage(val label: String, val code: String) {
     ENGLISH("English", "en"),
     RUSSIAN("Russian", "ru"),
 }
+
+private fun Set<String>.supports(language: VoiceLanguage): Boolean =
+    language.code in this || language.label in this
 
 enum class VoicePhase(val label: String) {
     IDLE("Ready"),

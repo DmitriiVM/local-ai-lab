@@ -49,5 +49,6 @@ private val com.dmitriim.localaiplayground.core.model.AiCapability.replayTarget 
     com.dmitriim.localaiplayground.core.model.AiCapability.CHAT -> NavigationTarget.CHAT
     com.dmitriim.localaiplayground.core.model.AiCapability.SPEECH_TO_TEXT -> NavigationTarget.SPEECH_TO_TEXT
     com.dmitriim.localaiplayground.core.model.AiCapability.TEXT_TO_SPEECH -> NavigationTarget.TEXT_TO_SPEECH
+    com.dmitriim.localaiplayground.core.model.AiCapability.VOICE_ACTIVITY_DETECTION -> NavigationTarget.SPEECH_TO_TEXT
     com.dmitriim.localaiplayground.core.model.AiCapability.VOICE_ASSISTANT -> NavigationTarget.VOICE_ASSISTANT
 }

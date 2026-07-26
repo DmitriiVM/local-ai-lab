@@ -124,6 +124,7 @@ private val AiCapability.label get() = when (this) {
     AiCapability.CHAT -> "Chat"
     AiCapability.SPEECH_TO_TEXT -> "Speech to text"
     AiCapability.TEXT_TO_SPEECH -> "Text to speech"
+    AiCapability.VOICE_ACTIVITY_DETECTION -> "Voice activity detection"
     AiCapability.VOICE_ASSISTANT -> "Voice assistant"
 }
 

@@ -6,7 +6,6 @@ import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.RuntimeProfileType
 import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionMetrics
 
 data class SpeechToTextUiState(
@@ -41,5 +40,4 @@ internal fun InstalledModel.toSpeechModelOption(): SpeechModelOption = SpeechMod
 
 internal fun InstalledModel.isReadySpeechModel(): Boolean =
     AiCapability.SPEECH_TO_TEXT in manifest.capabilities &&
-        validationState == ModelValidationState.READY &&
-        manifest.profileType == RuntimeProfileType.WHISPER_STT
+        validationState == ModelValidationState.READY

@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.source.models.transfer
 
 import android.app.Application
 import android.util.Log
+import com.dmitriim.localaiplayground.core.model.CatalogDownloadArchive
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.CatalogDownloadFile
 import com.dmitriim.localaiplayground.core.model.CatalogModel
@@ -18,6 +19,8 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -107,6 +110,14 @@ class ModelTransferService(
         Log.i(TAG, "Catalog model transfer started: modelId=${modelId.value}, stagingDirectory=${temporary.name}")
         transferState.update { it + (modelId to ModelTransferState.Running(0, entry.download.expectedBytes)) }
         try {
+            entry.download.archive?.let { archive ->
+                downloadAndExtractArchive(entry, archive, temporary)
+                transferState.update { it + (modelId to ModelTransferState.Installing) }
+                installedModels.installDirectory(entry.manifest.copy(installedAtEpochMs = System.currentTimeMillis()), temporary)
+                transferState.update { it + (modelId to ModelTransferState.Completed) }
+                Log.i(TAG, "Catalog archive model transfer completed: modelId=${modelId.value}")
+                return
+            }
             val downloads = entry.download.files.ifEmpty {
                 val file = entry.manifest.files.single()
                 listOf(CatalogDownloadFile(file.relativePath, requireNotNull(entry.download.url) { "The catalog download URL is missing." }))
@@ -163,6 +174,87 @@ class ModelTransferService(
             transferState.update { it + (modelId to ModelTransferState.Failed(error.message ?: "Download failed.")) }
             throw error
         }
+    }
+
+    private suspend fun downloadAndExtractArchive(
+        entry: CatalogModel,
+        archive: CatalogDownloadArchive,
+        temporary: File,
+    ) {
+        require(archive.expectedBytes == entry.download.expectedBytes) {
+            "The catalog archive size does not match the download total."
+        }
+        val archiveFile = File(temporary, "download.tar.bz2")
+        Log.i(TAG, "Catalog archive download started: modelId=${entry.manifest.modelId.value}, bytes=${archive.expectedBytes}")
+        downloadTo(
+            archive.url,
+            archiveFile,
+            archive.expectedBytes,
+            entry.manifest.modelId,
+            completedBeforeFile = 0,
+            totalBytes = entry.download.expectedBytes,
+        )
+        require(archiveFile.length() == archive.expectedBytes) { "Downloaded archive size does not match the catalog." }
+        require(archiveFile.sha256().equals(archive.sha256, ignoreCase = true)) { "Downloaded archive checksum does not match the catalog." }
+        extractTarBzip2(archiveFile, temporary, archive.rootDirectory)
+        require(archiveFile.delete()) { "Could not remove the verified model archive." }
+        Log.i(TAG, "Catalog archive extracted: modelId=${entry.manifest.modelId.value}, root=${archive.rootDirectory}")
+    }
+
+    private suspend fun extractTarBzip2(archive: File, destinationRoot: File, rootDirectory: String) {
+        require(rootDirectory.isNotBlank() && !rootDirectory.contains('/') && !rootDirectory.contains('\\')) {
+            "The catalog archive root is unsafe."
+        }
+        var extractedFiles = 0
+        BZip2CompressorInputStream(archive.inputStream().buffered()).use { compressed ->
+            TarArchiveInputStream(compressed).use { tar ->
+                while (true) {
+                    coroutineContext.ensureActive()
+                    val entry = tar.nextEntry ?: break
+                    val archivePath = entry.name.replace('\\', '/')
+                    require(archivePath == rootDirectory || archivePath.startsWith("$rootDirectory/")) {
+                        "The model archive contains an unexpected path."
+                    }
+                    val relativePath = archivePath
+                        .removePrefix(rootDirectory)
+                        .removePrefix("/")
+                        .trimEnd('/')
+                    if (relativePath.isBlank()) {
+                        require(entry.isDirectory) { "The model archive contains an unsafe root entry." }
+                        continue
+                    }
+                    require(relativePath.split('/').none { it in setOf("", ".", "..") }) {
+                        "The model archive contains an unsafe path."
+                    }
+                    val destination = File(destinationRoot, relativePath)
+                    require(destination.canonicalPath.startsWith(destinationRoot.canonicalPath + File.separator)) {
+                        "The model archive contains an unsafe path."
+                    }
+                    when {
+                        entry.isDirectory -> require(destination.mkdirs() || destination.isDirectory) {
+                            "Could not create an extracted model directory."
+                        }
+                        entry.isFile -> {
+                            require(!destination.exists()) { "The model archive contains duplicate paths." }
+                            val parent = requireNotNull(destination.parentFile)
+                            require(parent.isDirectory || parent.mkdirs()) { "Could not create an extracted model directory." }
+                            FileOutputStream(destination).use { output ->
+                                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                                while (true) {
+                                    coroutineContext.ensureActive()
+                                    val read = tar.read(buffer)
+                                    if (read < 0) break
+                                    output.write(buffer, 0, read)
+                                }
+                            }
+                            extractedFiles += 1
+                        }
+                        else -> error("The model archive contains an unsupported entry.")
+                    }
+                }
+            }
+        }
+        require(extractedFiles > 0) { "The model archive does not contain any files." }
     }
 
     private suspend fun downloadTo(

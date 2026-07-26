@@ -1,5 +1,7 @@
 package com.dmitriim.localaiplayground.ai.api
 
+import com.dmitriim.localaiplayground.core.model.ModelProfileId
+
 /** Engine-neutral local chat boundary. Calls must run away from the Android main thread. */
 interface LlmEngine : AutoCloseable {
     val isLoaded: Boolean
@@ -22,6 +24,7 @@ interface LlmEngine : AutoCloseable {
 }
 
 data class LlmLoadRequest(
+    val profileType: ModelProfileId,
     val modelPath: String,
     val contextSize: Int = 512,
     val threadCount: Int = 0,

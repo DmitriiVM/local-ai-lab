@@ -36,6 +36,7 @@ interface ModelDiagnostics {
 data class ChatModelReference(
     val modelId: ModelId,
     val displayName: String,
+    val profileType: ModelProfileId,
     val modelPath: String,
     val defaultContextSize: Int,
 )
@@ -43,6 +44,7 @@ data class ChatModelReference(
 data class SpeechToTextModelReference(
     val modelId: ModelId,
     val displayName: String,
+    val profileType: ModelProfileId,
     val modelDirectory: String,
     val sampleRateHz: Int,
     val languages: Set<String>,
@@ -51,6 +53,7 @@ data class SpeechToTextModelReference(
 data class TextToSpeechModelReference(
     val modelId: ModelId,
     val displayName: String,
+    val profileType: ModelProfileId,
     val modelDirectory: String,
     val sampleRateHz: Int,
     val languages: Set<String>,
