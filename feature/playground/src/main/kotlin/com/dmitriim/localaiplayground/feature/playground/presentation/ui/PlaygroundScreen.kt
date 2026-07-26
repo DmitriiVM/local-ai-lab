@@ -22,8 +22,6 @@ import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.OperationState
 import com.dmitriim.localaiplayground.feature.playground.presentation.PlaygroundUiState
-import java.text.DateFormat
-import java.util.Date
 
 @Composable
 fun PlaygroundScreen(
@@ -31,7 +29,6 @@ fun PlaygroundScreen(
     onRefresh: () -> Unit,
     onOpenCapability: (AiCapability) -> Unit,
     onOpenModels: () -> Unit,
-    onOpenRuns: () -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
 
@@ -55,23 +52,6 @@ fun PlaygroundScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-            }
-        }
-        if (state.recentRuns.isNotEmpty()) {
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Recent activity", style = MaterialTheme.typography.titleLarge)
-                    state.recentRuns.forEach { run ->
-                        Card(Modifier.fillMaxWidth()) {
-                            Column(Modifier.padding(12.dp)) {
-                                Text("${run.capability.name.replace('_', ' ')} · ${run.status.name.lowercase()}")
-                                Text(run.model?.displayName ?: "Model snapshot unavailable", style = MaterialTheme.typography.bodySmall)
-                                Text(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(run.completedAtEpochMs)), style = MaterialTheme.typography.labelSmall)
-                            }
-                        }
-                    }
-                    OutlinedButton(onClick = onOpenRuns, modifier = Modifier.fillMaxWidth()) { Text("Open run history") }
-                }
             }
         }
         if (state.operation is OperationState.Preparing) {

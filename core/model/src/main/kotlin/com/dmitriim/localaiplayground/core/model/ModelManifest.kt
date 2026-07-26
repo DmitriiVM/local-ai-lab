@@ -69,6 +69,8 @@ data class ModelManifest(
     val files: List<ModelFileSpec>,
     val source: ModelSource,
     val languages: Set<String> = emptySet(),
+    /** Total verified language coverage when [languages] contains only representative languages for display. */
+    val supportedLanguageCount: Int? = null,
     val sampleRateHz: Int? = null,
     val contextSize: Int? = null,
     val approximateRamBytes: Long? = null,

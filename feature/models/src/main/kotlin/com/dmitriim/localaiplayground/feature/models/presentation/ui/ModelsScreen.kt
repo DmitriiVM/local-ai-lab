@@ -1,50 +1,56 @@
 package com.dmitriim.localaiplayground.feature.models.presentation.ui
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.CatalogModel
 import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.ModelManifest
 import com.dmitriim.localaiplayground.core.model.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.RuntimeProfileType
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
-import com.dmitriim.localaiplayground.feature.models.presentation.ModelValidationFeedback
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
 
 @Composable
 fun ModelsScreen(
     uiState: ModelsUiState,
-    onImport: (RuntimeProfileType) -> Unit,
     onDownload: (ModelId) -> Unit,
     onCancelTransfer: (ModelId) -> Unit,
-    onValidate: (ModelId) -> Unit,
     onDelete: (ModelId) -> Unit,
     onConfirmDelete: () -> Unit,
     onCancelDelete: () -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
-    val installedModelIds = uiState.installed.mapTo(mutableSetOf()) { it.manifest.modelId }
-    val approvedDownloads = uiState.catalog.filterNot { it.manifest.modelId in installedModelIds }
+    var typeFilter by rememberSaveable { mutableStateOf(ModelTypeFilter.ALL) }
+    var installationFilter by rememberSaveable { mutableStateOf(ModelInstallationFilter.ALL) }
+    val modelItems = uiState.toModelListItems()
+        .filter { typeFilter.matches(it.manifest) }
+        .filter { installationFilter.matches(it) }
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
         contentPadding = PaddingValues(bottom = dimensions.bottomNavigationOverlayClearance + 64.dp),
@@ -57,46 +63,40 @@ fun ModelsScreen(
                 style = MaterialTheme.typography.headlineMedium,
             )
         }
-        item {
-            Text(
-                "Models are copied into private app storage, verified, and never downloaded without confirmation.",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        }
         uiState.message?.let { message ->
             item { StatusMessage(title = "Model lifecycle", explanation = message) }
         }
         item {
-            ImportCard(onImport = onImport)
+            ModelFilters(
+                typeFilter = typeFilter,
+                installationFilter = installationFilter,
+                onTypeFilterChange = { typeFilter = it },
+                onInstallationFilterChange = { installationFilter = it },
+            )
         }
-        if (uiState.installed.isEmpty()) {
+        if (modelItems.isEmpty()) {
             item {
                 StatusMessage(
-                    title = "No models installed",
-                    explanation = "Import your own files or choose an approved curated model below.",
+                    title = "No matching models",
+                    explanation = "Try a different model type or availability filter.",
                 )
             }
         } else {
-            item { Text("Installed", style = MaterialTheme.typography.titleLarge) }
-            items(uiState.installed.size, key = { "installed-${uiState.installed[it].manifest.modelId.value}" }) { index ->
-                InstalledModelCard(
-                    model = uiState.installed[index],
-                    isValidating = uiState.installed[index].manifest.modelId in uiState.validatingModelIds,
-                    validationFeedback = uiState.validationFeedback[uiState.installed[index].manifest.modelId],
-                    onValidate = onValidate,
-                    onDelete = onDelete,
-                )
-            }
-        }
-        if (approvedDownloads.isNotEmpty()) {
-            item { Text("Approved downloads", style = MaterialTheme.typography.titleLarge) }
-            items(approvedDownloads.size, key = { "catalog-${approvedDownloads[it].manifest.modelId.value}" }) { index ->
-                CatalogModelCard(
-                    model = approvedDownloads[index],
-                    transfer = uiState.transfers[approvedDownloads[index].manifest.modelId],
-                    onDownload = onDownload,
-                    onCancel = onCancelTransfer,
-                )
+            item { Text("Models (${modelItems.size})", style = MaterialTheme.typography.titleLarge) }
+            items(modelItems.size, key = { modelItems[it].manifest.modelId.value }) { index ->
+                when (val item = modelItems[index]) {
+                    is ModelListItem.Installed -> InstalledModelCard(
+                        model = item.model,
+                        displayManifest = item.manifest,
+                        onDelete = onDelete,
+                    )
+                    is ModelListItem.Catalog -> CatalogModelCard(
+                        model = item.model,
+                        transfer = uiState.transfers[item.manifest.modelId],
+                        onDownload = onDownload,
+                        onCancel = onCancelTransfer,
+                    )
+                }
             }
         }
     }
@@ -112,74 +112,120 @@ fun ModelsScreen(
 }
 
 @Composable
-private fun ImportCard(onImport: (RuntimeProfileType) -> Unit) {
+private fun ModelFilters(
+    typeFilter: ModelTypeFilter,
+    installationFilter: ModelInstallationFilter,
+    onTypeFilterChange: (ModelTypeFilter) -> Unit,
+    onInstallationFilterChange: (ModelInstallationFilter) -> Unit,
+) {
     Card {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Import", style = MaterialTheme.typography.titleMedium)
-            Text("Select every required companion file in the document picker. The app validates the selected runtime profile before installation.")
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { onImport(RuntimeProfileType.LLM) }) { Text("GGUF") }
-                OutlinedButton(onClick = { onImport(RuntimeProfileType.WHISPER_STT) }) { Text("Whisper") }
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text("Show models", style = MaterialTheme.typography.titleMedium)
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(ModelTypeFilter.entries.size) { index ->
+                    val filter = ModelTypeFilter.entries[index]
+                    FilterChip(
+                        selected = typeFilter == filter,
+                        onClick = { onTypeFilterChange(filter) },
+                        label = { Text(filter.label) },
+                    )
+                }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { onImport(RuntimeProfileType.SILERO_VAD) }) { Text("VAD") }
-                OutlinedButton(onClick = { onImport(RuntimeProfileType.SUPERTONIC_TTS) }) { Text("Supertonic") }
+            Text("Availability", style = MaterialTheme.typography.titleMedium)
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(ModelInstallationFilter.entries.size) { index ->
+                    val filter = ModelInstallationFilter.entries[index]
+                    FilterChip(
+                        selected = installationFilter == filter,
+                        onClick = { onInstallationFilterChange(filter) },
+                        label = { Text(filter.label) },
+                    )
+                }
             }
         }
+    }
+}
+
+private enum class ModelTypeFilter(
+    val label: String,
+    private val profileType: RuntimeProfileType? = null,
+) {
+    ALL(label = "All"),
+    LLM(label = "LLM", profileType = RuntimeProfileType.LLM),
+    TTS(label = "TTS", profileType = RuntimeProfileType.SUPERTONIC_TTS),
+    STT(label = "STT", profileType = RuntimeProfileType.WHISPER_STT),
+    VAD(label = "VAD", profileType = RuntimeProfileType.SILERO_VAD),
+    ;
+
+    fun matches(manifest: ModelManifest): Boolean = profileType == null || manifest.profileType == profileType
+}
+
+private enum class ModelInstallationFilter(val label: String) {
+    ALL(label = "All"),
+    INSTALLED(label = "Installed"),
+    NOT_INSTALLED(label = "Not installed"),
+    ;
+
+    fun matches(item: ModelListItem): Boolean = when (this) {
+        ALL -> true
+        INSTALLED -> item is ModelListItem.Installed
+        NOT_INSTALLED -> item is ModelListItem.Catalog
+    }
+}
+
+private sealed interface ModelListItem {
+    val manifest: ModelManifest
+
+    data class Installed(
+        val model: InstalledModel,
+        val catalogModel: CatalogModel? = null,
+    ) : ModelListItem {
+        override val manifest: ModelManifest = catalogModel?.manifest ?: model.manifest
+    }
+
+    data class Catalog(val model: CatalogModel) : ModelListItem {
+        override val manifest: ModelManifest = model.manifest
+    }
+}
+
+private fun ModelsUiState.toModelListItems(): List<ModelListItem> {
+    val installedById = installed.associateBy { it.manifest.modelId }
+    val catalogModelIds = catalog.mapTo(mutableSetOf()) { it.manifest.modelId }
+    return buildList {
+        catalog.forEach { catalogModel ->
+            val installedModel = installedById[catalogModel.manifest.modelId]
+            add(
+                installedModel?.let { ModelListItem.Installed(it, catalogModel) }
+                    ?: ModelListItem.Catalog(catalogModel),
+            )
+        }
+        installed
+            .filterNot { it.manifest.modelId in catalogModelIds }
+            .forEach { add(ModelListItem.Installed(it)) }
     }
 }
 
 @Composable
 private fun InstalledModelCard(
     model: InstalledModel,
-    isValidating: Boolean,
-    validationFeedback: ModelValidationFeedback?,
-    onValidate: (ModelId) -> Unit,
+    displayManifest: ModelManifest,
     onDelete: (ModelId) -> Unit,
 ) {
-    val manifest = model.manifest
     Card {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(manifest.displayName, style = MaterialTheme.typography.titleMedium)
-            Text("${manifest.family} • ${manifest.engineId.value} • ${manifest.profileType}")
-            Text("${model.validationState} • ${model.totalBytes.toReadableBytes()}")
-            model.validationMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            Text("${manifest.source.licenseName} • ${manifest.source.attribution}", style = MaterialTheme.typography.bodySmall)
-            Text("Files: ${manifest.files.joinToString { it.relativePath }}", style = MaterialTheme.typography.bodySmall)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
-                    onClick = { onValidate(manifest.modelId) },
-                    enabled = !isValidating,
-                ) {
-                    Text("Validate")
-                }
-                OutlinedButton(
-                    onClick = { onDelete(manifest.modelId) },
-                    enabled = !isValidating,
-                ) {
-                    Text("Delete")
-                }
-            }
-            Box(Modifier.fillMaxWidth().heightIn(min = 20.dp)) {
-                if (isValidating) {
-                    Text(
-                        text = "Validating model files…",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                } else {
-                    validationFeedback?.let { feedback ->
-                        Text(
-                            text = feedback.message,
-                            color = if (feedback.isError) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.primary
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
+            ModelCardHeader(
+                name = displayManifest.displayName,
+                status = model.validationState.statusLabel(),
+            )
+            ModelCardMetadata(
+                manifest = displayManifest,
+                size = model.totalBytes.toReadableBytes(),
+            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                OutlinedButton(onClick = { onDelete(model.manifest.modelId) }) { Text("Delete") }
             }
         }
     }
@@ -192,46 +238,119 @@ private fun CatalogModelCard(
     onDownload: (ModelId) -> Unit,
     onCancel: (ModelId) -> Unit,
 ) {
+    val manifest = model.manifest
     Card {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(model.manifest.displayName, style = MaterialTheme.typography.titleMedium)
-            Text("${model.manifest.capabilities.joinToString()} • ${model.manifest.engineId.value}")
-            Text("${model.download.expectedBytes.toReadableBytes()} • ${model.manifest.source.licenseName}")
-            if (model.download.files.isNotEmpty()) {
-                Text(
-                    "${model.download.files.size} individually verified files",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            } else {
-                model.download.sha256?.let { checksum ->
-                    Text("SHA-256: ${checksum.take(16)}…", style = MaterialTheme.typography.bodySmall)
-                }
-            }
+            ModelCardHeader(name = manifest.displayName, status = transfer.statusLabel())
+            ModelCardMetadata(manifest = manifest, size = model.download.expectedBytes.toReadableBytes())
             when {
                 transfer == ModelTransferState.Queued -> {
-                    Text("Waiting to start download")
-                    OutlinedButton(onClick = { onCancel(model.manifest.modelId) }) { Text("Cancel") }
+                    ModelCardAction { OutlinedButton(onClick = { onCancel(manifest.modelId) }) { Text("Cancel") } }
                 }
                 transfer is ModelTransferState.Running -> {
                     val total = transfer.totalBytes?.toReadableBytes() ?: "unknown size"
-                    Text("Downloading ${transfer.completedBytes.toReadableBytes()} / $total")
-                    OutlinedButton(onClick = { onCancel(model.manifest.modelId) }) { Text("Cancel") }
+                    Text("${transfer.completedBytes.toReadableBytes()} / $total", style = MaterialTheme.typography.bodySmall)
+                    ModelCardAction { OutlinedButton(onClick = { onCancel(manifest.modelId) }) { Text("Cancel") } }
                 }
-                transfer == ModelTransferState.Installing -> Text("Verifying and installing…")
                 transfer is ModelTransferState.Failed -> {
-                    Text(transfer.message, color = MaterialTheme.colorScheme.error)
-                    Button(onClick = { onDownload(model.manifest.modelId) }) { Text("Retry") }
+                    ModelCardAction { Button(onClick = { onDownload(manifest.modelId) }) { Text("Retry") } }
                 }
                 transfer == ModelTransferState.Cancelled -> {
-                    Text("Download cancelled")
-                    Button(onClick = { onDownload(model.manifest.modelId) }) { Text("Download") }
+                    ModelCardAction { Button(onClick = { onDownload(manifest.modelId) }) { Text("Download") } }
                 }
-                transfer == ModelTransferState.Completed -> Text("Installed")
                 transfer == ModelTransferState.Idle || transfer == null ->
-                    Button(onClick = { onDownload(model.manifest.modelId) }) { Text("Download") }
+                    ModelCardAction { Button(onClick = { onDownload(manifest.modelId) }) { Text("Download") } }
             }
         }
     }
+}
+
+@Composable
+private fun ModelCardHeader(name: String, status: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(text = name, style = MaterialTheme.typography.titleMedium)
+        StatusBadge(status)
+    }
+}
+
+@Composable
+private fun ModelCardMetadata(manifest: ModelManifest, size: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        TypeBadge(manifest.profileType.label)
+        Text(manifest.engineId.value, style = MaterialTheme.typography.bodyMedium)
+    }
+    Text(
+        "$size • ${manifest.languageSummary()}",
+        style = MaterialTheme.typography.bodyMedium,
+    )
+}
+
+@Composable
+private fun ModelCardAction(content: @Composable () -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        content()
+    }
+}
+
+@Composable
+private fun TypeBadge(label: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        shape = RoundedCornerShape(50),
+    ) {
+        Text(label, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
+    }
+}
+
+@Composable
+private fun StatusBadge(status: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        shape = RoundedCornerShape(50),
+    ) {
+        Text(status, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
+    }
+}
+
+private val RuntimeProfileType.label: String
+    get() = when (this) {
+        RuntimeProfileType.LLM -> "LLM"
+        RuntimeProfileType.WHISPER_STT -> "STT"
+        RuntimeProfileType.SILERO_VAD -> "VAD"
+        RuntimeProfileType.SUPERTONIC_TTS -> "TTS"
+    }
+
+private fun ModelManifest.languageSummary(): String {
+    val totalLanguageCount = supportedLanguageCount
+    return when {
+        profileType == RuntimeProfileType.SILERO_VAD -> "Language-independent"
+        languages.isEmpty() -> "Language not specified"
+        totalLanguageCount != null && totalLanguageCount > languages.size ->
+            "${languages.joinToString()} +${totalLanguageCount - languages.size}"
+        else -> languages.joinToString()
+    }
+}
+
+private fun ModelValidationState.statusLabel(): String = when (this) {
+    ModelValidationState.READY -> "Ready"
+    ModelValidationState.INVALID,
+    ModelValidationState.MISSING_FILES,
+    ModelValidationState.INCOMPATIBLE,
+    -> "Needs attention"
+}
+
+private fun ModelTransferState?.statusLabel(): String = when (this) {
+    ModelTransferState.Queued -> "Queued"
+    is ModelTransferState.Running -> "Downloading"
+    ModelTransferState.Installing -> "Installing"
+    is ModelTransferState.Failed -> "Download failed"
+    ModelTransferState.Cancelled -> "Cancelled"
+    ModelTransferState.Completed -> "Installed"
+    ModelTransferState.Idle,
+    null,
+    -> "Not installed"
 }
 
 private fun Long.toReadableBytes(): String = when {
