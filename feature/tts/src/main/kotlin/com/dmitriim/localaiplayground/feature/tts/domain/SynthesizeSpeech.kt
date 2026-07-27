@@ -7,6 +7,7 @@ import com.dmitriim.localaiplayground.ai.api.TextToSpeechRequest
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
 import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
 import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioStore
+import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffectsProcessor
 import com.dmitriim.localaiplayground.core.model.LocalModelResolver
 import dev.zacsweers.metro.Inject
 import java.util.concurrent.atomic.AtomicBoolean
@@ -28,6 +29,7 @@ class SynthesizeSpeech(
     private val textToSpeechEngine: TextToSpeechEngine,
     private val player: StreamingSpeechPlayer,
     private val generatedAudioStore: GeneratedAudioStore,
+    private val audioEffectsProcessor: SpeechAudioEffectsProcessor,
 ) {
     private val cancelled = AtomicBoolean(false)
 
@@ -37,7 +39,8 @@ class SynthesizeSpeech(
             "TTS synthesis requested: modelId=${request.modelId.value}, textLength=${request.text.length}, " +
                 "language=${request.settings.languageCode}, speaker=${request.settings.speakerId}, " +
                 "speed=${request.settings.speed}, silenceScale=${request.settings.sentenceSilenceScale}, " +
-                "volume=${request.settings.volume}, requestedThreads=${request.settings.threadCount}",
+                "volume=${request.settings.volume}, requestedThreads=${request.settings.threadCount}, " +
+                "audioEffects=${request.settings.audioEffects}",
         )
         request.settings.validate()
         require(request.text.isNotBlank()) { "Enter text to synthesize." }
@@ -80,31 +83,39 @@ class SynthesizeSpeech(
                 ),
             )
 
-            val session = player.open(
-                sampleRateHz = load.sampleRateHz,
-                volume = request.settings.volume,
-                runAnchorNanos = runAnchorNanos,
-            )
-            Log.i(TAG, "TTS playback session opened: sampleRateHz=${load.sampleRateHz}")
-            val chunks = Channel<FloatArray>(capacity = AUDIO_QUEUE_CAPACITY)
+            val effectsEnabled = !request.settings.audioEffects.isNeutral
+            var session = if (effectsEnabled) {
+                null
+            } else {
+                player.open(
+                    sampleRateHz = load.sampleRateHz,
+                    volume = request.settings.volume,
+                    runAnchorNanos = runAnchorNanos,
+                ).also {
+                    Log.i(TAG, "TTS playback session opened: sampleRateHz=${load.sampleRateHz}")
+                }
+            }
+            val chunks = session?.let { Channel<FloatArray>(capacity = AUDIO_QUEUE_CAPACITY) }
             var firstChunkNanos: Long? = null
             var chunkCount = 0
             var streamedSampleCount = 0L
             val playbackFailure = AtomicReference<Throwable?>(null)
-            val consumer = CoroutineScope(currentCoroutineContext()).launch(Dispatchers.IO) {
-                try {
-                    for (chunk in chunks) {
-                        if (!session.write(chunk)) {
-                            Log.w(TAG, "TTS playback stopped accepting audio; cancelling native synthesis.")
-                            textToSpeechEngine.cancel()
-                            break
+            val consumer = session?.let { activeSession ->
+                CoroutineScope(currentCoroutineContext()).launch(Dispatchers.IO) {
+                    try {
+                        for (chunk in requireNotNull(chunks)) {
+                            if (!activeSession.write(chunk)) {
+                                Log.w(TAG, "TTS playback stopped accepting audio; cancelling native synthesis.")
+                                textToSpeechEngine.cancel()
+                                break
+                            }
                         }
+                    } catch (error: Throwable) {
+                        Log.e(TAG, "TTS playback consumer failed; cancelling native synthesis.", error)
+                        playbackFailure.set(error)
+                        textToSpeechEngine.cancel()
+                        chunks?.cancel()
                     }
-                } catch (error: Throwable) {
-                    Log.e(TAG, "TTS playback consumer failed; cancelling native synthesis.", error)
-                    playbackFailure.set(error)
-                    textToSpeechEngine.cancel()
-                    chunks.cancel()
                 }
             }
 
@@ -125,31 +136,57 @@ class SynthesizeSpeech(
                     }
                     chunkCount += 1
                     streamedSampleCount += chunk.size
-                    !cancelled.get() && chunks.trySendBlocking(chunk.copyOf()).isSuccess
+                    !cancelled.get() && (
+                        chunks == null ||
+                            chunks.trySendBlocking(chunk.copyOf()).isSuccess
+                        )
                 }
             } finally {
-                chunks.close()
+                chunks?.close()
             }
             val synthesisDurationMs = nanosToMillis(
                 System.nanoTime() - synthesisStartedNanos,
             )
-            consumer.join()
+            consumer?.join()
             playbackFailure.get()?.let { throw it }
             check(!cancelled.get()) { "Speech synthesis was cancelled." }
             require(result.sampleRateHz == load.sampleRateHz) {
                 "The voice model changed sample rate during synthesis."
             }
+            val effectsStartedNanos = System.nanoTime()
+            val outputSamples = audioEffectsProcessor.process(
+                samples = result.samples,
+                sampleRateHz = result.sampleRateHz,
+                effects = request.settings.audioEffects,
+                isCancelled = cancelled::get,
+            )
+            val effectsDurationMs = nanosToMillis(System.nanoTime() - effectsStartedNanos)
+            if (effectsEnabled) {
+                session = player.open(
+                    sampleRateHz = load.sampleRateHz,
+                    volume = request.settings.volume,
+                    runAnchorNanos = runAnchorNanos,
+                )
+                Log.i(
+                    TAG,
+                    "TTS processed playback session opened: sampleRateHz=${load.sampleRateHz}, " +
+                        "effectsMs=$effectsDurationMs",
+                )
+                writeFloatChunks(requireNotNull(session), outputSamples)
+            }
             Log.i(
                 TAG,
                 "TTS native synthesis finished: durationMs=$synthesisDurationMs, chunks=$chunkCount, " +
                     "streamedSamples=$streamedSampleCount, resultSamples=${result.samples.size}, " +
+                    "outputSamples=${outputSamples.size}, effectsMs=$effectsDurationMs, " +
                     "sampleRateHz=${result.sampleRateHz}",
             )
-            val output = generatedAudioStore.saveLatest(result.samples, result.sampleRateHz)
+            val output = generatedAudioStore.saveLatest(outputSamples, result.sampleRateHz)
             Log.i(TAG, "TTS WAV retained: durationMs=${output.durationMs}, samples=${output.sampleCount}")
             emit(SpeechSynthesisEvent.Synthesized(output, synthesisDurationMs))
-            session.awaitDrained()
-            val playbackMetrics = session.metrics()
+            val activeSession = requireNotNull(session)
+            activeSession.awaitDrained()
+            val playbackMetrics = activeSession.metrics()
             Log.i(
                 TAG,
                 "TTS playback drained: framesWritten=${playbackMetrics.framesWritten}, " +
@@ -240,9 +277,25 @@ class SynthesizeSpeech(
 
     private fun nanosToMillis(nanos: Long): Long = nanos.coerceAtLeast(0) / 1_000_000L
 
+    private fun writeFloatChunks(
+        session: com.dmitriim.localaiplayground.core.audio.output.api.SpeechPlaybackSession,
+        samples: FloatArray,
+    ) {
+        var offset = 0
+        while (offset < samples.size) {
+            check(!cancelled.get()) { "Speech synthesis was cancelled." }
+            val end = minOf(offset + PROCESSED_AUDIO_CHUNK_SAMPLES, samples.size)
+            check(session.write(samples.copyOfRange(offset, end))) {
+                "Speech playback stopped accepting processed audio."
+            }
+            offset = end
+        }
+    }
+
     companion object {
         const val MAX_TEXT_CHARACTERS = 2_000
         private const val AUDIO_QUEUE_CAPACITY = 4
+        private const val PROCESSED_AUDIO_CHUNK_SAMPLES = 4_096
         private const val TAG = "AiP123Tts"
     }
 }

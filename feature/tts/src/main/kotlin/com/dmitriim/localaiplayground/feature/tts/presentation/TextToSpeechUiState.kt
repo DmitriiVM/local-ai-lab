@@ -1,6 +1,7 @@
 package com.dmitriim.localaiplayground.feature.tts.presentation
 
 import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
+import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackState
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.CatalogModel
@@ -20,6 +21,7 @@ data class TextToSpeechUiState(
     val sentenceSilenceScale: Float = 1f,
     val volume: Float = 1f,
     val threadCount: String = "0",
+    val audioEffects: SpeechAudioEffects = SpeechAudioEffects(),
     val selectedVoiceId: String? = null,
     val previewVoiceId: String? = null,
     val operation: TtsOperation = TtsOperation.IDLE,

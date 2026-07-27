@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
 import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioStore
+import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelLibrary
@@ -222,6 +223,46 @@ class TextToSpeechViewModel(
 
     fun updateVolume(value: Float) = mutableState.update { it.copy(volume = value, errorMessage = null) }
 
+    fun updatePitch(value: Float) = mutableState.update {
+        it.copy(
+            audioEffects = it.audioEffects.copy(pitchSemitones = value),
+            errorMessage = null,
+        )
+    }
+
+    fun updateFormant(value: Float) = mutableState.update {
+        it.copy(
+            audioEffects = it.audioEffects.copy(formantSemitones = value),
+            errorMessage = null,
+        )
+    }
+
+    fun updateLowEq(value: Float) = mutableState.update {
+        it.copy(audioEffects = it.audioEffects.copy(lowEqDb = value), errorMessage = null)
+    }
+
+    fun updateMidEq(value: Float) = mutableState.update {
+        it.copy(audioEffects = it.audioEffects.copy(midEqDb = value), errorMessage = null)
+    }
+
+    fun updateHighEq(value: Float) = mutableState.update {
+        it.copy(audioEffects = it.audioEffects.copy(highEqDb = value), errorMessage = null)
+    }
+
+    fun updateSaturation(value: Float) = mutableState.update {
+        it.copy(
+            audioEffects = it.audioEffects.copy(saturationDriveDb = value),
+            errorMessage = null,
+        )
+    }
+
+    fun resetAudioEffects() = mutableState.update {
+        it.copy(
+            audioEffects = SpeechAudioEffects(),
+            errorMessage = null,
+        )
+    }
+
     fun updateThreadCount(value: String) = mutableState.update {
         it.copy(threadCount = value.filter(Char::isDigit), errorMessage = null)
     }
@@ -290,6 +331,7 @@ class TextToSpeechViewModel(
                             sentenceSilenceScale = snapshot.sentenceSilenceScale,
                             volume = snapshot.volume,
                             threadCount = threads,
+                            audioEffects = snapshot.audioEffects,
                         ),
                     ),
                 )
@@ -350,7 +392,8 @@ class TextToSpeechViewModel(
             TAG,
             "TTS UI synthesis started: model=${model?.displayName}, textLength=${snapshot.text.length}, " +
                 "language=${snapshot.language.code}, voice=${voice.id}, speaker=${voice.speakerId}, speed=${snapshot.speed}, " +
-                "silenceScale=${snapshot.sentenceSilenceScale}, volume=${snapshot.volume}, threads=$threads",
+                "silenceScale=${snapshot.sentenceSilenceScale}, volume=${snapshot.volume}, threads=$threads, " +
+                "audioEffects=${snapshot.audioEffects}",
         )
         mutableState.update {
             it.copy(
@@ -376,6 +419,7 @@ class TextToSpeechViewModel(
                             sentenceSilenceScale = snapshot.sentenceSilenceScale,
                             volume = snapshot.volume,
                             threadCount = threads,
+                            audioEffects = snapshot.audioEffects,
                         ),
                     ),
                 ).collect { event ->
@@ -541,6 +585,20 @@ class TextToSpeechViewModel(
                 sentenceSilenceScale = parameters?.get("sentenceSilenceScale")?.jsonPrimitive?.floatOrNull ?: state.sentenceSilenceScale,
                 volume = parameters?.get("volume")?.jsonPrimitive?.floatOrNull ?: state.volume,
                 threadCount = parameters?.get("threadCount")?.jsonPrimitive?.content ?: state.threadCount,
+                audioEffects = state.audioEffects.copy(
+                    pitchSemitones = parameters?.get("pitchSemitones")?.jsonPrimitive?.floatOrNull
+                        ?: state.audioEffects.pitchSemitones,
+                    formantSemitones = parameters?.get("formantSemitones")?.jsonPrimitive?.floatOrNull
+                        ?: state.audioEffects.formantSemitones,
+                    lowEqDb = parameters?.get("lowEqDb")?.jsonPrimitive?.floatOrNull
+                        ?: state.audioEffects.lowEqDb,
+                    midEqDb = parameters?.get("midEqDb")?.jsonPrimitive?.floatOrNull
+                        ?: state.audioEffects.midEqDb,
+                    highEqDb = parameters?.get("highEqDb")?.jsonPrimitive?.floatOrNull
+                        ?: state.audioEffects.highEqDb,
+                    saturationDriveDb = parameters?.get("saturationDriveDb")?.jsonPrimitive?.floatOrNull
+                        ?: state.audioEffects.saturationDriveDb,
+                ),
                 errorMessage = if (modelId != null && selected == null) "Saved model ${run.model?.displayName.orEmpty()} is no longer installed. Select a compatible model before synthesizing." else null,
             )
         }
@@ -595,6 +653,7 @@ class TextToSpeechViewModel(
         sentenceSilenceScale = snapshot.sentenceSilenceScale,
         volume = snapshot.volume,
         threadCount = snapshot.threadCount,
+        audioEffects = snapshot.audioEffects,
         metrics = metrics,
         errorMessage = error,
     )

@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
+import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechUiState
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsLanguage
@@ -241,9 +242,87 @@ internal fun TextToSpeechSettings(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
+        }
+    }
+}
+
+@Composable
+internal fun TextToSpeechAudioEffectsSettings(
+    state: TextToSpeechUiState,
+    enabled: Boolean,
+    onPitchChange: (Float) -> Unit,
+    onFormantChange: (Float) -> Unit,
+    onLowEqChange: (Float) -> Unit,
+    onMidEqChange: (Float) -> Unit,
+    onHighEqChange: (Float) -> Unit,
+    onSaturationChange: (Float) -> Unit,
+    onReset: () -> Unit,
+) {
+    val effects = state.audioEffects
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("Post-processing", style = MaterialTheme.typography.titleMedium)
+                TextButton(onClick = onReset, enabled = enabled && !effects.isNeutral) {
+                    Text("Reset")
+                }
+            }
             Text(
-                "Pitch is not shown because the selected runtime profiles do not expose a pitch control.",
+                "These effects are applied to the generated PCM before playback, replay, sharing, and WAV export.",
                 style = MaterialTheme.typography.bodySmall,
+            )
+            TextToSpeechParameterSlider(
+                "Pitch",
+                effects.pitchSemitones,
+                effects.pitchSemitones.signed("st"),
+                SpeechAudioEffects.PITCH_RANGE,
+                enabled,
+                onPitchChange,
+            )
+            TextToSpeechParameterSlider(
+                "Formant",
+                effects.formantSemitones,
+                effects.formantSemitones.signed("st"),
+                SpeechAudioEffects.FORMANT_RANGE,
+                enabled,
+                onFormantChange,
+            )
+            Text("Equalizer", style = MaterialTheme.typography.labelLarge)
+            TextToSpeechParameterSlider(
+                "Low · 160 Hz",
+                effects.lowEqDb,
+                effects.lowEqDb.signed("dB"),
+                SpeechAudioEffects.EQ_RANGE,
+                enabled,
+                onLowEqChange,
+            )
+            TextToSpeechParameterSlider(
+                "Presence · 1.5 kHz",
+                effects.midEqDb,
+                effects.midEqDb.signed("dB"),
+                SpeechAudioEffects.EQ_RANGE,
+                enabled,
+                onMidEqChange,
+            )
+            TextToSpeechParameterSlider(
+                "High · 5 kHz",
+                effects.highEqDb,
+                effects.highEqDb.signed("dB"),
+                SpeechAudioEffects.EQ_RANGE,
+                enabled,
+                onHighEqChange,
+            )
+            TextToSpeechParameterSlider(
+                "Saturation drive",
+                effects.saturationDriveDb,
+                "%.1f dB".format(effects.saturationDriveDb),
+                SpeechAudioEffects.SATURATION_RANGE,
+                enabled,
+                onSaturationChange,
             )
         }
     }
@@ -252,7 +331,6 @@ internal fun TextToSpeechSettings(
 @Composable
 internal fun TextToSpeechPlaybackControls(
     state: TextToSpeechUiState,
-    onSynthesize: () -> Unit,
     onPause: () -> Unit,
     onResume: () -> Unit,
     onStop: () -> Unit,
@@ -277,12 +355,7 @@ internal fun TextToSpeechPlaybackControls(
                     Button(onClick = onResume) { Text("Resume") }
                     OutlinedButton(onClick = onStop) { Text("Stop") }
                 }
-                else -> {
-                    Button(onClick = onSynthesize, enabled = state.selectedVoice != null && state.text.isNotBlank()) {
-                        Text("Synthesize & play")
-                    }
-                    if (state.output != null) OutlinedButton(onClick = onReplay) { Text("Replay") }
-                }
+                else -> if (state.output != null) OutlinedButton(onClick = onReplay) { Text("Replay") }
             }
         }
         if (state.output != null) {
@@ -311,3 +384,5 @@ private fun TextToSpeechParameterSlider(
         Slider(value = value, onValueChange = onValueChange, valueRange = range, enabled = enabled)
     }
 }
+
+private fun Float.signed(unit: String): String = "%+.1f %s".format(this, unit)

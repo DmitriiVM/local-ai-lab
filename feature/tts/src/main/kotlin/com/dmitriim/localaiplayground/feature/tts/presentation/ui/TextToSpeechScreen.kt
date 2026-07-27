@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -34,6 +35,13 @@ fun TextToSpeechScreen(
     onSentenceSilenceChange: (Float) -> Unit,
     onVolumeChange: (Float) -> Unit,
     onThreadCountChange: (String) -> Unit,
+    onPitchChange: (Float) -> Unit,
+    onFormantChange: (Float) -> Unit,
+    onLowEqChange: (Float) -> Unit,
+    onMidEqChange: (Float) -> Unit,
+    onHighEqChange: (Float) -> Unit,
+    onSaturationChange: (Float) -> Unit,
+    onResetAudioEffects: () -> Unit,
     onSynthesize: () -> Unit,
     onPause: () -> Unit,
     onResume: () -> Unit,
@@ -64,7 +72,7 @@ fun TextToSpeechScreen(
     ) {
         Text("Local text to speech", style = MaterialTheme.typography.headlineSmall)
         Text(
-            "Choose an installed local model and voice. PCM streams through one retained Android output track while a replayable WAV is prepared.",
+            "Choose an installed local model and voice. Neutral PCM streams immediately; enabled post-processing is applied before playback and the replayable WAV.",
             style = MaterialTheme.typography.bodyMedium,
         )
 
@@ -92,6 +100,12 @@ fun TextToSpeechScreen(
             minLines = 4,
             modifier = Modifier.fillMaxWidth(),
         )
+        Button(
+            onClick = onSynthesize,
+            enabled = !busy && state.selectedVoice != null && state.text.isNotBlank(),
+        ) {
+            Text("Synthesize & play")
+        }
 
         TextToSpeechLanguageControls(state.language, !busy, onSelectLanguage, onApplySample)
         TextToSpeechSettings(
@@ -102,9 +116,19 @@ fun TextToSpeechScreen(
             onVolumeChange = onVolumeChange,
             onThreadCountChange = onThreadCountChange,
         )
+        TextToSpeechAudioEffectsSettings(
+            state = state,
+            enabled = !busy,
+            onPitchChange = onPitchChange,
+            onFormantChange = onFormantChange,
+            onLowEqChange = onLowEqChange,
+            onMidEqChange = onMidEqChange,
+            onHighEqChange = onHighEqChange,
+            onSaturationChange = onSaturationChange,
+            onReset = onResetAudioEffects,
+        )
         TextToSpeechPlaybackControls(
             state = state,
-            onSynthesize = onSynthesize,
             onPause = onPause,
             onResume = onResume,
             onStop = onStop,

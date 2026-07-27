@@ -5,6 +5,7 @@ import com.dmitriim.localaiplayground.ai.api.TextToSpeechEngine
 import com.dmitriim.localaiplayground.ai.api.TextToSpeechLoadRequest
 import com.dmitriim.localaiplayground.ai.api.TextToSpeechRequest
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
+import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffectsProcessor
 import com.dmitriim.localaiplayground.core.model.LocalModelResolver
 import com.dmitriim.localaiplayground.core.model.ModelId
 import dev.zacsweers.metro.Inject
@@ -24,6 +25,7 @@ class PreviewSpeech(
     private val modelResolver: LocalModelResolver,
     private val textToSpeechEngine: TextToSpeechEngine,
     private val player: StreamingSpeechPlayer,
+    private val audioEffectsProcessor: SpeechAudioEffectsProcessor,
 ) {
     private val cancelled = AtomicBoolean(false)
 
@@ -49,13 +51,18 @@ class PreviewSpeech(
                 "${request.voiceName} is unavailable in the installed ${model.displayName} bundle."
             }
             checkNotCancelled()
-            val session = player.open(
-                sampleRateHz = load.sampleRateHz,
-                volume = request.settings.volume,
-                runAnchorNanos = System.nanoTime(),
-            )
-            playbackOpen = true
-            textToSpeechEngine.synthesize(
+            val effectsEnabled = !request.settings.audioEffects.isNeutral
+            var session = if (effectsEnabled) {
+                null
+            } else {
+                player.open(
+                    sampleRateHz = load.sampleRateHz,
+                    volume = request.settings.volume,
+                    runAnchorNanos = System.nanoTime(),
+                ).also { playbackOpen = true }
+            }
+            val streamingSession = session
+            val result = textToSpeechEngine.synthesize(
                 TextToSpeechRequest(
                     text = request.text,
                     languageCode = request.settings.languageCode,
@@ -64,10 +71,25 @@ class PreviewSpeech(
                     sentenceSilenceScale = request.settings.sentenceSilenceScale,
                 ),
             ) { chunk ->
-                !cancelled.get() && session.write(chunk)
+                !cancelled.get() && (streamingSession == null || streamingSession.write(chunk))
             }
             checkNotCancelled()
-            session.awaitDrained()
+            if (effectsEnabled) {
+                val processed = audioEffectsProcessor.process(
+                    samples = result.samples,
+                    sampleRateHz = result.sampleRateHz,
+                    effects = request.settings.audioEffects,
+                    isCancelled = cancelled::get,
+                )
+                session = player.open(
+                    sampleRateHz = load.sampleRateHz,
+                    volume = request.settings.volume,
+                    runAnchorNanos = System.nanoTime(),
+                )
+                playbackOpen = true
+                writeFloatChunks(requireNotNull(session), processed)
+            }
+            requireNotNull(session).awaitDrained()
             checkNotCancelled()
             player.release(completed = true)
             playbackOpen = false
@@ -97,7 +119,23 @@ class PreviewSpeech(
         if (cancelled.get()) throw CancellationException("Voice preview stopped.")
     }
 
+    private fun writeFloatChunks(
+        session: com.dmitriim.localaiplayground.core.audio.output.api.SpeechPlaybackSession,
+        samples: FloatArray,
+    ) {
+        var offset = 0
+        while (offset < samples.size) {
+            checkNotCancelled()
+            val end = minOf(offset + PROCESSED_AUDIO_CHUNK_SAMPLES, samples.size)
+            if (!session.write(samples.copyOfRange(offset, end))) {
+                throw CancellationException("Voice preview playback stopped.")
+            }
+            offset = end
+        }
+    }
+
     private companion object {
         const val TAG = "AiP123Tts"
+        const val PROCESSED_AUDIO_CHUNK_SAMPLES = 4_096
     }
 }

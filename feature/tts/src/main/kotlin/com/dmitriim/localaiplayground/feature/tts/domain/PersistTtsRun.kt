@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.feature.tts.domain
 
+import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.RunRecord
@@ -34,6 +35,12 @@ class PersistTtsRun(private val runRepository: RunRepository) {
                     put("sentenceSilenceScale", snapshot.sentenceSilenceScale)
                     put("volume", snapshot.volume)
                     put("threadCount", snapshot.threadCount)
+                    put("pitchSemitones", snapshot.audioEffects.pitchSemitones)
+                    put("formantSemitones", snapshot.audioEffects.formantSemitones)
+                    put("lowEqDb", snapshot.audioEffects.lowEqDb)
+                    put("midEqDb", snapshot.audioEffects.midEqDb)
+                    put("highEqDb", snapshot.audioEffects.highEqDb)
+                    put("saturationDriveDb", snapshot.audioEffects.saturationDriveDb)
                 }),
                 metricsJson = snapshot.metrics?.let { metrics ->
                     Json.encodeToString(buildJsonObject {
@@ -66,6 +73,7 @@ data class TtsRunSnapshot(
     val sentenceSilenceScale: Float,
     val volume: Float,
     val threadCount: String,
+    val audioEffects: SpeechAudioEffects,
     val metrics: SpeechSynthesisMetrics?,
     val errorMessage: String?,
 )
