@@ -11,6 +11,7 @@ interface AppSettingsRepository {
     suspend fun updateTtsDraft(text: String)
     suspend fun updateTtsSelectedModel(modelId: String)
     suspend fun updateTtsVoice(modelId: String, voiceId: String)
+    suspend fun clearTtsVoice(modelId: String)
 }
 
 data class TtsSelectionPreferences(

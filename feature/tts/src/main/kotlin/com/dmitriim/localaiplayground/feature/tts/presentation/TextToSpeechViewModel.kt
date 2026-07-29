@@ -8,6 +8,9 @@ import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlaye
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
 import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
+import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoiceStore
+import com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition
+import com.dmitriim.localaiplayground.core.model.TtsVoiceMode
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelLibrary
@@ -61,6 +64,7 @@ class TextToSpeechViewModel(
     private val persistTtsRun: PersistTtsRun,
     private val replayStore: RunReplayStore,
     private val settingsRepository: AppSettingsRepository,
+    private val referenceVoiceStore: ReferenceVoiceStore,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(TextToSpeechUiState())
     val state: StateFlow<TextToSpeechUiState> = mutableState.asStateFlow()
@@ -81,22 +85,31 @@ class TextToSpeechViewModel(
             val selection = settingsRepository.ttsSelection.first()
             savedModelId = selection.selectedModelId?.let(::ModelId)
             savedVoiceIds.putAll(selection.voiceIdsByModel)
-            combine(modelLibrary.installedModels, modelTransfers.catalog) { installed, catalog ->
-                installed.filter { it.isReadyTtsModel() }.map { it.toTtsModelOption(catalog) }
-            }.collectLatest { models ->
+            combine(
+                modelLibrary.installedModels,
+                modelTransfers.catalog,
+                referenceVoiceStore.voices,
+            ) { installed, catalog, references ->
+                installed.filter { it.isReadyTtsModel() }.map { it.toTtsModelOption(catalog) } to references
+            }.collectLatest { (models, references) ->
                 mutableState.update { current ->
                     val selected = current.selectedModelId
                         ?.takeIf { id -> models.any { it.id == id } }
                         ?: savedModelId?.takeIf { id -> models.any { it.id == id } }
                         ?: models.firstOrNull()?.id
                     val selectedModel = models.firstOrNull { it.id == selected }
-                    val voices = selectedModel?.compatibleVoices(current.language).orEmpty()
+                    val language = if (selectedModel?.voiceMode == TtsVoiceMode.REFERENCE_AUDIO) {
+                        TtsLanguage.ENGLISH
+                    } else current.language
+                    val voices = voicesFor(selectedModel, language, references)
                     val preferredVoiceId = current.selectedVoiceId
                         ?.takeIf { current.selectedModelId == selected }
                         ?: selected?.value?.let(savedVoiceIds::get)
                     current.copy(
                         models = models,
+                        referenceVoices = references,
                         selectedModelId = selected,
+                        language = language,
                         selectedVoiceId = preferredVoiceId
                             ?.takeIf { id -> voices.any { it.id == id } }
                             ?: voices.firstOrNull()?.id,
@@ -139,14 +152,19 @@ class TextToSpeechViewModel(
 
     fun selectModel(modelId: ModelId) {
         if (isActive()) return
+        if (mutableState.value.selectedModelId != modelId) synthesizeSpeech.unloadRuntime()
         mutableState.update { state ->
             val model = state.models.firstOrNull { it.id == modelId } ?: return@update state
-            val voices = model.compatibleVoices(state.language)
+            val language = if (model.voiceMode == TtsVoiceMode.REFERENCE_AUDIO) {
+                TtsLanguage.ENGLISH
+            } else state.language
+            val voices = voicesFor(model, language, state.referenceVoices)
             val selectedVoiceId = savedVoiceIds[modelId.value]
                 ?.takeIf { id -> voices.any { it.id == id } }
                 ?: voices.firstOrNull()?.id
             state.copy(
                 selectedModelId = modelId,
+                language = language,
                 selectedVoiceId = selectedVoiceId,
                 errorMessage = null,
                 metrics = null,
@@ -180,8 +198,9 @@ class TextToSpeechViewModel(
 
     fun selectLanguage(language: TtsLanguage) {
         if (isActive()) return
+        if (mutableState.value.usesReferenceVoice && language != TtsLanguage.ENGLISH) return
         mutableState.update { state ->
-            val voices = state.selectedModel?.compatibleVoices(language).orEmpty()
+            val voices = voicesFor(state.selectedModel, language, state.referenceVoices)
             state.copy(
                 language = language,
                 selectedVoiceId = state.selectedVoiceId
@@ -199,7 +218,8 @@ class TextToSpeechViewModel(
     fun applySample(language: TtsLanguage) {
         if (isActive()) return
         mutableState.update { state ->
-            val voices = state.selectedModel?.compatibleVoices(language).orEmpty()
+            if (state.usesReferenceVoice && language != TtsLanguage.ENGLISH) return@update state
+            val voices = voicesFor(state.selectedModel, language, state.referenceVoices)
             state.copy(
                 language = language,
                 text = language.sample,
@@ -267,6 +287,114 @@ class TextToSpeechViewModel(
         it.copy(threadCount = value.filter(Char::isDigit), errorMessage = null)
     }
 
+    fun startReferenceRecording() {
+        if (isActive() || !mutableState.value.usesReferenceVoice) return
+        mutableState.update {
+            it.copy(
+                operation = TtsOperation.RECORDING_REFERENCE,
+                referenceLevel = null,
+                errorMessage = null,
+                statusMessage = "Record 5–10 seconds of clear speech. Recording stops automatically at 10 seconds.",
+            )
+        }
+        operationJob = viewModelScope.launch(Dispatchers.Default) {
+            try {
+                val voice = referenceVoiceStore.capture { level ->
+                    mutableState.update { it.copy(referenceLevel = level) }
+                }
+                mutableState.update {
+                    it.copy(
+                        operation = TtsOperation.IDLE,
+                        referenceLevel = null,
+                        referenceVoices = referenceVoiceStore.voices.value,
+                        selectedVoiceId = voice.id,
+                        statusMessage = "Saved reference voice “${voice.displayName}”.",
+                    )
+                }
+                persistVoiceSelection(requireNotNull(mutableState.value.selectedVoice))
+            } catch (cancelled: CancellationException) {
+                mutableState.update {
+                    it.copy(operation = TtsOperation.IDLE, referenceLevel = null, statusMessage = "Reference recording stopped.")
+                }
+            } catch (error: Throwable) {
+                mutableState.update {
+                    it.copy(
+                        operation = TtsOperation.IDLE,
+                        referenceVoices = referenceVoiceStore.voices.value,
+                        referenceLevel = null,
+                        errorMessage = error.message ?: "Could not record the reference voice.",
+                        statusMessage = null,
+                    )
+                }
+            }
+        }.also(::registerForegroundCancellation)
+    }
+
+    fun stopReferenceRecording() {
+        if (mutableState.value.operation != TtsOperation.RECORDING_REFERENCE) return
+        mutableState.update { it.copy(operation = TtsOperation.STOPPING_REFERENCE) }
+        referenceVoiceStore.stopCapture()
+    }
+
+    fun importReferenceAudio(uri: Uri) {
+        if (isActive() || !mutableState.value.usesReferenceVoice) return
+        mutableState.update {
+            it.copy(
+                operation = TtsOperation.IMPORTING_REFERENCE,
+                errorMessage = null,
+                statusMessage = "Normalizing reference audio to mono 24 kHz…",
+            )
+        }
+        operationJob = viewModelScope.launch(Dispatchers.Default) {
+            try {
+                val voice = referenceVoiceStore.importAudio(uri)
+                mutableState.update {
+                    it.copy(
+                        operation = TtsOperation.IDLE,
+                        referenceVoices = referenceVoiceStore.voices.value,
+                        selectedVoiceId = voice.id,
+                        statusMessage = "Saved reference voice “${voice.displayName}”.",
+                    )
+                }
+                persistVoiceSelection(requireNotNull(mutableState.value.selectedVoice))
+            } catch (cancelled: CancellationException) {
+                mutableState.update { it.copy(operation = TtsOperation.IDLE) }
+            } catch (error: Throwable) {
+                mutableState.update {
+                    it.copy(
+                        operation = TtsOperation.IDLE,
+                        errorMessage = error.message ?: "Could not import the reference audio.",
+                        statusMessage = null,
+                    )
+                }
+            }
+        }.also(::registerForegroundCancellation)
+    }
+
+    fun deleteReferenceVoice(voiceId: String) {
+        if (isActive()) return
+        referenceVoiceStore.delete(voiceId)
+        val selectedModelId = mutableState.value.selectedModelId
+        if (selectedModelId != null && savedVoiceIds[selectedModelId.value] == voiceId) {
+            savedVoiceIds.remove(selectedModelId.value)
+            viewModelScope.launch(Dispatchers.IO) {
+                settingsRepository.clearTtsVoice(selectedModelId.value)
+            }
+        }
+        mutableState.update { state ->
+            state.copy(
+                selectedVoiceId = state.selectedVoiceId.takeUnless { it == voiceId },
+                errorMessage = if (state.selectedVoiceId == voiceId) {
+                    "The selected reference was deleted. Record or import another voice."
+                } else state.errorMessage,
+            )
+        }
+    }
+
+    fun microphonePermissionDenied() = mutableState.update {
+        it.copy(errorMessage = "Microphone permission was denied. Allow it in Android settings and try again.")
+    }
+
     fun previewVoice(voiceId: String) {
         val snapshot = mutableState.value
         val activeJob = operationJob?.takeIf(Job::isActive)
@@ -324,7 +452,7 @@ class TextToSpeechViewModel(
                         voiceName = voice.displayName,
                         settings = SpeechSynthesisSettings(
                             languageCode = snapshot.language.code,
-                            speakerId = voice.speakerId,
+                            voiceCondition = voiceCondition(voice),
                             voiceName = voice.displayName,
                             expectedSpeakerCount = snapshot.selectedModel?.speakerCount,
                             speed = snapshot.speed,
@@ -401,7 +529,11 @@ class TextToSpeechViewModel(
                 previewVoiceId = null,
                 metrics = null,
                 errorMessage = null,
-                statusMessage = "Synthesizing and streaming PCM locally…",
+                statusMessage = if (snapshot.usesReferenceVoice) {
+                    "Generating Chatterbox speech locally…"
+                } else {
+                    "Synthesizing and streaming PCM locally…"
+                },
             )
         }
         operationJob = viewModelScope.launch(Dispatchers.Default) {
@@ -412,7 +544,7 @@ class TextToSpeechViewModel(
                         text = snapshot.text,
                         settings = SpeechSynthesisSettings(
                             languageCode = snapshot.language.code,
-                            speakerId = voice.speakerId,
+                            voiceCondition = voiceCondition(voice),
                             voiceName = voice.displayName,
                             expectedSpeakerCount = snapshot.selectedModel?.speakerCount,
                             speed = snapshot.speed,
@@ -484,6 +616,7 @@ class TextToSpeechViewModel(
         if (!isActive() && mutableState.value.playback.status !in activePlaybackStatuses) return
         Log.i(TAG, "TTS UI stop requested: operation=${mutableState.value.operation}, playback=${mutableState.value.playback.status}")
         mutableState.update { it.copy(operation = TtsOperation.CANCELLING) }
+        referenceVoiceStore.stopCapture()
         previewSpeech.cancel()
         synthesizeSpeech.cancel()
         operationJob?.cancel()
@@ -548,7 +681,9 @@ class TextToSpeechViewModel(
         Log.i(TAG, "TTS ViewModel cleared; cancelling active work.")
         previewSpeech.cancel()
         synthesizeSpeech.cancel()
+        referenceVoiceStore.stopCapture()
         operationJob?.cancel()
+        synthesizeSpeech.unloadRuntime()
         super.onCleared()
     }
 
@@ -561,10 +696,12 @@ class TextToSpeechViewModel(
         val replayVoiceId = parameters?.get("voiceId")?.jsonPrimitive?.content
         val replaySpeakerId = parameters?.get("speakerId")?.jsonPrimitive?.intOrNull
         mutableState.update { state ->
-            val language = replayLanguage ?: state.language
+            val language = if (selectedModelForReplay(state, selected)?.voiceMode == TtsVoiceMode.REFERENCE_AUDIO) {
+                TtsLanguage.ENGLISH
+            } else replayLanguage ?: state.language
             val selectedModelId = selected ?: state.selectedModelId
             val selectedModel = state.models.firstOrNull { it.id == selectedModelId }
-            val voices = selectedModel?.compatibleVoices(language).orEmpty()
+            val voices = voicesFor(selectedModel, language, state.referenceVoices)
             val selectedVoiceId = if (modelId == null || selected != null) {
                 replayVoiceId
                     ?.takeIf { id -> voices.any { it.id == id } }
@@ -599,7 +736,15 @@ class TextToSpeechViewModel(
                     saturationDriveDb = parameters?.get("saturationDriveDb")?.jsonPrimitive?.floatOrNull
                         ?: state.audioEffects.saturationDriveDb,
                 ),
-                errorMessage = if (modelId != null && selected == null) "Saved model ${run.model?.displayName.orEmpty()} is no longer installed. Select a compatible model before synthesizing." else null,
+                errorMessage = when {
+                    modelId != null && selected == null ->
+                        "Saved model ${run.model?.displayName.orEmpty()} is no longer installed. Select a compatible model before synthesizing."
+                    selectedModel?.voiceMode == TtsVoiceMode.REFERENCE_AUDIO &&
+                        replayVoiceId != null &&
+                        voices.none { it.id == replayVoiceId } ->
+                        "The saved reference voice was deleted. Record or import another reference before synthesizing."
+                    else -> null
+                },
             )
         }
         if (selected != null) {
@@ -624,6 +769,40 @@ class TextToSpeechViewModel(
         }
     }
 
+    private fun voiceCondition(voice: TtsVoiceOption): TextToSpeechVoiceCondition =
+        voice.reference?.let { reference ->
+            TextToSpeechVoiceCondition.ReferenceAudio(
+                referenceId = reference.id,
+                displayName = reference.displayName,
+                pcmFilePath = reference.pcmFilePath,
+                sampleRateHz = reference.sampleRateHz,
+            )
+        } ?: TextToSpeechVoiceCondition.FixedSpeaker(
+            requireNotNull(voice.speakerId) { "The selected fixed voice has no speaker ID." },
+        )
+
+    private fun voicesFor(
+        model: TtsModelOption?,
+        language: TtsLanguage,
+        references: List<com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoice>,
+    ): List<TtsVoiceOption> = if (model?.voiceMode == TtsVoiceMode.REFERENCE_AUDIO) {
+        references.map { reference ->
+            TtsVoiceOption(
+                id = reference.id,
+                displayName = reference.displayName,
+                speakerId = null,
+                languages = setOf("en"),
+                description = "${reference.durationMs / 1_000.0} s · ${reference.sourceDescription}",
+                reference = reference,
+            )
+        }
+    } else {
+        model?.compatibleVoices(language).orEmpty()
+    }
+
+    private fun selectedModelForReplay(state: TextToSpeechUiState, selected: ModelId?) =
+        state.models.firstOrNull { it.id == (selected ?: state.selectedModelId) }
+
     private companion object {
         const val TAG = "AiP123Tts"
         val activePlaybackStatuses = setOf(
@@ -643,12 +822,15 @@ class TextToSpeechViewModel(
     ) = TtsRunSnapshot(
         status = status,
         startedAtEpochMs = startedAt,
-        model = model?.let { RunModelSnapshot(it.id.value, it.displayName, "sherpa-onnx") },
+        model = model?.let { RunModelSnapshot(it.id.value, it.displayName, it.engineId.value) },
         input = snapshot.text,
         languageCode = snapshot.language.code,
         voiceId = requireNotNull(snapshot.selectedVoice).id,
         voiceName = snapshot.selectedVoice!!.displayName,
         speakerId = snapshot.selectedVoice!!.speakerId,
+        referenceVoiceId = snapshot.selectedVoice!!.reference?.id,
+        referenceVoiceName = snapshot.selectedVoice!!.reference?.displayName,
+        watermarkStatus = if (snapshot.usesReferenceVoice) "NOT_WATERMARKED" else "NOT_APPLICABLE",
         speed = snapshot.speed,
         sentenceSilenceScale = snapshot.sentenceSilenceScale,
         volume = snapshot.volume,

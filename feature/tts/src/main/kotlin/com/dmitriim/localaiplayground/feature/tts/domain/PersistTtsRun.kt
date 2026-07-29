@@ -31,6 +31,9 @@ class PersistTtsRun(private val runRepository: RunRepository) {
                     put("voiceId", snapshot.voiceId)
                     put("voiceName", snapshot.voiceName)
                     put("speakerId", snapshot.speakerId)
+                    put("referenceVoiceId", snapshot.referenceVoiceId)
+                    put("referenceVoiceName", snapshot.referenceVoiceName)
+                    put("watermarkStatus", snapshot.watermarkStatus)
                     put("speed", snapshot.speed)
                     put("sentenceSilenceScale", snapshot.sentenceSilenceScale)
                     put("volume", snapshot.volume)
@@ -52,6 +55,13 @@ class PersistTtsRun(private val runRepository: RunRepository) {
                         put("sampleRateHz", metrics.sampleRateHz)
                         put("playbackUnderrunCount", metrics.playbackUnderrunCount)
                         put("effectiveThreadCount", metrics.effectiveThreadCount)
+                        put("conditioningDurationMs", metrics.conditioningDurationMs)
+                        put("tokenGenerationDurationMs", metrics.tokenGenerationDurationMs)
+                        put("decoderDurationMs", metrics.decoderDurationMs)
+                        put("generatedTokenCount", metrics.generatedTokenCount)
+                        put("conditioningCacheHit", metrics.conditioningCacheHit)
+                        put("peakProcessPssBytes", metrics.peakProcessPssBytes)
+                        put("availableDeviceMemoryBytes", metrics.availableDeviceMemoryBytes)
                     })
                 } ?: "{}",
                 errorMessage = snapshot.errorMessage,
@@ -68,7 +78,10 @@ data class TtsRunSnapshot(
     val languageCode: String,
     val voiceId: String,
     val voiceName: String,
-    val speakerId: Int,
+    val speakerId: Int?,
+    val referenceVoiceId: String?,
+    val referenceVoiceName: String?,
+    val watermarkStatus: String,
     val speed: Float,
     val sentenceSilenceScale: Float,
     val volume: Float,

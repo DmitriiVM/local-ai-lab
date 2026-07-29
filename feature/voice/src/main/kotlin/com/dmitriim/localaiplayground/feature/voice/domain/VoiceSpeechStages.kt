@@ -7,6 +7,7 @@ import com.dmitriim.localaiplayground.ai.api.SpeechToTextRequest
 import com.dmitriim.localaiplayground.ai.api.TextToSpeechEngine
 import com.dmitriim.localaiplayground.ai.api.TextToSpeechLoadRequest
 import com.dmitriim.localaiplayground.ai.api.TextToSpeechRequest
+import com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
@@ -74,9 +75,16 @@ internal suspend fun synthesizeAndPlayVoiceResponse(
 ): VoiceSpeechMetrics {
     require(text.isNotBlank()) { "The local model returned an empty response." }
     Log.i(TAG, "Voice TTS stage loading: model=${model.displayName}, textLength=${text.length}, requestedThreads=${request.ttsThreadCount}, speaker=${request.speakerId}, speed=${request.speechRate}, volume=${request.volume}")
-    val load = engine.load(TextToSpeechLoadRequest(model.profileType, model.modelDirectory, request.ttsThreadCount))
+    val load = engine.load(
+        TextToSpeechLoadRequest(
+            engineId = model.engineId,
+            profileType = model.profileType,
+            modelDirectory = model.modelDirectory,
+            threadCount = request.ttsThreadCount,
+        ),
+    )
     Log.i(TAG, "Voice TTS stage loaded: coldStart=${load.coldStart}, loadMs=${load.loadDurationMs}, sampleRateHz=${load.sampleRateHz}, speakers=${load.speakerCount}, effectiveThreads=${load.effectiveThreadCount}")
-    require(request.speakerId < load.speakerCount) {
+    require(load.speakerCount?.let { request.speakerId < it } == true) {
         "Speaker ${request.speakerId} is unavailable for ${model.displayName}."
     }
     val session = player.open(load.sampleRateHz, request.volume, anchorNanos)
@@ -92,7 +100,7 @@ internal suspend fun synthesizeAndPlayVoiceResponse(
             TextToSpeechRequest(
                 text = text,
                 languageCode = request.languageCode,
-                speakerId = request.speakerId,
+                voice = TextToSpeechVoiceCondition.FixedSpeaker(request.speakerId),
                 speed = request.speechRate,
                 sentenceSilenceScale = 1f,
             ),

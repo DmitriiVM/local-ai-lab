@@ -22,6 +22,7 @@ value class ModelProfileId(val value: String) {
         val PIPER_VITS_TTS = ModelProfileId("PIPER_VITS_TTS")
         val KOKORO_TTS = ModelProfileId("KOKORO_TTS")
         val POCKET_TTS = ModelProfileId("POCKET_TTS")
+        val CHATTERBOX_TURBO_Q4 = ModelProfileId("CHATTERBOX_TURBO_Q4")
     }
 }
 
@@ -34,6 +35,7 @@ object ModelProfileIds {
     val PIPER_VITS_TTS = ModelProfileId("PIPER_VITS_TTS")
     val KOKORO_TTS = ModelProfileId("KOKORO_TTS")
     val POCKET_TTS = ModelProfileId("POCKET_TTS")
+    val CHATTERBOX_TURBO_Q4 = ModelProfileId("CHATTERBOX_TURBO_Q4")
 }
 
 /** Semantic role of an installed model file. Adapters may define additional roles. */
@@ -69,6 +71,12 @@ value class ModelFileRole(val value: String) {
         val VOCABULARY = ModelFileRole("VOCABULARY")
         val TOKEN_SCORES = ModelFileRole("TOKEN_SCORES")
         val REFERENCE_AUDIO = ModelFileRole("REFERENCE_AUDIO")
+        val SPEECH_ENCODER = ModelFileRole("SPEECH_ENCODER")
+        val EMBED_TOKENS = ModelFileRole("EMBED_TOKENS")
+        val LANGUAGE_MODEL = ModelFileRole("LANGUAGE_MODEL")
+        val CONDITIONAL_DECODER = ModelFileRole("CONDITIONAL_DECODER")
+        val EXTERNAL_DATA = ModelFileRole("EXTERNAL_DATA")
+        val TOKENIZER = ModelFileRole("TOKENIZER")
     }
 }
 
@@ -104,6 +112,28 @@ object ModelFileRoles {
     val VOCABULARY = ModelFileRole("VOCABULARY")
     val TOKEN_SCORES = ModelFileRole("TOKEN_SCORES")
     val REFERENCE_AUDIO = ModelFileRole("REFERENCE_AUDIO")
+    val SPEECH_ENCODER = ModelFileRole("SPEECH_ENCODER")
+    val EMBED_TOKENS = ModelFileRole("EMBED_TOKENS")
+    val LANGUAGE_MODEL = ModelFileRole("LANGUAGE_MODEL")
+    val CONDITIONAL_DECODER = ModelFileRole("CONDITIONAL_DECODER")
+    val EXTERNAL_DATA = ModelFileRole("EXTERNAL_DATA")
+    val TOKENIZER = ModelFileRole("TOKENIZER")
+}
+
+@Serializable
+enum class TtsVoiceMode {
+    SPEAKER_ID,
+    REFERENCE_AUDIO,
+}
+
+@Serializable
+enum class TtsControl {
+    LANGUAGE,
+    SPEAKER,
+    SPEECH_RATE,
+    SENTENCE_SILENCE,
+    REFERENCE_VOICE,
+    EXPRESSIVE_TAGS,
 }
 
 @Serializable
@@ -159,6 +189,14 @@ data class ModelManifest(
     val sampleRateHz: Int? = null,
     val speakerCount: Int? = null,
     val voices: List<TtsVoiceDescriptor> = emptyList(),
+    /** Defaults preserve schema-v2 manifests installed before reference-voice TTS existed. */
+    val ttsVoiceMode: TtsVoiceMode = TtsVoiceMode.SPEAKER_ID,
+    val ttsControls: Set<TtsControl> = setOf(
+        TtsControl.LANGUAGE,
+        TtsControl.SPEAKER,
+        TtsControl.SPEECH_RATE,
+        TtsControl.SENTENCE_SILENCE,
+    ),
     val contextSize: Int? = null,
     val approximateRamBytes: Long? = null,
     val catalogVersion: Int? = null,

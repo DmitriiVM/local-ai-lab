@@ -193,26 +193,127 @@ internal fun TextToSpeechVoiceSelector(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ChatterboxReferenceVoiceSelector(
+    state: TextToSpeechUiState,
+    enabled: Boolean,
+    onSelect: (String) -> Unit,
+    onRecord: () -> Unit,
+    onStopRecording: () -> Unit,
+    onImport: () -> Unit,
+    onDelete: (String) -> Unit,
+) {
+    var sheetVisible by remember { mutableStateOf(false) }
+    val selected = state.selectedVoice
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Reference voice", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Use only a voice you own or have permission to clone. References are stored as app-private mono 24 kHz PCM.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            if (state.operation in setOf(TtsOperation.RECORDING_REFERENCE, TtsOperation.STOPPING_REFERENCE)) {
+                val elapsed = state.referenceLevel?.elapsedMs ?: 0L
+                Text("Recording… %.1f / 10.0 s".format(elapsed / 1_000.0))
+                Button(
+                    onClick = onStopRecording,
+                    enabled = state.operation == TtsOperation.RECORDING_REFERENCE &&
+                        elapsed >= 5_000,
+                ) {
+                    Text(if (elapsed < 5_000) "Keep recording" else "Save reference")
+                }
+            } else {
+                OutlinedButton(
+                    onClick = { sheetVisible = true },
+                    enabled = enabled,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(selected?.displayName ?: "Choose a saved reference")
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = onRecord, enabled = enabled) { Text("Record voice") }
+                    OutlinedButton(onClick = onImport, enabled = enabled) { Text("Import audio") }
+                }
+            }
+        }
+    }
+    if (sheetVisible) {
+        ModalBottomSheet(onDismissRequest = { sheetVisible = false }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(bottom = 24.dp),
+            ) {
+                Text(
+                    "Saved reference voices",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                )
+                if (state.compatibleVoices.isEmpty()) {
+                    Text(
+                        "No saved references yet. Record or import 5–10 seconds of speech.",
+                        modifier = Modifier.padding(24.dp),
+                    )
+                }
+                LazyColumn(Modifier.fillMaxWidth().heightIn(max = 560.dp)) {
+                    items(state.compatibleVoices, key = TtsVoiceOption::id) { voice ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(enabled = enabled) {
+                                    onSelect(voice.id)
+                                    sheetVisible = false
+                                }
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = state.selectedVoiceId == voice.id, onClick = null)
+                            Column(Modifier.weight(1f)) {
+                                Text(voice.displayName)
+                                voice.description?.let {
+                                    Text(it, style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                            TextButton(
+                                onClick = { onDelete(voice.id) },
+                                enabled = enabled,
+                            ) { Text("Delete") }
+                        }
+                        HorizontalDivider()
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Composable
 internal fun TextToSpeechLanguageControls(
     selectedLanguage: TtsLanguage,
     enabled: Boolean,
     onSelectLanguage: (TtsLanguage) -> Unit,
     onApplySample: (TtsLanguage) -> Unit,
+    englishOnly: Boolean = false,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         TtsLanguage.entries.forEach { language ->
             FilterChip(
                 selected = selectedLanguage == language,
                 onClick = { onSelectLanguage(language) },
-                enabled = enabled,
+                // Chatterbox Turbo Q4 is English-only.
+                enabled = enabled && (!englishOnly || language == TtsLanguage.ENGLISH),
                 label = { Text(language.label) },
             )
         }
     }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         TtsLanguage.entries.forEach { language ->
-            TextButton(onClick = { onApplySample(language) }, enabled = enabled) {
+            TextButton(
+                onClick = { onApplySample(language) },
+                enabled = enabled && (!englishOnly || language == TtsLanguage.ENGLISH),
+            ) {
                 Text("${language.label} sample")
             }
         }
@@ -231,8 +332,12 @@ internal fun TextToSpeechSettings(
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("Supported controls", style = MaterialTheme.typography.titleMedium)
-            TextToSpeechParameterSlider("Speech rate", state.speed, "%.2f×".format(state.speed), 0.5f..2f, enabled, onSpeedChange)
-            TextToSpeechParameterSlider("Sentence silence", state.sentenceSilenceScale, "%.2f×".format(state.sentenceSilenceScale), 0f..2f, enabled, onSentenceSilenceChange)
+            if (state.supportsSpeechRate) {
+                TextToSpeechParameterSlider("Speech rate", state.speed, "%.2f×".format(state.speed), 0.5f..2f, enabled, onSpeedChange)
+            }
+            if (state.supportsSentenceSilence) {
+                TextToSpeechParameterSlider("Sentence silence", state.sentenceSilenceScale, "%.2f×".format(state.sentenceSilenceScale), 0f..2f, enabled, onSentenceSilenceChange)
+            }
             TextToSpeechParameterSlider("Playback volume", state.volume, "${(state.volume * 100).toInt()}%", 0f..1f, enabled, onVolumeChange)
             OutlinedTextField(
                 value = state.threadCount,

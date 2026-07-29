@@ -3,6 +3,7 @@ package com.dmitriim.localaiplayground.feature.voice.presentation
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.TtsVoiceMode
 import com.dmitriim.localaiplayground.feature.voice.domain.VoiceContextUsage as DomainVoiceContextUsage
 import com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent
 import com.dmitriim.localaiplayground.feature.voice.domain.VoiceTurnPhase
@@ -102,4 +103,5 @@ private fun isReadyChat(model: InstalledModel) =
 
 private fun isReadyVoice(model: InstalledModel) =
         model.validationState == ModelValidationState.READY &&
-        AiCapability.TEXT_TO_SPEECH in model.manifest.capabilities
+        AiCapability.TEXT_TO_SPEECH in model.manifest.capabilities &&
+        model.manifest.ttsVoiceMode == TtsVoiceMode.SPEAKER_ID

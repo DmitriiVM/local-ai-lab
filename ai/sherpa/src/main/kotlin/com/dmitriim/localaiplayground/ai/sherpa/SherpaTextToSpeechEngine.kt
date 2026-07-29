@@ -1,14 +1,16 @@
 package com.dmitriim.localaiplayground.ai.sherpa
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechEngine
+import com.dmitriim.localaiplayground.ai.api.TextToSpeechBackend
 import com.dmitriim.localaiplayground.ai.api.TextToSpeechLoadRequest
 import com.dmitriim.localaiplayground.ai.api.TextToSpeechLoadResult
 import com.dmitriim.localaiplayground.ai.api.TextToSpeechRequest
 import com.dmitriim.localaiplayground.ai.api.TextToSpeechResult
+import com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelProfileId
 import com.dmitriim.localaiplayground.core.model.ModelProfileIds
+import com.dmitriim.localaiplayground.core.model.EngineId
 import com.k2fsa.sherpa.onnx.GenerationConfig
 import com.k2fsa.sherpa.onnx.OfflineTts
 import com.k2fsa.sherpa.onnx.OfflineTtsConfig
@@ -17,9 +19,10 @@ import com.k2fsa.sherpa.onnx.OfflineTtsModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsPocketModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsSupertonicModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsVitsModelConfig
-import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import dev.zacsweers.metro.binding
 import java.io.File
 import java.io.RandomAccessFile
 import java.util.concurrent.atomic.AtomicBoolean
@@ -27,8 +30,9 @@ import kotlin.system.measureTimeMillis
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class)
-class SherpaTextToSpeechEngine : TextToSpeechEngine {
+@ContributesIntoSet(AppScope::class, binding = binding<TextToSpeechBackend>())
+class SherpaTextToSpeechEngine : TextToSpeechBackend {
+    override val engineId = EngineId("sherpa-onnx")
     private val lock = Any()
     private val cancelled = AtomicBoolean(false)
     private var tts: OfflineTts? = null
@@ -150,15 +154,17 @@ class SherpaTextToSpeechEngine : TextToSpeechEngine {
         require(request.sentenceSilenceScale in 0f..2f) {
             "Sentence silence must be between 0.0 and 2.0."
         }
+        val speaker = request.voice as? TextToSpeechVoiceCondition.FixedSpeaker
+            ?: error("Sherpa TTS requires a fixed speaker voice.")
         cancelled.set(false)
         Log.i(
             TAG,
             "Sherpa TTS synthesis started: textLength=${request.text.length}, language=${request.languageCode}, " +
-                "speaker=${request.speakerId}, speed=${request.speed}, silenceScale=${request.sentenceSilenceScale}",
+                "speaker=${speaker.speakerId}, speed=${request.speed}, silenceScale=${request.sentenceSilenceScale}",
         )
         val generationConfig = GenerationConfig().apply {
             speed = request.speed
-            sid = request.speakerId
+            sid = speaker.speakerId
             silenceScale = request.sentenceSilenceScale
             when (profile) {
                 ModelProfileIds.POCKET_TTS -> {

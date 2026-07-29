@@ -39,16 +39,21 @@ class PreviewSpeech(
             val model = modelResolver.resolveTextToSpeechModel(request.modelId).getOrThrow()
             val load = textToSpeechEngine.load(
                 TextToSpeechLoadRequest(
+                    engineId = model.engineId,
                     profileType = model.profileType,
                     modelDirectory = model.modelDirectory,
                     threadCount = request.settings.threadCount,
                 ),
             )
-            require(
-                request.settings.expectedSpeakerCount?.let { it == load.speakerCount } != false &&
-                    request.settings.speakerId < load.speakerCount,
-            ) {
-                "${request.voiceName} is unavailable in the installed ${model.displayName} bundle."
+            val fixedSpeaker = request.settings.voiceCondition as?
+                com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition.FixedSpeaker
+            if (fixedSpeaker != null) {
+                require(
+                    request.settings.expectedSpeakerCount?.let { it == load.speakerCount } != false &&
+                        load.speakerCount?.let { fixedSpeaker.speakerId < it } == true,
+                ) {
+                    "${request.voiceName} is unavailable in the installed ${model.displayName} bundle."
+                }
             }
             checkNotCancelled()
             val effectsEnabled = !request.settings.audioEffects.isNeutral
@@ -66,7 +71,7 @@ class PreviewSpeech(
                 TextToSpeechRequest(
                     text = request.text,
                     languageCode = request.settings.languageCode,
-                    speakerId = request.settings.speakerId,
+                    voice = request.settings.voiceCondition,
                     speed = request.settings.speed,
                     sentenceSilenceScale = request.settings.sentenceSilenceScale,
                 ),
@@ -101,11 +106,7 @@ class PreviewSpeech(
             }
             throw error
         } finally {
-            try {
-                runCatching { textToSpeechEngine.unload() }
-            } finally {
-                if (playbackOpen) player.release(completed = completed)
-            }
+            if (playbackOpen) player.release(completed = completed)
         }
     }
 

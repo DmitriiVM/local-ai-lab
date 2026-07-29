@@ -18,10 +18,12 @@ import java.util.UUID
 /** Owns session-scoped temporary STT input and delegates each audio concern. */
 @Inject
 @SingleIn(AppScope::class)
-class AudioInputStore(private val application: Application) {
+class AudioInputStore(
+    private val application: Application,
+    private val microphoneCapture: MicrophoneCapture,
+    private val decoder: PlatformAudioDecoder,
+) {
     private val directory = File(application.cacheDir, "stt-inputs")
-    private val microphoneCapture = MicrophoneCapture(application)
-    private val decoder = PlatformAudioDecoder(application)
 
     init {
         directory.mkdirs()

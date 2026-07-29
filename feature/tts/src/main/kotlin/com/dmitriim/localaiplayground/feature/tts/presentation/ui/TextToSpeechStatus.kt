@@ -68,6 +68,19 @@ internal fun TextToSpeechMetricsCard(metrics: SpeechSynthesisMetrics) {
                 "${metrics.sampleRateHz} Hz · underruns: ${metrics.playbackUnderrunCount} · " +
                     "load: ${formatDuration(metrics.loadDurationMs)} · threads: ${metrics.effectiveThreadCount}",
             )
+            if (metrics.conditioningDurationMs != null) {
+                Text(
+                    "Chatterbox conditioning: ${formatDuration(metrics.conditioningDurationMs)} " +
+                        "(${if (metrics.conditioningCacheHit == true) "cache hit" else "encoded"}) · " +
+                        "tokens: ${formatOptionalDuration(metrics.tokenGenerationDurationMs)} · " +
+                        "decoder: ${formatOptionalDuration(metrics.decoderDurationMs)}",
+                )
+                Text("Generated speech tokens: ${metrics.generatedTokenCount ?: "—"}")
+                Text(
+                    "Peak process PSS: ${metrics.peakProcessPssBytes?.toMebibytes() ?: "—"} · " +
+                        "device available: ${metrics.availableDeviceMemoryBytes?.toMebibytes() ?: "—"}",
+                )
+            }
             if (metrics.timeToFirstPresentationMs == null) {
                 Text(
                     "This audio route did not expose a reliable presentation timestamp; callback time is not substituted.",
@@ -85,3 +98,5 @@ private fun formatDuration(durationMs: Long): String {
     val millis = durationMs % 1_000
     return "%d:%02d.%03d".format(seconds / 60, seconds % 60, millis)
 }
+
+private fun Long.toMebibytes(): String = "%.1f MiB".format(toDouble() / 1_048_576)

@@ -6,6 +6,8 @@ import dev.zacsweers.metro.createGraphFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import android.content.ComponentCallbacks2
 
 class LocalAiPlaygroundApplication : Application() {
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -22,4 +24,11 @@ class LocalAiPlaygroundApplication : Application() {
         graph.modelTransfers
     }
 
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+            graph.textToSpeechEngine.cancel()
+            applicationScope.launch { graph.textToSpeechEngine.unload() }
+        }
+    }
 }

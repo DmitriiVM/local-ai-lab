@@ -28,6 +28,10 @@ fun TextToSpeechScreen(
     onSelectModel: (ModelId) -> Unit,
     onSelectVoice: (String) -> Unit,
     onPreviewVoice: (String) -> Unit,
+    onRecordReference: () -> Unit,
+    onStopReferenceRecording: () -> Unit,
+    onImportReference: () -> Unit,
+    onDeleteReference: (String) -> Unit,
     onTextChange: (String) -> Unit,
     onSelectLanguage: (TtsLanguage) -> Unit,
     onApplySample: (TtsLanguage) -> Unit,
@@ -77,19 +81,39 @@ fun TextToSpeechScreen(
         )
 
         TextToSpeechModelPicker(state.models, state.selectedModelId, !busy, onSelectModel)
-        TextToSpeechVoiceSelector(
-            visible = state.selectedModel?.voices?.size?.let { it > 1 } == true,
-            voices = state.compatibleVoices,
-            selectedId = state.selectedVoiceId,
-            language = state.language,
-            enabled = !busy,
-            operation = state.operation,
-            previewVoiceId = state.previewVoiceId,
-            hasPreviewText = state.text.isNotBlank(),
-            onSelect = onSelectVoice,
-            onPreview = onPreviewVoice,
-            onStopPreview = onStop,
-        )
+        if (state.usesReferenceVoice) {
+            ChatterboxReferenceVoiceSelector(
+                state = state,
+                enabled = !busy,
+                onSelect = onSelectVoice,
+                onRecord = onRecordReference,
+                onStopRecording = onStopReferenceRecording,
+                onImport = onImportReference,
+                onDelete = onDeleteReference,
+            )
+            Text(
+                "Expressive tags: [laugh], [chuckle], [cough], [sigh], [whispering], [happy], [angry], [dramatic], and more.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(
+                "Generated output: Not watermarked",
+                style = MaterialTheme.typography.labelLarge,
+            )
+        } else {
+            TextToSpeechVoiceSelector(
+                visible = state.selectedModel?.voices?.size?.let { it > 1 } == true,
+                voices = state.compatibleVoices,
+                selectedId = state.selectedVoiceId,
+                language = state.language,
+                enabled = !busy,
+                operation = state.operation,
+                previewVoiceId = state.previewVoiceId,
+                hasPreviewText = state.text.isNotBlank(),
+                onSelect = onSelectVoice,
+                onPreview = onPreviewVoice,
+                onStopPreview = onStop,
+            )
+        }
 
         OutlinedTextField(
             value = state.text,
@@ -107,7 +131,13 @@ fun TextToSpeechScreen(
             Text("Synthesize & play")
         }
 
-        TextToSpeechLanguageControls(state.language, !busy, onSelectLanguage, onApplySample)
+        TextToSpeechLanguageControls(
+            state.language,
+            !busy,
+            onSelectLanguage,
+            onApplySample,
+            englishOnly = state.usesReferenceVoice,
+        )
         TextToSpeechSettings(
             state = state,
             enabled = !busy,

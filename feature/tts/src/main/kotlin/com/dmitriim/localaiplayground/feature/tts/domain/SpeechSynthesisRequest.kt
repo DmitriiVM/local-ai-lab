@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.feature.tts.domain
 
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
 import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition
 
 data class SpeechSynthesisRequest(
     val modelId: ModelId,
@@ -11,7 +12,7 @@ data class SpeechSynthesisRequest(
 
 data class SpeechSynthesisSettings(
     val languageCode: String,
-    val speakerId: Int,
+    val voiceCondition: TextToSpeechVoiceCondition,
     val voiceName: String? = null,
     val expectedSpeakerCount: Int? = null,
     val speed: Float,
@@ -22,7 +23,9 @@ data class SpeechSynthesisSettings(
 ) {
     fun validate() {
         require(languageCode in setOf("en", "ru", "zh")) { "Select a supported language." }
-        require(speakerId >= 0) { "Speaker ID cannot be negative." }
+        if (voiceCondition is TextToSpeechVoiceCondition.FixedSpeaker) {
+            require(voiceCondition.speakerId >= 0) { "Speaker ID cannot be negative." }
+        }
         require(expectedSpeakerCount == null || expectedSpeakerCount > 0) {
             "Voice metadata must declare at least one speaker."
         }

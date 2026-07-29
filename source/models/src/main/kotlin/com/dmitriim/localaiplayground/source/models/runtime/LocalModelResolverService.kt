@@ -61,10 +61,14 @@ class LocalModelResolverService(
         TextToSpeechModelReference(
             modelId = modelId,
             displayName = manifest.displayName,
+            engineId = manifest.engineId,
             profileType = manifest.profileType,
             modelDirectory = directory.absolutePath,
             sampleRateHz = manifest.sampleRateHz ?: 44_100,
             languages = manifest.languages,
+            speakerCount = manifest.speakerCount,
+            voiceMode = manifest.ttsVoiceMode,
+            supportedControls = manifest.ttsControls,
         )
     }
 }

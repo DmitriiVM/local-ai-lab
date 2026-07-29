@@ -37,7 +37,7 @@ class SynthesizeSpeech(
         Log.i(
             TAG,
             "TTS synthesis requested: modelId=${request.modelId.value}, textLength=${request.text.length}, " +
-                "language=${request.settings.languageCode}, speaker=${request.settings.speakerId}, " +
+                "language=${request.settings.languageCode}, voice=${request.settings.voiceCondition}, " +
                 "speed=${request.settings.speed}, silenceScale=${request.settings.sentenceSilenceScale}, " +
                 "volume=${request.settings.volume}, requestedThreads=${request.settings.threadCount}, " +
                 "audioEffects=${request.settings.audioEffects}",
@@ -56,6 +56,7 @@ class SynthesizeSpeech(
             Log.i(TAG, "TTS model resolved: name=${model.displayName}, directory=${model.modelDirectory}")
             val load = textToSpeechEngine.load(
                 TextToSpeechLoadRequest(
+                    engineId = model.engineId,
                     profileType = model.profileType,
                     modelDirectory = model.modelDirectory,
                     threadCount = request.settings.threadCount,
@@ -67,11 +68,15 @@ class SynthesizeSpeech(
                     "threads=${load.effectiveThreadCount}, sampleRateHz=${load.sampleRateHz}, " +
                     "speakers=${load.speakerCount}",
             )
-            require(
-                request.settings.expectedSpeakerCount?.let { it == load.speakerCount } != false &&
-                    request.settings.speakerId < load.speakerCount,
-            ) {
-                "${request.settings.voiceName ?: "The selected voice"} is unavailable in the installed ${model.displayName} bundle."
+            val fixedSpeaker = request.settings.voiceCondition as?
+                com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition.FixedSpeaker
+            if (fixedSpeaker != null) {
+                require(
+                    request.settings.expectedSpeakerCount?.let { it == load.speakerCount } != false &&
+                        load.speakerCount?.let { fixedSpeaker.speakerId < it } == true,
+                ) {
+                    "${request.settings.voiceName ?: "The selected voice"} is unavailable in the installed ${model.displayName} bundle."
+                }
             }
             emit(
                 SpeechSynthesisEvent.Prepared(
@@ -125,7 +130,7 @@ class SynthesizeSpeech(
                     TextToSpeechRequest(
                         text = request.text,
                         languageCode = request.settings.languageCode,
-                        speakerId = request.settings.speakerId,
+                        voice = request.settings.voiceCondition,
                         speed = request.settings.speed,
                         sentenceSilenceScale = request.settings.sentenceSilenceScale,
                     ),
@@ -211,6 +216,13 @@ class SynthesizeSpeech(
                         playbackUnderrunCount = playbackMetrics.underrunCount,
                         loadDurationMs = load.loadDurationMs,
                         effectiveThreadCount = load.effectiveThreadCount,
+                        conditioningDurationMs = result.stageMetrics.conditioningDurationMs,
+                        tokenGenerationDurationMs = result.stageMetrics.tokenGenerationDurationMs,
+                        decoderDurationMs = result.stageMetrics.decoderDurationMs,
+                        generatedTokenCount = result.stageMetrics.generatedTokenCount,
+                        conditioningCacheHit = result.stageMetrics.conditioningCacheHit,
+                        peakProcessPssBytes = result.stageMetrics.peakProcessPssBytes,
+                        availableDeviceMemoryBytes = result.stageMetrics.availableDeviceMemoryBytes,
                     ),
                 ),
             )
@@ -218,7 +230,6 @@ class SynthesizeSpeech(
             Log.e(TAG, "TTS synthesis flow failed: ${error.message}", error)
             throw error
         } finally {
-            runCatching { textToSpeechEngine.unload() }
             if (!completed) {
                 generatedAudioStore.discardPartial()
                 player.release(completed = false)
@@ -274,6 +285,8 @@ class SynthesizeSpeech(
         textToSpeechEngine.cancel()
         player.stop()
     }
+
+    fun unloadRuntime() = textToSpeechEngine.unload()
 
     private fun nanosToMillis(nanos: Long): Long = nanos.coerceAtLeast(0) / 1_000_000L
 

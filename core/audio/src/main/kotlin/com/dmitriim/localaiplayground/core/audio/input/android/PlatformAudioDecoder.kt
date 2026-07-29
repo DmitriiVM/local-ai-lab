@@ -7,16 +7,21 @@ import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.net.Uri
 import android.util.Log
+import com.dmitriim.localaiplayground.core.di.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-internal data class DecodedAudio(val frames: Long, val mimeType: String)
+data class DecodedAudio(val frames: Long, val mimeType: String)
 
 /** Decodes a document with platform codecs, downmixes it, then resamples it to PCM16. */
-internal class PlatformAudioDecoder(private val application: Application) {
+@Inject
+@SingleIn(AppScope::class)
+class PlatformAudioDecoder(private val application: Application) {
     fun decodeToMonoPcm(uri: Uri, output: File, targetRateHz: Int): DecodedAudio {
         Log.i(TAG, "Audio import decode requested: uriScheme=${uri.scheme}, targetRateHz=$targetRateHz")
         val extractor = MediaExtractor()

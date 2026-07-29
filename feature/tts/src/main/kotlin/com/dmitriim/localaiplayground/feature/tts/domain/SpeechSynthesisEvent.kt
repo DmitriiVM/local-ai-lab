@@ -8,7 +8,7 @@ sealed interface SpeechSynthesisEvent {
         val loadDurationMs: Long,
         val effectiveThreadCount: Int,
         val sampleRateHz: Int,
-        val speakerCount: Int,
+        val speakerCount: Int?,
     ) : SpeechSynthesisEvent
 
     data class Synthesized(
@@ -33,4 +33,11 @@ data class SpeechSynthesisMetrics(
     val playbackUnderrunCount: Int,
     val loadDurationMs: Long,
     val effectiveThreadCount: Int,
+    val conditioningDurationMs: Long? = null,
+    val tokenGenerationDurationMs: Long? = null,
+    val decoderDurationMs: Long? = null,
+    val generatedTokenCount: Int? = null,
+    val conditioningCacheHit: Boolean? = null,
+    val peakProcessPssBytes: Long? = null,
+    val availableDeviceMemoryBytes: Long? = null,
 )

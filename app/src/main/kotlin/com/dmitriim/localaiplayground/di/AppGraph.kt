@@ -11,6 +11,7 @@ import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 import kotlinx.coroutines.CoroutineScope
+import com.dmitriim.localaiplayground.ai.api.TextToSpeechEngine
 
 @DependencyGraph(AppScope::class)
 interface AppGraph : ViewModelGraph {
@@ -18,6 +19,7 @@ interface AppGraph : ViewModelGraph {
     val foregroundOperationCoordinator: ForegroundOperationCoordinator
     val modelTransfers: ModelTransfers
     val settingsRepository: AppSettingsRepository
+    val textToSpeechEngine: TextToSpeechEngine
 
     @get:ApplicationCoroutineScope
     val applicationScope: CoroutineScope

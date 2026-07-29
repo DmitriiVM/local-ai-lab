@@ -17,6 +17,7 @@ room = "2.8.4"
 work = "2.11.2"
 commonsCompress = "1.28.0"
 datastore = "1.2.1"
+onnxRuntime = "1.27.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -52,6 +53,7 @@ metro-runtime = { group = "dev.zacsweers.metro", name = "runtime", version.ref =
 metrox-viewmodel = { group = "dev.zacsweers.metro", name = "metrox-viewmodel", version.ref = "metro" }
 metrox-viewmodel-compose = { group = "dev.zacsweers.metro", name = "metrox-viewmodel-compose", version.ref = "metro" }
 commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commonsCompress" }
+onnxruntime-android = { group = "com.microsoft.onnxruntime", name = "onnxruntime-android", version.ref = "onnxRuntime" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -53,8 +53,12 @@ data class SpeechToTextModelReference(
 data class TextToSpeechModelReference(
     val modelId: ModelId,
     val displayName: String,
+    val engineId: EngineId,
     val profileType: ModelProfileId,
     val modelDirectory: String,
     val sampleRateHz: Int,
     val languages: Set<String>,
+    val speakerCount: Int?,
+    val voiceMode: TtsVoiceMode,
+    val supportedControls: Set<TtsControl>,
 )

@@ -10,6 +10,9 @@ import android.media.MediaRecorder
 import android.util.Log
 import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
+import com.dmitriim.localaiplayground.core.di.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -20,7 +23,9 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 
 /** Sole owner of the active [AudioRecord] session. */
-internal class MicrophoneCapture(private val application: Application) {
+@Inject
+@SingleIn(AppScope::class)
+class MicrophoneCapture(private val application: Application) {
     private val lock = Any()
     @Volatile private var activeRecord: AudioRecord? = null
     @Volatile private var capturing = false

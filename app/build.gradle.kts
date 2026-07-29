@@ -19,6 +19,9 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -42,6 +45,7 @@ android {
 
 dependencies {
     implementation(project(":ai:api"))
+    implementation(project(":ai:chatterbox"))
     implementation(project(":ai:llamacpp"))
     implementation(project(":ai:sherpa"))
     implementation(project(":ai:system"))

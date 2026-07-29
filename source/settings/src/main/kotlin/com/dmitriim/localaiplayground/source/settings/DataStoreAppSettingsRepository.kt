@@ -88,6 +88,19 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
         }
     }
 
+    override suspend fun clearTtsVoice(modelId: String) {
+        store.edit { values ->
+            val selections = values[TTS_VOICE_SELECTIONS].orEmpty()
+                .mapNotNull(::decodeVoiceSelection)
+                .toMap()
+                .toMutableMap()
+                .apply { remove(modelId) }
+            values[TTS_VOICE_SELECTIONS] = selections.mapTo(mutableSetOf()) { (savedModelId, savedVoiceId) ->
+                encodeVoiceSelection(savedModelId, savedVoiceId)
+            }
+        }
+    }
+
     private inline fun <reified T : Enum<T>> String.asEnum(default: T): T =
         enumValues<T>().firstOrNull { it.name == this } ?: default
 
