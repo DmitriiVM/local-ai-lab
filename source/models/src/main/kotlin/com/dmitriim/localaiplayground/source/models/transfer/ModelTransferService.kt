@@ -3,6 +3,7 @@ package com.dmitriim.localaiplayground.source.models.transfer
 import android.app.Application
 import android.util.Log
 import com.dmitriim.localaiplayground.core.model.CatalogDownloadArchive
+import com.dmitriim.localaiplayground.core.model.CatalogArchiveFormat
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.CatalogDownloadFile
 import com.dmitriim.localaiplayground.core.model.CatalogModel
@@ -26,6 +27,7 @@ import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URI
 import java.util.UUID
+import java.util.zip.ZipInputStream
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -184,7 +186,10 @@ class ModelTransferService(
         require(archive.expectedBytes == entry.download.expectedBytes) {
             "The catalog archive size does not match the download total."
         }
-        val archiveFile = File(temporary, "download.tar.bz2")
+        val archiveFile = File(
+            temporary,
+            if (archive.format == CatalogArchiveFormat.ZIP) "download.zip" else "download.tar.bz2",
+        )
         Log.i(TAG, "Catalog archive download started: modelId=${entry.manifest.modelId.value}, bytes=${archive.expectedBytes}")
         downloadTo(
             archive.url,
@@ -196,7 +201,10 @@ class ModelTransferService(
         )
         require(archiveFile.length() == archive.expectedBytes) { "Downloaded archive size does not match the catalog." }
         require(archiveFile.sha256().equals(archive.sha256, ignoreCase = true)) { "Downloaded archive checksum does not match the catalog." }
-        extractTarBzip2(archiveFile, temporary, archive.rootDirectory)
+        when (archive.format) {
+            CatalogArchiveFormat.TAR_BZIP2 -> extractTarBzip2(archiveFile, temporary, archive.rootDirectory)
+            CatalogArchiveFormat.ZIP -> extractZip(archiveFile, temporary, archive.rootDirectory)
+        }
         require(archiveFile.delete()) { "Could not remove the verified model archive." }
         Log.i(TAG, "Catalog archive extracted: modelId=${entry.manifest.modelId.value}, root=${archive.rootDirectory}")
     }
@@ -211,7 +219,7 @@ class ModelTransferService(
                 while (true) {
                     coroutineContext.ensureActive()
                     val entry = tar.nextEntry ?: break
-                    val archivePath = entry.name.replace('\\', '/')
+                    val archivePath = entry.name.normalizedArchivePath()
                     require(archivePath == rootDirectory || archivePath.startsWith("$rootDirectory/")) {
                         "The model archive contains an unexpected path."
                     }
@@ -256,6 +264,64 @@ class ModelTransferService(
         }
         require(extractedFiles > 0) { "The model archive does not contain any files." }
     }
+
+    private suspend fun extractZip(archive: File, destinationRoot: File, rootDirectory: String) {
+        require(rootDirectory.isNotBlank() && !rootDirectory.contains('/') && !rootDirectory.contains('\\')) {
+            "The catalog archive root is unsafe."
+        }
+        var extractedFiles = 0
+        ZipInputStream(archive.inputStream().buffered()).use { zip ->
+            while (true) {
+                coroutineContext.ensureActive()
+                val entry = zip.nextEntry ?: break
+                val archivePath = entry.name.normalizedArchivePath()
+                require(archivePath == rootDirectory || archivePath.startsWith("$rootDirectory/")) {
+                    "The model archive contains an unexpected path."
+                }
+                val relativePath = archivePath
+                    .removePrefix(rootDirectory)
+                    .removePrefix("/")
+                    .trimEnd('/')
+                if (relativePath.isBlank()) {
+                    require(entry.isDirectory) { "The model archive contains an unsafe root entry." }
+                    zip.closeEntry()
+                    continue
+                }
+                require(relativePath.split('/').none { it in setOf("", ".", "..") }) {
+                    "The model archive contains an unsafe path."
+                }
+                val destination = File(destinationRoot, relativePath)
+                require(destination.canonicalPath.startsWith(destinationRoot.canonicalPath + File.separator)) {
+                    "The model archive contains an unsafe path."
+                }
+                if (entry.isDirectory) {
+                    require(destination.mkdirs() || destination.isDirectory) {
+                        "Could not create an extracted model directory."
+                    }
+                } else {
+                    require(!destination.exists()) { "The model archive contains duplicate paths." }
+                    val parent = requireNotNull(destination.parentFile)
+                    require(parent.isDirectory || parent.mkdirs()) { "Could not create an extracted model directory." }
+                    FileOutputStream(destination).use { output ->
+                        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                        while (true) {
+                            coroutineContext.ensureActive()
+                            val read = zip.read(buffer)
+                            if (read < 0) break
+                            output.write(buffer, 0, read)
+                        }
+                    }
+                    extractedFiles += 1
+                }
+                zip.closeEntry()
+            }
+        }
+        require(extractedFiles > 0) { "The model archive does not contain any files." }
+    }
+
+    /** Tar tools commonly emit a harmless "./" prefix; root and traversal checks run after removing it. */
+    private fun String.normalizedArchivePath(): String =
+        replace('\\', '/').removePrefix("./")
 
     private suspend fun downloadTo(
         url: String,

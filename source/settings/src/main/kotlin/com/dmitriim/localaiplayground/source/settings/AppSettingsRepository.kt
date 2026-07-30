@@ -6,12 +6,14 @@ interface AppSettingsRepository {
     val settings: Flow<AppSettings>
     val ttsDraft: Flow<String?>
     val ttsSelection: Flow<TtsSelectionPreferences>
+    val sttSelectedModel: Flow<String?>
 
     suspend fun update(settings: AppSettings)
     suspend fun updateTtsDraft(text: String)
     suspend fun updateTtsSelectedModel(modelId: String)
     suspend fun updateTtsVoice(modelId: String, voiceId: String)
     suspend fun clearTtsVoice(modelId: String)
+    suspend fun updateSttSelectedModel(modelId: String)
 }
 
 data class TtsSelectionPreferences(

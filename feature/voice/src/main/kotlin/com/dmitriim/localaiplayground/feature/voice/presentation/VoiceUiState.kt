@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.feature.voice.presentation
 
 import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
 import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.EngineId
 import com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineMetrics
 import java.util.UUID
 
@@ -52,6 +53,7 @@ data class VoiceUiState(
 data class VoiceModelOption(
     val id: ModelId,
     val displayName: String,
+    val engineId: EngineId,
     val languages: Set<String>,
     val approximateRamBytes: Long?,
 )

@@ -8,9 +8,6 @@ import com.k2fsa.sherpa.onnx.OfflineTtsConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsSupertonicModelConfig
 import com.k2fsa.sherpa.onnx.OfflineWhisperModelConfig
-import com.k2fsa.sherpa.onnx.SileroVadModelConfig
-import com.k2fsa.sherpa.onnx.Vad
-import com.k2fsa.sherpa.onnx.VadModelConfig
 import java.io.File
 import java.io.RandomAccessFile
 import kotlin.system.measureTimeMillis
@@ -23,11 +20,6 @@ data class StageZeroSttResult(
 data class StageZeroTtsResult(
     val sampleRate: Int,
     val sampleCount: Int,
-    val durationMs: Long,
-)
-
-data class StageZeroVadResult(
-    val detectedSpeech: Boolean,
     val durationMs: Long,
 )
 
@@ -105,42 +97,6 @@ object StageZeroSherpa {
             return result.copy(durationMs = duration)
         } finally {
             tts.release()
-        }
-    }
-
-    fun probeSileroVad(modelFile: File, wavFile: File): StageZeroVadResult {
-        require(modelFile.isFile) { "Silero VAD model is missing: ${modelFile.name}" }
-        val audio = PcmWave.read(wavFile)
-        require(audio.sampleRate == 16_000) { "Silero Stage 0 sample must be 16 kHz" }
-        val vad = Vad(null,
-            VadModelConfig().apply {
-                sileroVadModelConfig = SileroVadModelConfig().apply {
-                    model = modelFile.absolutePath
-                    windowSize = 512
-                }
-                sampleRate = audio.sampleRate
-                numThreads = 1
-                provider = "cpu"
-                debug = false
-            },
-        )
-        try {
-            var detectedSpeech = false
-            val duration = measureTimeMillis {
-                var offset = 0
-                while (offset + 512 <= audio.samples.size) {
-                    vad.acceptWaveform(audio.samples.copyOfRange(offset, offset + 512))
-                    detectedSpeech = detectedSpeech || vad.isSpeechDetected()
-                    while (!vad.empty()) vad.pop()
-                    offset += 512
-                }
-                vad.flush()
-                detectedSpeech = detectedSpeech || !vad.empty()
-                while (!vad.empty()) vad.pop()
-            }
-            return StageZeroVadResult(detectedSpeech = detectedSpeech, durationMs = duration)
-        } finally {
-            vad.release()
         }
     }
 

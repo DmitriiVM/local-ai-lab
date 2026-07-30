@@ -17,6 +17,7 @@ import com.dmitriim.localaiplayground.feature.voice.domain.VoiceAssistantCoordin
 import com.dmitriim.localaiplayground.feature.voice.domain.CompletedVoiceTurn
 import com.dmitriim.localaiplayground.feature.voice.domain.PersistVoiceTurn
 import com.dmitriim.localaiplayground.feature.voice.domain.VoiceConversationSnapshot
+import com.dmitriim.localaiplayground.ai.api.SystemSpeechToTextSupport
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -43,6 +44,7 @@ class VoiceViewModel(
     private val runRepository: RunRepository,
     private val persistVoiceTurn: PersistVoiceTurn,
     private val replayStore: RunReplayStore,
+    private val systemSpeechSupport: SystemSpeechToTextSupport,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(VoiceUiState())
     val state: StateFlow<VoiceUiState> = mutableState.asStateFlow()
@@ -52,7 +54,12 @@ class VoiceViewModel(
     init {
         viewModelScope.launch {
             modelLibrary.installedModels.collectLatest { installed ->
-                mutableState.update { it.withAvailableModels(installed) }
+                mutableState.update {
+                    it.withAvailableModels(
+                        installed,
+                        includeAndroidRecognizer = systemSpeechSupport.isOnDeviceRecognizerAvailable,
+                    )
+                }
             }
         }
         viewModelScope.launch {
@@ -277,9 +284,9 @@ class VoiceViewModel(
             response = final.streamingResponse,
             conversation = final.conversation.map { VoiceConversationSnapshot(it.id, it.userText, it.assistantText) },
             metrics = metrics,
-            speechModel = snapshot.selectedSpeechModel?.let { RunModelSnapshot(it.id.value, it.displayName, "sherpa-onnx") },
-            chatModel = snapshot.selectedChatModel?.let { RunModelSnapshot(it.id.value, it.displayName, "llama.cpp") },
-            voiceModel = snapshot.selectedVoiceModel?.let { RunModelSnapshot(it.id.value, it.displayName, "sherpa-onnx") },
+            speechModel = snapshot.selectedSpeechModel?.let { RunModelSnapshot(it.id.value, it.displayName, it.engineId.value) },
+            chatModel = snapshot.selectedChatModel?.let { RunModelSnapshot(it.id.value, it.displayName, it.engineId.value) },
+            voiceModel = snapshot.selectedVoiceModel?.let { RunModelSnapshot(it.id.value, it.displayName, it.engineId.value) },
         )
     }
 

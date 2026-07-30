@@ -17,7 +17,14 @@ value class ModelProfileId(val value: String) {
     companion object {
         val LLM = ModelProfileId("LLM")
         val WHISPER_STT = ModelProfileId("WHISPER_STT")
-        val SILERO_VAD = ModelProfileId("SILERO_VAD")
+        val PARAKEET_CTC_STT = ModelProfileId("PARAKEET_CTC_STT")
+        val GIGAAM_CTC_STT = ModelProfileId("GIGAAM_CTC_STT")
+        val ZIPFORMER_STT = ModelProfileId("ZIPFORMER_STT")
+        val SENSE_VOICE_STT = ModelProfileId("SENSE_VOICE_STT")
+        val PARAFORMER_STT = ModelProfileId("PARAFORMER_STT")
+        val MOONSHINE_STT = ModelProfileId("MOONSHINE_STT")
+        val VOSK_STT = ModelProfileId("VOSK_STT")
+        val ANDROID_SPEECH_RECOGNIZER_STT = ModelProfileId("ANDROID_SPEECH_RECOGNIZER_STT")
         val SUPERTONIC_TTS = ModelProfileId("SUPERTONIC_TTS")
         val PIPER_VITS_TTS = ModelProfileId("PIPER_VITS_TTS")
         val KOKORO_TTS = ModelProfileId("KOKORO_TTS")
@@ -30,7 +37,14 @@ value class ModelProfileId(val value: String) {
 object ModelProfileIds {
     val LLM = ModelProfileId("LLM")
     val WHISPER_STT = ModelProfileId("WHISPER_STT")
-    val SILERO_VAD = ModelProfileId("SILERO_VAD")
+    val PARAKEET_CTC_STT = ModelProfileId("PARAKEET_CTC_STT")
+    val GIGAAM_CTC_STT = ModelProfileId("GIGAAM_CTC_STT")
+    val ZIPFORMER_STT = ModelProfileId("ZIPFORMER_STT")
+    val SENSE_VOICE_STT = ModelProfileId("SENSE_VOICE_STT")
+    val PARAFORMER_STT = ModelProfileId("PARAFORMER_STT")
+    val MOONSHINE_STT = ModelProfileId("MOONSHINE_STT")
+    val VOSK_STT = ModelProfileId("VOSK_STT")
+    val ANDROID_SPEECH_RECOGNIZER_STT = ModelProfileId("ANDROID_SPEECH_RECOGNIZER_STT")
     val SUPERTONIC_TTS = ModelProfileId("SUPERTONIC_TTS")
     val PIPER_VITS_TTS = ModelProfileId("PIPER_VITS_TTS")
     val KOKORO_TTS = ModelProfileId("KOKORO_TTS")
@@ -46,8 +60,9 @@ value class ModelFileRole(val value: String) {
         val PRIMARY_MODEL = ModelFileRole("PRIMARY_MODEL")
         val ENCODER = ModelFileRole("ENCODER")
         val DECODER = ModelFileRole("DECODER")
+        val JOINER = ModelFileRole("JOINER")
+        val MERGED_DECODER = ModelFileRole("MERGED_DECODER")
         val TOKENS = ModelFileRole("TOKENS")
-        val VAD_MODEL = ModelFileRole("VAD_MODEL")
         val DURATION_PREDICTOR = ModelFileRole("DURATION_PREDICTOR")
         val TEXT_ENCODER = ModelFileRole("TEXT_ENCODER")
         val VECTOR_ESTIMATOR = ModelFileRole("VECTOR_ESTIMATOR")
@@ -87,8 +102,9 @@ object ModelFileRoles {
     val PRIMARY_MODEL = ModelFileRole("PRIMARY_MODEL")
     val ENCODER = ModelFileRole("ENCODER")
     val DECODER = ModelFileRole("DECODER")
+    val JOINER = ModelFileRole("JOINER")
+    val MERGED_DECODER = ModelFileRole("MERGED_DECODER")
     val TOKENS = ModelFileRole("TOKENS")
-    val VAD_MODEL = ModelFileRole("VAD_MODEL")
     val DURATION_PREDICTOR = ModelFileRole("DURATION_PREDICTOR")
     val TEXT_ENCODER = ModelFileRole("TEXT_ENCODER")
     val VECTOR_ESTIMATOR = ModelFileRole("VECTOR_ESTIMATOR")
@@ -134,6 +150,16 @@ enum class TtsControl {
     SENTENCE_SILENCE,
     REFERENCE_VOICE,
     EXPRESSIVE_TAGS,
+}
+
+@Serializable
+enum class SttRecognitionMode {
+    OFFLINE,
+    STREAMING,
+}
+
+object BuiltInSpeechToTextModels {
+    val ANDROID_SPEECH_RECOGNIZER = ModelId("android-on-device-speech-recognizer")
 }
 
 @Serializable
@@ -197,6 +223,8 @@ data class ModelManifest(
         TtsControl.SPEECH_RATE,
         TtsControl.SENTENCE_SILENCE,
     ),
+    /** Describes the native recognizer. The current STT screen still emits one final result per segment. */
+    val sttRecognitionMode: SttRecognitionMode = SttRecognitionMode.OFFLINE,
     val contextSize: Int? = null,
     val approximateRamBytes: Long? = null,
     val catalogVersion: Int? = null,

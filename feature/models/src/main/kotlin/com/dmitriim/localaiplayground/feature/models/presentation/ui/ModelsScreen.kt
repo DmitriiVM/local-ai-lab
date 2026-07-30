@@ -157,7 +157,6 @@ private enum class ModelTypeFilter(
     LLM(label = "LLM", capability = AiCapability.CHAT),
     TTS(label = "TTS", capability = AiCapability.TEXT_TO_SPEECH),
     STT(label = "STT", capability = AiCapability.SPEECH_TO_TEXT),
-    VAD(label = "VAD", capability = AiCapability.VOICE_ACTIVITY_DETECTION),
     ;
 
     fun matches(manifest: ModelManifest): Boolean = capability == null || capability in manifest.capabilities

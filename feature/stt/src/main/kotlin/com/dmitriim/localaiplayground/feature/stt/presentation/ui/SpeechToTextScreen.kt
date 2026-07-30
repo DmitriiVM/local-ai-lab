@@ -65,12 +65,12 @@ fun SpeechToTextScreen(
     ) {
         Text("Local speech to text", style = MaterialTheme.typography.headlineSmall)
         Text(
-            "Whisper Base runs entirely on-device. It is an offline model: recording shows live levels, then final text appears after you stop.",
+            "Choose the Android on-device recognizer or an installed speech model. Recording shows live levels, then final text appears after you stop.",
             style = MaterialTheme.typography.bodyMedium,
         )
         SpeechModelPicker(state.models, state.selectedModelId, enabled = !busy, onSelectModel)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SttLanguage.entries.forEach { language ->
+            state.availableLanguages.forEach { language ->
                 FilterChip(
                     selected = state.language == language,
                     onClick = { onSelectLanguage(language) },
@@ -110,7 +110,15 @@ fun SpeechToTextScreen(
         }
         state.errorMessage?.let { StatusMessage(title = "Speech to text needs attention", explanation = it) }
         if (state.operation == SttOperation.TRANSCRIBING) {
-            StatusMessage(title = "Transcribing locally", explanation = "Whisper is processing bounded 30-second audio segments. You can cancel at any time.")
+            val isAndroidRecognizer = state.selectedModel?.engineId?.value == "android-speech-recognizer"
+            StatusMessage(
+                title = if (isAndroidRecognizer) "Processing recording" else "Transcribing locally",
+                explanation = if (isAndroidRecognizer) {
+                    "Recording has stopped. Android SpeechRecognizer is receiving the captured audio in real time, so this takes about as long as the recording."
+                } else {
+                    "${state.selectedModel?.displayName.orEmpty()} is processing bounded 30-second audio segments. You can cancel at any time."
+                },
+            )
         }
         if (state.transcript.isNotBlank()) {
             Card(modifier = Modifier.fillMaxWidth()) {
@@ -140,10 +148,17 @@ fun SpeechToTextScreen(
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Run metrics", style = MaterialTheme.typography.titleMedium)
                     Text("Audio: ${formatDuration(metrics.audioDurationMs)} · processing: ${formatDuration(metrics.processingDurationMs)}")
-                    Text("First partial: — (offline model) · final result: ${formatDuration(metrics.timeToFinalMs)}")
+                    Text("First partial: — · final result: ${formatDuration(metrics.timeToFinalMs)}")
                     Text("RTF: ${metrics.realTimeFactor?.let { "%.2f".format(it) } ?: "—"}")
                     Text("Segments: ${metrics.segmentCount} · model load: ${formatDuration(metrics.loadDurationMs)} · threads: ${metrics.effectiveThreadCount}")
-                    Text("Partial results: unavailable for this offline Whisper profile.", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        if (state.selectedModel?.recognitionMode == com.dmitriim.localaiplayground.core.model.SttRecognitionMode.STREAMING) {
+                            "This model supports streaming; the current screen finalizes each captured segment after recording stops."
+                        } else {
+                            "This model uses offline segment decoding."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
             }
         }
@@ -162,7 +177,7 @@ private fun SpeechModelPicker(
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text("Speech model", style = MaterialTheme.typography.labelLarge)
         OutlinedButton(onClick = { expanded = true }, enabled = enabled && models.isNotEmpty()) {
-            Text(selected?.displayName ?: "Install Whisper Base INT8 in Models")
+            Text(selected?.displayName ?: "Install a speech model in Models")
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             models.forEach { model ->
@@ -190,7 +205,15 @@ private fun RecordingControls(
         when (operation) {
             SttOperation.RECORDING -> Button(onClick = onStop) { Text("Stop recording") }
             SttOperation.STOPPING -> OutlinedButton(onClick = {}, enabled = false) { Text("Stopping…") }
-            SttOperation.IMPORTING, SttOperation.TRANSCRIBING, SttOperation.CANCELLING -> Button(onClick = onCancel) { Text("Cancel") }
+            SttOperation.IMPORTING -> {
+                OutlinedButton(onClick = {}, enabled = false) { Text("Importing…") }
+                TextButton(onClick = onCancel) { Text("Cancel import") }
+            }
+            SttOperation.TRANSCRIBING -> {
+                OutlinedButton(onClick = {}, enabled = false) { Text("Transcribing…") }
+                TextButton(onClick = onCancel) { Text("Cancel transcription") }
+            }
+            SttOperation.CANCELLING -> OutlinedButton(onClick = {}, enabled = false) { Text("Cancelling…") }
             SttOperation.IDLE -> {
                 Button(onClick = onStart) { Text("Record") }
                 OutlinedButton(onClick = onImport) { Text("Import audio") }

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
-/** Runs one complete local Whisper transcription and reports domain events. */
+/** Runs one complete local transcription and reports domain events. */
 @Inject
 class TranscribeAudio(
     private val modelResolver: LocalModelResolver,
@@ -34,8 +34,10 @@ class TranscribeAudio(
             Log.i(TAG, "STT model resolved: name=${model.displayName}, directory=${model.modelDirectory}")
             val load = speechEngine.load(
                 SpeechToTextLoadRequest(
+                    engineId = model.engineId,
                     profileType = model.profileType,
                     modelDirectory = model.modelDirectory,
+                    files = model.files,
                     languageCode = effectiveSettings.languageCode,
                     threadCount = effectiveSettings.threadCount,
                 ),

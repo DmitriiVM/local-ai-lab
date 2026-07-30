@@ -6,6 +6,9 @@ import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.AiCapability
+import com.dmitriim.localaiplayground.core.model.EngineId
+import com.dmitriim.localaiplayground.core.model.SttRecognitionMode
+import com.dmitriim.localaiplayground.core.model.BuiltInSpeechToTextModels
 import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionMetrics
 
 data class SpeechToTextUiState(
@@ -21,13 +24,28 @@ data class SpeechToTextUiState(
     val errorMessage: String? = null,
 ) {
     val selectedModel: SpeechModelOption? get() = models.firstOrNull { it.id == selectedModelId }
+    val availableLanguages: List<SttLanguage>
+        get() = selectedModel?.supportedLanguages.orEmpty().ifEmpty { listOf(SttLanguage.ENGLISH) }
 }
 
-data class SpeechModelOption(val id: ModelId, val displayName: String, val languages: Set<String>)
+data class SpeechModelOption(
+    val id: ModelId,
+    val displayName: String,
+    val engineId: EngineId,
+    val languages: Set<String>,
+    val recognitionMode: SttRecognitionMode,
+) {
+    val supportedLanguages: List<SttLanguage>
+        get() = SttLanguage.entries.filter { it.label in languages }
+}
 
 enum class SttLanguage(val label: String, val whisperCode: String) {
     ENGLISH("English", "en"),
     RUSSIAN("Russian", "ru"),
+    CHINESE("Chinese", "zh"),
+    JAPANESE("Japanese", "ja"),
+    KOREAN("Korean", "ko"),
+    CANTONESE("Cantonese", "yue"),
 }
 
 enum class SttOperation { IDLE, RECORDING, STOPPING, IMPORTING, TRANSCRIBING, CANCELLING }
@@ -35,9 +53,19 @@ enum class SttOperation { IDLE, RECORDING, STOPPING, IMPORTING, TRANSCRIBING, CA
 internal fun InstalledModel.toSpeechModelOption(): SpeechModelOption = SpeechModelOption(
     id = manifest.modelId,
     displayName = manifest.displayName,
+    engineId = manifest.engineId,
     languages = manifest.languages,
+    recognitionMode = manifest.sttRecognitionMode,
 )
 
 internal fun InstalledModel.isReadySpeechModel(): Boolean =
     AiCapability.SPEECH_TO_TEXT in manifest.capabilities &&
         validationState == ModelValidationState.READY
+
+internal fun androidSpeechRecognizerOption() = SpeechModelOption(
+    id = BuiltInSpeechToTextModels.ANDROID_SPEECH_RECOGNIZER,
+    displayName = "Android On-device SpeechRecognizer",
+    engineId = EngineId("android-speech-recognizer"),
+    languages = linkedSetOf("English", "Russian", "Chinese", "Japanese", "Korean", "Cantonese"),
+    recognitionMode = SttRecognitionMode.STREAMING,
+)

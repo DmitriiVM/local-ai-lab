@@ -50,6 +50,7 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
             voiceIdsByModel = values[TTS_VOICE_SELECTIONS].orEmpty().mapNotNull(::decodeVoiceSelection).toMap(),
         )
     }
+    override val sttSelectedModel: Flow<String?> = store.data.map { values -> values[STT_SELECTED_MODEL] }
 
     override suspend fun update(settings: AppSettings) {
         store.edit { values ->
@@ -101,6 +102,10 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
         }
     }
 
+    override suspend fun updateSttSelectedModel(modelId: String) {
+        store.edit { values -> values[STT_SELECTED_MODEL] = modelId }
+    }
+
     private inline fun <reified T : Enum<T>> String.asEnum(default: T): T =
         enumValues<T>().firstOrNull { it.name == this } ?: default
 
@@ -119,6 +124,7 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
         val TTS_DRAFT = stringPreferencesKey("tts_draft")
         val TTS_SELECTED_MODEL = stringPreferencesKey("tts_selected_model")
         val TTS_VOICE_SELECTIONS = stringSetPreferencesKey("tts_voice_selections")
+        val STT_SELECTED_MODEL = stringPreferencesKey("stt_selected_model")
 
         fun encodeVoiceSelection(modelId: String, voiceId: String): String =
             "${encode(modelId)}:${encode(voiceId)}"

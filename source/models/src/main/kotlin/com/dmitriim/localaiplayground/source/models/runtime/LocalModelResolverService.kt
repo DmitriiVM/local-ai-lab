@@ -8,6 +8,10 @@ import com.dmitriim.localaiplayground.core.model.ModelFileRoles
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.SpeechToTextModelReference
 import com.dmitriim.localaiplayground.core.model.TextToSpeechModelReference
+import com.dmitriim.localaiplayground.core.model.BuiltInSpeechToTextModels
+import com.dmitriim.localaiplayground.core.model.EngineId
+import com.dmitriim.localaiplayground.core.model.ModelProfileIds
+import com.dmitriim.localaiplayground.core.model.SttRecognitionMode
 import com.dmitriim.localaiplayground.source.models.library.InstalledModelService
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -39,6 +43,19 @@ class LocalModelResolverService(
     }
 
     override suspend fun resolveSpeechToTextModel(modelId: ModelId): Result<SpeechToTextModelReference> = runCatching {
+        if (modelId == BuiltInSpeechToTextModels.ANDROID_SPEECH_RECOGNIZER) {
+            return@runCatching SpeechToTextModelReference(
+                modelId = modelId,
+                displayName = "Android On-device SpeechRecognizer",
+                engineId = EngineId("android-speech-recognizer"),
+                profileType = ModelProfileIds.ANDROID_SPEECH_RECOGNIZER_STT,
+                modelDirectory = "",
+                files = emptyMap(),
+                sampleRateHz = 16_000,
+                languages = linkedSetOf("English", "Russian", "Chinese", "Japanese", "Korean", "Cantonese"),
+                recognitionMode = SttRecognitionMode.STREAMING,
+            )
+        }
         val (manifest, directory) = installedModels.requireReadyModel(modelId)
         require(AiCapability.SPEECH_TO_TEXT in manifest.capabilities) {
             "This installed model is not a compatible local speech-to-text model."
@@ -46,10 +63,15 @@ class LocalModelResolverService(
         SpeechToTextModelReference(
             modelId = modelId,
             displayName = manifest.displayName,
+            engineId = manifest.engineId,
             profileType = manifest.profileType,
             modelDirectory = directory.absolutePath,
+            files = manifest.files
+                .filter { it.required && !it.directory }
+                .associate { it.role to File(directory, it.relativePath).absolutePath },
             sampleRateHz = manifest.sampleRateHz ?: 16_000,
             languages = manifest.languages,
+            recognitionMode = manifest.sttRecognitionMode,
         )
     }
 

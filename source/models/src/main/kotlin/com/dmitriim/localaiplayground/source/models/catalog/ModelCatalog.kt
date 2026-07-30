@@ -4,6 +4,7 @@ import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.CatalogDownload
 import com.dmitriim.localaiplayground.core.model.CatalogDownloadFile
 import com.dmitriim.localaiplayground.core.model.CatalogDownloadArchive
+import com.dmitriim.localaiplayground.core.model.CatalogArchiveFormat
 import com.dmitriim.localaiplayground.core.model.CatalogModel
 import com.dmitriim.localaiplayground.core.model.EngineId
 import com.dmitriim.localaiplayground.core.model.ModelCatalogState
@@ -17,14 +18,19 @@ import com.dmitriim.localaiplayground.core.model.ModelProfileIds
 import com.dmitriim.localaiplayground.core.model.TtsVoiceDescriptor
 import com.dmitriim.localaiplayground.core.model.TtsControl
 import com.dmitriim.localaiplayground.core.model.TtsVoiceMode
+import com.dmitriim.localaiplayground.core.model.SttRecognitionMode
 
 /** Immutable, app-bundled catalog. Remote hosts provide bytes only, never catalog updates. */
 internal object ModelCatalog {
     private const val catalogVersion = 2
     private const val apacheAttribution = "Apache License 2.0; source and model attribution are shown in Model details."
     private const val mitAttribution = "MIT licensed upstream model bundle; attribution is shown in Model details."
-    private const val whisperRepository = "csukuangfj/sherpa-onnx-whisper-base"
-    private const val whisperRevision = "bb53ee204431c90d314c1cc08d28d23e5b7927cc"
+    private const val whisperTinyRepository = "csukuangfj/sherpa-onnx-whisper-tiny"
+    private const val whisperTinyRevision = "65176e2deb88badc814a94058666cadccc29b61c"
+    private const val whisperBaseRepository = "csukuangfj/sherpa-onnx-whisper-base"
+    private const val whisperBaseRevision = "bb53ee204431c90d314c1cc08d28d23e5b7927cc"
+    private const val whisperSmallRepository = "csukuangfj/sherpa-onnx-whisper-small"
+    private const val whisperSmallRevision = "8f3c18b358db4d1f2fc1eae49d75cd20989e4309"
     private const val supertonicRepository = "csukuangfj2/sherpa-onnx-supertonic-3-tts-int8-2026-05-11"
     private const val supertonicRevision = "cca5a0e6c96e1d2c720986bf7e75fcc81dee3ae4"
     private const val piperDownloadUrl = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-en_US-lessac-medium.tar.bz2"
@@ -236,75 +242,185 @@ internal object ModelCatalog {
                 ),
             ),
         ),
-        CatalogModel(
-            manifest = ModelManifest(
-                modelId = ModelId("whisper-base-int8"), displayName = "Whisper Base INT8", family = "Whisper",
-                capabilities = setOf(AiCapability.SPEECH_TO_TEXT), engineId = EngineId("sherpa-onnx"),
-                profileType = ModelProfileIds.WHISPER_STT, format = ModelFormat.ONNX, quantization = "INT8",
-                revision = whisperRevision,
-                files = listOf(
-                    ModelFileSpec(
-                        "base-encoder.int8.onnx",
-                        ModelFileRoles.ENCODER,
-                        expectedBytes = 29_120_534,
-                        sha256 = "0b8fb1304b6109976038efff5ace81720e00386f3ff6b54ee8c75291ca0a1e11",
-                    ),
-                    ModelFileSpec(
-                        "base-decoder.int8.onnx",
-                        ModelFileRoles.DECODER,
-                        expectedBytes = 130_672_026,
-                        sha256 = "9759d217388a01b3a4c7c15533201067b48ae819c4daafc8624e64b9409dc02d",
-                    ),
-                    ModelFileSpec(
-                        "base-tokens.txt",
-                        ModelFileRoles.TOKENS,
-                        expectedBytes = 816_730,
-                        sha256 = "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126",
-                    ),
-                ),
-                source = ModelSource(
-                    url = "https://huggingface.co/$whisperRepository/tree/$whisperRevision",
-                    revision = whisperRevision,
-                    licenseName = "Apache-2.0",
-                    attribution = apacheAttribution,
-                ),
-                languages = linkedSetOf("English", "Russian", "Spanish"),
-                supportedLanguageCount = 99,
-                sampleRateHz = 16_000,
-                approximateRamBytes = 850_000_000, catalogVersion = catalogVersion, installedAtEpochMs = 0,
-            ),
-            state = ModelCatalogState.APPROVED,
-            download = CatalogDownload(
-                expectedBytes = 160_609_290,
-                files = huggingFaceFiles(
-                    whisperRepository,
-                    whisperRevision,
-                    "base-encoder.int8.onnx",
-                    "base-decoder.int8.onnx",
-                    "base-tokens.txt",
-                ),
-            ),
+        whisperModel(
+            modelId = "whisper-tiny-int8",
+            displayName = "Whisper Tiny INT8",
+            repository = whisperTinyRepository,
+            revision = whisperTinyRevision,
+            filePrefix = "tiny",
+            encoderBytes = 12_937_772,
+            encoderSha256 = "d24fb083ae3b1041fc24e97971d60e280c9342201fbb67b0ab428a8b4a51a434",
+            decoderBytes = 89_855_401,
+            decoderSha256 = "d2fece8dd42771f1df975c6c0445770d0c292bf7547c2cae04a6c0cc57540925",
+            approximateRamBytes = 500_000_000,
         ),
-        CatalogModel(
-            manifest = ModelManifest(
-                modelId = ModelId("silero-vad"), displayName = "Silero VAD", family = "Silero",
-                capabilities = setOf(AiCapability.VOICE_ACTIVITY_DETECTION),
-                engineId = EngineId("sherpa-onnx"), profileType = ModelProfileIds.SILERO_VAD,
-                format = ModelFormat.ONNX, files = listOf(ModelFileSpec("silero_vad.onnx", ModelFileRoles.VAD_MODEL,
-                    expectedBytes = 643_854, sha256 = "9e2449e1087496d8d4caba907f23e0bd3f78d91fa552479bb9c23ac09cbb1fd6")),
-                source = ModelSource(
-                    url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx",
-                    licenseName = "MIT", attribution = mitAttribution,
-                ),
-                sampleRateHz = 16_000, approximateRamBytes = 20_000_000,
-                catalogVersion = catalogVersion, installedAtEpochMs = 0,
+        whisperModel(
+            modelId = "whisper-base-int8",
+            displayName = "Whisper Base INT8",
+            repository = whisperBaseRepository,
+            revision = whisperBaseRevision,
+            filePrefix = "base",
+            encoderBytes = 29_120_534,
+            encoderSha256 = "0b8fb1304b6109976038efff5ace81720e00386f3ff6b54ee8c75291ca0a1e11",
+            decoderBytes = 130_672_026,
+            decoderSha256 = "9759d217388a01b3a4c7c15533201067b48ae819c4daafc8624e64b9409dc02d",
+            approximateRamBytes = 850_000_000,
+        ),
+        whisperModel(
+            modelId = "whisper-small-int8",
+            displayName = "Whisper Small INT8",
+            repository = whisperSmallRepository,
+            revision = whisperSmallRevision,
+            filePrefix = "small",
+            encoderBytes = 112_442_483,
+            encoderSha256 = "4cbe7b22fa9026b843b60a68640c747de05bafb1a11b57edc0e66c232d9f33a9",
+            decoderBytes = 262_226_114,
+            decoderSha256 = "acad50b5c782696e91b55914cc5ab4f756f1532f76e22aa6fc615f39fb69a8ee",
+            approximateRamBytes = 2_600_000_000,
+        ),
+        sttArchiveModel(
+            modelId = "parakeet-tdt-ctc-110m-en-int8",
+            displayName = "Parakeet TDT-CTC 110M INT8",
+            family = "Parakeet",
+            profileType = ModelProfileIds.PARAKEET_CTC_STT,
+            archiveName = "sherpa-onnx-nemo-parakeet_tdt_ctc_110m-en-36000-int8",
+            archiveBytes = 104_337_827,
+            archiveSha256 = "17f945007b52ccd8b7200ffc7c5652e9e8e961dfdf479cefcabd06cf5703630b",
+            files = listOf(
+                ModelFileSpec("model.int8.onnx", ModelFileRoles.PRIMARY_MODEL, expectedBytes = 131_652_171),
+                ModelFileSpec("tokens.txt", ModelFileRoles.TOKENS, expectedBytes = 9_953),
             ),
-            state = ModelCatalogState.APPROVED,
-            download = CatalogDownload(
-                url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx",
-                expectedBytes = 643_854,
-                sha256 = "9e2449e1087496d8d4caba907f23e0bd3f78d91fa552479bb9c23ac09cbb1fd6",
+            languages = linkedSetOf("English"),
+            licenseName = "CC-BY-4.0",
+            attribution = "NVIDIA Parakeet TDT-CTC 110M, converted and packaged for sherpa-onnx.",
+            approximateRamBytes = 500_000_000,
+        ),
+        sttArchiveModel(
+            modelId = "gigaam-v2-ctc-ru-int8",
+            displayName = "GigaAM v2 CTC INT8",
+            family = "GigaAM",
+            profileType = ModelProfileIds.GIGAAM_CTC_STT,
+            archiveName = "sherpa-onnx-nemo-ctc-giga-am-v2-russian-2025-04-19",
+            archiveBytes = 166_917_722,
+            archiveSha256 = "777be8717d8aaf04861823671290f7687f7579fd9ac63a2124955573f920caf5",
+            files = listOf(
+                ModelFileSpec("model.int8.onnx", ModelFileRoles.PRIMARY_MODEL, expectedBytes = 236_457_977),
+                ModelFileSpec("tokens.txt", ModelFileRoles.TOKENS, expectedBytes = 196),
             ),
+            languages = linkedSetOf("Russian"),
+            licenseName = "MIT",
+            attribution = "GigaAM v2 by SberDevices, converted and packaged for sherpa-onnx.",
+            approximateRamBytes = 800_000_000,
+        ),
+        sttArchiveModel(
+            modelId = "zipformer-en-20m-streaming-int8",
+            displayName = "Zipformer 20M Streaming INT8",
+            family = "Zipformer",
+            profileType = ModelProfileIds.ZIPFORMER_STT,
+            archiveName = "sherpa-onnx-streaming-zipformer-en-20M-2023-02-17",
+            archiveBytes = 127_887_156,
+            archiveSha256 = "9c559283e8498d3fe95913c79ca1cb454bb26281ac2b102b41306c7d752765d9",
+            files = listOf(
+                ModelFileSpec("encoder-epoch-99-avg-1.int8.onnx", ModelFileRoles.ENCODER, expectedBytes = 42_845_182),
+                ModelFileSpec("decoder-epoch-99-avg-1.int8.onnx", ModelFileRoles.DECODER, expectedBytes = 539_499),
+                ModelFileSpec("joiner-epoch-99-avg-1.int8.onnx", ModelFileRoles.JOINER, expectedBytes = 259_572),
+                ModelFileSpec("tokens.txt", ModelFileRoles.TOKENS, expectedBytes = 5_048),
+            ),
+            languages = linkedSetOf("English"),
+            licenseName = "Apache-2.0",
+            attribution = "Icefall streaming Zipformer model packaged for sherpa-onnx.",
+            recognitionMode = SttRecognitionMode.STREAMING,
+            approximateRamBytes = 350_000_000,
+        ),
+        sttArchiveModel(
+            modelId = "sensevoice-small-5lang-int8",
+            displayName = "SenseVoice Small INT8",
+            family = "SenseVoice",
+            profileType = ModelProfileIds.SENSE_VOICE_STT,
+            archiveName = "sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17",
+            archiveBytes = 163_002_883,
+            archiveSha256 = "7d1efa2138a65b0b488df37f8b89e3d91a60676e416f515b952358d83dfd347e",
+            files = listOf(
+                ModelFileSpec("model.int8.onnx", ModelFileRoles.PRIMARY_MODEL),
+                ModelFileSpec("tokens.txt", ModelFileRoles.TOKENS),
+            ),
+            languages = linkedSetOf("Chinese", "English", "Japanese", "Korean", "Cantonese"),
+            licenseName = "See upstream model license",
+            attribution = "SenseVoiceSmall by FunAudioLLM, converted and packaged for sherpa-onnx.",
+            approximateRamBytes = 700_000_000,
+        ),
+        sttArchiveModel(
+            modelId = "paraformer-zh-en-small-int8",
+            displayName = "Paraformer Small INT8",
+            family = "Paraformer",
+            profileType = ModelProfileIds.PARAFORMER_STT,
+            archiveName = "sherpa-onnx-paraformer-zh-small-2024-03-09",
+            archiveBytes = 77_920_048,
+            archiveSha256 = "da92b3db5218c5be53aad53e57d1b6e63e7fc98a0e054fbdd6dbe18e9c6b1450",
+            files = listOf(
+                ModelFileSpec("model.int8.onnx", ModelFileRoles.PRIMARY_MODEL, expectedBytes = 81_828_675),
+                ModelFileSpec("tokens.txt", ModelFileRoles.TOKENS, expectedBytes = 75_352),
+            ),
+            languages = linkedSetOf("Chinese", "English"),
+            licenseName = "Apache-2.0",
+            attribution = "Paraformer model from ModelScope, converted and packaged for sherpa-onnx.",
+            approximateRamBytes = 350_000_000,
+        ),
+        sttArchiveModel(
+            modelId = "moonshine-base-en-quantized",
+            displayName = "Moonshine v2 Base Quantized",
+            family = "Moonshine",
+            profileType = ModelProfileIds.MOONSHINE_STT,
+            archiveName = "sherpa-onnx-moonshine-base-en-quantized-2026-02-27",
+            archiveBytes = 111_266_225,
+            archiveSha256 = "43232c1d13013d37317163baec3135bd771a186a4356f28c889bab453bb0e891",
+            files = listOf(
+                ModelFileSpec("encoder_model.ort", ModelFileRoles.ENCODER, expectedBytes = 31_326_816),
+                ModelFileSpec("decoder_model_merged.ort", ModelFileRoles.MERGED_DECODER, expectedBytes = 109_424_400),
+                ModelFileSpec("tokens.txt", ModelFileRoles.TOKENS, expectedBytes = 549_350),
+            ),
+            languages = linkedSetOf("English"),
+            licenseName = "CC-BY-4.0",
+            attribution = "Moonshine v2 by Useful Sensors, quantized and packaged for sherpa-onnx.",
+            approximateRamBytes = 550_000_000,
+        ),
+        sttArchiveModel(
+            modelId = "vosk-small-en-us-0-15",
+            displayName = "Vosk Small English US",
+            family = "Vosk",
+            engineId = EngineId("vosk"),
+            profileType = ModelProfileIds.VOSK_STT,
+            archiveName = "vosk-model-small-en-us-0.15",
+            downloadUrl = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip",
+            archiveBytes = 41_205_931,
+            archiveSha256 = "30f26242c4eb449f948e42cb302dd7a686cb29a3423a8367f99ff41780942498",
+            archiveFormat = CatalogArchiveFormat.ZIP,
+            files = voskDirectories(),
+            languages = linkedSetOf("English"),
+            licenseName = "Apache-2.0",
+            attribution = "Vosk lightweight US English model by Alpha Cephei.",
+            recognitionMode = SttRecognitionMode.STREAMING,
+            quantization = null,
+            approximateRamBytes = 300_000_000,
+        ),
+        sttArchiveModel(
+            modelId = "vosk-small-ru-0-22",
+            displayName = "Vosk Small Russian",
+            family = "Vosk",
+            engineId = EngineId("vosk"),
+            profileType = ModelProfileIds.VOSK_STT,
+            archiveName = "vosk-model-small-ru-0.22",
+            downloadUrl = "https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip",
+            archiveBytes = 46_236_750,
+            archiveSha256 = "961d5ff98a17f4aa6de69864d0aa71fa5bac682301d2b5d17a3f24c5c99a46d4",
+            archiveFormat = CatalogArchiveFormat.ZIP,
+            files = voskDirectories(),
+            languages = linkedSetOf("Russian"),
+            licenseName = "Apache-2.0",
+            attribution = "Vosk lightweight Russian model by Alpha Cephei.",
+            recognitionMode = SttRecognitionMode.STREAMING,
+            quantization = null,
+            approximateRamBytes = 300_000_000,
         ),
         CatalogModel(
             manifest = ModelManifest(
@@ -443,6 +559,129 @@ internal object ModelCatalog {
                 ),
             ),
         ),
+    )
+
+    private fun whisperModel(
+        modelId: String,
+        displayName: String,
+        repository: String,
+        revision: String,
+        filePrefix: String,
+        encoderBytes: Long,
+        encoderSha256: String,
+        decoderBytes: Long,
+        decoderSha256: String,
+        approximateRamBytes: Long,
+    ): CatalogModel {
+        val encoder = "$filePrefix-encoder.int8.onnx"
+        val decoder = "$filePrefix-decoder.int8.onnx"
+        val tokens = "$filePrefix-tokens.txt"
+        val tokenBytes = 816_730L
+        return CatalogModel(
+            manifest = ModelManifest(
+                modelId = ModelId(modelId),
+                displayName = displayName,
+                family = "Whisper",
+                capabilities = setOf(AiCapability.SPEECH_TO_TEXT),
+                engineId = EngineId("sherpa-onnx"),
+                profileType = ModelProfileIds.WHISPER_STT,
+                format = ModelFormat.ONNX,
+                quantization = "INT8",
+                architecture = displayName.removeSuffix(" INT8"),
+                revision = revision,
+                files = listOf(
+                    ModelFileSpec(encoder, ModelFileRoles.ENCODER, encoderBytes, encoderSha256),
+                    ModelFileSpec(decoder, ModelFileRoles.DECODER, decoderBytes, decoderSha256),
+                    ModelFileSpec(
+                        tokens,
+                        ModelFileRoles.TOKENS,
+                        tokenBytes,
+                        "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126",
+                    ),
+                ),
+                source = ModelSource(
+                    url = "https://huggingface.co/$repository/tree/$revision",
+                    revision = revision,
+                    licenseName = "Apache-2.0",
+                    attribution = apacheAttribution,
+                ),
+                languages = linkedSetOf("English", "Russian", "Spanish"),
+                supportedLanguageCount = 99,
+                sampleRateHz = 16_000,
+                approximateRamBytes = approximateRamBytes,
+                catalogVersion = catalogVersion,
+                installedAtEpochMs = 0,
+            ),
+            state = ModelCatalogState.APPROVED,
+            download = CatalogDownload(
+                expectedBytes = encoderBytes + decoderBytes + tokenBytes,
+                files = huggingFaceFiles(repository, revision, encoder, decoder, tokens),
+            ),
+        )
+    }
+
+    private fun sttArchiveModel(
+        modelId: String,
+        displayName: String,
+        family: String,
+        profileType: com.dmitriim.localaiplayground.core.model.ModelProfileId,
+        archiveName: String,
+        archiveBytes: Long,
+        archiveSha256: String,
+        files: List<ModelFileSpec>,
+        languages: Set<String>,
+        licenseName: String,
+        attribution: String,
+        approximateRamBytes: Long,
+        engineId: EngineId = EngineId("sherpa-onnx"),
+        downloadUrl: String = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/$archiveName.tar.bz2",
+        archiveFormat: CatalogArchiveFormat = CatalogArchiveFormat.TAR_BZIP2,
+        recognitionMode: SttRecognitionMode = SttRecognitionMode.OFFLINE,
+        quantization: String? = "INT8",
+    ) = CatalogModel(
+        manifest = ModelManifest(
+            modelId = ModelId(modelId),
+            displayName = displayName,
+            family = family,
+            capabilities = setOf(AiCapability.SPEECH_TO_TEXT),
+            engineId = engineId,
+            profileType = profileType,
+            format = if (engineId.value == "vosk") ModelFormat.BINARY else ModelFormat.ONNX,
+            quantization = quantization,
+            architecture = family,
+            revision = archiveName.substringAfterLast('-'),
+            files = files,
+            source = ModelSource(
+                url = downloadUrl,
+                revision = archiveName,
+                licenseName = licenseName,
+                attribution = attribution,
+            ),
+            languages = languages,
+            supportedLanguageCount = languages.size,
+            sampleRateHz = 16_000,
+            sttRecognitionMode = recognitionMode,
+            approximateRamBytes = approximateRamBytes,
+            catalogVersion = catalogVersion,
+            installedAtEpochMs = 0,
+        ),
+        state = ModelCatalogState.APPROVED,
+        download = CatalogDownload(
+            expectedBytes = archiveBytes,
+            archive = CatalogDownloadArchive(
+                url = downloadUrl,
+                expectedBytes = archiveBytes,
+                sha256 = archiveSha256,
+                rootDirectory = archiveName,
+                format = archiveFormat,
+            ),
+        ),
+    )
+
+    private fun voskDirectories() = listOf(
+        ModelFileSpec("am", ModelFileRoles.PRIMARY_MODEL, directory = true),
+        ModelFileSpec("conf", ModelFileRoles.CONFIG, directory = true),
+        ModelFileSpec("graph", ModelFileRoles.VOCABULARY, directory = true),
     )
 
     private fun huggingFaceFiles(

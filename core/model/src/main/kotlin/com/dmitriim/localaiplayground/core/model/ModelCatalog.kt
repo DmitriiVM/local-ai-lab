@@ -27,7 +27,14 @@ data class CatalogDownloadArchive(
     val sha256: String,
     /** The required archive root, removed while installing to the model directory. */
     val rootDirectory: String,
+    val format: CatalogArchiveFormat = CatalogArchiveFormat.TAR_BZIP2,
 )
+
+@Serializable
+enum class CatalogArchiveFormat {
+    TAR_BZIP2,
+    ZIP,
+}
 
 @Serializable
 data class CatalogDownloadFile(

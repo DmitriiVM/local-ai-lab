@@ -44,10 +44,13 @@ data class ChatModelReference(
 data class SpeechToTextModelReference(
     val modelId: ModelId,
     val displayName: String,
+    val engineId: EngineId,
     val profileType: ModelProfileId,
     val modelDirectory: String,
+    val files: Map<ModelFileRole, String>,
     val sampleRateHz: Int,
     val languages: Set<String>,
+    val recognitionMode: SttRecognitionMode,
 )
 
 data class TextToSpeechModelReference(

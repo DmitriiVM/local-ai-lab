@@ -26,8 +26,10 @@ internal suspend fun transcribeVoiceInput(
     Log.i(TAG, "Voice STT stage loading: model=${model.displayName}, language=$languageCode, requestedThreads=$threadCount")
     val load = engine.load(
         SpeechToTextLoadRequest(
+            engineId = model.engineId,
             profileType = model.profileType,
             modelDirectory = model.modelDirectory,
+            files = model.files,
             languageCode = languageCode,
             threadCount = threadCount,
         ),

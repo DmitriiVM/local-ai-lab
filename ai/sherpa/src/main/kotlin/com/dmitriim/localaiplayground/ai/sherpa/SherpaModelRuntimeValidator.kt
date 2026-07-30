@@ -24,7 +24,12 @@ class SherpaModelRuntimeValidator : ModelAdapter {
     override val engineId = EngineId("sherpa-onnx")
     override val profileTypes = setOf(
         ModelProfileIds.WHISPER_STT,
-        ModelProfileIds.SILERO_VAD,
+        ModelProfileIds.PARAKEET_CTC_STT,
+        ModelProfileIds.GIGAAM_CTC_STT,
+        ModelProfileIds.ZIPFORMER_STT,
+        ModelProfileIds.SENSE_VOICE_STT,
+        ModelProfileIds.PARAFORMER_STT,
+        ModelProfileIds.MOONSHINE_STT,
         ModelProfileIds.SUPERTONIC_TTS,
         ModelProfileIds.PIPER_VITS_TTS,
         ModelProfileIds.KOKORO_TTS,
@@ -33,12 +38,17 @@ class SherpaModelRuntimeValidator : ModelAdapter {
     override val capabilities = setOf(
         AiCapability.SPEECH_TO_TEXT,
         AiCapability.TEXT_TO_SPEECH,
-        AiCapability.VOICE_ACTIVITY_DETECTION,
     )
 
     override fun capabilitiesFor(profileType: ModelProfileId) = when (profileType) {
-        ModelProfileIds.WHISPER_STT -> setOf(AiCapability.SPEECH_TO_TEXT)
-        ModelProfileIds.SILERO_VAD -> setOf(AiCapability.VOICE_ACTIVITY_DETECTION)
+        ModelProfileIds.WHISPER_STT,
+        ModelProfileIds.PARAKEET_CTC_STT,
+        ModelProfileIds.GIGAAM_CTC_STT,
+        ModelProfileIds.ZIPFORMER_STT,
+        ModelProfileIds.SENSE_VOICE_STT,
+        ModelProfileIds.PARAFORMER_STT,
+        ModelProfileIds.MOONSHINE_STT,
+        -> setOf(AiCapability.SPEECH_TO_TEXT)
         ModelProfileIds.SUPERTONIC_TTS,
         ModelProfileIds.PIPER_VITS_TTS,
         ModelProfileIds.KOKORO_TTS,
@@ -57,10 +67,36 @@ class SherpaModelRuntimeValidator : ModelAdapter {
                 ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "base-tokens.txt"),
             ),
         )
-        ModelProfileIds.SILERO_VAD -> ModelImportDefinition(
-            displayName = "Silero VAD model",
+        ModelProfileIds.PARAKEET_CTC_STT,
+        ModelProfileIds.GIGAAM_CTC_STT,
+        ModelProfileIds.SENSE_VOICE_STT,
+        ModelProfileIds.PARAFORMER_STT,
+        -> ModelImportDefinition(
+            displayName = "Single-model STT bundle",
             format = ModelFormat.ONNX,
-            files = listOf(ModelImportFileDefinition(ModelFileRoles.VAD_MODEL, relativePath = "silero_vad.onnx")),
+            files = listOf(
+                ModelImportFileDefinition(ModelFileRoles.PRIMARY_MODEL, relativePath = "model.int8.onnx"),
+                ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
+            ),
+        )
+        ModelProfileIds.ZIPFORMER_STT -> ModelImportDefinition(
+            displayName = "Streaming Zipformer bundle",
+            format = ModelFormat.ONNX,
+            files = listOf(
+                ModelImportFileDefinition(ModelFileRoles.ENCODER, relativePath = "encoder-epoch-99-avg-1.int8.onnx"),
+                ModelImportFileDefinition(ModelFileRoles.DECODER, relativePath = "decoder-epoch-99-avg-1.int8.onnx"),
+                ModelImportFileDefinition(ModelFileRoles.JOINER, relativePath = "joiner-epoch-99-avg-1.int8.onnx"),
+                ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
+            ),
+        )
+        ModelProfileIds.MOONSHINE_STT -> ModelImportDefinition(
+            displayName = "Moonshine STT bundle",
+            format = ModelFormat.ONNX,
+            files = listOf(
+                ModelImportFileDefinition(ModelFileRoles.ENCODER, relativePath = "encoder_model.ort"),
+                ModelImportFileDefinition(ModelFileRoles.MERGED_DECODER, relativePath = "decoder_model_merged.ort"),
+                ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
+            ),
         )
         ModelProfileIds.SUPERTONIC_TTS -> ModelImportDefinition(
             displayName = "Supertonic TTS bundle",

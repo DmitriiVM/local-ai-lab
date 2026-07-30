@@ -14,7 +14,9 @@ import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.RunRecord
 import com.dmitriim.localaiplayground.core.model.RunStatus
 import com.dmitriim.localaiplayground.source.runs.RunReplayStore
+import com.dmitriim.localaiplayground.source.settings.AppSettingsRepository
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
+import com.dmitriim.localaiplayground.ai.api.SystemSpeechToTextSupport
 import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionEvent
 import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionRequest
 import com.dmitriim.localaiplayground.feature.stt.domain.SttTranscriptionSettings
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -47,18 +50,40 @@ class SpeechToTextViewModel(
     private val operationCoordinator: ForegroundOperationCoordinator,
     private val persistSttRun: PersistSttRun,
     private val replayStore: RunReplayStore,
+    private val settingsRepository: AppSettingsRepository,
+    private val systemSpeechSupport: SystemSpeechToTextSupport,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(SpeechToTextUiState())
     val state: StateFlow<SpeechToTextUiState> = mutableState.asStateFlow()
     private var operationJob: Job? = null
+    private var savedModelId: ModelId? = null
 
     init {
         viewModelScope.launch {
+            savedModelId = settingsRepository.sttSelectedModel.first()?.let(::ModelId)
             modelLibrary.installedModels.collectLatest { installed ->
-                val models = installed.filter { it.isReadySpeechModel() }.map { it.toSpeechModelOption() }
+                val models = buildList {
+                    if (systemSpeechSupport.isOnDeviceRecognizerAvailable) {
+                        add(androidSpeechRecognizerOption())
+                    }
+                    addAll(installed.filter { it.isReadySpeechModel() }.map { it.toSpeechModelOption() })
+                }
                 mutableState.update { current ->
-                    val selected = current.selectedModelId?.takeIf { id -> models.any { it.id == id } } ?: models.firstOrNull()?.id
-                    current.copy(models = models, selectedModelId = selected)
+                    val selected = current.selectedModelId
+                        ?.takeIf { id -> models.any { it.id == id } }
+                        ?: savedModelId?.takeIf { id -> models.any { it.id == id } }
+                        ?: models.firstOrNull()?.id
+                    val selectedModel = models.firstOrNull { it.id == selected }
+                    val language = current.language.takeIf { it in selectedModel?.supportedLanguages.orEmpty() }
+                        ?: selectedModel?.supportedLanguages?.firstOrNull()
+                        ?: current.language
+                    current.copy(models = models, selectedModelId = selected, language = language)
+                }
+                mutableState.value.selectedModelId?.let { selectedModelId ->
+                    if (savedModelId != selectedModelId) {
+                        savedModelId = selectedModelId
+                        persistModelSelection(selectedModelId)
+                    }
                 }
             }
         }
@@ -71,10 +96,25 @@ class SpeechToTextViewModel(
 
     fun selectModel(modelId: ModelId) {
         if (operationJob?.isActive == true) return
-        mutableState.update { it.copy(selectedModelId = modelId, errorMessage = null, metrics = null) }
+        if (mutableState.value.models.none { it.id == modelId }) return
+        mutableState.update { current ->
+            val model = current.models.first { it.id == modelId }
+            current.copy(
+                selectedModelId = modelId,
+                language = current.language.takeIf { it in model.supportedLanguages }
+                    ?: model.supportedLanguages.firstOrNull()
+                    ?: current.language,
+                errorMessage = null,
+                metrics = null,
+            )
+        }
+        savedModelId = modelId
+        persistModelSelection(modelId)
     }
 
-    fun selectLanguage(language: SttLanguage) = mutableState.update { it.copy(language = language, errorMessage = null) }
+    fun selectLanguage(language: SttLanguage) = mutableState.update {
+        if (language in it.availableLanguages) it.copy(language = language, errorMessage = null) else it
+    }
 
     fun updateThreadCount(value: String) = mutableState.update { it.copy(threadCount = value.filter(Char::isDigit), errorMessage = null) }
 
@@ -201,6 +241,9 @@ class SpeechToTextViewModel(
                                 operation = SttOperation.IDLE,
                                 transcript = event.transcript,
                                 metrics = event.metrics,
+                                errorMessage = event.transcript.takeIf(String::isBlank)?.let {
+                                    "No speech was recognized in this audio. Try recording again or choose an installed local model."
+                                },
                             )
                         }.also {
                             Log.i(TAG, "STT UI received completed event: transcriptLength=${event.transcript.length}, segments=${event.metrics.segmentCount}, totalMs=${event.metrics.timeToFinalMs}")
@@ -223,7 +266,7 @@ class SpeechToTextViewModel(
     private fun requireModel(): Boolean {
         if (mutableState.value.selectedModelId != null) return true
         Log.w(TAG, "STT cannot start because no compatible model is selected.")
-        mutableState.update { it.copy(errorMessage = "Install a compatible Whisper speech model before recording or importing audio.") }
+        mutableState.update { it.copy(errorMessage = "Install a compatible speech-to-text model before recording or importing audio.") }
         return false
     }
 
@@ -236,6 +279,12 @@ class SpeechToTextViewModel(
     private fun registerForegroundCancellation(job: Job) {
         val registration = operationCoordinator.register(::cancel)
         job.invokeOnCompletion { registration.close() }
+    }
+
+    private fun persistModelSelection(modelId: ModelId) {
+        viewModelScope.launch(Dispatchers.IO) {
+            settingsRepository.updateSttSelectedModel(modelId.value)
+        }
     }
 
     override fun onCleared() {
@@ -275,7 +324,7 @@ class SpeechToTextViewModel(
     ) = SttRunSnapshot(
         status = status,
         startedAtEpochMs = startedAt,
-        model = model?.let { RunModelSnapshot(it.id.value, it.displayName, "sherpa-onnx") },
+        model = model?.let { RunModelSnapshot(it.id.value, it.displayName, it.engineId.value) },
         inputDescription = "${input.displayName} (${input.durationMs} ms; ${input.sourceDescription})",
         transcript = transcript,
         languageCode = state.language.whisperCode,

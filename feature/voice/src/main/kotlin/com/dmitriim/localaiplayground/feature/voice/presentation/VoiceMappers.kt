@@ -4,6 +4,8 @@ import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.TtsVoiceMode
+import com.dmitriim.localaiplayground.core.model.BuiltInSpeechToTextModels
+import com.dmitriim.localaiplayground.core.model.EngineId
 import com.dmitriim.localaiplayground.feature.voice.domain.VoiceContextUsage as DomainVoiceContextUsage
 import com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent
 import com.dmitriim.localaiplayground.feature.voice.domain.VoiceTurnPhase
@@ -34,8 +36,24 @@ internal fun VoiceUiState.toVoiceTurnRequest(): Result<VoiceTurnRequest> = runCa
     request
 }
 
-internal fun VoiceUiState.withAvailableModels(installed: List<InstalledModel>): VoiceUiState {
-    val speech = installed.filter(::isReadySpeech).map(InstalledModel::toVoiceOption)
+internal fun VoiceUiState.withAvailableModels(
+    installed: List<InstalledModel>,
+    includeAndroidRecognizer: Boolean,
+): VoiceUiState {
+    val speech = buildList {
+        if (includeAndroidRecognizer) {
+            add(
+                VoiceModelOption(
+                    id = BuiltInSpeechToTextModels.ANDROID_SPEECH_RECOGNIZER,
+                    displayName = "Android On-device SpeechRecognizer",
+                    engineId = EngineId("android-speech-recognizer"),
+                    languages = linkedSetOf("English", "Russian"),
+                    approximateRamBytes = null,
+                ),
+            )
+        }
+        addAll(installed.filter(::isReadySpeech).map(InstalledModel::toVoiceOption))
+    }
     val chat = installed.filter(::isReadyChat).map(InstalledModel::toVoiceOption)
     val voice = installed.filter(::isReadyVoice).map(InstalledModel::toVoiceOption)
     return copy(
@@ -89,6 +107,7 @@ private fun VoiceTurnPhase.toStatusMessage() = when (this) {
 private fun InstalledModel.toVoiceOption() = VoiceModelOption(
     id = manifest.modelId,
     displayName = manifest.displayName,
+    engineId = manifest.engineId,
     languages = manifest.languages,
     approximateRamBytes = manifest.approximateRamBytes,
 )
