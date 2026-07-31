@@ -19,7 +19,6 @@ fun PlaygroundRoute(
         state = state,
         onRefresh = viewModel::refresh,
         onOpenCapability = { capability -> navigator.navigate(capability.navigationTarget) },
-        onOpenModels = { navigator.navigate(NavigationTarget.MODELS) },
     )
 }
 

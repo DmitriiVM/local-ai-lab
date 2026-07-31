@@ -34,6 +34,7 @@ fun LocalAiPlaygroundApp(graph: AppGraph) {
 
     AdaptiveNavigationScaffold(
         selectedDestination = navigationState.selectedDestination,
+        showTopLevelNavigation = !navigationState.canNavigateUp,
         onSelectDestination = navigationState::selectTopLevelDestination,
         onOpenSettings = { navigationState.navigate(NavigationTarget.SETTINGS) },
         onNavigateUp = if (navigationState.canNavigateUp) navigationState::navigateBack else null,

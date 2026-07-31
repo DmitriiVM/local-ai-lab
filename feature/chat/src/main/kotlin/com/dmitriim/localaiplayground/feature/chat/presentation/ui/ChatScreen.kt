@@ -3,6 +3,8 @@ package com.dmitriim.localaiplayground.feature.chat.presentation.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -43,47 +45,67 @@ fun ChatScreen(
     var showSettings by remember { mutableStateOf(false) }
     var showClearConfirmation by remember { mutableStateOf(false) }
     val clipboard = LocalClipboardManager.current
+    val systemNavigationPadding = if (dimensions.bottomNavigationOverlayClearance == 0.dp) {
+        Modifier.navigationBarsPadding()
+    } else {
+        Modifier
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .then(systemNavigationPadding)
+            .imePadding()
             .padding(
                 start = 16.dp,
                 top = dimensions.topBarOverlayClearance + 12.dp,
                 end = 16.dp,
-                bottom = 16.dp,
+                bottom = dimensions.bottomNavigationOverlayClearance + 8.dp,
             ),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ChatModelSelector(
             state = uiState,
             enabled = uiState.operation == ChatOperation.IDLE,
             onSelect = onSelectModel,
         )
-        ChatActionRow(
-            state = uiState,
-            onShowSettings = { showSettings = true },
-            onRegenerate = onRegenerate,
-            onUnload = onUnloadModel,
-            onClear = { showClearConfirmation = true },
-        )
-        uiState.contextUsage?.let { usage ->
-            val omitted = if (usage.omittedMessageCount > 0) " ${usage.omittedMessageCount} earlier message(s) were omitted from this prompt." else ""
-            Text(
-                "Context: ${usage.promptTokens} prompt + ${usage.reservedOutputTokens} reserved / ${usage.contextSize} tokens.$omitted",
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
-        uiState.errorMessage?.let { message ->
-            StatusMessage(title = "Chat needs attention", explanation = message)
-        }
         ChatConversation(
             messages = uiState.messages,
             modifier = Modifier.weight(1f),
             onCopy = { clipboard.setText(AnnotatedString(it)) },
             onEdit = onEditAndRetry,
+            onRegenerate = onRegenerate,
+            canRegenerate = uiState.operation == ChatOperation.IDLE,
+            header = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ChatActionRow(
+                        state = uiState,
+                        onShowSettings = { showSettings = true },
+                        onUnload = onUnloadModel,
+                        onClear = { showClearConfirmation = true },
+                    )
+                    uiState.contextUsage?.let { usage ->
+                        val omitted = if (usage.omittedMessageCount > 0) {
+                            " ${usage.omittedMessageCount} earlier message(s) omitted."
+                        } else {
+                            ""
+                        }
+                        Text(
+                            "Context budget: ${usage.promptTokens} input · " +
+                                "${usage.reservedOutputTokens} max output · ${usage.contextSize} total.$omitted",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    uiState.errorMessage?.let { message ->
+                        StatusMessage(title = "Chat needs attention", explanation = message)
+                    }
+                }
+            },
+            footer = {
+                uiState.metrics?.let { metrics -> ChatMetricsCard(metrics) }
+            },
         )
-        uiState.metrics?.let { metrics -> ChatMetricsCard(metrics) }
         ChatComposer(
             state = uiState,
             onInput = onUpdateInput,

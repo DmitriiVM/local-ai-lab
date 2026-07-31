@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,15 +26,17 @@ fun PlaygroundScreen(
     state: PlaygroundUiState,
     onRefresh: () -> Unit,
     onOpenCapability: (AiCapability) -> Unit,
-    onOpenModels: () -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
+    val visibleCapabilities = state.capabilities.filterNot {
+        it.capability == AiCapability.VOICE_ACTIVITY_DETECTION
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
         contentPadding = PaddingValues(
             top = dimensions.topBarOverlayClearance,
-            bottom = dimensions.bottomNavigationOverlayClearance,
+            bottom = 44.dp + dimensions.bottomNavigationOverlayClearance,
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -82,22 +82,14 @@ fun PlaygroundScreen(
             }
         }
         items(
-            count = state.capabilities.size,
-            key = { index -> state.capabilities[index].capability.name },
+            count = visibleCapabilities.size,
+            key = { index -> visibleCapabilities[index].capability.name },
         ) { index ->
-            val capability = state.capabilities[index]
+            val capability = visibleCapabilities[index]
             CapabilityCard(
                 readiness = capability,
                 onClick = { onOpenCapability(capability.capability) },
             )
-        }
-        item {
-            Button(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-                onClick = onOpenModels,
-            ) {
-                Text("Open Models")
-            }
         }
     }
 }

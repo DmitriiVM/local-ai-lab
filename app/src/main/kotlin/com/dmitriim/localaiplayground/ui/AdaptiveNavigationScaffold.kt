@@ -59,6 +59,7 @@ import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 @Composable
 fun AdaptiveNavigationScaffold(
     selectedDestination: TopLevelDestination,
+    showTopLevelNavigation: Boolean,
     onSelectDestination: (TopLevelDestination) -> Unit,
     onOpenSettings: () -> Unit,
     onNavigateUp: (() -> Unit)?,
@@ -68,14 +69,16 @@ fun AdaptiveNavigationScaffold(
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         if (maxWidth >= dimensions.navigationRailBreakpoint) {
             Row(modifier = Modifier.fillMaxSize()) {
-                NavigationRail {
-                    TopLevelItem.entries.forEach { item ->
-                        NavigationRailItem(
-                            selected = selectedDestination == item.destination,
-                            onClick = { onSelectDestination(item.destination) },
-                            icon = { Icon(item.icon, contentDescription = item.label) },
-                            label = { Text(item.label) },
-                        )
+                if (showTopLevelNavigation) {
+                    NavigationRail {
+                        TopLevelItem.entries.forEach { item ->
+                            NavigationRailItem(
+                                selected = selectedDestination == item.destination,
+                                onClick = { onSelectDestination(item.destination) },
+                                icon = { Icon(item.icon, contentDescription = item.label) },
+                                label = { Text(item.label) },
+                            )
+                        }
                     }
                 }
                 Box(modifier = Modifier.weight(1f)) {
@@ -97,7 +100,9 @@ fun AdaptiveNavigationScaffold(
         } else {
             Box(modifier = Modifier.fillMaxSize()) {
                 CompositionLocalProvider(
-                    LocalAppDimensions provides dimensions.copy(bottomNavigationOverlayClearance = 112.dp),
+                    LocalAppDimensions provides dimensions.copy(
+                        bottomNavigationOverlayClearance = if (showTopLevelNavigation) 100.dp else 0.dp,
+                    ),
                 ) {
                     Scaffold(
                         contentWindowInsets = WindowInsets.safeDrawing.only(
@@ -107,11 +112,13 @@ fun AdaptiveNavigationScaffold(
                         content(Modifier.padding(contentPadding))
                     }
                 }
-                LiquidGlassNavigationBar(
-                    selectedDestination = selectedDestination,
-                    onSelectDestination = onSelectDestination,
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                )
+                if (showTopLevelNavigation) {
+                    LiquidGlassNavigationBar(
+                        selectedDestination = selectedDestination,
+                        onSelectDestination = onSelectDestination,
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                    )
+                }
                 AppTopBar(
                     onOpenSettings = onOpenSettings,
                     onNavigateUp = onNavigateUp,
@@ -135,8 +142,8 @@ private fun LiquidGlassNavigationBar(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-            .height(72.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .height(64.dp)
             .shadow(
                 elevation = 24.dp,
                 shape = barShape,
@@ -164,7 +171,7 @@ private fun LiquidGlassNavigationBar(
                 ),
                 shape = barShape,
             )
-            .padding(6.dp),
+            .padding(4.dp),
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             TopLevelItem.entries.forEach { item ->
