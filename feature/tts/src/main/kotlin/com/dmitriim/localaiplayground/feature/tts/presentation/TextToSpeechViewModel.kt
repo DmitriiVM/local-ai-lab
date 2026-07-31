@@ -10,6 +10,7 @@ import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioSt
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoiceStore
 import com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition
+import com.dmitriim.localaiplayground.ai.api.SystemTextToSpeechSupport
 import com.dmitriim.localaiplayground.core.model.TtsVoiceMode
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelId
@@ -65,6 +66,7 @@ class TextToSpeechViewModel(
     private val replayStore: RunReplayStore,
     private val settingsRepository: AppSettingsRepository,
     private val referenceVoiceStore: ReferenceVoiceStore,
+    private val systemTextToSpeechSupport: SystemTextToSpeechSupport,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(TextToSpeechUiState())
     val state: StateFlow<TextToSpeechUiState> = mutableState.asStateFlow()
@@ -74,6 +76,12 @@ class TextToSpeechViewModel(
     @Volatile private var hasTextInput = false
 
     init {
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching(systemTextToSpeechSupport::refresh)
+                .onFailure { error ->
+                    Log.w(TAG, "Android TextToSpeech voice discovery failed: ${error.message}")
+                }
+        }
         viewModelScope.launch {
             settingsRepository.ttsDraft.first()?.let { savedText ->
                 if (!hasTextInput) {
@@ -89,8 +97,12 @@ class TextToSpeechViewModel(
                 modelLibrary.installedModels,
                 modelTransfers.catalog,
                 referenceVoiceStore.voices,
-            ) { installed, catalog, references ->
-                ttsModelOptions(installed, catalog) to references
+                systemTextToSpeechSupport.voices,
+            ) { installed, catalog, references, systemVoices ->
+                buildList {
+                    if (systemVoices.isNotEmpty()) add(androidTextToSpeechOption(systemVoices))
+                    addAll(ttsModelOptions(installed, catalog))
+                } to references
             }.collectLatest { (models, references) ->
                 mutableState.update { current ->
                     val selected = current.selectedModelId
@@ -532,6 +544,8 @@ class TextToSpeechViewModel(
                 errorMessage = null,
                 statusMessage = if (snapshot.usesReferenceVoice) {
                     "Generating Chatterbox speech locally…"
+                } else if (snapshot.usesPlatformVoice) {
+                    "Synthesizing with Android’s on-device voice…"
                 } else {
                     "Synthesizing and streaming PCM locally…"
                 },
@@ -773,16 +787,17 @@ class TextToSpeechViewModel(
     }
 
     private fun voiceCondition(voice: TtsVoiceOption): TextToSpeechVoiceCondition =
-        voice.reference?.let { reference ->
-            TextToSpeechVoiceCondition.ReferenceAudio(
-                referenceId = reference.id,
-                displayName = reference.displayName,
-                pcmFilePath = reference.pcmFilePath,
-                sampleRateHz = reference.sampleRateHz,
+        voice.platformVoiceId?.let(TextToSpeechVoiceCondition::PlatformVoice)
+            ?: voice.reference?.let { reference ->
+                TextToSpeechVoiceCondition.ReferenceAudio(
+                    referenceId = reference.id,
+                    displayName = reference.displayName,
+                    pcmFilePath = reference.pcmFilePath,
+                    sampleRateHz = reference.sampleRateHz,
+                )
+            } ?: TextToSpeechVoiceCondition.FixedSpeaker(
+                requireNotNull(voice.speakerId) { "The selected fixed voice has no speaker ID." },
             )
-        } ?: TextToSpeechVoiceCondition.FixedSpeaker(
-            requireNotNull(voice.speakerId) { "The selected fixed voice has no speaker ID." },
-        )
 
     private fun voicesFor(
         model: TtsModelOption?,

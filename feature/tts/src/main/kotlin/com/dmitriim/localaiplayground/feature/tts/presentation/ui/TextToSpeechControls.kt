@@ -53,9 +53,9 @@ internal fun TextToSpeechModelPicker(
     var expanded by remember { mutableStateOf(false) }
     val selected = models.firstOrNull { it.id == selectedId }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Voice model", style = MaterialTheme.typography.labelLarge)
+        Text("Speech engine / model", style = MaterialTheme.typography.labelLarge)
         OutlinedButton(onClick = { expanded = true }, enabled = enabled && models.isNotEmpty()) {
-            Text(selected?.displayName ?: "Install Supertonic 3 INT8 in Models")
+            Text(selected?.displayName ?: "Install a TTS model in Models")
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             models.forEach { model ->
@@ -348,14 +348,16 @@ internal fun TextToSpeechSettings(
                 TextToSpeechParameterSlider("Sentence silence", state.sentenceSilenceScale, "%.2f×".format(state.sentenceSilenceScale), 0f..2f, enabled, onSentenceSilenceChange)
             }
             TextToSpeechParameterSlider("Playback volume", state.volume, "${(state.volume * 100).toInt()}%", 0f..1f, enabled, onVolumeChange)
-            OutlinedTextField(
-                value = state.threadCount,
-                onValueChange = onThreadCountChange,
-                enabled = enabled,
-                label = { Text("CPU threads (0 = safe default)") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            if (!state.usesPlatformVoice) {
+                OutlinedTextField(
+                    value = state.threadCount,
+                    onValueChange = onThreadCountChange,
+                    enabled = enabled,
+                    label = { Text("CPU threads (0 = safe default)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
     }
 }

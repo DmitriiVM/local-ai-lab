@@ -9,9 +9,12 @@ import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.SpeechToTextModelReference
 import com.dmitriim.localaiplayground.core.model.TextToSpeechModelReference
 import com.dmitriim.localaiplayground.core.model.BuiltInSpeechToTextModels
+import com.dmitriim.localaiplayground.core.model.BuiltInTextToSpeechModels
 import com.dmitriim.localaiplayground.core.model.EngineId
 import com.dmitriim.localaiplayground.core.model.ModelProfileIds
 import com.dmitriim.localaiplayground.core.model.SttRecognitionMode
+import com.dmitriim.localaiplayground.core.model.TtsControl
+import com.dmitriim.localaiplayground.core.model.TtsVoiceMode
 import com.dmitriim.localaiplayground.source.models.library.InstalledModelService
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -76,6 +79,24 @@ class LocalModelResolverService(
     }
 
     override suspend fun resolveTextToSpeechModel(modelId: ModelId): Result<TextToSpeechModelReference> = runCatching {
+        if (modelId == BuiltInTextToSpeechModels.ANDROID_TEXT_TO_SPEECH) {
+            return@runCatching TextToSpeechModelReference(
+                modelId = modelId,
+                displayName = "Android On-device TextToSpeech",
+                engineId = EngineId("android-text-to-speech"),
+                profileType = ModelProfileIds.ANDROID_TEXT_TO_SPEECH_TTS,
+                modelDirectory = "",
+                sampleRateHz = 0,
+                languages = linkedSetOf("English", "Russian", "Chinese"),
+                speakerCount = null,
+                voiceMode = TtsVoiceMode.PLATFORM,
+                supportedControls = setOf(
+                    TtsControl.LANGUAGE,
+                    TtsControl.SPEAKER,
+                    TtsControl.SPEECH_RATE,
+                ),
+            )
+        }
         val (manifest, directory) = installedModels.requireReadyModel(modelId)
         require(AiCapability.TEXT_TO_SPEECH in manifest.capabilities) {
             "This installed model is not a compatible local text-to-speech model."

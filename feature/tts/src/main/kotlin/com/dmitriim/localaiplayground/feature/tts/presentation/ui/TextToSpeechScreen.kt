@@ -74,9 +74,9 @@ fun TextToSpeechScreen(
             ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("Local text to speech", style = MaterialTheme.typography.headlineSmall)
+        Text("On-device text to speech", style = MaterialTheme.typography.headlineSmall)
         Text(
-            "Choose an installed local model and voice. Neutral PCM streams immediately; enabled post-processing is applied before playback and the replayable WAV.",
+            "Choose Android’s on-device speech engine or an installed local model. Generated audio can be replayed, processed, shared, and exported as WAV.",
             style = MaterialTheme.typography.bodyMedium,
         )
 

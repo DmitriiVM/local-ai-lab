@@ -14,8 +14,11 @@ import com.dmitriim.localaiplayground.core.model.ModelManifest
 import com.dmitriim.localaiplayground.core.model.TtsVoiceDescriptor
 import com.dmitriim.localaiplayground.core.model.EngineId
 import com.dmitriim.localaiplayground.core.model.ModelProfileId
+import com.dmitriim.localaiplayground.core.model.ModelProfileIds
 import com.dmitriim.localaiplayground.core.model.TtsControl
 import com.dmitriim.localaiplayground.core.model.TtsVoiceMode
+import com.dmitriim.localaiplayground.core.model.BuiltInTextToSpeechModels
+import com.dmitriim.localaiplayground.ai.api.SystemTextToSpeechVoice
 import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisMetrics
 import com.dmitriim.localaiplayground.feature.tts.domain.SynthesizeSpeech
 
@@ -58,6 +61,8 @@ data class TextToSpeechUiState(
         get() = TtsControl.SPEECH_RATE in selectedModel?.supportedControls.orEmpty()
     val supportsSentenceSilence: Boolean
         get() = TtsControl.SENTENCE_SILENCE in selectedModel?.supportedControls.orEmpty()
+    val usesPlatformVoice: Boolean
+        get() = selectedModel?.voiceMode == TtsVoiceMode.PLATFORM
 }
 
 data class TtsModelOption(
@@ -80,6 +85,7 @@ data class TtsVoiceOption(
     val languages: Set<String>,
     val description: String?,
     val reference: ReferenceVoice? = null,
+    val platformVoiceId: String? = null,
 )
 
 enum class TtsLanguage(
@@ -174,6 +180,41 @@ internal fun InstalledModel.isReadyTtsModel(): Boolean =
     AiCapability.TEXT_TO_SPEECH in manifest.capabilities &&
         validationState == ModelValidationState.READY
 
+internal fun androidTextToSpeechOption(
+    systemVoices: List<SystemTextToSpeechVoice>,
+): TtsModelOption {
+    val voices = systemVoices.map { voice ->
+        TtsVoiceOption(
+            id = voice.id,
+            displayName = voice.displayName,
+            speakerId = null,
+            languages = setOf(voice.languageTag),
+            description = voice.description,
+            platformVoiceId = voice.id,
+        )
+    }
+    return TtsModelOption(
+        id = BuiltInTextToSpeechModels.ANDROID_TEXT_TO_SPEECH,
+        displayName = "Android On-device TextToSpeech",
+        engineId = EngineId("android-text-to-speech"),
+        profileType = ModelProfileIds.ANDROID_TEXT_TO_SPEECH_TTS,
+        languages = TtsLanguage.entries
+            .filter { language ->
+                systemVoices.any { voice -> languageCode(voice.languageTag) == language.code }
+            }
+            .mapTo(linkedSetOf(), TtsLanguage::label),
+        speakerCount = null,
+        voiceMode = TtsVoiceMode.PLATFORM,
+        supportedControls = setOf(
+            TtsControl.LANGUAGE,
+            TtsControl.SPEAKER,
+            TtsControl.SPEECH_RATE,
+        ),
+        voices = voices,
+        installed = true,
+    )
+}
+
 internal fun ttsModelOptions(
     installedModels: List<InstalledModel>,
     catalogModels: List<CatalogModel>,
@@ -195,16 +236,19 @@ private const val ENGLISH_SAMPLE = "Local speech synthesis is running entirely o
 private const val RUSSIAN_SAMPLE = "Локальный синтез речи полностью выполняется на этом устройстве."
 private const val CHINESE_SAMPLE = "本地语音合成完全在这台设备上运行。"
 
-private fun languageCode(value: String): String = when (value.lowercase()) {
-    "english" -> "en"
-    "russian" -> "ru"
-    "chinese" -> "zh"
-    "german" -> "de"
-    "spanish" -> "es"
-    "french" -> "fr"
-    "hindi" -> "hi"
-    "italian" -> "it"
-    "japanese" -> "ja"
-    "portuguese" -> "pt"
-    else -> value.lowercase()
+private fun languageCode(value: String): String {
+    val normalized = value.lowercase()
+    return when (normalized) {
+        "english" -> "en"
+        "russian" -> "ru"
+        "chinese" -> "zh"
+        "german" -> "de"
+        "spanish" -> "es"
+        "french" -> "fr"
+        "hindi" -> "hi"
+        "italian" -> "it"
+        "japanese" -> "ja"
+        "portuguese" -> "pt"
+        else -> normalized.substringBefore('-').substringBefore('_')
+    }
 }

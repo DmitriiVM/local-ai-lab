@@ -25,6 +25,7 @@ value class ModelProfileId(val value: String) {
         val MOONSHINE_STT = ModelProfileId("MOONSHINE_STT")
         val VOSK_STT = ModelProfileId("VOSK_STT")
         val ANDROID_SPEECH_RECOGNIZER_STT = ModelProfileId("ANDROID_SPEECH_RECOGNIZER_STT")
+        val ANDROID_TEXT_TO_SPEECH_TTS = ModelProfileId("ANDROID_TEXT_TO_SPEECH_TTS")
         val SUPERTONIC_TTS = ModelProfileId("SUPERTONIC_TTS")
         val PIPER_VITS_TTS = ModelProfileId("PIPER_VITS_TTS")
         val KOKORO_TTS = ModelProfileId("KOKORO_TTS")
@@ -45,6 +46,7 @@ object ModelProfileIds {
     val MOONSHINE_STT = ModelProfileId("MOONSHINE_STT")
     val VOSK_STT = ModelProfileId("VOSK_STT")
     val ANDROID_SPEECH_RECOGNIZER_STT = ModelProfileId("ANDROID_SPEECH_RECOGNIZER_STT")
+    val ANDROID_TEXT_TO_SPEECH_TTS = ModelProfileId("ANDROID_TEXT_TO_SPEECH_TTS")
     val SUPERTONIC_TTS = ModelProfileId("SUPERTONIC_TTS")
     val PIPER_VITS_TTS = ModelProfileId("PIPER_VITS_TTS")
     val KOKORO_TTS = ModelProfileId("KOKORO_TTS")
@@ -140,6 +142,7 @@ object ModelFileRoles {
 enum class TtsVoiceMode {
     SPEAKER_ID,
     REFERENCE_AUDIO,
+    PLATFORM,
 }
 
 @Serializable
@@ -160,6 +163,10 @@ enum class SttRecognitionMode {
 
 object BuiltInSpeechToTextModels {
     val ANDROID_SPEECH_RECOGNIZER = ModelId("android-on-device-speech-recognizer")
+}
+
+object BuiltInTextToSpeechModels {
+    val ANDROID_TEXT_TO_SPEECH = ModelId("android-on-device-text-to-speech")
 }
 
 @Serializable

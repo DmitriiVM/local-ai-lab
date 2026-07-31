@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.ai.api
 
 import com.dmitriim.localaiplayground.core.model.EngineId
 import com.dmitriim.localaiplayground.core.model.ModelProfileId
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Engine-neutral TTS facade. The router keeps the selected backend warm until [unload] is
@@ -41,6 +42,22 @@ interface TextToSpeechBackend : AutoCloseable {
     override fun close() = unload()
 }
 
+/** A locally available voice exposed by the operating system's text-to-speech service. */
+data class SystemTextToSpeechVoice(
+    val id: String,
+    val displayName: String,
+    val languageTag: String,
+    val description: String?,
+)
+
+/** Discovers on-device voices supplied by Android without coupling features to the platform module. */
+interface SystemTextToSpeechSupport {
+    val voices: StateFlow<List<SystemTextToSpeechVoice>>
+
+    /** Initializes the platform engine and refreshes [voices]. This call may block. */
+    fun refresh()
+}
+
 data class TextToSpeechLoadRequest(
     val engineId: EngineId,
     val profileType: ModelProfileId,
@@ -53,12 +70,15 @@ data class TextToSpeechLoadResult(
     val effectiveThreadCount: Int,
     val loadDurationMs: Long,
     val coldStart: Boolean,
+    /** Zero when the backend reports its output format only after synthesis begins. */
     val sampleRateHz: Int,
     val speakerCount: Int?,
 )
 
 sealed interface TextToSpeechVoiceCondition {
     data class FixedSpeaker(val speakerId: Int) : TextToSpeechVoiceCondition
+
+    data class PlatformVoice(val voiceId: String) : TextToSpeechVoiceCondition
 
     /** App-private, mono PCM16 reference. External document URIs never cross this boundary. */
     data class ReferenceAudio(

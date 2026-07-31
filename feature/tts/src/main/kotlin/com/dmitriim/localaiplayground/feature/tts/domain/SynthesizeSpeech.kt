@@ -89,7 +89,8 @@ class SynthesizeSpeech(
             )
 
             val effectsEnabled = !request.settings.audioEffects.isNeutral
-            var session = if (effectsEnabled) {
+            val canStreamImmediately = !effectsEnabled && load.sampleRateHz > 0
+            var session = if (!canStreamImmediately) {
                 null
             } else {
                 player.open(
@@ -155,7 +156,7 @@ class SynthesizeSpeech(
             consumer?.join()
             playbackFailure.get()?.let { throw it }
             check(!cancelled.get()) { "Speech synthesis was cancelled." }
-            require(result.sampleRateHz == load.sampleRateHz) {
+            require(load.sampleRateHz == 0 || result.sampleRateHz == load.sampleRateHz) {
                 "The voice model changed sample rate during synthesis."
             }
             val effectsStartedNanos = System.nanoTime()
@@ -166,15 +167,15 @@ class SynthesizeSpeech(
                 isCancelled = cancelled::get,
             )
             val effectsDurationMs = nanosToMillis(System.nanoTime() - effectsStartedNanos)
-            if (effectsEnabled) {
+            if (session == null) {
                 session = player.open(
-                    sampleRateHz = load.sampleRateHz,
+                    sampleRateHz = result.sampleRateHz,
                     volume = request.settings.volume,
                     runAnchorNanos = runAnchorNanos,
                 )
                 Log.i(
                     TAG,
-                    "TTS processed playback session opened: sampleRateHz=${load.sampleRateHz}, " +
+                    "TTS buffered playback session opened: sampleRateHz=${result.sampleRateHz}, " +
                         "effectsMs=$effectsDurationMs",
                 )
                 writeFloatChunks(requireNotNull(session), outputSamples)

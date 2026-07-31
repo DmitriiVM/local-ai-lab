@@ -57,7 +57,8 @@ class PreviewSpeech(
             }
             checkNotCancelled()
             val effectsEnabled = !request.settings.audioEffects.isNeutral
-            var session = if (effectsEnabled) {
+            val canStreamImmediately = !effectsEnabled && load.sampleRateHz > 0
+            var session = if (!canStreamImmediately) {
                 null
             } else {
                 player.open(
@@ -79,20 +80,27 @@ class PreviewSpeech(
                 !cancelled.get() && (streamingSession == null || streamingSession.write(chunk))
             }
             checkNotCancelled()
-            if (effectsEnabled) {
-                val processed = audioEffectsProcessor.process(
-                    samples = result.samples,
-                    sampleRateHz = result.sampleRateHz,
-                    effects = request.settings.audioEffects,
-                    isCancelled = cancelled::get,
-                )
+            require(load.sampleRateHz == 0 || result.sampleRateHz == load.sampleRateHz) {
+                "The voice model changed sample rate during synthesis."
+            }
+            if (session == null) {
+                val output = if (effectsEnabled) {
+                    audioEffectsProcessor.process(
+                        samples = result.samples,
+                        sampleRateHz = result.sampleRateHz,
+                        effects = request.settings.audioEffects,
+                        isCancelled = cancelled::get,
+                    )
+                } else {
+                    result.samples
+                }
                 session = player.open(
-                    sampleRateHz = load.sampleRateHz,
+                    sampleRateHz = result.sampleRateHz,
                     volume = request.settings.volume,
                     runAnchorNanos = System.nanoTime(),
                 )
                 playbackOpen = true
-                writeFloatChunks(requireNotNull(session), processed)
+                writeFloatChunks(requireNotNull(session), output)
             }
             requireNotNull(session).awaitDrained()
             checkNotCancelled()
