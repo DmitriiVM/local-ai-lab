@@ -39,6 +39,7 @@ import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
 @Composable
 fun ModelsScreen(
     uiState: ModelsUiState,
+    onOpenDetails: (ModelId) -> Unit,
     onDownload: (ModelId) -> Unit,
     onCancelTransfer: (ModelId) -> Unit,
     onDelete: (ModelId) -> Unit,
@@ -88,11 +89,13 @@ fun ModelsScreen(
                     is ModelListItem.Installed -> InstalledModelCard(
                         model = item.model,
                         displayManifest = item.manifest,
+                        onOpenDetails = onOpenDetails,
                         onDelete = onDelete,
                     )
                     is ModelListItem.Catalog -> CatalogModelCard(
                         model = item.model,
                         transfer = uiState.transfers[item.manifest.modelId],
+                        onOpenDetails = onOpenDetails,
                         onDownload = onDownload,
                         onCancel = onCancelTransfer,
                     )
@@ -211,9 +214,10 @@ private fun ModelsUiState.toModelListItems(): List<ModelListItem> {
 private fun InstalledModelCard(
     model: InstalledModel,
     displayManifest: ModelManifest,
+    onOpenDetails: (ModelId) -> Unit,
     onDelete: (ModelId) -> Unit,
 ) {
-    Card {
+    Card(onClick = { onOpenDetails(model.manifest.modelId) }) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             ModelCardHeader(
                 name = displayManifest.displayName,
@@ -234,11 +238,12 @@ private fun InstalledModelCard(
 private fun CatalogModelCard(
     model: CatalogModel,
     transfer: ModelTransferState?,
+    onOpenDetails: (ModelId) -> Unit,
     onDownload: (ModelId) -> Unit,
     onCancel: (ModelId) -> Unit,
 ) {
     val manifest = model.manifest
-    Card {
+    Card(onClick = { onOpenDetails(manifest.modelId) }) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             ModelCardHeader(name = manifest.displayName, status = transfer.statusLabel())
             ModelCardMetadata(manifest = manifest, size = model.download.expectedBytes.toReadableBytes())

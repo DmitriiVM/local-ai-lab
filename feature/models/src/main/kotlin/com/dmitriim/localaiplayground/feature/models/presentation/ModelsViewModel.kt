@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.EngineId
+import com.dmitriim.localaiplayground.core.model.ModelDiagnostics
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelImportRequest
 import com.dmitriim.localaiplayground.core.model.ModelLibrary
+import com.dmitriim.localaiplayground.core.model.ModelManifest
 import com.dmitriim.localaiplayground.core.model.ModelProfileId
 import com.dmitriim.localaiplayground.core.model.ModelProfileIds
 import com.dmitriim.localaiplayground.core.model.ModelTransfers
@@ -28,6 +30,7 @@ import kotlinx.coroutines.launch
 class ModelsViewModel(
     private val modelLibrary: ModelLibrary,
     private val modelTransfers: ModelTransfers,
+    private val modelDiagnostics: ModelDiagnostics,
 ) : ViewModel() {
     private val mutableUiState = MutableStateFlow(ModelsUiState())
     val uiState: StateFlow<ModelsUiState> = mutableUiState.asStateFlow()
@@ -38,7 +41,12 @@ class ModelsViewModel(
                 Triple(installed, catalog, transfers)
             }.collect { (installed, catalog, transfers) ->
                 mutableUiState.update { current ->
-                    current.copy(installed = installed, catalog = catalog, transfers = transfers)
+                    current.copy(
+                        isModelDataLoaded = true,
+                        installed = installed,
+                        catalog = catalog,
+                        transfers = transfers,
+                    )
                 }
             }
         }
@@ -57,6 +65,68 @@ class ModelsViewModel(
         ).getOrThrow()
         Log.i(TAG, "Models UI import completed: profile=$profile, modelId=${modelId.value}")
         "Model imported and validated."
+    }
+
+    fun selectModel(modelId: ModelId) {
+        mutableUiState.update { state ->
+            if (state.selectedModelId == modelId) {
+                state
+            } else {
+                state.copy(
+                    selectedModelId = modelId,
+                    compatibilityModelId = null,
+                    compatibility = null,
+                    isCheckingCompatibility = false,
+                    compatibilityError = null,
+                )
+            }
+        }
+    }
+
+    fun checkCompatibility(manifest: ModelManifest) {
+        val state = mutableUiState.value
+        if (state.selectedModelId != manifest.modelId ||
+            state.isCheckingCompatibility ||
+            state.compatibilityModelId == manifest.modelId
+        ) {
+            return
+        }
+        mutableUiState.update {
+            it.copy(
+                compatibilityModelId = manifest.modelId,
+                compatibility = null,
+                isCheckingCompatibility = true,
+                compatibilityError = null,
+            )
+        }
+        viewModelScope.launch {
+            val result = runCatching { modelDiagnostics.compatibility(manifest) }
+            mutableUiState.update { current ->
+                if (current.selectedModelId != manifest.modelId) {
+                    current
+                } else {
+                    result.fold(
+                        onSuccess = { compatibility ->
+                            current.copy(
+                                compatibility = compatibility,
+                                isCheckingCompatibility = false,
+                            )
+                        },
+                        onFailure = { error ->
+                            Log.e(
+                                TAG,
+                                "Model compatibility check failed: modelId=${manifest.modelId.value}, message=${error.message}",
+                                error,
+                            )
+                            current.copy(
+                                isCheckingCompatibility = false,
+                                compatibilityError = error.message ?: "Compatibility could not be checked.",
+                            )
+                        },
+                    )
+                }
+            }
+        }
     }
 
     fun download(modelId: ModelId) = launchOperation("download") {

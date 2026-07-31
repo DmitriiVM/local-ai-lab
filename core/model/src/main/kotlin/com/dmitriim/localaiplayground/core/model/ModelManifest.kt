@@ -206,6 +206,7 @@ data class ModelManifest(
     val modelId: ModelId,
     val displayName: String,
     val family: String,
+    val description: String? = null,
     val capabilities: Set<AiCapability>,
     val engineId: EngineId,
     /** Kept under its original serialized field name to retain installed-manifest compatibility. */

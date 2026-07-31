@@ -24,6 +24,7 @@ enum class NavigationTarget {
 
 interface AppNavigator {
     fun navigate(target: NavigationTarget)
+    fun navigate(key: NavKey, host: TopLevelDestination)
     fun navigateBack()
 }
 

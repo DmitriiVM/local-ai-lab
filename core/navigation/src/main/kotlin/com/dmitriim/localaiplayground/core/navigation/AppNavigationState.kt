@@ -88,6 +88,14 @@ class AppNavigationState internal constructor(
         }
     }
 
+    override fun navigate(key: NavKey, host: TopLevelDestination) {
+        selectedDestination = host
+        val stack = stacks[host]
+        if (stack.lastOrNull() != key) {
+            stack.add(key)
+        }
+    }
+
     override fun navigateBack() {
         if (activeStack.size > 1) {
             activeStack.removeLastOrNull()
