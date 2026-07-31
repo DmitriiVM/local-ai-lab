@@ -19,7 +19,12 @@ data class ChatUiState(
     val errorMessage: String? = null,
 )
 
-data class ChatModelOption(val id: ModelId, val displayName: String, val defaultContextSize: Int)
+data class ChatModelOption(
+    val id: ModelId,
+    val displayName: String,
+    val defaultContextSize: Int,
+    val installed: Boolean,
+)
 
 enum class ChatMessageRole { USER, ASSISTANT }
 
@@ -98,7 +103,12 @@ internal fun isReadyChatModel(model: InstalledModel): Boolean =
     AiCapability.CHAT in model.manifest.capabilities && model.validationState == ModelValidationState.READY
 
 internal fun InstalledModel.toChatModelOption() =
-    ChatModelOption(manifest.modelId, manifest.displayName, manifest.contextSize ?: 512)
+    ChatModelOption(
+        id = manifest.modelId,
+        displayName = manifest.displayName,
+        defaultContextSize = manifest.contextSize ?: 512,
+        installed = true,
+    )
 
 internal fun ChatUiState.replaceAssistantText(id: String, text: String, append: Boolean): ChatUiState = copy(
     messages = messages.map { message ->

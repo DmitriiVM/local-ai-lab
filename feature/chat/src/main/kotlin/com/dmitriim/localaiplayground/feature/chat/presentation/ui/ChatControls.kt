@@ -34,7 +34,7 @@ internal fun ChatModelSelector(state: ChatUiState, enabled: Boolean, onSelect: (
     if (state.availableModels.isEmpty()) {
         StatusMessage(
             title = "Chat model required",
-            explanation = "Import or download a compatible GGUF model from Models, then return here for offline local chat.",
+            explanation = "No compatible GGUF chat models are available in this build.",
         )
         return
     }
@@ -46,10 +46,25 @@ internal fun ChatModelSelector(state: ChatUiState, enabled: Boolean, onSelect: (
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             state.availableModels.forEach { model ->
                 DropdownMenuItem(
-                    text = { Text("${model.displayName} (${model.defaultContextSize} context)") },
+                    text = {
+                        Text(
+                            if (model.installed) {
+                                "${model.displayName} (${model.defaultContextSize} context)"
+                            } else {
+                                "${model.displayName} · Download in Models"
+                            },
+                        )
+                    },
                     onClick = { onSelect(model.id); expanded = false },
+                    enabled = model.installed,
                 )
             }
+        }
+        if (state.availableModels.none { it.installed }) {
+            Text(
+                "Download a chat model from the Models tab before starting a conversation.",
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
     }
 }
@@ -89,7 +104,12 @@ internal fun ChatComposer(state: ChatUiState, onInput: (String) -> Unit, onSend:
         keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSend = { onSend() }),
     )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Button(onClick = onSend, enabled = !active && state.input.isNotBlank() && state.selectedModelId != null) { Text("Send") }
+        Button(
+            onClick = onSend,
+            enabled = !active &&
+                state.input.isNotBlank() &&
+                state.availableModels.any { it.id == state.selectedModelId && it.installed },
+        ) { Text("Send") }
         if (active) {
             OutlinedButton(onClick = onStop) { Text(if (state.operation == ChatOperation.CANCELLING) "Stopping…" else "Stop") }
         }

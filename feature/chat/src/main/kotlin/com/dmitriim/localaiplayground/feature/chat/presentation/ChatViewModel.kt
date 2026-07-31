@@ -6,9 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.ChatEngine
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ConversationMessageRole
+import com.dmitriim.localaiplayground.core.model.AiCapability
+import com.dmitriim.localaiplayground.core.model.CatalogModel
 import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelLibrary
+import com.dmitriim.localaiplayground.core.model.ModelTransfers
 import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.RunRecord
 import com.dmitriim.localaiplayground.core.model.RunRepository
@@ -33,6 +36,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -45,6 +49,7 @@ import java.util.UUID
 @ContributesIntoMap(AppScope::class)
 class ChatViewModel(
     private val modelLibrary: ModelLibrary,
+    private val modelTransfers: ModelTransfers,
     private val chatEngine: ChatEngine,
     private val generateChatResponse: GenerateChatResponse,
     private val operationCoordinator: ForegroundOperationCoordinator,
@@ -59,11 +64,12 @@ class ChatViewModel(
 
     init {
         viewModelScope.launch {
-            modelLibrary.installedModels.collectLatest { installed ->
-                val models = installed.filter(::isReadyChatModel).map(InstalledModel::toChatModelOption)
+            combine(modelLibrary.installedModels, modelTransfers.catalog, ::Pair).collectLatest { (installed, catalog) ->
+                val models = chatModelOptions(installed, catalog)
                 mutableState.update { current ->
-                    val selected = current.selectedModelId?.takeIf { id -> models.any { it.id == id } }
-                        ?: models.firstOrNull()?.id
+                    val selected = current.selectedModelId?.takeIf { id ->
+                        models.any { it.id == id && it.installed }
+                    } ?: models.firstOrNull { it.installed }?.id
                     val selectedModel = models.firstOrNull { it.id == selected }
                     current.copy(
                         availableModels = models,
@@ -89,7 +95,9 @@ class ChatViewModel(
             Log.w(TAG, "Ignoring chat model selection while generation is active.")
             return
         }
-        val model = mutableState.value.availableModels.firstOrNull { it.id == modelId } ?: return
+        val model = mutableState.value.availableModels.firstOrNull {
+            it.id == modelId && it.installed
+        } ?: return
         mutableState.update {
             it.copy(
                 selectedModelId = modelId,
@@ -314,7 +322,9 @@ class ChatViewModel(
         Log.i(TAG, "Chat replay configuration received: runId=${run.id}")
         val modelId = run.model?.modelId?.let(::ModelId)
         val available = mutableState.value.availableModels
-        val selected = modelId?.takeIf { candidate -> available.any { it.id == candidate } }
+        val selected = modelId?.takeIf { candidate ->
+            available.any { it.id == candidate && it.installed }
+        }
         val parameters = runCatching { Json.parseToJsonElement(run.parametersJson).jsonObject }.getOrNull()
         mutableState.update { state ->
             state.copy(
@@ -374,6 +384,32 @@ class ChatViewModel(
 
     private companion object {
         const val TAG = "AiP123Chat"
+    }
+}
+
+private fun chatModelOptions(
+    installedModels: List<InstalledModel>,
+    catalogModels: List<CatalogModel>,
+): List<ChatModelOption> {
+    val installedChatModels = installedModels.filter(::isReadyChatModel)
+    val installedById = installedChatModels.associateBy { it.manifest.modelId }
+    val catalogChatModels = catalogModels.filter { AiCapability.CHAT in it.manifest.capabilities }
+    val catalogIds = catalogChatModels.mapTo(mutableSetOf()) { it.manifest.modelId }
+    return buildList {
+        catalogChatModels.forEach { catalog ->
+            val manifest = catalog.manifest
+            add(
+                ChatModelOption(
+                    id = manifest.modelId,
+                    displayName = manifest.displayName,
+                    defaultContextSize = manifest.contextSize ?: 512,
+                    installed = manifest.modelId in installedById,
+                ),
+            )
+        }
+        installedChatModels
+            .filterNot { it.manifest.modelId in catalogIds }
+            .mapTo(this, InstalledModel::toChatModelOption)
     }
 }
 
