@@ -1,8 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Declared here so lint can validate the UIDT scheduler in this owning module. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- These permissions belong to this module's model-transfer implementations. -->
     <uses-permission android:name="android.permission.RUN_USER_INITIATED_JOBS" />
+    <!-- Model downloads are the app's declared data-sync foreground-service use case. -->
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE"
+        tools:ignore="ForegroundServicePolicy" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
     <application>
+        <service
+            android:name=".transfer.ModelDownloadJobService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge" />
+
         <!-- WorkManager's JobScheduler IDs cannot overlap direct UIDT JobService IDs. -->
         <meta-data
             android:name="androidx.work.default_job_scheduler_id_range"
