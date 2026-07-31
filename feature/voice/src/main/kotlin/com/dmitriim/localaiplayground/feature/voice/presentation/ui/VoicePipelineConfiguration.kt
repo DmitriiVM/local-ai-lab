@@ -124,8 +124,17 @@ private fun VoiceModelPicker(
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             models.forEach { model ->
                 DropdownMenuItem(
-                    text = { Text("${model.displayName} (${model.languages.joinToString()})") },
+                    text = {
+                        Text(
+                            if (model.installed) {
+                                "${model.displayName} (${model.languages.joinToString()})"
+                            } else {
+                                "${model.displayName} · Download in Models"
+                            },
+                        )
+                    },
                     onClick = { onSelect(model.id); expanded = false },
+                    enabled = model.installed,
                 )
             }
         }

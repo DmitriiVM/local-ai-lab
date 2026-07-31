@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelLibrary
+import com.dmitriim.localaiplayground.core.model.ModelTransfers
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.RunRecord
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -39,6 +41,7 @@ import kotlinx.serialization.json.jsonPrimitive
 @ContributesIntoMap(AppScope::class)
 class VoiceViewModel(
     private val modelLibrary: ModelLibrary,
+    private val modelTransfers: ModelTransfers,
     private val coordinator: VoiceAssistantCoordinator,
     private val operationCoordinator: ForegroundOperationCoordinator,
     private val runRepository: RunRepository,
@@ -53,10 +56,11 @@ class VoiceViewModel(
 
     init {
         viewModelScope.launch {
-            modelLibrary.installedModels.collectLatest { installed ->
+            combine(modelLibrary.installedModels, modelTransfers.catalog, ::Pair).collectLatest { (installed, catalog) ->
                 mutableState.update {
                     it.withAvailableModels(
                         installed,
+                        catalog,
                         includeAndroidRecognizer = systemSpeechSupport.isOnDeviceRecognizerAvailable,
                     )
                 }
@@ -69,11 +73,23 @@ class VoiceViewModel(
         }
     }
 
-    fun selectSpeechModel(modelId: ModelId) = selectWhenInactive { it.copy(selectedSpeechModelId = modelId) }
+    fun selectSpeechModel(modelId: ModelId) = selectWhenInactive { state ->
+        state.takeIf { it.speechModels.any { model -> model.id == modelId && model.installed } }
+            ?.copy(selectedSpeechModelId = modelId)
+            ?: state
+    }
 
-    fun selectChatModel(modelId: ModelId) = selectWhenInactive { it.copy(selectedChatModelId = modelId) }
+    fun selectChatModel(modelId: ModelId) = selectWhenInactive { state ->
+        state.takeIf { it.chatModels.any { model -> model.id == modelId && model.installed } }
+            ?.copy(selectedChatModelId = modelId)
+            ?: state
+    }
 
-    fun selectVoiceModel(modelId: ModelId) = selectWhenInactive { it.copy(selectedVoiceModelId = modelId) }
+    fun selectVoiceModel(modelId: ModelId) = selectWhenInactive { state ->
+        state.takeIf { it.voiceModels.any { model -> model.id == modelId && model.installed } }
+            ?.copy(selectedVoiceModelId = modelId)
+            ?: state
+    }
 
     fun selectLanguage(language: VoiceLanguage) = selectWhenInactive { it.copy(language = language) }
 

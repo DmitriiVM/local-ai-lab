@@ -3,6 +3,7 @@ package com.dmitriim.localaiplayground.feature.stt.presentation
 import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.model.InstalledModel
+import com.dmitriim.localaiplayground.core.model.CatalogModel
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.AiCapability
@@ -34,6 +35,7 @@ data class SpeechModelOption(
     val engineId: EngineId,
     val languages: Set<String>,
     val recognitionMode: SttRecognitionMode,
+    val installed: Boolean,
 ) {
     val supportedLanguages: List<SttLanguage>
         get() = SttLanguage.entries.filter { it.label in languages }
@@ -56,6 +58,16 @@ internal fun InstalledModel.toSpeechModelOption(): SpeechModelOption = SpeechMod
     engineId = manifest.engineId,
     languages = manifest.languages,
     recognitionMode = manifest.sttRecognitionMode,
+    installed = true,
+)
+
+internal fun CatalogModel.toSpeechModelOption(): SpeechModelOption = SpeechModelOption(
+    id = manifest.modelId,
+    displayName = manifest.displayName,
+    engineId = manifest.engineId,
+    languages = manifest.languages,
+    recognitionMode = manifest.sttRecognitionMode,
+    installed = false,
 )
 
 internal fun InstalledModel.isReadySpeechModel(): Boolean =
@@ -68,4 +80,5 @@ internal fun androidSpeechRecognizerOption() = SpeechModelOption(
     engineId = EngineId("android-speech-recognizer"),
     languages = linkedSetOf("English", "Russian", "Chinese", "Japanese", "Korean", "Cantonese"),
     recognitionMode = SttRecognitionMode.STREAMING,
+    installed = true,
 )

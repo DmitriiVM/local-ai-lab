@@ -2,6 +2,8 @@ package com.dmitriim.localaiplayground.feature.voice.presentation
 
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.InstalledModel
+import com.dmitriim.localaiplayground.core.model.CatalogModel
+import com.dmitriim.localaiplayground.core.model.ModelManifest
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.TtsVoiceMode
 import com.dmitriim.localaiplayground.core.model.BuiltInSpeechToTextModels
@@ -38,6 +40,7 @@ internal fun VoiceUiState.toVoiceTurnRequest(): Result<VoiceTurnRequest> = runCa
 
 internal fun VoiceUiState.withAvailableModels(
     installed: List<InstalledModel>,
+    catalog: List<CatalogModel>,
     includeAndroidRecognizer: Boolean,
 ): VoiceUiState {
     val speech = buildList {
@@ -49,20 +52,26 @@ internal fun VoiceUiState.withAvailableModels(
                     engineId = EngineId("android-speech-recognizer"),
                     languages = linkedSetOf("English", "Russian"),
                     approximateRamBytes = null,
+                    installed = true,
                 ),
             )
         }
-        addAll(installed.filter(::isReadySpeech).map(InstalledModel::toVoiceOption))
+        addAll(voiceModelOptions(installed, catalog, AiCapability.SPEECH_TO_TEXT))
     }
-    val chat = installed.filter(::isReadyChat).map(InstalledModel::toVoiceOption)
-    val voice = installed.filter(::isReadyVoice).map(InstalledModel::toVoiceOption)
+    val chat = voiceModelOptions(installed, catalog, AiCapability.CHAT)
+    val voice = voiceModelOptions(installed, catalog, AiCapability.TEXT_TO_SPEECH) {
+        it.ttsVoiceMode == TtsVoiceMode.SPEAKER_ID
+    }
     return copy(
         speechModels = speech,
         chatModels = chat,
         voiceModels = voice,
-        selectedSpeechModelId = selectedSpeechModelId.takeIf { id -> speech.any { it.id == id } } ?: speech.firstOrNull()?.id,
-        selectedChatModelId = selectedChatModelId.takeIf { id -> chat.any { it.id == id } } ?: chat.firstOrNull()?.id,
-        selectedVoiceModelId = selectedVoiceModelId.takeIf { id -> voice.any { it.id == id } } ?: voice.firstOrNull()?.id,
+        selectedSpeechModelId = selectedSpeechModelId.takeIf { id -> speech.any { it.id == id && it.installed } }
+            ?: speech.firstOrNull { it.installed }?.id,
+        selectedChatModelId = selectedChatModelId.takeIf { id -> chat.any { it.id == id && it.installed } }
+            ?: chat.firstOrNull { it.installed }?.id,
+        selectedVoiceModelId = selectedVoiceModelId.takeIf { id -> voice.any { it.id == id && it.installed } }
+            ?: voice.firstOrNull { it.installed }?.id,
     )
 }
 
@@ -110,7 +119,41 @@ private fun InstalledModel.toVoiceOption() = VoiceModelOption(
     engineId = manifest.engineId,
     languages = manifest.languages,
     approximateRamBytes = manifest.approximateRamBytes,
+    installed = true,
 )
+
+private fun ModelManifest.toVoiceOption(installed: Boolean) = VoiceModelOption(
+    id = modelId,
+    displayName = displayName,
+    engineId = engineId,
+    languages = languages,
+    approximateRamBytes = approximateRamBytes,
+    installed = installed,
+)
+
+private fun voiceModelOptions(
+    installedModels: List<InstalledModel>,
+    catalogModels: List<CatalogModel>,
+    capability: AiCapability,
+    include: (ModelManifest) -> Boolean = { true },
+): List<VoiceModelOption> {
+    val installedById = installedModels
+        .filter { it.validationState == ModelValidationState.READY }
+        .filter { capability in it.manifest.capabilities && include(it.manifest) }
+        .associateBy { it.manifest.modelId }
+    val catalogEntries = catalogModels.filter {
+        capability in it.manifest.capabilities && include(it.manifest)
+    }
+    return buildList {
+        catalogEntries.forEach { entry ->
+            add(installedById[entry.manifest.modelId]?.toVoiceOption() ?: entry.manifest.toVoiceOption(installed = false))
+        }
+        installedById
+            .filterKeys { id -> catalogEntries.none { it.manifest.modelId == id } }
+            .values
+            .mapTo(this, InstalledModel::toVoiceOption)
+    }
+}
 
 private fun isReadySpeech(model: InstalledModel) =
         model.validationState == ModelValidationState.READY &&

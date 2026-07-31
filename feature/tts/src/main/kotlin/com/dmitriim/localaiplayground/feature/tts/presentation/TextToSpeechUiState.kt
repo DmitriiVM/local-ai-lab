@@ -10,6 +10,7 @@ import com.dmitriim.localaiplayground.core.model.CatalogModel
 import com.dmitriim.localaiplayground.core.model.InstalledModel
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.ModelManifest
 import com.dmitriim.localaiplayground.core.model.TtsVoiceDescriptor
 import com.dmitriim.localaiplayground.core.model.EngineId
 import com.dmitriim.localaiplayground.core.model.ModelProfileId
@@ -69,6 +70,7 @@ data class TtsModelOption(
     val voiceMode: TtsVoiceMode,
     val supportedControls: Set<TtsControl>,
     val voices: List<TtsVoiceOption>,
+    val installed: Boolean,
 )
 
 data class TtsVoiceOption(
@@ -108,9 +110,19 @@ internal fun InstalledModel.toTtsModelOption(catalog: List<CatalogModel>): TtsMo
         }
         ?.manifest
     val metadata = catalogManifest ?: manifest
+    return manifest.toTtsModelOption(metadata, installed = true)
+}
+
+internal fun CatalogModel.toTtsModelOption(): TtsModelOption =
+    manifest.toTtsModelOption(manifest, installed = false)
+
+private fun ModelManifest.toTtsModelOption(
+    metadata: ModelManifest,
+    installed: Boolean,
+): TtsModelOption {
     val voiceDescriptors = metadata.voices.ifEmpty {
-        val count = (metadata.speakerCount ?: manifest.speakerCount ?: 1).coerceAtLeast(1)
-        val languages = manifest.languages.mapTo(linkedSetOf(), ::languageCode)
+        val count = (metadata.speakerCount ?: this.speakerCount ?: 1).coerceAtLeast(1)
+        val languages = this.languages.mapTo(linkedSetOf(), ::languageCode)
         List(count) { speakerId ->
             TtsVoiceDescriptor(
                 id = "speaker-$speakerId",
@@ -121,13 +133,12 @@ internal fun InstalledModel.toTtsModelOption(catalog: List<CatalogModel>): TtsMo
         }
     }
     return TtsModelOption(
-        id = manifest.modelId,
-        displayName = manifest.displayName,
-        engineId = manifest.engineId,
-        profileType = manifest.profileType,
-        languages = manifest.languages,
-        speakerCount = metadata.speakerCount
-            ?: voiceDescriptors.maxOfOrNull { it.speakerId + 1 },
+        id = modelId,
+        displayName = displayName,
+        engineId = engineId,
+        profileType = profileType,
+        languages = languages,
+        speakerCount = metadata.speakerCount ?: voiceDescriptors.maxOfOrNull { it.speakerId + 1 },
         voiceMode = metadata.ttsVoiceMode,
         supportedControls = metadata.ttsControls,
         voices = voiceDescriptors.map { voice ->
@@ -139,6 +150,7 @@ internal fun InstalledModel.toTtsModelOption(catalog: List<CatalogModel>): TtsMo
                 description = voice.description,
             )
         },
+        installed = installed,
     )
 }
 
@@ -161,6 +173,23 @@ internal fun TtsModelOption.compatibleVoices(language: TtsLanguage): List<TtsVoi
 internal fun InstalledModel.isReadyTtsModel(): Boolean =
     AiCapability.TEXT_TO_SPEECH in manifest.capabilities &&
         validationState == ModelValidationState.READY
+
+internal fun ttsModelOptions(
+    installedModels: List<InstalledModel>,
+    catalogModels: List<CatalogModel>,
+): List<TtsModelOption> {
+    val installedById = installedModels.filter { it.isReadyTtsModel() }.associateBy { it.manifest.modelId }
+    val catalogTtsModels = catalogModels.filter { AiCapability.TEXT_TO_SPEECH in it.manifest.capabilities }
+    return buildList {
+        catalogTtsModels.forEach { entry ->
+            add(installedById[entry.manifest.modelId]?.toTtsModelOption(catalogModels) ?: entry.toTtsModelOption())
+        }
+        installedById
+            .filterKeys { id -> catalogTtsModels.none { it.manifest.modelId == id } }
+            .values
+            .mapTo(this) { it.toTtsModelOption(catalogModels) }
+    }
+}
 
 private const val ENGLISH_SAMPLE = "Local speech synthesis is running entirely on this device."
 private const val RUSSIAN_SAMPLE = "Локальный синтез речи полностью выполняется на этом устройстве."

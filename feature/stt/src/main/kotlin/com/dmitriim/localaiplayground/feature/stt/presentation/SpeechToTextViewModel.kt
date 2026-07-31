@@ -9,6 +9,7 @@ import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.ModelId
 import com.dmitriim.localaiplayground.core.model.ModelLibrary
+import com.dmitriim.localaiplayground.core.model.ModelTransfers
 import com.dmitriim.localaiplayground.core.model.AiCapability
 import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.RunRecord
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -45,6 +47,7 @@ import kotlinx.serialization.json.jsonPrimitive
 @ContributesIntoMap(AppScope::class)
 class SpeechToTextViewModel(
     private val modelLibrary: ModelLibrary,
+    private val modelTransfers: ModelTransfers,
     private val audioInputStore: AudioInputStore,
     private val transcribeAudio: TranscribeAudio,
     private val operationCoordinator: ForegroundOperationCoordinator,
@@ -61,18 +64,28 @@ class SpeechToTextViewModel(
     init {
         viewModelScope.launch {
             savedModelId = settingsRepository.sttSelectedModel.first()?.let(::ModelId)
-            modelLibrary.installedModels.collectLatest { installed ->
+            combine(modelLibrary.installedModels, modelTransfers.catalog, ::Pair).collectLatest { (installed, catalog) ->
+                val installedById = installed.filter { it.isReadySpeechModel() }.associateBy { it.manifest.modelId }
+                val catalogSpeechModels = catalog.filter {
+                    AiCapability.SPEECH_TO_TEXT in it.manifest.capabilities
+                }
                 val models = buildList {
                     if (systemSpeechSupport.isOnDeviceRecognizerAvailable) {
                         add(androidSpeechRecognizerOption())
                     }
-                    addAll(installed.filter { it.isReadySpeechModel() }.map { it.toSpeechModelOption() })
+                    catalogSpeechModels.forEach { entry ->
+                        add(installedById[entry.manifest.modelId]?.toSpeechModelOption() ?: entry.toSpeechModelOption())
+                    }
+                    installedById
+                        .filterKeys { id -> catalogSpeechModels.none { it.manifest.modelId == id } }
+                        .values
+                        .mapTo(this) { it.toSpeechModelOption() }
                 }
                 mutableState.update { current ->
                     val selected = current.selectedModelId
-                        ?.takeIf { id -> models.any { it.id == id } }
-                        ?: savedModelId?.takeIf { id -> models.any { it.id == id } }
-                        ?: models.firstOrNull()?.id
+                        ?.takeIf { id -> models.any { it.id == id && it.installed } }
+                        ?: savedModelId?.takeIf { id -> models.any { it.id == id && it.installed } }
+                        ?: models.firstOrNull { it.installed }?.id
                     val selectedModel = models.firstOrNull { it.id == selected }
                     val language = current.language.takeIf { it in selectedModel?.supportedLanguages.orEmpty() }
                         ?: selectedModel?.supportedLanguages?.firstOrNull()
@@ -96,7 +109,7 @@ class SpeechToTextViewModel(
 
     fun selectModel(modelId: ModelId) {
         if (operationJob?.isActive == true) return
-        if (mutableState.value.models.none { it.id == modelId }) return
+        if (mutableState.value.models.none { it.id == modelId && it.installed }) return
         mutableState.update { current ->
             val model = current.models.first { it.id == modelId }
             current.copy(
@@ -264,7 +277,7 @@ class SpeechToTextViewModel(
     }
 
     private fun requireModel(): Boolean {
-        if (mutableState.value.selectedModelId != null) return true
+        if (mutableState.value.selectedModel?.installed == true) return true
         Log.w(TAG, "STT cannot start because no compatible model is selected.")
         mutableState.update { it.copy(errorMessage = "Install a compatible speech-to-text model before recording or importing audio.") }
         return false
@@ -296,7 +309,9 @@ class SpeechToTextViewModel(
     private fun applyReplay(run: RunRecord) {
         Log.i(TAG, "STT replay configuration received: runId=${run.id}")
         val modelId = run.model?.modelId?.let(::ModelId)
-        val selected = modelId?.takeIf { id -> mutableState.value.models.any { it.id == id } }
+        val selected = modelId?.takeIf { id ->
+            mutableState.value.models.any { it.id == id && it.installed }
+        }
         val parameters = runCatching { Json.parseToJsonElement(run.parametersJson).jsonObject }.getOrNull()
         mutableState.update { state ->
             state.copy(

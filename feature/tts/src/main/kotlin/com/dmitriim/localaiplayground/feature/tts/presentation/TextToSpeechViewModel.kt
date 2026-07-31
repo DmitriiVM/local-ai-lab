@@ -90,13 +90,13 @@ class TextToSpeechViewModel(
                 modelTransfers.catalog,
                 referenceVoiceStore.voices,
             ) { installed, catalog, references ->
-                installed.filter { it.isReadyTtsModel() }.map { it.toTtsModelOption(catalog) } to references
+                ttsModelOptions(installed, catalog) to references
             }.collectLatest { (models, references) ->
                 mutableState.update { current ->
                     val selected = current.selectedModelId
-                        ?.takeIf { id -> models.any { it.id == id } }
-                        ?: savedModelId?.takeIf { id -> models.any { it.id == id } }
-                        ?: models.firstOrNull()?.id
+                        ?.takeIf { id -> models.any { it.id == id && it.installed } }
+                        ?: savedModelId?.takeIf { id -> models.any { it.id == id && it.installed } }
+                        ?: models.firstOrNull { it.installed }?.id
                     val selectedModel = models.firstOrNull { it.id == selected }
                     val language = if (selectedModel?.voiceMode == TtsVoiceMode.REFERENCE_AUDIO) {
                         TtsLanguage.ENGLISH
@@ -152,6 +152,7 @@ class TextToSpeechViewModel(
 
     fun selectModel(modelId: ModelId) {
         if (isActive()) return
+        if (mutableState.value.models.none { it.id == modelId && it.installed }) return
         if (mutableState.value.selectedModelId != modelId) synthesizeSpeech.unloadRuntime()
         mutableState.update { state ->
             val model = state.models.firstOrNull { it.id == modelId } ?: return@update state
@@ -689,7 +690,9 @@ class TextToSpeechViewModel(
 
     private fun applyReplay(run: RunRecord) {
         val modelId = run.model?.modelId?.let(::ModelId)
-        val selected = modelId?.takeIf { id -> mutableState.value.models.any { it.id == id } }
+        val selected = modelId?.takeIf { id ->
+            mutableState.value.models.any { it.id == id && it.installed }
+        }
         val parameters = runCatching { Json.parseToJsonElement(run.parametersJson).jsonObject }.getOrNull()
         val replayLanguage = parameters?.get("language")?.jsonPrimitive?.content
             ?.let { code -> TtsLanguage.entries.firstOrNull { it.code == code } }

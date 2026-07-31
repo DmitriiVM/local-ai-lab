@@ -40,6 +40,9 @@ data class VoiceUiState(
             selectedSpeechModel == null -> "Select an installed speech model."
             selectedChatModel == null -> "Select an installed chat model."
             selectedVoiceModel == null -> "Select an installed voice model."
+            !selectedSpeechModel!!.installed -> "Download the selected speech model in Models."
+            !selectedChatModel!!.installed -> "Download the selected chat model in Models."
+            !selectedVoiceModel!!.installed -> "Download the selected voice model in Models."
             !selectedSpeechModel!!.languages.supports(language) ->
                 "${selectedSpeechModel!!.displayName} is not configured for ${language.label}."
             !selectedVoiceModel!!.languages.supports(language) ->
@@ -56,6 +59,7 @@ data class VoiceModelOption(
     val engineId: EngineId,
     val languages: Set<String>,
     val approximateRamBytes: Long?,
+    val installed: Boolean,
 )
 
 enum class VoiceLanguage(val label: String, val code: String) {
