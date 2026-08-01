@@ -3,7 +3,7 @@ package com.dmitriim.localaiplayground.feature.models.presentation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.navigation.AppNavigator
 import com.dmitriim.localaiplayground.core.navigation.TopLevelDestination
 import com.dmitriim.localaiplayground.feature.models.navigation.ModelDetailsKey

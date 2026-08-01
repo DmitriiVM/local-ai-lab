@@ -1,13 +1,13 @@
 package com.dmitriim.localaiplayground.feature.voice.domain
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.ChatEngine
-import com.dmitriim.localaiplayground.ai.api.LlmBackend
-import com.dmitriim.localaiplayground.ai.api.LlmChatMessage
-import com.dmitriim.localaiplayground.ai.api.LlmChatRole
-import com.dmitriim.localaiplayground.ai.api.LlmGenerationRequest
-import com.dmitriim.localaiplayground.ai.api.LlmLoadRequest
-import com.dmitriim.localaiplayground.core.model.ChatModelReference
+import com.dmitriim.localaiplayground.ai.api.llm.ChatEngine
+import com.dmitriim.localaiplayground.ai.api.llm.LlmBackend
+import com.dmitriim.localaiplayground.ai.api.llm.LlmChatMessage
+import com.dmitriim.localaiplayground.ai.api.llm.LlmChatRole
+import com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationRequest
+import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadRequest
+import com.dmitriim.localaiplayground.core.model.runtime.ChatModelReference
 
 internal fun generateVoiceResponse(
     engine: ChatEngine,

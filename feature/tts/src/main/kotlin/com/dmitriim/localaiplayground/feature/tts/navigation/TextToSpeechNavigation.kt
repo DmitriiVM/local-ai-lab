@@ -11,10 +11,6 @@ import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechRoute
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object TextToSpeechKey : NavKey
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding<NavigationEntryProvider>())

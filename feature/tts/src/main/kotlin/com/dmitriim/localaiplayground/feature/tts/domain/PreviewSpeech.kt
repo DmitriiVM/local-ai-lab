@@ -1,23 +1,15 @@
 package com.dmitriim.localaiplayground.feature.tts.domain
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechEngine
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechLoadRequest
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechRequest
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechEngine
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechLoadRequest
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechRequest
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffectsProcessor
-import com.dmitriim.localaiplayground.core.model.LocalModelResolver
-import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import dev.zacsweers.metro.Inject
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CancellationException
-
-data class SpeechPreviewRequest(
-    val modelId: ModelId,
-    val text: String,
-    val voiceName: String,
-    val settings: SpeechSynthesisSettings,
-)
+import java.util.concurrent.atomic.AtomicBoolean
 
 /** Synthesizes an ephemeral sample without retaining audio or creating run history. */
 @Inject
@@ -46,7 +38,7 @@ class PreviewSpeech(
                 ),
             )
             val fixedSpeaker = request.settings.voiceCondition as?
-                com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition.FixedSpeaker
+                com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition.FixedSpeaker
             if (fixedSpeaker != null) {
                 require(
                     request.settings.expectedSpeakerCount?.let { it == load.speakerCount } != false &&

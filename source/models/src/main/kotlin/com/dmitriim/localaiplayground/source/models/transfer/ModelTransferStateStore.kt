@@ -1,8 +1,8 @@
 package com.dmitriim.localaiplayground.source.models.transfer
 
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelTransferState
+import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow

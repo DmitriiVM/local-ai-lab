@@ -2,11 +2,11 @@ package com.dmitriim.localaiplayground.feature.stt.domain
 
 import android.os.SystemClock
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextEngine
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextLoadRequest
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextRequest
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextEngine
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextLoadRequest
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextRequest
 import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
-import com.dmitriim.localaiplayground.core.model.LocalModelResolver
+import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

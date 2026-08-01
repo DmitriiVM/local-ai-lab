@@ -1,17 +1,17 @@
 package com.dmitriim.localaiplayground.feature.voice.presentation
 
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.InstalledModel
-import com.dmitriim.localaiplayground.core.model.CatalogModel
-import com.dmitriim.localaiplayground.core.model.ModelManifest
-import com.dmitriim.localaiplayground.core.model.ModelValidationState
-import com.dmitriim.localaiplayground.core.model.TtsVoiceMode
-import com.dmitriim.localaiplayground.core.model.BuiltInSpeechToTextModels
-import com.dmitriim.localaiplayground.core.model.EngineId
-import com.dmitriim.localaiplayground.feature.voice.domain.VoiceContextUsage as DomainVoiceContextUsage
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.library.BuiltInSpeechToTextModels
+import com.dmitriim.localaiplayground.core.model.library.CatalogModel
+import com.dmitriim.localaiplayground.core.model.library.InstalledModel
+import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
+import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineEvent
 import com.dmitriim.localaiplayground.feature.voice.domain.VoiceTurnPhase
 import com.dmitriim.localaiplayground.feature.voice.domain.VoiceTurnRequest
+import com.dmitriim.localaiplayground.feature.voice.domain.VoiceContextUsage as DomainVoiceContextUsage
 
 internal fun VoiceUiState.toVoiceTurnRequest(): Result<VoiceTurnRequest> = runCatching {
     val effectiveSettings = settings

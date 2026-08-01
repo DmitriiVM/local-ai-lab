@@ -1,16 +1,16 @@
 package com.dmitriim.localaiplayground.ai.sherpa
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechBackend
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechLoadRequest
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechLoadResult
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechRequest
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechResult
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechBackend
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechLoadRequest
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechLoadResult
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechRequest
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechResult
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.ModelProfileId
-import com.dmitriim.localaiplayground.core.model.ModelProfileIds
-import com.dmitriim.localaiplayground.core.model.EngineId
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileIds
 import com.k2fsa.sherpa.onnx.GenerationConfig
 import com.k2fsa.sherpa.onnx.OfflineTts
 import com.k2fsa.sherpa.onnx.OfflineTtsConfig

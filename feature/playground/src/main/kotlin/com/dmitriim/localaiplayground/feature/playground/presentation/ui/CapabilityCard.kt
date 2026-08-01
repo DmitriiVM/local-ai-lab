@@ -12,9 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.CapabilityReadiness
-import com.dmitriim.localaiplayground.core.model.CapabilityReadinessState
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.capability.CapabilityReadiness
+import com.dmitriim.localaiplayground.core.model.capability.CapabilityReadinessState
 
 @Composable
 internal fun CapabilityCard(

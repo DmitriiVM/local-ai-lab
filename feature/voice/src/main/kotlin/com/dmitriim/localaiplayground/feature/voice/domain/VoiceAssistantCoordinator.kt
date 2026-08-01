@@ -2,20 +2,20 @@ package com.dmitriim.localaiplayground.feature.voice.domain
 
 import android.os.SystemClock
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.ChatEngine
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextEngine
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechEngine
+import com.dmitriim.localaiplayground.ai.api.llm.ChatEngine
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextEngine
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechEngine
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
-import com.dmitriim.localaiplayground.core.model.LocalModelResolver
+import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import dev.zacsweers.metro.Inject
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
+import java.util.concurrent.atomic.AtomicBoolean
 
 /** Owns one foreground turn's sequencing, cancellation, and cleanup. */
 @Inject

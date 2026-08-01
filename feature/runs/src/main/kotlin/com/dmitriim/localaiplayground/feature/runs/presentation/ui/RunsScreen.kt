@@ -16,9 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.RunRecord
-import com.dmitriim.localaiplayground.core.model.RunStatus
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 import com.dmitriim.localaiplayground.feature.runs.presentation.RunsUiState

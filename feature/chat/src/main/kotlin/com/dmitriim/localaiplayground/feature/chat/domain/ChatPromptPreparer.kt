@@ -1,9 +1,9 @@
 package com.dmitriim.localaiplayground.feature.chat.domain
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.ChatEngine
-import com.dmitriim.localaiplayground.ai.api.LlmChatMessage
-import com.dmitriim.localaiplayground.ai.api.LlmChatRole
+import com.dmitriim.localaiplayground.ai.api.llm.ChatEngine
+import com.dmitriim.localaiplayground.ai.api.llm.LlmChatMessage
+import com.dmitriim.localaiplayground.ai.api.llm.LlmChatRole
 
 /** Enforces the documented oldest-turn truncation strategy before a local generation. */
 internal class ChatPromptPreparer(

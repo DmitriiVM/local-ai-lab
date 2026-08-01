@@ -6,9 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dmitriim.localaiplayground.feature.runs.presentation.ui.RunsScreen
 import com.dmitriim.localaiplayground.core.navigation.AppNavigator
 import com.dmitriim.localaiplayground.core.navigation.NavigationTarget
+import com.dmitriim.localaiplayground.feature.runs.presentation.ui.RunsScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 @Composable
@@ -45,10 +45,10 @@ fun RunsRoute(navigator: AppNavigator, viewModel: RunsViewModel = metroViewModel
     )
 }
 
-private val com.dmitriim.localaiplayground.core.model.AiCapability.replayTarget get() = when (this) {
-    com.dmitriim.localaiplayground.core.model.AiCapability.CHAT -> NavigationTarget.CHAT
-    com.dmitriim.localaiplayground.core.model.AiCapability.SPEECH_TO_TEXT -> NavigationTarget.SPEECH_TO_TEXT
-    com.dmitriim.localaiplayground.core.model.AiCapability.TEXT_TO_SPEECH -> NavigationTarget.TEXT_TO_SPEECH
-    com.dmitriim.localaiplayground.core.model.AiCapability.VOICE_ACTIVITY_DETECTION -> NavigationTarget.SPEECH_TO_TEXT
-    com.dmitriim.localaiplayground.core.model.AiCapability.VOICE_ASSISTANT -> NavigationTarget.VOICE_ASSISTANT
+private val com.dmitriim.localaiplayground.core.model.capability.AiCapability.replayTarget get() = when (this) {
+    com.dmitriim.localaiplayground.core.model.capability.AiCapability.CHAT -> NavigationTarget.CHAT
+    com.dmitriim.localaiplayground.core.model.capability.AiCapability.SPEECH_TO_TEXT -> NavigationTarget.SPEECH_TO_TEXT
+    com.dmitriim.localaiplayground.core.model.capability.AiCapability.TEXT_TO_SPEECH -> NavigationTarget.TEXT_TO_SPEECH
+    com.dmitriim.localaiplayground.core.model.capability.AiCapability.VOICE_ACTIVITY_DETECTION -> NavigationTarget.SPEECH_TO_TEXT
+    com.dmitriim.localaiplayground.core.model.capability.AiCapability.VOICE_ASSISTANT -> NavigationTarget.VOICE_ASSISTANT
 }

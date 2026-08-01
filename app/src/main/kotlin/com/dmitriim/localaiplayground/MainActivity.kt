@@ -8,16 +8,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localaiplayground.core.ui.theme.LocalAiPlaygroundTheme
-import com.dmitriim.localaiplayground.ui.LocalAiPlaygroundApp
-import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import com.dmitriim.localaiplayground.source.settings.AppSettings
 import com.dmitriim.localaiplayground.source.settings.ThemePreference
+import com.dmitriim.localaiplayground.ui.LocalAiPlaygroundApp
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

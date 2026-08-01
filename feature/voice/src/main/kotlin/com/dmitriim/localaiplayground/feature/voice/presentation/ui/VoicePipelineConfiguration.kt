@@ -20,7 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.feature.voice.presentation.VoiceLanguage
 import com.dmitriim.localaiplayground.feature.voice.presentation.VoiceModelOption
 import com.dmitriim.localaiplayground.feature.voice.presentation.VoiceSettings

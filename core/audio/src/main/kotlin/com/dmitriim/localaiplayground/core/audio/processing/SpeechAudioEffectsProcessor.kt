@@ -1,6 +1,7 @@
 package com.dmitriim.localaiplayground.core.audio.processing
 
 import dev.zacsweers.metro.Inject
+import kotlinx.coroutines.CancellationException
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -14,7 +15,6 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.math.tanh
-import kotlinx.coroutines.CancellationException
 
 /**
  * Offline mono speech effects. Processing a complete synthesis keeps pitch and

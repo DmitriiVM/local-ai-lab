@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localaiplayground.core.model.EngineAvailability
+import com.dmitriim.localaiplayground.core.model.engine.EngineAvailability
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.device.presentation.DeviceUiState
 

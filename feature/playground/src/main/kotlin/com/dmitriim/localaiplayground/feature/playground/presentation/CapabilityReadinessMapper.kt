@@ -1,11 +1,11 @@
 package com.dmitriim.localaiplayground.feature.playground.presentation
 
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.CapabilityReadiness
-import com.dmitriim.localaiplayground.core.model.CapabilityReadinessState
-import com.dmitriim.localaiplayground.core.model.EngineAvailability
-import com.dmitriim.localaiplayground.core.model.InstalledModel
-import com.dmitriim.localaiplayground.core.model.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.capability.CapabilityReadiness
+import com.dmitriim.localaiplayground.core.model.capability.CapabilityReadinessState
+import com.dmitriim.localaiplayground.core.model.engine.EngineAvailability
+import com.dmitriim.localaiplayground.core.model.library.InstalledModel
+import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
 
 internal fun buildCapabilityReadiness(
     availability: List<EngineAvailability>,

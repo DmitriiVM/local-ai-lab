@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
-import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechUiState

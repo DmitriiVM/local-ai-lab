@@ -2,9 +2,9 @@ package com.dmitriim.localaiplayground.feature.playground.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dmitriim.localaiplayground.ai.api.EngineAvailabilitySource
+import com.dmitriim.localaiplayground.ai.api.availability.EngineAvailabilitySource
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.ModelLibrary
+import com.dmitriim.localaiplayground.core.model.service.ModelLibrary
 import com.dmitriim.localaiplayground.core.result.DomainError
 import com.dmitriim.localaiplayground.core.result.DomainErrorCategory
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
@@ -12,7 +12,6 @@ import com.dmitriim.localaiplayground.core.result.OperationState
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import java.util.concurrent.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +21,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.concurrent.CancellationException
 
 @Inject
 @ViewModelKey

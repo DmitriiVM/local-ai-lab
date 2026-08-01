@@ -1,18 +1,18 @@
 package com.dmitriim.localaiplayground.feature.voice.domain
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextEngine
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextLoadRequest
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextRequest
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechEngine
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechLoadRequest
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechRequest
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextEngine
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextLoadRequest
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextRequest
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechEngine
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechLoadRequest
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechRequest
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
-import com.dmitriim.localaiplayground.core.model.SpeechToTextModelReference
-import com.dmitriim.localaiplayground.core.model.TextToSpeechModelReference
+import com.dmitriim.localaiplayground.core.model.runtime.SpeechToTextModelReference
+import com.dmitriim.localaiplayground.core.model.runtime.TextToSpeechModelReference
 
 internal suspend fun transcribeVoiceInput(
     audioInputStore: AudioInputStore,

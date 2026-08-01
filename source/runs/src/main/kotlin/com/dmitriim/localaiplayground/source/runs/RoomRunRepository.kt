@@ -2,19 +2,19 @@ package com.dmitriim.localaiplayground.source.runs
 
 import android.app.Application
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.ConversationMessageRecord
-import com.dmitriim.localaiplayground.core.model.ConversationRecord
-import com.dmitriim.localaiplayground.core.model.RunRecord
-import com.dmitriim.localaiplayground.core.model.RunRepository
-import com.dmitriim.localaiplayground.core.model.StorageUsage
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessageRecord
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationRecord
+import com.dmitriim.localaiplayground.core.model.device.StorageUsage
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
+import com.dmitriim.localaiplayground.core.model.service.RunRepository
 import com.dmitriim.localaiplayground.source.database.ModelDatabaseProvider
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import java.io.File
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import java.io.File
 
 @Inject
 @SingleIn(AppScope::class)

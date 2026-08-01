@@ -1,20 +1,18 @@
 package com.dmitriim.localaiplayground.feature.voice.domain
 
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.ConversationKind
-import com.dmitriim.localaiplayground.core.model.ConversationMessageRecord
-import com.dmitriim.localaiplayground.core.model.ConversationMessageRole
-import com.dmitriim.localaiplayground.core.model.ConversationRecord
-import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
-import com.dmitriim.localaiplayground.core.model.RunRecord
-import com.dmitriim.localaiplayground.core.model.RunRepository
-import com.dmitriim.localaiplayground.core.model.RunStatus
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationKind
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessageRecord
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessageRole
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunStatus
+import com.dmitriim.localaiplayground.core.model.service.RunRepository
 import dev.zacsweers.metro.Inject
-import java.util.UUID
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import java.util.UUID
 
 @Inject
 class PersistVoiceTurn(private val runRepository: RunRepository) {
@@ -94,22 +92,3 @@ class PersistVoiceTurn(private val runRepository: RunRepository) {
         }
     }
 }
-
-data class CompletedVoiceTurn(
-    val conversationId: String,
-    val startedAtEpochMs: Long,
-    val request: VoiceTurnRequest,
-    val transcript: String,
-    val response: String,
-    val conversation: List<VoiceConversationSnapshot>,
-    val metrics: VoicePipelineMetrics,
-    val speechModel: RunModelSnapshot?,
-    val chatModel: RunModelSnapshot?,
-    val voiceModel: RunModelSnapshot?,
-)
-
-data class VoiceConversationSnapshot(
-    val id: String,
-    val userText: String,
-    val assistantText: String,
-)

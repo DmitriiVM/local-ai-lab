@@ -1,14 +1,14 @@
 package com.dmitriim.localaiplayground.ai.llamacpp
 
 import android.os.Build
-import com.dmitriim.localaiplayground.ai.api.EngineAvailabilityProbe
+import com.dmitriim.localaiplayground.ai.api.availability.EngineAvailabilityProbe
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.EngineAvailability
-import com.dmitriim.localaiplayground.core.model.EngineDescriptor
-import com.dmitriim.localaiplayground.core.model.EngineId
-import com.dmitriim.localaiplayground.core.model.EngineKind
-import com.dmitriim.localaiplayground.core.model.RuntimeBackend
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.engine.EngineAvailability
+import com.dmitriim.localaiplayground.core.model.engine.EngineDescriptor
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.engine.EngineKind
+import com.dmitriim.localaiplayground.core.model.engine.RuntimeBackend
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers

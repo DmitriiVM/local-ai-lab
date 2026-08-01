@@ -6,7 +6,7 @@ import android.os.Build
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 
 class ModelDownloadWorker(
     appContext: Context,

@@ -2,15 +2,15 @@ package com.dmitriim.localaiplayground.ai.llamacpp
 
 import android.content.Context
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.ChatEngine
-import com.dmitriim.localaiplayground.ai.api.LlmBackend
-import com.dmitriim.localaiplayground.ai.api.LlmChatMessage
-import com.dmitriim.localaiplayground.ai.api.LlmFinishReason
-import com.dmitriim.localaiplayground.ai.api.LlmGenerationRequest
-import com.dmitriim.localaiplayground.ai.api.LlmGenerationResult
-import com.dmitriim.localaiplayground.ai.api.LlmLoadRequest
-import com.dmitriim.localaiplayground.ai.api.LlmLoadResult
-import com.dmitriim.localaiplayground.core.model.ModelProfileIds
+import com.dmitriim.localaiplayground.ai.api.llm.ChatEngine
+import com.dmitriim.localaiplayground.ai.api.llm.LlmBackend
+import com.dmitriim.localaiplayground.ai.api.llm.LlmChatMessage
+import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
+import com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationRequest
+import com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationResult
+import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadRequest
+import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadResult
+import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileIds
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock

@@ -30,13 +30,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
-import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechUiState
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsLanguage
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsModelOption

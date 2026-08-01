@@ -1,13 +1,13 @@
 package com.dmitriim.localaiplayground
 
 import android.app.Application
+import android.content.ComponentCallbacks2
 import com.dmitriim.localaiplayground.di.AppGraph
 import dev.zacsweers.metro.createGraphFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import android.content.ComponentCallbacks2
 
 class LocalAiPlaygroundApplication : Application() {
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

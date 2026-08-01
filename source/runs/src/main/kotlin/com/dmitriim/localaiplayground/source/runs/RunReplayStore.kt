@@ -1,7 +1,7 @@
 package com.dmitriim.localaiplayground.source.runs
 
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.RunRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.MutableStateFlow

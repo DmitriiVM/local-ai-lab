@@ -12,8 +12,8 @@ import com.dmitriim.localaiplayground.core.audio.output.api.SpeechPlaybackSessio
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackMetrics
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackState
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.delay
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
 import kotlin.math.roundToInt
 

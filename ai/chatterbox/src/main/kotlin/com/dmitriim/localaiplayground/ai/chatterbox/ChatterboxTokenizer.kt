@@ -1,12 +1,12 @@
 package com.dmitriim.localaiplayground.ai.chatterbox
 
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.regex.Pattern
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.regex.Pattern
 
 /** Minimal, pinned GPT-2 byte-level BPE implementation for Chatterbox's tokenizer.json. */
 internal class ChatterboxTokenizer(tokenizerFile: File) {

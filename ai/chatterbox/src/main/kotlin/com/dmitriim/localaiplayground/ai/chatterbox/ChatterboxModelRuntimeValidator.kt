@@ -1,17 +1,17 @@
 package com.dmitriim.localaiplayground.ai.chatterbox
 
-import com.dmitriim.localaiplayground.ai.api.ModelAdapter
-import com.dmitriim.localaiplayground.ai.api.ModelImportDefinition
-import com.dmitriim.localaiplayground.ai.api.ModelImportFileDefinition
-import com.dmitriim.localaiplayground.ai.api.RuntimeValidationResult
+import com.dmitriim.localaiplayground.ai.api.model.ModelAdapter
+import com.dmitriim.localaiplayground.ai.api.model.ModelImportDefinition
+import com.dmitriim.localaiplayground.ai.api.model.ModelImportFileDefinition
+import com.dmitriim.localaiplayground.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.EngineId
-import com.dmitriim.localaiplayground.core.model.ModelFileRoles
-import com.dmitriim.localaiplayground.core.model.ModelFormat
-import com.dmitriim.localaiplayground.core.model.ModelManifest
-import com.dmitriim.localaiplayground.core.model.ModelProfileIds
-import com.dmitriim.localaiplayground.core.model.TtsVoiceMode
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelFileRoles
+import com.dmitriim.localaiplayground.core.model.manifest.ModelFormat
+import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
+import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileIds
+import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -25,10 +25,10 @@ class ChatterboxModelRuntimeValidator : ModelAdapter {
     override val profileTypes = setOf(ModelProfileIds.CHATTERBOX_TURBO_Q4)
     override val capabilities = setOf(AiCapability.TEXT_TO_SPEECH)
 
-    override fun capabilitiesFor(profileType: com.dmitriim.localaiplayground.core.model.ModelProfileId) =
+    override fun capabilitiesFor(profileType: com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId) =
         if (profileType in profileTypes) capabilities else emptySet()
 
-    override fun importDefinition(profileType: com.dmitriim.localaiplayground.core.model.ModelProfileId) =
+    override fun importDefinition(profileType: com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId) =
         if (profileType == ModelProfileIds.CHATTERBOX_TURBO_Q4) {
             ModelImportDefinition(
                 displayName = "Chatterbox Turbo Q4 (English)",

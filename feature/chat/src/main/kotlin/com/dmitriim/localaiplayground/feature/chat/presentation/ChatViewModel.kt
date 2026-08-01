@@ -3,28 +3,28 @@ package com.dmitriim.localaiplayground.feature.chat.presentation
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dmitriim.localaiplayground.ai.api.ChatEngine
+import com.dmitriim.localaiplayground.ai.api.llm.ChatEngine
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.ConversationMessageRole
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.CatalogModel
-import com.dmitriim.localaiplayground.core.model.InstalledModel
-import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelLibrary
-import com.dmitriim.localaiplayground.core.model.ModelTransfers
-import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
-import com.dmitriim.localaiplayground.core.model.RunRecord
-import com.dmitriim.localaiplayground.core.model.RunRepository
-import com.dmitriim.localaiplayground.core.model.RunStatus
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessageRole
+import com.dmitriim.localaiplayground.core.model.library.CatalogModel
+import com.dmitriim.localaiplayground.core.model.library.InstalledModel
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.model.runs.RunModelSnapshot
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunStatus
+import com.dmitriim.localaiplayground.core.model.service.ModelLibrary
+import com.dmitriim.localaiplayground.core.model.service.ModelTransfers
+import com.dmitriim.localaiplayground.core.model.service.RunRepository
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
+import com.dmitriim.localaiplayground.feature.chat.domain.ChatConversationSnapshot
 import com.dmitriim.localaiplayground.feature.chat.domain.ChatGenerationEvent
 import com.dmitriim.localaiplayground.feature.chat.domain.ChatGenerationRequest
-import com.dmitriim.localaiplayground.feature.chat.domain.GenerateChatResponse
-import com.dmitriim.localaiplayground.feature.chat.domain.PersistChatTurn
-import com.dmitriim.localaiplayground.feature.chat.domain.ChatConversationSnapshot
 import com.dmitriim.localaiplayground.feature.chat.domain.ChatPersistenceSnapshot
 import com.dmitriim.localaiplayground.feature.chat.domain.ChatRunMetrics
 import com.dmitriim.localaiplayground.feature.chat.domain.ChatRunSettings
+import com.dmitriim.localaiplayground.feature.chat.domain.GenerateChatResponse
+import com.dmitriim.localaiplayground.feature.chat.domain.PersistChatTurn
 import com.dmitriim.localaiplayground.source.runs.RunReplayStore
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -85,7 +85,7 @@ class ChatViewModel(
         }
         viewModelScope.launch {
             replayStore.pending.collectLatest { run ->
-                if (run?.capability == com.dmitriim.localaiplayground.core.model.AiCapability.CHAT) applyReplay(run)
+                if (run?.capability == com.dmitriim.localaiplayground.core.model.capability.AiCapability.CHAT) applyReplay(run)
             }
         }
     }

@@ -1,8 +1,8 @@
 package com.dmitriim.localaiplayground.feature.tts.domain
 
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
-import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 
 data class SpeechSynthesisRequest(
     val modelId: ModelId,

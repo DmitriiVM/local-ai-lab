@@ -1,10 +1,10 @@
 package com.dmitriim.localaiplayground.feature.chat.presentation
 
-import com.dmitriim.localaiplayground.ai.api.LlmFinishReason
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.InstalledModel
-import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelValidationState
+import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.library.InstalledModel
+import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import java.util.UUID
 
 data class ChatUiState(

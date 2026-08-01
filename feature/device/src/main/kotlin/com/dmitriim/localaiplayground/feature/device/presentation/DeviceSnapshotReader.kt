@@ -2,8 +2,8 @@ package com.dmitriim.localaiplayground.feature.device.presentation
 
 import android.app.ActivityManager
 import android.app.Application
-import android.os.Build
 import android.os.BatteryManager
+import android.os.Build
 import android.os.PowerManager
 import android.os.StatFs
 import java.util.Locale

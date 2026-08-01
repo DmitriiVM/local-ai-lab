@@ -1,20 +1,15 @@
 package com.dmitriim.localaiplayground.feature.chat.domain
 
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.ConversationKind
-import com.dmitriim.localaiplayground.core.model.ConversationMessageRecord
-import com.dmitriim.localaiplayground.core.model.ConversationMessageRole
-import com.dmitriim.localaiplayground.core.model.ConversationRecord
-import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
-import com.dmitriim.localaiplayground.core.model.RunRecord
-import com.dmitriim.localaiplayground.core.model.RunRepository
-import com.dmitriim.localaiplayground.core.model.RunStatus
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationKind
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessageRecord
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessageRole
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
+import com.dmitriim.localaiplayground.core.model.service.RunRepository
 import dev.zacsweers.metro.Inject
-import java.util.UUID
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
+import java.util.UUID
 
 @Inject
 class PersistChatTurn(private val runRepository: RunRepository) {
@@ -58,67 +53,3 @@ class PersistChatTurn(private val runRepository: RunRepository) {
         )
     }
 }
-
-data class ChatPersistenceSnapshot(
-    val conversationId: String,
-    val status: RunStatus,
-    val startedAtEpochMs: Long,
-    val model: RunModelSnapshot?,
-    val input: String,
-    val output: String?,
-    val settings: ChatRunSettings,
-    val metrics: ChatRunMetrics?,
-    val errorMessage: String?,
-    val messages: List<ChatConversationSnapshot>,
-)
-
-data class ChatRunSettings(
-    val systemPrompt: String,
-    val temperature: Float,
-    val topK: Int,
-    val topP: Float,
-    val maxOutputTokens: Int,
-    val seed: Int,
-    val contextSize: Int,
-    val threadCount: Int,
-) {
-    fun toJson() = buildJsonObject {
-        put("systemPrompt", systemPrompt)
-        put("temperature", temperature)
-        put("topK", topK)
-        put("topP", topP)
-        put("maxOutputTokens", maxOutputTokens)
-        put("seed", seed)
-        put("contextSize", contextSize)
-        put("threadCount", threadCount)
-    }
-}
-
-data class ChatRunMetrics(
-    val coldStart: Boolean,
-    val loadDurationMs: Long,
-    val promptTokens: Int,
-    val timeToFirstTokenMs: Long?,
-    val generatedTokens: Int,
-    val totalDurationMs: Long,
-    val finishReason: String,
-    val effectiveThreadCount: Int,
-) {
-    fun toJson() = buildJsonObject {
-        put("coldStart", coldStart)
-        put("loadDurationMs", loadDurationMs)
-        put("promptTokens", promptTokens)
-        put("timeToFirstTokenMs", timeToFirstTokenMs)
-        put("generatedTokens", generatedTokens)
-        put("totalDurationMs", totalDurationMs)
-        put("finishReason", finishReason)
-        put("effectiveThreadCount", effectiveThreadCount)
-    }
-}
-
-data class ChatConversationSnapshot(
-    val id: String,
-    val role: ConversationMessageRole,
-    val content: String,
-    val incomplete: Boolean,
-)

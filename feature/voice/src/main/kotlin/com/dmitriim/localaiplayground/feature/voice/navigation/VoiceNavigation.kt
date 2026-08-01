@@ -11,10 +11,6 @@ import com.dmitriim.localaiplayground.feature.voice.presentation.VoiceRoute
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object VoiceKey : NavKey
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding<NavigationEntryProvider>())

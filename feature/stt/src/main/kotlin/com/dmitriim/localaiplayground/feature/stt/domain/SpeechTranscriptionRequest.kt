@@ -1,7 +1,7 @@
 package com.dmitriim.localaiplayground.feature.stt.domain
 
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
-import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 
 data class SpeechTranscriptionRequest(
     val modelId: ModelId,

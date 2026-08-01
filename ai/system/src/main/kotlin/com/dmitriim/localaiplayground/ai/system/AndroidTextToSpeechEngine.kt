@@ -8,22 +8,25 @@ import android.os.Looper
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
-import com.dmitriim.localaiplayground.ai.api.SystemTextToSpeechSupport
-import com.dmitriim.localaiplayground.ai.api.SystemTextToSpeechVoice
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechBackend
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechLoadRequest
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechLoadResult
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechRequest
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechResult
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition
+import com.dmitriim.localaiplayground.ai.api.system.SystemTextToSpeechSupport
+import com.dmitriim.localaiplayground.ai.api.system.SystemTextToSpeechVoice
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechBackend
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechLoadRequest
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechLoadResult
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechRequest
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechResult
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.EngineId
-import com.dmitriim.localaiplayground.core.model.ModelProfileIds
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileIds
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.ByteBuffer
@@ -32,9 +35,6 @@ import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 @Inject
 @SingleIn(AppScope::class)

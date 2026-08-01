@@ -1,14 +1,14 @@
 package com.dmitriim.localaiplayground.ai.vosk
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextBackend
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextLoadRequest
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextLoadResult
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextRequest
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextResult
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextBackend
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextLoadRequest
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextLoadResult
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextRequest
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextResult
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.EngineId
-import com.dmitriim.localaiplayground.core.model.ModelProfileIds
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileIds
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn

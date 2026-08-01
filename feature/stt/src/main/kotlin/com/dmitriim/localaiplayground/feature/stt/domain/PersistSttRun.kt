@@ -1,16 +1,15 @@
 package com.dmitriim.localaiplayground.feature.stt.domain
 
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
-import com.dmitriim.localaiplayground.core.model.RunRecord
-import com.dmitriim.localaiplayground.core.model.RunRepository
-import com.dmitriim.localaiplayground.core.model.RunStatus
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.runs.RunModelSnapshot
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunStatus
+import com.dmitriim.localaiplayground.core.model.service.RunRepository
 import dev.zacsweers.metro.Inject
-import java.util.UUID
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import java.util.UUID
 
 @Inject
 class PersistSttRun(private val runRepository: RunRepository) {

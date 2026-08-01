@@ -1,10 +1,10 @@
 package com.dmitriim.localaiplayground.feature.models.presentation
 
-import com.dmitriim.localaiplayground.core.model.CatalogModel
-import com.dmitriim.localaiplayground.core.model.InstalledModel
-import com.dmitriim.localaiplayground.core.model.ModelCompatibility
-import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelTransferState
+import com.dmitriim.localaiplayground.core.model.library.CatalogModel
+import com.dmitriim.localaiplayground.core.model.library.InstalledModel
+import com.dmitriim.localaiplayground.core.model.library.ModelCompatibility
+import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 
 data class ModelsUiState(
     val isModelDataLoaded: Boolean = false,

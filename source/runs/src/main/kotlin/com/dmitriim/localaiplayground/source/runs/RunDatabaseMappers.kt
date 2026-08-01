@@ -1,13 +1,13 @@
 package com.dmitriim.localaiplayground.source.runs
 
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.ConversationKind
-import com.dmitriim.localaiplayground.core.model.ConversationMessageRecord
-import com.dmitriim.localaiplayground.core.model.ConversationMessageRole
-import com.dmitriim.localaiplayground.core.model.ConversationRecord
-import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
-import com.dmitriim.localaiplayground.core.model.RunRecord
-import com.dmitriim.localaiplayground.core.model.RunStatus
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationKind
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessageRecord
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessageRole
+import com.dmitriim.localaiplayground.core.model.conversation.ConversationRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunModelSnapshot
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.source.database.ConversationEntity
 import com.dmitriim.localaiplayground.source.database.ConversationMessageEntity
 import com.dmitriim.localaiplayground.source.database.RunEntity

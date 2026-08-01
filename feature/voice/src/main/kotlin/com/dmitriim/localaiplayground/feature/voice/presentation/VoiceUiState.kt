@@ -1,8 +1,8 @@
 package com.dmitriim.localaiplayground.feature.voice.presentation
 
 import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
-import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.EngineId
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.feature.voice.domain.VoicePipelineMetrics
 import java.util.UUID
 

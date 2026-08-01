@@ -3,13 +3,12 @@ package com.dmitriim.localaiplayground.source.runs
 import android.app.Application
 import androidx.core.content.FileProvider
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.RunRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import java.io.File
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.File
 
 @Inject
 @SingleIn(AppScope::class)

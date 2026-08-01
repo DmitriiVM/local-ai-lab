@@ -30,7 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 import com.dmitriim.localaiplayground.feature.stt.presentation.SpeechModelOption
@@ -152,7 +152,7 @@ fun SpeechToTextScreen(
                     Text("RTF: ${metrics.realTimeFactor?.let { "%.2f".format(it) } ?: "—"}")
                     Text("Segments: ${metrics.segmentCount} · model load: ${formatDuration(metrics.loadDurationMs)} · threads: ${metrics.effectiveThreadCount}")
                     Text(
-                        if (state.selectedModel?.recognitionMode == com.dmitriim.localaiplayground.core.model.SttRecognitionMode.STREAMING) {
+                        if (state.selectedModel?.recognitionMode == com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode.STREAMING) {
                             "This model supports streaming; the current screen finalizes each captured segment after recording stops."
                         } else {
                             "This model uses offline segment decoding."

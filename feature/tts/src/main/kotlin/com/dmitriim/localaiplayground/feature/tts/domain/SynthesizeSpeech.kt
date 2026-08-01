@@ -1,26 +1,26 @@
 package com.dmitriim.localaiplayground.feature.tts.domain
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechEngine
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechLoadRequest
-import com.dmitriim.localaiplayground.ai.api.TextToSpeechRequest
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechEngine
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechLoadRequest
+import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechRequest
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
 import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
 import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffectsProcessor
-import com.dmitriim.localaiplayground.core.model.LocalModelResolver
+import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import dev.zacsweers.metro.Inject
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.trySendBlocking
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /** Coordinates one bounded native synthesis stream, Android playback, and WAV retention. */
 @Inject
@@ -69,7 +69,7 @@ class SynthesizeSpeech(
                     "speakers=${load.speakerCount}",
             )
             val fixedSpeaker = request.settings.voiceCondition as?
-                com.dmitriim.localaiplayground.ai.api.TextToSpeechVoiceCondition.FixedSpeaker
+                com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition.FixedSpeaker
             if (fixedSpeaker != null) {
                 require(
                     request.settings.expectedSpeakerCount?.let { it == load.speakerCount } != false &&

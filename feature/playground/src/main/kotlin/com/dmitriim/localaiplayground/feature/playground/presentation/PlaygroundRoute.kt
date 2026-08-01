@@ -3,7 +3,7 @@ package com.dmitriim.localaiplayground.feature.playground.presentation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dmitriim.localaiplayground.core.model.AiCapability
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.navigation.AppNavigator
 import com.dmitriim.localaiplayground.core.navigation.NavigationTarget
 import com.dmitriim.localaiplayground.feature.playground.presentation.ui.PlaygroundScreen

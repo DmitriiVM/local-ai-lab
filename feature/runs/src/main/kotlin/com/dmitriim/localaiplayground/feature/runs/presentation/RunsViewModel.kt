@@ -3,10 +3,10 @@ package com.dmitriim.localaiplayground.feature.runs.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.RunRecord
-import com.dmitriim.localaiplayground.core.model.RunRepository
-import com.dmitriim.localaiplayground.core.model.RunStatus
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunStatus
+import com.dmitriim.localaiplayground.core.model.service.RunRepository
 import com.dmitriim.localaiplayground.source.runs.RunExporter
 import com.dmitriim.localaiplayground.source.runs.RunReplayStore
 import dev.zacsweers.metro.ContributesIntoMap

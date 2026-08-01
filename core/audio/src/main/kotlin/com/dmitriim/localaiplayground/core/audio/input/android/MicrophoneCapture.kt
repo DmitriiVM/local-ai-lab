@@ -13,14 +13,13 @@ import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.di.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.sqrt
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.coroutineContext
 
 /** Sole owner of the active [AudioRecord] session. */
 @Inject

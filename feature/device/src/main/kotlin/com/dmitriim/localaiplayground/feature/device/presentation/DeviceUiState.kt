@@ -1,7 +1,7 @@
 package com.dmitriim.localaiplayground.feature.device.presentation
 
-import com.dmitriim.localaiplayground.core.model.EngineAvailability
-import com.dmitriim.localaiplayground.core.model.DeviceDiagnostics
+import com.dmitriim.localaiplayground.core.model.device.DeviceDiagnostics
+import com.dmitriim.localaiplayground.core.model.engine.EngineAvailability
 
 data class DeviceSnapshot(
     val deviceName: String,

@@ -2,14 +2,14 @@ package com.dmitriim.localaiplayground.feature.stt.presentation
 
 import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
-import com.dmitriim.localaiplayground.core.model.InstalledModel
-import com.dmitriim.localaiplayground.core.model.CatalogModel
-import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelValidationState
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.EngineId
-import com.dmitriim.localaiplayground.core.model.SttRecognitionMode
-import com.dmitriim.localaiplayground.core.model.BuiltInSpeechToTextModels
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.library.BuiltInSpeechToTextModels
+import com.dmitriim.localaiplayground.core.model.library.CatalogModel
+import com.dmitriim.localaiplayground.core.model.library.InstalledModel
+import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode
 import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionMetrics
 
 data class SpeechToTextUiState(

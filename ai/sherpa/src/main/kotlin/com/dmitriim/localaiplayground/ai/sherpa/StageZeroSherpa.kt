@@ -12,17 +12,6 @@ import java.io.File
 import java.io.RandomAccessFile
 import kotlin.system.measureTimeMillis
 
-data class StageZeroSttResult(
-    val text: String,
-    val durationMs: Long,
-)
-
-data class StageZeroTtsResult(
-    val sampleRate: Int,
-    val sampleCount: Int,
-    val durationMs: Long,
-)
-
 /**
  * Direct, CPU-only sherpa-onnx spike. This is deliberately not a production
  * microphone or playback implementation; it proves model loading, inference,
@@ -104,58 +93,57 @@ object StageZeroSherpa {
         val missing = SherpaProfiles.missingFiles(directory, required)
         require(missing.isEmpty()) { "$profile files are missing: ${missing.joinToString()}" }
     }
-}
-
-private data class PcmWave(val sampleRate: Int, val samples: FloatArray) {
-    companion object {
-        fun read(file: File): PcmWave = RandomAccessFile(file, "r").use { input ->
-            require(readAscii(input, 4) == "RIFF") { "Not a RIFF WAV: ${file.name}" }
-            input.skipBytes(4)
-            require(readAscii(input, 4) == "WAVE") { "Not a WAVE file: ${file.name}" }
-            var sampleRate = 0
-            var channels = 0
-            var bitsPerSample = 0
-            var pcmData: ByteArray? = null
-            while (input.filePointer + 8 <= input.length()) {
-                val chunk = readAscii(input, 4)
-                val size = Integer.reverseBytes(input.readInt())
-                require(size >= 0 && input.filePointer + size <= input.length()) { "Invalid WAV chunk" }
-                when (chunk) {
-                    "fmt " -> {
-                        require(size >= 16) { "Invalid WAV format chunk" }
-                        val format = java.lang.Short.reverseBytes(input.readShort()).toInt()
-                        channels = java.lang.Short.reverseBytes(input.readShort()).toInt()
-                        sampleRate = Integer.reverseBytes(input.readInt())
-                        input.skipBytes(6)
-                        bitsPerSample = java.lang.Short.reverseBytes(input.readShort()).toInt()
-                        require(format == 1 && channels == 1 && bitsPerSample == 16) {
-                            "Only mono PCM16 WAV is supported by this Stage 0 probe"
+    private data class PcmWave(val sampleRate: Int, val samples: FloatArray) {
+        companion object {
+            fun read(file: File): PcmWave = RandomAccessFile(file, "r").use { input ->
+                require(readAscii(input, 4) == "RIFF") { "Not a RIFF WAV: ${file.name}" }
+                input.skipBytes(4)
+                require(readAscii(input, 4) == "WAVE") { "Not a WAVE file: ${file.name}" }
+                var sampleRate = 0
+                var channels = 0
+                var bitsPerSample = 0
+                var pcmData: ByteArray? = null
+                while (input.filePointer + 8 <= input.length()) {
+                    val chunk = readAscii(input, 4)
+                    val size = Integer.reverseBytes(input.readInt())
+                    require(size >= 0 && input.filePointer + size <= input.length()) { "Invalid WAV chunk" }
+                    when (chunk) {
+                        "fmt " -> {
+                            require(size >= 16) { "Invalid WAV format chunk" }
+                            val format = java.lang.Short.reverseBytes(input.readShort()).toInt()
+                            channels = java.lang.Short.reverseBytes(input.readShort()).toInt()
+                            sampleRate = Integer.reverseBytes(input.readInt())
+                            input.skipBytes(6)
+                            bitsPerSample = java.lang.Short.reverseBytes(input.readShort()).toInt()
+                            require(format == 1 && channels == 1 && bitsPerSample == 16) {
+                                "Only mono PCM16 WAV is supported by this Stage 0 probe"
+                            }
+                            input.seek(input.filePointer + size - 16)
                         }
-                        input.seek(input.filePointer + size - 16)
+                        "data" -> {
+                            pcmData = ByteArray(size)
+                            input.readFully(pcmData)
+                        }
+                        else -> input.seek(input.filePointer + size)
                     }
-                    "data" -> {
-                        pcmData = ByteArray(size)
-                        input.readFully(pcmData)
-                    }
-                    else -> input.seek(input.filePointer + size)
+                    if (size % 2 == 1 && input.filePointer < input.length()) input.skipBytes(1)
                 }
-                if (size % 2 == 1 && input.filePointer < input.length()) input.skipBytes(1)
+                val data = requireNotNull(pcmData) { "WAV data chunk is missing" }
+                require(sampleRate > 0 && channels == 1 && bitsPerSample == 16) { "WAV format chunk is missing" }
+                val samples = FloatArray(data.size / 2)
+                for (index in samples.indices) {
+                    val lo = data[index * 2].toInt() and 0xff
+                    val hi = data[index * 2 + 1].toInt()
+                    samples[index] = ((hi shl 8) or lo).toShort() / 32768f
+                }
+                PcmWave(sampleRate, samples)
             }
-            val data = requireNotNull(pcmData) { "WAV data chunk is missing" }
-            require(sampleRate > 0 && channels == 1 && bitsPerSample == 16) { "WAV format chunk is missing" }
-            val samples = FloatArray(data.size / 2)
-            for (index in samples.indices) {
-                val lo = data[index * 2].toInt() and 0xff
-                val hi = data[index * 2 + 1].toInt()
-                samples[index] = ((hi shl 8) or lo).toShort() / 32768f
-            }
-            PcmWave(sampleRate, samples)
-        }
 
-        private fun readAscii(input: RandomAccessFile, size: Int): String {
-            val bytes = ByteArray(size)
-            input.readFully(bytes)
-            return bytes.toString(Charsets.US_ASCII)
+            private fun readAscii(input: RandomAccessFile, size: Int): String {
+                val bytes = ByteArray(size)
+                input.readFully(bytes)
+                return bytes.toString(Charsets.US_ASCII)
+            }
         }
     }
 }

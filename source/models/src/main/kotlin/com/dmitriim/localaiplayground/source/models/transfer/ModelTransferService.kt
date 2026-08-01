@@ -2,16 +2,16 @@ package com.dmitriim.localaiplayground.source.models.transfer
 
 import android.app.Application
 import android.util.Log
-import com.dmitriim.localaiplayground.core.model.CatalogDownloadArchive
-import com.dmitriim.localaiplayground.core.model.CatalogArchiveFormat
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.CatalogDownloadFile
-import com.dmitriim.localaiplayground.core.model.CatalogModel
-import com.dmitriim.localaiplayground.core.model.ModelCompatibilityState
-import com.dmitriim.localaiplayground.core.model.ModelFileSpec
-import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelTransferState
-import com.dmitriim.localaiplayground.core.model.ModelTransfers
+import com.dmitriim.localaiplayground.core.model.library.CatalogArchiveFormat
+import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadArchive
+import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadFile
+import com.dmitriim.localaiplayground.core.model.library.CatalogModel
+import com.dmitriim.localaiplayground.core.model.library.ModelCompatibilityState
+import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
+import com.dmitriim.localaiplayground.core.model.manifest.ModelFileSpec
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.model.service.ModelTransfers
 import com.dmitriim.localaiplayground.source.models.catalog.ModelCatalog
 import com.dmitriim.localaiplayground.source.models.diagnostics.ModelDiagnosticsService
 import com.dmitriim.localaiplayground.source.models.library.InstalledModelService
@@ -20,6 +20,13 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withContext
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import java.io.File
@@ -28,13 +35,6 @@ import java.net.HttpURLConnection
 import java.net.URI
 import java.util.UUID
 import java.util.zip.ZipInputStream
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 
 /** Owns scheduling, network transfer progress, and transactional catalog installation. */

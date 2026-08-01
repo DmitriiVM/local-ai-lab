@@ -1,17 +1,13 @@
 package com.dmitriim.localaiplayground.feature.tts.domain
 
-import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.RunModelSnapshot
-import com.dmitriim.localaiplayground.core.model.RunRecord
-import com.dmitriim.localaiplayground.core.model.RunRepository
-import com.dmitriim.localaiplayground.core.model.RunStatus
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
+import com.dmitriim.localaiplayground.core.model.service.RunRepository
 import dev.zacsweers.metro.Inject
-import java.util.UUID
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import java.util.UUID
 
 @Inject
 class PersistTtsRun(private val runRepository: RunRepository) {
@@ -69,24 +65,3 @@ class PersistTtsRun(private val runRepository: RunRepository) {
         )
     }
 }
-
-data class TtsRunSnapshot(
-    val status: RunStatus,
-    val startedAtEpochMs: Long,
-    val model: RunModelSnapshot?,
-    val input: String,
-    val languageCode: String,
-    val voiceId: String,
-    val voiceName: String,
-    val speakerId: Int?,
-    val referenceVoiceId: String?,
-    val referenceVoiceName: String?,
-    val watermarkStatus: String,
-    val speed: Float,
-    val sentenceSilenceScale: Float,
-    val volume: Float,
-    val threadCount: String,
-    val audioEffects: SpeechAudioEffects,
-    val metrics: SpeechSynthesisMetrics?,
-    val errorMessage: String?,
-)

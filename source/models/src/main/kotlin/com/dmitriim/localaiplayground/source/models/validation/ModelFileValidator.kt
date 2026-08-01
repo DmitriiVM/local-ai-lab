@@ -1,11 +1,10 @@
 package com.dmitriim.localaiplayground.source.models.validation
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.ModelAdapterRegistry
+import com.dmitriim.localaiplayground.ai.api.model.ModelAdapterRegistry
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.ModelFileSpec
-import com.dmitriim.localaiplayground.core.model.ModelManifest
-import com.dmitriim.localaiplayground.core.model.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import java.io.File

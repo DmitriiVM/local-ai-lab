@@ -1,24 +1,24 @@
 package com.dmitriim.localaiplayground.source.models.catalog
 
-import com.dmitriim.localaiplayground.core.model.AiCapability
-import com.dmitriim.localaiplayground.core.model.CatalogDownload
-import com.dmitriim.localaiplayground.core.model.CatalogDownloadFile
-import com.dmitriim.localaiplayground.core.model.CatalogDownloadArchive
-import com.dmitriim.localaiplayground.core.model.CatalogArchiveFormat
-import com.dmitriim.localaiplayground.core.model.CatalogModel
-import com.dmitriim.localaiplayground.core.model.EngineId
-import com.dmitriim.localaiplayground.core.model.ModelCatalogState
-import com.dmitriim.localaiplayground.core.model.ModelFileRoles
-import com.dmitriim.localaiplayground.core.model.ModelFileSpec
-import com.dmitriim.localaiplayground.core.model.ModelFormat
-import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelManifest
-import com.dmitriim.localaiplayground.core.model.ModelSource
-import com.dmitriim.localaiplayground.core.model.ModelProfileIds
-import com.dmitriim.localaiplayground.core.model.TtsVoiceDescriptor
-import com.dmitriim.localaiplayground.core.model.TtsControl
-import com.dmitriim.localaiplayground.core.model.TtsVoiceMode
-import com.dmitriim.localaiplayground.core.model.SttRecognitionMode
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.library.CatalogArchiveFormat
+import com.dmitriim.localaiplayground.core.model.library.CatalogDownload
+import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadArchive
+import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadFile
+import com.dmitriim.localaiplayground.core.model.library.CatalogModel
+import com.dmitriim.localaiplayground.core.model.library.ModelCatalogState
+import com.dmitriim.localaiplayground.core.model.manifest.ModelFileRoles
+import com.dmitriim.localaiplayground.core.model.manifest.ModelFileSpec
+import com.dmitriim.localaiplayground.core.model.manifest.ModelFormat
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
+import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileIds
+import com.dmitriim.localaiplayground.core.model.manifest.ModelSource
+import com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode
+import com.dmitriim.localaiplayground.core.model.manifest.TtsControl
+import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceDescriptor
+import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
 
 /** Immutable, app-bundled catalog. Remote hosts provide bytes only, never catalog updates. */
 internal object ModelCatalog {
@@ -819,7 +819,7 @@ internal object ModelCatalog {
         displayName: String,
         family: String,
         description: String,
-        profileType: com.dmitriim.localaiplayground.core.model.ModelProfileId,
+        profileType: com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId,
         archiveName: String,
         archiveBytes: Long,
         archiveSha256: String,

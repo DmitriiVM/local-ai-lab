@@ -1,16 +1,16 @@
 package com.dmitriim.localaiplayground.ai.sherpa
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextBackend
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextLoadRequest
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextLoadResult
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextRequest
-import com.dmitriim.localaiplayground.ai.api.SpeechToTextResult
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextBackend
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextLoadRequest
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextLoadResult
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextRequest
+import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextResult
 import com.dmitriim.localaiplayground.core.di.AppScope
-import com.dmitriim.localaiplayground.core.model.EngineId
-import com.dmitriim.localaiplayground.core.model.ModelFileRole
-import com.dmitriim.localaiplayground.core.model.ModelFileRoles
-import com.dmitriim.localaiplayground.core.model.ModelProfileIds
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelFileRole
+import com.dmitriim.localaiplayground.core.model.manifest.ModelFileRoles
+import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileIds
 import com.k2fsa.sherpa.onnx.OfflineModelConfig
 import com.k2fsa.sherpa.onnx.OfflineMoonshineModelConfig
 import com.k2fsa.sherpa.onnx.OfflineNemoEncDecCtcModelConfig
@@ -224,7 +224,7 @@ class SherpaSpeechToTextEngine : SpeechToTextBackend {
         cancelled = false
     }
 
-    private fun requiredRoles(profileType: com.dmitriim.localaiplayground.core.model.ModelProfileId) = when (profileType) {
+    private fun requiredRoles(profileType: com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId) = when (profileType) {
         ModelProfileIds.WHISPER_STT -> setOf(ModelFileRoles.ENCODER, ModelFileRoles.DECODER, ModelFileRoles.TOKENS)
         ModelProfileIds.PARAKEET_CTC_STT,
         ModelProfileIds.GIGAAM_CTC_STT,

@@ -3,14 +3,13 @@ package com.dmitriim.localaiplayground.feature.device.presentation
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dmitriim.localaiplayground.ai.api.EngineAvailabilitySource
+import com.dmitriim.localaiplayground.ai.api.availability.EngineAvailabilitySource
 import com.dmitriim.localaiplayground.core.di.AppScope
+import com.dmitriim.localaiplayground.core.model.service.ModelDiagnostics
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
-import com.dmitriim.localaiplayground.core.model.ModelDiagnostics
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import java.util.concurrent.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -21,6 +20,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.CancellationException
 
 @Inject
 @ViewModelKey
@@ -71,5 +71,4 @@ class DeviceViewModel(
         job.invokeOnCompletion { registration.close() }
         job.start()
     }
-
 }

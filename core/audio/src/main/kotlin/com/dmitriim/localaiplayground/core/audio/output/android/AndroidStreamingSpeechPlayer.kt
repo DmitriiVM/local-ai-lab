@@ -4,11 +4,11 @@ import android.app.Application
 import android.content.Context
 import android.media.AudioManager
 import android.util.Log
-import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.audio.output.api.SpeechPlaybackSession
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackState
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
+import com.dmitriim.localaiplayground.core.di.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn

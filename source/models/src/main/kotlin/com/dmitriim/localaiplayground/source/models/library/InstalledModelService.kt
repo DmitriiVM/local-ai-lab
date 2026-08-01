@@ -1,24 +1,24 @@
 package com.dmitriim.localaiplayground.source.models.library
 
 import android.app.Application
-import android.provider.OpenableColumns
 import android.provider.DocumentsContract
+import android.provider.OpenableColumns
 import android.util.Log
 import androidx.core.net.toUri
-import com.dmitriim.localaiplayground.ai.api.ModelAdapter
-import com.dmitriim.localaiplayground.ai.api.ModelAdapterRegistry
-import com.dmitriim.localaiplayground.ai.api.ModelImportDefinition
+import com.dmitriim.localaiplayground.ai.api.model.ModelAdapter
+import com.dmitriim.localaiplayground.ai.api.model.ModelAdapterRegistry
+import com.dmitriim.localaiplayground.ai.api.model.ModelImportDefinition
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.di.ApplicationCoroutineScope
-import com.dmitriim.localaiplayground.core.model.InstalledModel
-import com.dmitriim.localaiplayground.core.model.ModelFileSpec
-import com.dmitriim.localaiplayground.core.model.ModelId
-import com.dmitriim.localaiplayground.core.model.ModelImportRequest
-import com.dmitriim.localaiplayground.core.model.ModelLibrary
-import com.dmitriim.localaiplayground.core.model.ModelManifest
-import com.dmitriim.localaiplayground.core.model.ModelSource
-import com.dmitriim.localaiplayground.core.model.ModelTransferState
-import com.dmitriim.localaiplayground.core.model.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.library.InstalledModel
+import com.dmitriim.localaiplayground.core.model.library.ModelImportRequest
+import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
+import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.manifest.ModelFileSpec
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
+import com.dmitriim.localaiplayground.core.model.manifest.ModelSource
+import com.dmitriim.localaiplayground.core.model.service.ModelLibrary
 import com.dmitriim.localaiplayground.source.database.InstalledModelEntity
 import com.dmitriim.localaiplayground.source.database.ModelDatabaseProvider
 import com.dmitriim.localaiplayground.source.models.transfer.ModelTransferStateStore
@@ -27,9 +27,6 @@ import com.dmitriim.localaiplayground.source.models.validation.totalFileBytes
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import java.io.File
-import java.io.FileOutputStream
-import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -38,6 +35,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import java.io.File
+import java.io.FileOutputStream
+import java.util.UUID
 
 @Inject
 @SingleIn(AppScope::class)

@@ -1,13 +1,11 @@
 package com.dmitriim.localaiplayground.feature.chat.domain
 
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.ChatEngine
-import com.dmitriim.localaiplayground.ai.api.LlmBackend
-import com.dmitriim.localaiplayground.ai.api.LlmGenerationRequest
-import com.dmitriim.localaiplayground.ai.api.LlmGenerationResult
-import com.dmitriim.localaiplayground.ai.api.LlmLoadRequest
-import com.dmitriim.localaiplayground.ai.api.LlmLoadResult
-import com.dmitriim.localaiplayground.core.model.LocalModelResolver
+import com.dmitriim.localaiplayground.ai.api.llm.ChatEngine
+import com.dmitriim.localaiplayground.ai.api.llm.LlmBackend
+import com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationRequest
+import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadRequest
+import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -88,14 +86,4 @@ class GenerateChatResponse(
     private companion object {
         const val TAG = "AiP123Chat"
     }
-}
-
-internal sealed interface ChatGenerationEvent {
-    data class Prepared(val contextUsage: ChatContextUsage) : ChatGenerationEvent
-    data class Token(val text: String) : ChatGenerationEvent
-    data class Completed(
-        val modelName: String,
-        val load: LlmLoadResult,
-        val generation: LlmGenerationResult,
-    ) : ChatGenerationEvent
 }

@@ -1,6 +1,6 @@
 package com.dmitriim.localaiplayground.feature.chat.domain
 
-import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 
 internal data class ChatGenerationRequest(
     val modelId: ModelId,

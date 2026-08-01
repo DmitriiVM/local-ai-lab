@@ -3,7 +3,7 @@ package com.dmitriim.localaiplayground.source.models.transfer
 import android.app.job.JobParameters
 import android.app.job.JobService
 import android.os.Build
-import com.dmitriim.localaiplayground.core.model.ModelId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

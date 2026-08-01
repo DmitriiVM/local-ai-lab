@@ -1,6 +1,6 @@
 package com.dmitriim.localaiplayground.feature.voice.domain
 
-import com.dmitriim.localaiplayground.core.model.LocalModelResolver
+import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 
 /** Revalidates the selected profiles before the microphone is opened. */
 internal suspend fun LocalModelResolver.preflightVoicePipeline(request: VoiceTurnRequest): PreparedVoicePipeline {
