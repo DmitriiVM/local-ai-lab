@@ -6,12 +6,6 @@ interface LlmEngine : AutoCloseable {
 
     fun load(request: LlmLoadRequest): LlmLoadResult
 
-    /** Formats messages with the model's embedded chat template when it has one. */
-    fun format(messages: List<LlmChatMessage>): String
-
-    /** Returns an exact token count for a formatted prompt. */
-    fun countTokens(prompt: String): Int
-
     fun generate(request: LlmGenerationRequest, onToken: (String) -> Unit): LlmGenerationResult
 
     fun cancel()

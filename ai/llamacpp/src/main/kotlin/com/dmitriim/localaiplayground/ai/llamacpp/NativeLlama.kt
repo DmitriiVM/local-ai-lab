@@ -2,22 +2,33 @@ package com.dmitriim.localaiplayground.ai.llamacpp
 
 import android.content.Context
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.llm.ChatEngine
-import com.dmitriim.localaiplayground.ai.api.llm.LlmBackend
+import com.dmitriim.localaiplayground.ai.api.llm.LlmChatTemplateHandling
+import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
+import com.dmitriim.localaiplayground.ai.api.llm.LlmChatFormatter
 import com.dmitriim.localaiplayground.ai.api.llm.LlmChatMessage
+import com.dmitriim.localaiplayground.ai.api.llm.LlmEngineCapabilities
 import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
+import com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationOption
 import com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationRequest
 import com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationResult
+import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadOption
 import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadRequest
 import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadResult
+import com.dmitriim.localaiplayground.ai.api.llm.LlmRuntime
+import com.dmitriim.localaiplayground.ai.api.llm.LlmRuntimeDiagnostics
+import com.dmitriim.localaiplayground.ai.api.llm.LlmTokenCounter
+import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelFileRoles
 import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileIds
+import com.dmitriim.localaiplayground.core.model.runtime.ChatModelReference
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.system.measureTimeMillis
 
 /** JNI-backed llama.cpp engine. It owns one model/context and serializes native access. */
-class NativeLlama(context: Context) : ChatEngine {
+class NativeLlama(context: Context) : LlmRuntime, LlmChatFormatter, LlmTokenCounter {
     private val native = NativeBridge(context.applicationInfo.nativeLibraryDir)
     private val lock = ReentrantLock()
     private var activeRequest: LlmLoadRequest? = null
@@ -25,32 +36,64 @@ class NativeLlama(context: Context) : ChatEngine {
     override var isLoaded: Boolean = false
         private set
 
+    override val engineId = EngineId("llama.cpp")
+
+    override val capabilities = LlmEngineCapabilities(
+        computePreferences = setOf(ComputePreference.CPU),
+        streaming = true,
+        cancellation = true,
+        tokenCounting = true,
+        chatTemplateHandling = LlmChatTemplateHandling.ENGINE_FORMATS_MESSAGES,
+        systemInstructions = true,
+        contextManagement = LlmContextManagement.EXACT_CALLER_BUDGET,
+        loadOptions = setOf(LlmLoadOption.CONTEXT_SIZE, LlmLoadOption.THREAD_COUNT),
+        generationOptions = setOf(
+            LlmGenerationOption.MAX_OUTPUT_TOKENS,
+            LlmGenerationOption.TEMPERATURE,
+            LlmGenerationOption.TOP_K,
+            LlmGenerationOption.TOP_P,
+            LlmGenerationOption.SEED,
+        ),
+    )
+
     override fun load(request: LlmLoadRequest): LlmLoadResult = lock.withLock {
-        require(request.profileType == ModelProfileIds.LLM) {
-            "Unsupported chat profile: ${request.profileType.value}"
+        val reference = request.model
+        require(reference.engineId == engineId) {
+            "Unsupported LLM engine: ${reference.engineId.value}"
         }
-        Log.i(TAG, "llama.cpp load requested: model=${File(request.modelPath).name}, contextSize=${request.contextSize}, requestedThreads=${request.threadCount}, backend=${request.requestedBackend}")
-        require(request.requestedBackend == LlmBackend.CPU) {
-            "Only the CPU backend is enabled; ${request.requestedBackend} is experimental."
+        require(reference.profileType == ModelProfileIds.LLM) {
+            "Unsupported chat profile: ${reference.profileType.value}"
         }
-        require(request.contextSize >= 128) { "Context size must be at least 128 tokens." }
-        require(request.threadCount >= 0) { "Thread count cannot be negative." }
-        val model = File(request.modelPath)
+        require(reference is ChatModelReference.ArtifactBacked) {
+            "The llama.cpp runtime requires an artifact-backed model."
+        }
+        val artifact = requireNotNull(
+            reference.artifacts.firstOrNull { it.role == ModelFileRoles.PRIMARY_MODEL && !it.directory },
+        ) { "The llama.cpp model does not declare a primary model file." }
+        val contextSize = request.options.contextSize ?: DEFAULT_CONTEXT_SIZE
+        val threadCount = request.options.threadCount ?: DEFAULT_THREAD_COUNT
+        val computePreference = request.options.computePreference
+        Log.i(TAG, "llama.cpp load requested: model=${File(artifact.path).name}, contextSize=$contextSize, requestedThreads=$threadCount, compute=$computePreference")
+        require(computePreference == ComputePreference.AUTO || computePreference == ComputePreference.CPU) {
+            "The llama.cpp runtime supports CPU compute only; requested $computePreference."
+        }
+        require(contextSize >= 128) { "Context size must be at least 128 tokens." }
+        require(threadCount >= 0) { "Thread count cannot be negative." }
+        val model = File(artifact.path)
         require(model.isFile && model.canRead()) { "Model file is not readable: ${model.name}" }
         if (isLoaded && activeRequest == request) {
             Log.i(TAG, "llama.cpp model reuse: effectiveThreads=${native.nativeEffectiveThreads()}")
             return LlmLoadResult(
-                effectiveBackend = LlmBackend.CPU,
-                effectiveThreadCount = native.nativeEffectiveThreads(),
+                effectiveComputePreference = ComputePreference.CPU,
                 loadDurationMs = 0,
-                systemInfo = native.nativeSystemInfo(),
                 coldStart = false,
+                diagnostics = runtimeDiagnostics(),
             )
         }
         val coldStart = !isLoaded
         val durationMs = try {
             measureTimeMillis {
-                native.requireSuccess(native.nativeLoad(model.absolutePath, request.contextSize, request.threadCount))
+                native.requireSuccess(native.nativeLoad(model.absolutePath, contextSize, threadCount))
             }
         } catch (error: Throwable) {
             Log.e(TAG, "llama.cpp model load failed: ${error.message}", error)
@@ -60,11 +103,10 @@ class NativeLlama(context: Context) : ChatEngine {
         activeRequest = request
         Log.i(TAG, "llama.cpp model loaded: coldStart=$coldStart, loadMs=$durationMs, effectiveThreads=${native.nativeEffectiveThreads()}")
         LlmLoadResult(
-            effectiveBackend = LlmBackend.CPU,
-            effectiveThreadCount = native.nativeEffectiveThreads(),
+            effectiveComputePreference = ComputePreference.CPU,
             loadDurationMs = durationMs,
-            systemInfo = native.nativeSystemInfo(),
             coldStart = coldStart,
+            diagnostics = runtimeDiagnostics(),
         )
     }
 
@@ -100,20 +142,25 @@ class NativeLlama(context: Context) : ChatEngine {
 
     override fun generate(request: LlmGenerationRequest, onToken: (String) -> Unit): LlmGenerationResult = lock.withLock {
         check(isLoaded) { "Load a model before generating text." }
+        val maxTokens = request.options.maxTokens ?: DEFAULT_MAX_TOKENS
+        val temperature = request.options.temperature ?: DEFAULT_TEMPERATURE
+        val topK = request.options.topK ?: DEFAULT_TOP_K
+        val topP = request.options.topP ?: DEFAULT_TOP_P
+        val seed = request.options.seed ?: ENGINE_SELECTED_SEED
         require(request.prompt.isNotBlank()) { "Prompt must not be empty." }
-        require(request.maxTokens > 0) { "Maximum output tokens must be positive." }
-        require(request.temperature in 0f..2f) { "Temperature must be between 0 and 2." }
-        require(request.topK in 1..200) { "Top-K must be between 1 and 200." }
-        require(request.topP in 0.05f..1f) { "Top-P must be between 0.05 and 1." }
-        Log.i(TAG, "llama.cpp generation started: promptChars=${request.prompt.length}, maxTokens=${request.maxTokens}, temperature=${request.temperature}, topK=${request.topK}, topP=${request.topP}, seed=${request.seed}")
+        require(maxTokens > 0) { "Maximum output tokens must be positive." }
+        require(temperature in 0f..2f) { "Temperature must be between 0 and 2." }
+        require(topK in 1..200) { "Top-K must be between 1 and 200." }
+        require(topP in 0.05f..1f) { "Top-P must be between 0.05 and 1." }
+        Log.i(TAG, "llama.cpp generation started: promptChars=${request.prompt.length}, maxTokens=$maxTokens, temperature=$temperature, topK=$topK, topP=$topP, seed=$seed")
         val result = try {
             native.nativeGenerate(
                 prompt = request.prompt,
-                maxTokens = request.maxTokens,
-                temperature = request.temperature,
-                topK = request.topK,
-                topP = request.topP,
-                seed = request.seed,
+                maxTokens = maxTokens,
+                temperature = temperature,
+                topK = topK,
+                topP = topP,
+                seed = seed,
                 callback = NativeTokenCallback(onToken),
             )
         } catch (error: Throwable) {
@@ -147,6 +194,12 @@ class NativeLlama(context: Context) : ChatEngine {
         activeRequest = null
     }
 
+    private fun runtimeDiagnostics() = LlmRuntimeDiagnostics(
+        computeDetail = "ggml CPU",
+        effectiveThreadCount = native.nativeEffectiveThreads(),
+        systemInfo = native.nativeSystemInfo(),
+    )
+
     private class NativeBridge(nativeLibraryDir: String) {
         init {
             System.loadLibrary("local_ai_llamacpp")
@@ -179,6 +232,13 @@ class NativeLlama(context: Context) : ChatEngine {
 
     private companion object {
         const val TAG = "AiP123Chat"
+        const val DEFAULT_CONTEXT_SIZE = 512
+        const val DEFAULT_THREAD_COUNT = 0
+        const val DEFAULT_MAX_TOKENS = 128
+        const val DEFAULT_TEMPERATURE = 0.7f
+        const val DEFAULT_TOP_K = 40
+        const val DEFAULT_TOP_P = 0.9f
+        const val ENGINE_SELECTED_SEED = -1
     }
 }
 

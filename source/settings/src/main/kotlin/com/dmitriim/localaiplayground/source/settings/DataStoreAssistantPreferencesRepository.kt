@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.dmitriim.localaiplayground.core.di.AppScope
+import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
@@ -31,12 +32,15 @@ class DataStoreAssistantPreferencesRepository(
         AssistantPreferences(
             chat = AssistantChatPreferences(
                 modelId = values[CHAT_MODEL],
+                computePreference = values[CHAT_COMPUTE]
+                    ?.let { stored -> ComputePreference.entries.firstOrNull { it.name == stored } }
+                    ?: ComputePreference.CPU,
                 systemPrompt = values[CHAT_SYSTEM_PROMPT] ?: AssistantChatPreferences().systemPrompt,
                 temperature = values[CHAT_TEMPERATURE] ?: 0.7f,
                 topK = values[CHAT_TOP_K] ?: 40,
                 topP = values[CHAT_TOP_P] ?: 0.9f,
                 maxOutputTokens = values[CHAT_MAX_OUTPUT] ?: 128,
-                seed = values[CHAT_SEED] ?: -1,
+                seed = values[CHAT_SEED]?.takeIf { it >= 0 },
                 contextSize = values[CHAT_CONTEXT] ?: 512,
                 threadCount = values[CHAT_THREADS] ?: 0,
             ),
@@ -60,12 +64,13 @@ class DataStoreAssistantPreferencesRepository(
     override suspend fun update(preferences: AssistantPreferences) {
         store.edit { values ->
             values.putOrRemove(CHAT_MODEL, preferences.chat.modelId)
+            values[CHAT_COMPUTE] = preferences.chat.computePreference.name
             values[CHAT_SYSTEM_PROMPT] = preferences.chat.systemPrompt
             values[CHAT_TEMPERATURE] = preferences.chat.temperature
             values[CHAT_TOP_K] = preferences.chat.topK
             values[CHAT_TOP_P] = preferences.chat.topP
             values[CHAT_MAX_OUTPUT] = preferences.chat.maxOutputTokens
-            values[CHAT_SEED] = preferences.chat.seed
+            preferences.chat.seed?.let { values[CHAT_SEED] = it } ?: values.remove(CHAT_SEED)
             values[CHAT_CONTEXT] = preferences.chat.contextSize
             values[CHAT_THREADS] = preferences.chat.threadCount
             values.putOrRemove(STT_MODEL, preferences.speechInput.modelId)
@@ -87,6 +92,7 @@ class DataStoreAssistantPreferencesRepository(
 
     private companion object {
         val CHAT_MODEL = stringPreferencesKey("chat_model")
+        val CHAT_COMPUTE = stringPreferencesKey("chat_compute")
         val CHAT_SYSTEM_PROMPT = stringPreferencesKey("chat_system_prompt")
         val CHAT_TEMPERATURE = floatPreferencesKey("chat_temperature")
         val CHAT_TOP_K = intPreferencesKey("chat_top_k")

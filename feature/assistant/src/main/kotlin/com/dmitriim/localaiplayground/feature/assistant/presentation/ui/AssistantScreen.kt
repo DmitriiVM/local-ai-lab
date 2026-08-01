@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantInputMode
@@ -100,8 +101,21 @@ fun AssistantScreen(
                                 ""
                             }
                             Text(
-                                "Context: ${usage.promptTokens} input · ${usage.reservedOutputTokens} max output · " +
-                                    "${usage.contextSize} total.$omitted",
+                                buildString {
+                                    append("Context: ")
+                                    val details = buildList {
+                                        if (usage.contextManagement == LlmContextManagement.RUNTIME_MANAGED) {
+                                            add("runtime-managed")
+                                        }
+                                        usage.promptTokens?.let { tokens ->
+                                            add(if (usage.promptTokensEstimated) "~$tokens estimated input" else "$tokens input")
+                                        }
+                                        usage.reservedOutputTokens?.let { add("$it max output") }
+                                        usage.contextSize?.let { add("$it total") }
+                                    }
+                                    append(details.joinToString(" · "))
+                                    append(".$omitted")
+                                },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )

@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.feature.assistant.presentation
 
+import com.dmitriim.localaiplayground.ai.api.llm.LlmEngineCapabilities
 import com.dmitriim.localaiplayground.ai.api.system.SystemTextToSpeechVoice
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoice
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
@@ -18,10 +19,13 @@ import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
 internal fun chatModelOptions(
     installedModels: List<InstalledModel>,
     catalogModels: List<CatalogModel>,
+    capabilitiesFor: (EngineId) -> LlmEngineCapabilities?,
 ): List<ChatModelOption> = capabilityModels(installedModels, catalogModels, AiCapability.CHAT) { manifest, installed ->
     ChatModelOption(
         id = manifest.modelId,
         displayName = manifest.displayName,
+        engineId = manifest.engineId,
+        capabilities = capabilitiesFor(manifest.engineId),
         defaultContextSize = manifest.contextSize ?: 512,
         installed = installed,
     )

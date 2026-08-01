@@ -35,8 +35,8 @@ internal fun ChatMetricsCard(metrics: ChatMetrics) {
                     Text("Run details", fontWeight = FontWeight.Bold)
                     Text(
                         buildString {
-                            append(metrics.generatedTokens)
-                            append("\u00A0tokens")
+                            metrics.generatedTokens?.let { append("$it\u00A0tokens") }
+                                ?: append("Token count unavailable")
                             metrics.generatedTokensPerSecond?.let {
                                 append(" · ${formatRate(it)}\u00A0tok/s")
                             }
@@ -53,23 +53,21 @@ internal fun ChatMetricsCard(metrics: ChatMetrics) {
             if (expanded) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     MetricRow("Model", metrics.modelName)
-                    MetricRow(
-                        "Startup",
-                        "${if (metrics.coldStart) "Cold" else "Warm"} · ${metrics.effectiveThreadCount} threads",
-                    )
+                    MetricRow("Startup", buildString {
+                        append(if (metrics.coldStart) "Cold" else "Warm")
+                        metrics.effectiveThreadCount?.let { append(" · $it threads") }
+                    })
                     MetricRow("Load", "${metrics.loadDurationMs}\u00A0ms")
-                    MetricRow(
-                        "Prompt",
-                        buildMetricValue(metrics.promptTokens, metrics.promptTokensPerSecond),
-                    )
+                    metrics.promptTokens?.let { tokens ->
+                        MetricRow("Prompt", buildMetricValue(tokens, metrics.promptTokensPerSecond))
+                    }
                     MetricRow(
                         "First token",
                         metrics.timeToFirstTokenMs?.let { "$it\u00A0ms" } ?: "Not reached",
                     )
-                    MetricRow(
-                        "Output",
-                        buildMetricValue(metrics.generatedTokens, metrics.generatedTokensPerSecond),
-                    )
+                    metrics.generatedTokens?.let { tokens ->
+                        MetricRow("Output", buildMetricValue(tokens, metrics.generatedTokensPerSecond))
+                    }
                     MetricRow("Total", formatDuration(metrics.totalDurationMs))
                     MetricRow(
                         "Finish",
@@ -82,7 +80,8 @@ internal fun ChatMetricsCard(metrics: ChatMetrics) {
                         "Generation: temperature ${metrics.effectiveSettings.temperature} · " +
                             "top-K ${metrics.effectiveSettings.topK} · top-P ${metrics.effectiveSettings.topP}\n" +
                             "Limits: ${metrics.effectiveSettings.maxOutputTokens} output · " +
-                            "${metrics.effectiveSettings.contextSize} context · seed ${metrics.effectiveSettings.seed}",
+                            "${metrics.effectiveSettings.contextSize} context · seed " +
+                            (metrics.effectiveSettings.seed?.toString() ?: "engine-selected"),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

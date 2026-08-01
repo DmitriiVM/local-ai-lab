@@ -4,11 +4,11 @@ import android.os.Build
 import com.dmitriim.localaiplayground.ai.api.availability.EngineAvailabilityProbe
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import com.dmitriim.localaiplayground.core.model.engine.EngineAvailability
 import com.dmitriim.localaiplayground.core.model.engine.EngineDescriptor
 import com.dmitriim.localaiplayground.core.model.engine.EngineId
 import com.dmitriim.localaiplayground.core.model.engine.EngineKind
-import com.dmitriim.localaiplayground.core.model.engine.RuntimeBackend
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers
@@ -29,9 +29,10 @@ class LlamaCppEngineAvailabilityProbe : EngineAvailabilityProbe {
             onSuccess = {
                 EngineAvailability.Available(
                     descriptor = descriptor,
-                    effectiveBackend = RuntimeBackend.CPU,
+                    effectiveComputePreference = ComputePreference.CPU,
                     detail = "Bundled arm64 CPU runtime is available.",
-                    requestedBackend = RuntimeBackend.CPU,
+                    requestedComputePreference = ComputePreference.CPU,
+                    computeDetail = "ggml CPU",
                     effectiveThreadCount = Runtime.getRuntime().availableProcessors(),
                 )
             },

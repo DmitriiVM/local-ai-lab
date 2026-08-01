@@ -1,9 +1,12 @@
 package com.dmitriim.localaiplayground.feature.assistant.presentation
 
+import com.dmitriim.localaiplayground.ai.api.llm.LlmEngineCapabilities
 import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
+import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoice
 import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId
 import com.dmitriim.localaiplayground.core.model.manifest.TtsControl
@@ -39,7 +42,10 @@ data class AssistantUiState(
         get() = selectedVoiceModel?.compatibleVoices(speechOutputSettings.languageCode).orEmpty()
     val selectedVoice: TtsVoiceOption? get() = compatibleVoices.firstOrNull { it.id == selectedVoiceId }
     val isIdle: Boolean get() = operation == AssistantOperation.Idle
-    val canSend: Boolean get() = isIdle && input.isNotBlank() && selectedChatModel?.installed == true
+    val canSend: Boolean
+        get() = isIdle && input.isNotBlank() && selectedChatModel?.let { model ->
+            model.installed && model.capabilities != null
+        } == true
     val canDictate: Boolean get() = isIdle && selectedSpeechModel?.installed == true
     val voiceConfigurationError: String?
         get() = when {
@@ -66,9 +72,19 @@ sealed interface AssistantOperation {
 data class ChatModelOption(
     val id: ModelId,
     val displayName: String,
+    val engineId: EngineId,
+    val capabilities: LlmEngineCapabilities?,
     val defaultContextSize: Int,
     val installed: Boolean,
-)
+) {
+    fun supportedComputePreference(preference: ComputePreference): ComputePreference {
+        val supported = capabilities?.computePreferences.orEmpty()
+        return preference.takeIf(supported::contains)
+            ?: ComputePreference.AUTO.takeIf(supported::contains)
+            ?: supported.firstOrNull()
+            ?: preference
+    }
+}
 
 data class SpeechModelOption(
     val id: ModelId,
@@ -130,12 +146,13 @@ data class ChatMessage(
 }
 
 data class ChatSettings(
+    val computePreference: ComputePreference = ComputePreference.CPU,
     val systemPrompt: String = "You are a helpful, concise assistant.",
     val temperature: String = "0.7",
     val topK: String = "40",
     val topP: String = "0.9",
     val maxOutputTokens: String = "128",
-    val seed: String = "-1",
+    val seed: String = "",
     val contextSize: String = "512",
     val threadCount: String = "0",
 ) {
@@ -144,16 +161,29 @@ data class ChatSettings(
         val topKValue = topK.toIntOrNull() ?: error("Top-K must be a whole number.")
         val topPValue = topP.toFloatOrNull() ?: error("Top-P must be a number.")
         val maxOutputValue = maxOutputTokens.toIntOrNull() ?: error("Maximum output tokens must be a whole number.")
-        val seedValue = seed.toIntOrNull() ?: error("Seed must be a whole number.")
+        val seedValue = seed.trim().let { value ->
+            if (value.isEmpty()) null else value.toIntOrNull() ?: error("Seed must be a whole number.")
+        }
         val contextValue = contextSize.toIntOrNull() ?: error("Context size must be a whole number.")
         val threadsValue = threadCount.toIntOrNull() ?: error("Thread count must be a whole number.")
         require(temperatureValue in 0f..2f) { "Temperature must be between 0 and 2." }
         require(topKValue in 1..200) { "Top-K must be between 1 and 200." }
         require(topPValue in 0.05f..1f) { "Top-P must be between 0.05 and 1." }
+        require(seedValue == null || seedValue >= 0) { "Seed cannot be negative; leave it blank for engine selection." }
         require(contextValue in 128..32_768) { "Context size must be between 128 and 32,768 tokens." }
         require(maxOutputValue in 1 until contextValue) { "Maximum output must be positive and smaller than the context size." }
         require(threadsValue in 0..64) { "Thread count must be between 0 and 64; 0 chooses a safe default." }
-        return EffectiveChatSettings(systemPrompt.trim(), temperatureValue, topKValue, topPValue, maxOutputValue, seedValue, contextValue, threadsValue)
+        return EffectiveChatSettings(
+            computePreference = computePreference,
+            systemPrompt = systemPrompt.trim(),
+            temperature = temperatureValue,
+            topK = topKValue,
+            topP = topPValue,
+            maxOutputTokens = maxOutputValue,
+            seed = seedValue,
+            contextSize = contextValue,
+            threadCount = threadsValue,
+        )
     }
 }
 
@@ -188,36 +218,39 @@ data class SpeechOutputSettings(
 }
 
 data class EffectiveChatSettings(
+    val computePreference: ComputePreference,
     val systemPrompt: String,
     val temperature: Float,
     val topK: Int,
     val topP: Float,
     val maxOutputTokens: Int,
-    val seed: Int,
+    val seed: Int?,
     val contextSize: Int,
     val threadCount: Int,
 )
 
 data class ContextUsage(
-    val promptTokens: Int,
-    val contextSize: Int,
-    val reservedOutputTokens: Int,
+    val promptTokens: Int?,
+    val promptTokensEstimated: Boolean,
+    val contextSize: Int?,
+    val reservedOutputTokens: Int?,
     val omittedMessageCount: Int,
+    val contextManagement: LlmContextManagement,
 )
 
 data class ChatMetrics(
     val modelName: String,
     val coldStart: Boolean,
     val loadDurationMs: Long,
-    val promptTokens: Int,
+    val promptTokens: Int?,
     val promptTokensPerSecond: Double?,
     val timeToFirstTokenMs: Long?,
-    val generatedTokens: Int,
+    val generatedTokens: Int?,
     val generatedTokensPerSecond: Double?,
     val totalDurationMs: Long,
     val finishReason: LlmFinishReason,
     val effectiveSettings: EffectiveChatSettings,
-    val effectiveThreadCount: Int,
+    val effectiveThreadCount: Int?,
 )
 
 internal fun AssistantUiState.replaceAssistantText(

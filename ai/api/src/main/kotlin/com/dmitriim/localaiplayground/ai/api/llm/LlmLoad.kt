@@ -1,25 +1,30 @@
 package com.dmitriim.localaiplayground.ai.api.llm
 
-import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId
+import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
+import com.dmitriim.localaiplayground.core.model.runtime.ChatModelReference
 
 data class LlmLoadRequest(
-    val profileType: ModelProfileId,
-    val modelPath: String,
-    val contextSize: Int = 512,
-    val threadCount: Int = 0,
-    val requestedBackend: LlmBackend = LlmBackend.CPU,
+    val model: ChatModelReference,
+    val options: LlmLoadOptions = LlmLoadOptions(),
+)
+
+data class LlmLoadOptions(
+    val contextSize: Int? = null,
+    val threadCount: Int? = null,
+    val computePreference: ComputePreference = ComputePreference.AUTO,
 )
 
 data class LlmLoadResult(
-    val effectiveBackend: LlmBackend,
-    val effectiveThreadCount: Int,
+    val effectiveComputePreference: ComputePreference,
     val loadDurationMs: Long,
-    val systemInfo: String,
     val coldStart: Boolean,
+    val diagnostics: LlmRuntimeDiagnostics = LlmRuntimeDiagnostics(),
 )
 
-enum class LlmBackend {
-    CPU,
-    VULKAN,
-    NNAPI,
-}
+data class LlmRuntimeDiagnostics(
+    /** Runtime-reported compute implementation; this is diagnostic text, not a portable option. */
+    val computeDetail: String? = null,
+    val effectiveThreadCount: Int? = null,
+    val systemInfo: String? = null,
+    val fallbackReason: String? = null,
+)

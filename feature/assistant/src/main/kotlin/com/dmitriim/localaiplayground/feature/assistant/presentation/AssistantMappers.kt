@@ -6,6 +6,7 @@ import com.dmitriim.localaiplayground.feature.assistant.domain.ChatTurn
 import com.dmitriim.localaiplayground.feature.assistant.domain.ChatTurnRole
 
 internal fun EffectiveChatSettings.toDomain() = ChatGenerationConfig(
+    computePreference = computePreference,
     systemPrompt = systemPrompt,
     temperature = temperature,
     topK = topK,
@@ -26,7 +27,9 @@ internal fun ChatMessage.toDomain() = ChatTurn(
 
 internal fun ChatContextUsage.toUi() = ContextUsage(
     promptTokens = promptTokens,
+    promptTokensEstimated = promptTokensEstimated,
     contextSize = contextSize,
     reservedOutputTokens = reservedOutputTokens,
     omittedMessageCount = omittedTurnCount,
+    contextManagement = contextManagement,
 )

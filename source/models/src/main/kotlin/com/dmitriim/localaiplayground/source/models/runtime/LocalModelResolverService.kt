@@ -12,6 +12,7 @@ import com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode
 import com.dmitriim.localaiplayground.core.model.manifest.TtsControl
 import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localaiplayground.core.model.runtime.ChatModelReference
+import com.dmitriim.localaiplayground.core.model.runtime.ModelArtifactReference
 import com.dmitriim.localaiplayground.core.model.runtime.SpeechToTextModelReference
 import com.dmitriim.localaiplayground.core.model.runtime.TextToSpeechModelReference
 import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
@@ -33,15 +34,25 @@ class LocalModelResolverService(
         require(AiCapability.CHAT in manifest.capabilities) {
             "This installed model is not a compatible local chat model."
         }
-        val primary = requireNotNull(manifest.files.firstOrNull { it.role == ModelFileRoles.PRIMARY_MODEL }) {
-            "The chat model does not declare a primary GGUF file."
+        requireNotNull(manifest.files.firstOrNull { it.role == ModelFileRoles.PRIMARY_MODEL }) {
+            "The chat model does not declare a primary model artifact."
         }
-        ChatModelReference(
+        val artifacts = manifest.files.mapNotNull { specification ->
+            val artifact = File(directory, specification.relativePath)
+            if (!specification.required && !artifact.exists()) return@mapNotNull null
+            ModelArtifactReference(
+                role = specification.role,
+                path = artifact.absolutePath,
+                directory = specification.directory,
+            )
+        }
+        ChatModelReference.ArtifactBacked(
             modelId = modelId,
             displayName = manifest.displayName,
+            engineId = manifest.engineId,
             profileType = manifest.profileType,
-            modelPath = File(directory, primary.relativePath).absolutePath,
             defaultContextSize = manifest.contextSize ?: 512,
+            artifacts = artifacts,
         )
     }
 

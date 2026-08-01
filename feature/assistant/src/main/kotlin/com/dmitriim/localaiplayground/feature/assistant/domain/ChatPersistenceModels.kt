@@ -1,6 +1,7 @@
 package com.dmitriim.localaiplayground.feature.assistant.domain
 
 import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessageRole
+import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import com.dmitriim.localaiplayground.core.model.runs.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import kotlinx.serialization.json.buildJsonObject
@@ -20,16 +21,18 @@ data class ChatPersistenceSnapshot(
 )
 
 data class ChatRunSettings(
+    val computePreference: ComputePreference,
     val systemPrompt: String,
     val temperature: Float,
     val topK: Int,
     val topP: Float,
     val maxOutputTokens: Int,
-    val seed: Int,
+    val seed: Int?,
     val contextSize: Int,
     val threadCount: Int,
 ) {
     fun toJson() = buildJsonObject {
+        put("computePreference", computePreference.name)
         put("systemPrompt", systemPrompt)
         put("temperature", temperature)
         put("topK", topK)
@@ -44,12 +47,12 @@ data class ChatRunSettings(
 data class ChatRunMetrics(
     val coldStart: Boolean,
     val loadDurationMs: Long,
-    val promptTokens: Int,
+    val promptTokens: Int?,
     val timeToFirstTokenMs: Long?,
-    val generatedTokens: Int,
+    val generatedTokens: Int?,
     val totalDurationMs: Long,
     val finishReason: String,
-    val effectiveThreadCount: Int,
+    val effectiveThreadCount: Int?,
 ) {
     fun toJson() = buildJsonObject {
         put("coldStart", coldStart)

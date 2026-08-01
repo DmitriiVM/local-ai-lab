@@ -1,13 +1,21 @@
 package com.dmitriim.localaiplayground.ai.llamacpp
 
 import android.app.Application
-import com.dmitriim.localaiplayground.ai.api.llm.ChatEngine
+import com.dmitriim.localaiplayground.ai.api.llm.LlmChatFormatter
+import com.dmitriim.localaiplayground.ai.api.llm.LlmRuntime
+import com.dmitriim.localaiplayground.ai.api.llm.LlmTokenCounter
 import com.dmitriim.localaiplayground.core.di.AppScope
-import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import dev.zacsweers.metro.binding
 
-@Inject
 @SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class)
-class LlamaCppChatEngine(application: Application) : ChatEngine by NativeLlama(application)
+@ContributesIntoSet(AppScope::class, binding = binding<LlmRuntime>())
+class LlamaCppChatEngine private constructor(delegate: NativeLlama) :
+    LlmRuntime by delegate,
+    LlmChatFormatter by delegate,
+    LlmTokenCounter by delegate {
+    @Inject
+    constructor(application: Application) : this(NativeLlama(application))
+}

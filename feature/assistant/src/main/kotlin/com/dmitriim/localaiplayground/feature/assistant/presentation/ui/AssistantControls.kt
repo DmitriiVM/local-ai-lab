@@ -187,8 +187,14 @@ internal fun AssistantComposer(
                     AssistantOperation.Cancelling -> FilledIconButton(onClick = {}, enabled = false) {
                         Icon(Icons.Outlined.Stop, contentDescription = "Stopping")
                     }
-                    else -> IconButton(onClick = onCancel) {
-                        Icon(Icons.Outlined.Close, contentDescription = "Cancel operation")
+                    else -> {
+                        val llmOperation = state.operation == AssistantOperation.Loading ||
+                            state.operation == AssistantOperation.Generating
+                        if (!llmOperation || state.selectedChatModel?.capabilities?.cancellation == true) {
+                            IconButton(onClick = onCancel) {
+                                Icon(Icons.Outlined.Close, contentDescription = "Cancel operation")
+                            }
+                        }
                     }
                 }
             }

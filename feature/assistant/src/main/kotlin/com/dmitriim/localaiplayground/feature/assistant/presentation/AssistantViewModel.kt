@@ -11,6 +11,7 @@ import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoiceSto
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessageRole
+import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.runs.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
@@ -58,6 +59,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -102,7 +104,7 @@ class AssistantViewModel(
                 systemTextToSpeechSupport.voices,
             ) { installed, catalog, references, systemVoices ->
                 AssistantModelOptions(
-                    chat = chatModelOptions(installed, catalog),
+                    chat = chatModelOptions(installed, catalog, chatEngine::capabilitiesFor),
                     speech = speechModelOptions(
                         installed,
                         catalog,
@@ -146,13 +148,17 @@ class AssistantViewModel(
         if (!mutableState.value.isIdle) return "Wait for the current operation to finish."
         val model = mutableState.value.chatModels.firstOrNull { it.id == modelId && it.installed }
             ?: return "Select an installed chat model."
-        val error = runCatching(settings::toEffective).exceptionOrNull()?.message
+        if (model.capabilities == null) return "The selected model's LLM runtime is not packaged."
+        val normalizedSettings = settings.copy(
+            computePreference = model.supportedComputePreference(settings.computePreference),
+        )
+        val error = runCatching(normalizedSettings::toEffective).exceptionOrNull()?.message
         if (error != null) return error
         val modelChanged = mutableState.value.selectedChatModelId != modelId
         mutableState.update {
             it.copy(
                 selectedChatModelId = modelId,
-                chatSettings = settings,
+                chatSettings = normalizedSettings,
                 metrics = null,
                 errorMessage = null,
                 statusMessage = if (modelChanged) "${model.displayName} will be used for the next message." else null,
@@ -535,7 +541,7 @@ class AssistantViewModel(
                             totalDurationMs = result.totalDurationMs,
                             finishReason = result.finishReason,
                             effectiveSettings = settings,
-                            effectiveThreadCount = event.load.effectiveThreadCount,
+                            effectiveThreadCount = event.load.diagnostics.effectiveThreadCount,
                         )
                         mutableState.update { state ->
                             state.replaceAssistantText(id, result.text, append = false).copy(
@@ -737,12 +743,17 @@ class AssistantViewModel(
                 },
                 input = run.input.orEmpty(),
                 chatSettings = state.chatSettings.copy(
+                    computePreference = parameters?.get("computePreference")?.jsonPrimitive?.content
+                        ?.let { stored -> ComputePreference.entries.firstOrNull { it.name == stored } }
+                        ?: state.chatSettings.computePreference,
                     systemPrompt = parameters?.get("systemPrompt")?.jsonPrimitive?.content ?: state.chatSettings.systemPrompt,
                     temperature = parameters?.get("temperature")?.jsonPrimitive?.content ?: state.chatSettings.temperature,
                     topK = parameters?.get("topK")?.jsonPrimitive?.content ?: state.chatSettings.topK,
                     topP = parameters?.get("topP")?.jsonPrimitive?.content ?: state.chatSettings.topP,
                     maxOutputTokens = parameters?.get("maxOutputTokens")?.jsonPrimitive?.content ?: state.chatSettings.maxOutputTokens,
-                    seed = parameters?.get("seed")?.jsonPrimitive?.content ?: state.chatSettings.seed,
+                    seed = parameters?.get("seed")?.jsonPrimitive?.contentOrNull
+                        ?.takeUnless { it == "-1" }
+                        ?: "",
                     contextSize = parameters?.get("contextSize")?.jsonPrimitive?.content ?: state.chatSettings.contextSize,
                     threadCount = parameters?.get("threadCount")?.jsonPrimitive?.content ?: state.chatSettings.threadCount,
                 ),
@@ -766,18 +777,19 @@ class AssistantViewModel(
         conversationId = conversationId,
         status = status,
         startedAtEpochMs = startedAt,
-        model = model?.let { RunModelSnapshot(it.id.value, it.displayName, "llama.cpp") },
+        model = model?.let { RunModelSnapshot(it.id.value, it.displayName, it.engineId.value) },
         input = input,
         output = output,
         settings = ChatRunSettings(
-            settings.systemPrompt,
-            settings.temperature,
-            settings.topK,
-            settings.topP,
-            settings.maxOutputTokens,
-            settings.seed,
-            settings.contextSize,
-            settings.threadCount,
+            computePreference = settings.computePreference,
+            systemPrompt = settings.systemPrompt,
+            temperature = settings.temperature,
+            topK = settings.topK,
+            topP = settings.topP,
+            maxOutputTokens = settings.maxOutputTokens,
+            seed = settings.seed,
+            contextSize = settings.contextSize,
+            threadCount = settings.threadCount,
         ),
         metrics = metrics?.let {
             ChatRunMetrics(
@@ -862,6 +874,8 @@ private fun AssistantUiState.withConfiguration(
     val selectedOutputVoice = preferences.speechOutput.voiceId?.takeIf { id -> compatibleVoices.any { it.id == id } }
         ?: selectedVoiceId?.takeIf { id -> compatibleVoices.any { it.id == id } }
         ?: compatibleVoices.firstOrNull()?.id
+    val chatModel = options.chat.firstOrNull { it.id == chatId }
+    val restoredChatSettings = preferences.chat.toUi()
     return copy(
         chatModels = options.chat,
         speechModels = options.speech,
@@ -870,7 +884,10 @@ private fun AssistantUiState.withConfiguration(
         selectedSpeechModelId = speechId,
         selectedVoiceModelId = voiceId,
         selectedVoiceId = selectedOutputVoice,
-        chatSettings = preferences.chat.toUi(),
+        chatSettings = restoredChatSettings.copy(
+            computePreference = chatModel?.supportedComputePreference(restoredChatSettings.computePreference)
+                ?: restoredChatSettings.computePreference,
+        ),
         speechInputSettings = SpeechInputSettings(speechLanguage, preferences.speechInput.threadCount.toString()),
         speechOutputSettings = SpeechOutputSettings(
             languageCode = outputLanguage,
@@ -883,12 +900,13 @@ private fun AssistantUiState.withConfiguration(
 }
 
 private fun AssistantChatPreferences.toUi() = ChatSettings(
+    computePreference = computePreference,
     systemPrompt = systemPrompt,
     temperature = temperature.toString(),
     topK = topK.toString(),
     topP = topP.toString(),
     maxOutputTokens = maxOutputTokens.toString(),
-    seed = seed.toString(),
+    seed = seed?.toString().orEmpty(),
     contextSize = contextSize.toString(),
     threadCount = threadCount.toString(),
 )
@@ -897,6 +915,7 @@ private fun AssistantUiState.toPreferences() = AssistantPreferences(
     chat = chatSettings.toEffectiveOrDefault(selectedChatModel?.defaultContextSize ?: 512).let { settings ->
         AssistantChatPreferences(
             modelId = selectedChatModelId?.value,
+            computePreference = settings.computePreference,
             systemPrompt = settings.systemPrompt,
             temperature = settings.temperature,
             topK = settings.topK,
@@ -936,5 +955,5 @@ private fun appendTranscript(existing: String, transcript: String): String = whe
     else -> "$existing $transcript"
 }
 
-private fun rate(tokens: Int, durationMs: Long): Double? =
-    durationMs.takeIf { it > 0 }?.let { tokens * 1_000.0 / it }
+private fun rate(tokens: Int?, durationMs: Long): Double? =
+    tokens?.let { count -> durationMs.takeIf { it > 0 }?.let { count * 1_000.0 / it } }

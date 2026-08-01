@@ -8,14 +8,6 @@ import com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode
 import com.dmitriim.localaiplayground.core.model.manifest.TtsControl
 import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
 
-data class ChatModelReference(
-    val modelId: ModelId,
-    val displayName: String,
-    val profileType: ModelProfileId,
-    val modelPath: String,
-    val defaultContextSize: Int,
-)
-
 data class SpeechToTextModelReference(
     val modelId: ModelId,
     val displayName: String,

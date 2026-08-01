@@ -14,14 +14,6 @@ enum class EngineKind {
 }
 
 @Serializable
-enum class RuntimeBackend {
-    CPU,
-    VULKAN,
-    NNAPI,
-    SYSTEM_SERVICE,
-}
-
-@Serializable
 data class EngineDescriptor(
     val id: EngineId,
     val displayName: String,
@@ -35,9 +27,11 @@ sealed interface EngineAvailability {
 
     data class Available(
         override val descriptor: EngineDescriptor,
-        val effectiveBackend: RuntimeBackend,
+        val effectiveComputePreference: ComputePreference,
         val detail: String,
-        val requestedBackend: RuntimeBackend = effectiveBackend,
+        val requestedComputePreference: ComputePreference = effectiveComputePreference,
+        /** Runtime-reported compute implementation, such as a delegate or system provider. */
+        val computeDetail: String? = null,
         val effectiveThreadCount: Int? = null,
         val fallbackReason: String? = null,
     ) : EngineAvailability

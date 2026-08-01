@@ -72,16 +72,18 @@ fun DeviceScreen(
                 lines = listOf(
                     when (engine) {
                         is EngineAvailability.Available ->
-                            "Available • ${engine.effectiveBackend} • ${engine.detail}"
+                            "Available • ${engine.effectiveComputePreference} • ${engine.detail}"
                         is EngineAvailability.Unsupported -> "Unsupported • ${engine.reason}"
                         is EngineAvailability.TemporarilyUnavailable ->
                             "Temporarily unavailable • ${engine.reason}"
                     },
                     "Capabilities: ${engine.descriptor.capabilities.joinToString()}",
                     (engine as? EngineAvailability.Available)?.let {
-                        "Requested: ${it.requestedBackend}; effective: ${it.effectiveBackend}; threads: ${it.effectiveThreadCount ?: "runtime default"}" +
+                        "Requested compute: ${it.requestedComputePreference}; effective: ${it.effectiveComputePreference}" +
+                            (it.computeDetail?.let { detail -> "; runtime: $detail" } ?: "") +
+                            "; threads: ${it.effectiveThreadCount ?: "not reported"}" +
                             (it.fallbackReason?.let { reason -> "; fallback: $reason" } ?: "")
-                    } ?: "No active backend is available.",
+                    } ?: "No active runtime is available.",
                     if (engine.descriptor.bundledRuntime) {
                         "Runtime is bundled with the app."
                     } else {

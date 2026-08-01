@@ -2,18 +2,27 @@ package com.dmitriim.localaiplayground.ai.api.llm
 
 data class LlmGenerationRequest(
     val prompt: String,
-    val maxTokens: Int = 128,
-    val temperature: Float = 0.7f,
-    val topK: Int = 40,
-    val topP: Float = 0.9f,
-    /** -1 delegates seed selection to llama.cpp. */
-    val seed: Int = -1,
+    val options: LlmGenerationOptions = LlmGenerationOptions(),
 )
+
+/** Typed generation controls. A null value leaves that control to the selected engine. */
+data class LlmGenerationOptions(
+    val maxTokens: Int? = null,
+    val temperature: Float? = null,
+    val topK: Int? = null,
+    val topP: Float? = null,
+    /** Null leaves seed selection to the engine; a value requests that explicit seed. */
+    val seed: Int? = null,
+) {
+    init {
+        require(seed == null || seed >= 0) { "An explicit generation seed cannot be negative." }
+    }
+}
 
 data class LlmGenerationResult(
     val text: String,
-    val promptTokenCount: Int,
-    val generatedTokenCount: Int,
+    val promptTokenCount: Int?,
+    val generatedTokenCount: Int?,
     val firstTokenLatencyMs: Long?,
     val promptDurationMs: Long,
     val generationDurationMs: Long,
