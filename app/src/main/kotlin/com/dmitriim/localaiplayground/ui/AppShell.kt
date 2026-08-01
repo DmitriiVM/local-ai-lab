@@ -8,7 +8,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dmitriim.localaiplayground.core.navigation.AppNavHost
-import com.dmitriim.localaiplayground.core.navigation.NavigationTarget
 import com.dmitriim.localaiplayground.core.navigation.rememberAppNavigationState
 import com.dmitriim.localaiplayground.di.AppGraph
 
@@ -36,7 +35,6 @@ fun LocalAiPlaygroundApp(graph: AppGraph) {
         selectedDestination = navigationState.selectedDestination,
         showTopLevelNavigation = !navigationState.canNavigateUp,
         onSelectDestination = navigationState::selectTopLevelDestination,
-        onOpenSettings = { navigationState.navigate(NavigationTarget.SETTINGS) },
         onNavigateUp = if (navigationState.canNavigateUp) navigationState::navigateBack else null,
     ) { modifier ->
         AppNavHost(

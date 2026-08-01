@@ -16,10 +16,9 @@ enum class NavigationTarget {
     RUNS,
     DEVICE,
     SETTINGS,
-    CHAT,
+    ASSISTANT,
     SPEECH_TO_TEXT,
     TEXT_TO_SPEECH,
-    VOICE_ASSISTANT,
 }
 
 interface AppNavigator {

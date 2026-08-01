@@ -29,7 +29,8 @@ fun PlaygroundScreen(
 ) {
     val dimensions = LocalAppDimensions.current
     val visibleCapabilities = state.capabilities.filterNot {
-        it.capability == AiCapability.VOICE_ACTIVITY_DETECTION
+        it.capability == AiCapability.VOICE_ACTIVITY_DETECTION ||
+            it.capability == AiCapability.VOICE_ASSISTANT
     }
 
     LazyColumn(

@@ -46,9 +46,9 @@ fun RunsRoute(navigator: AppNavigator, viewModel: RunsViewModel = metroViewModel
 }
 
 private val com.dmitriim.localaiplayground.core.model.capability.AiCapability.replayTarget get() = when (this) {
-    com.dmitriim.localaiplayground.core.model.capability.AiCapability.CHAT -> NavigationTarget.CHAT
+    com.dmitriim.localaiplayground.core.model.capability.AiCapability.CHAT -> NavigationTarget.ASSISTANT
     com.dmitriim.localaiplayground.core.model.capability.AiCapability.SPEECH_TO_TEXT -> NavigationTarget.SPEECH_TO_TEXT
     com.dmitriim.localaiplayground.core.model.capability.AiCapability.TEXT_TO_SPEECH -> NavigationTarget.TEXT_TO_SPEECH
     com.dmitriim.localaiplayground.core.model.capability.AiCapability.VOICE_ACTIVITY_DETECTION -> NavigationTarget.SPEECH_TO_TEXT
-    com.dmitriim.localaiplayground.core.model.capability.AiCapability.VOICE_ASSISTANT -> NavigationTarget.VOICE_ASSISTANT
+    com.dmitriim.localaiplayground.core.model.capability.AiCapability.VOICE_ASSISTANT -> NavigationTarget.ASSISTANT
 }

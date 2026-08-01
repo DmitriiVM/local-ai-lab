@@ -24,9 +24,9 @@ fun PlaygroundRoute(
 
 private val AiCapability.navigationTarget: NavigationTarget
     get() = when (this) {
-        AiCapability.CHAT -> NavigationTarget.CHAT
+        AiCapability.CHAT -> NavigationTarget.ASSISTANT
         AiCapability.SPEECH_TO_TEXT -> NavigationTarget.SPEECH_TO_TEXT
         AiCapability.TEXT_TO_SPEECH -> NavigationTarget.TEXT_TO_SPEECH
         AiCapability.VOICE_ACTIVITY_DETECTION -> NavigationTarget.SPEECH_TO_TEXT
-        AiCapability.VOICE_ASSISTANT -> NavigationTarget.VOICE_ASSISTANT
+        AiCapability.VOICE_ASSISTANT -> NavigationTarget.ASSISTANT
     }

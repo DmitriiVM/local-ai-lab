@@ -21,13 +21,12 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,8 +34,6 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -61,7 +58,6 @@ fun AdaptiveNavigationScaffold(
     selectedDestination: TopLevelDestination,
     showTopLevelNavigation: Boolean,
     onSelectDestination: (TopLevelDestination) -> Unit,
-    onOpenSettings: () -> Unit,
     onNavigateUp: (() -> Unit)?,
     content: @Composable (Modifier) -> Unit,
 ) {
@@ -91,9 +87,8 @@ fun AdaptiveNavigationScaffold(
                         content(Modifier.padding(contentPadding))
                     }
                     AppTopBar(
-                        onOpenSettings = onOpenSettings,
                         onNavigateUp = onNavigateUp,
-                        modifier = Modifier.align(Alignment.TopCenter),
+                        modifier = Modifier.align(Alignment.TopStart),
                     )
                 }
             }
@@ -120,9 +115,8 @@ fun AdaptiveNavigationScaffold(
                     )
                 }
                 AppTopBar(
-                    onOpenSettings = onOpenSettings,
                     onNavigateUp = onNavigateUp,
-                    modifier = Modifier.align(Alignment.TopCenter),
+                    modifier = Modifier.align(Alignment.TopStart),
                 )
             }
         }
@@ -273,36 +267,23 @@ private fun LiquidGlassNavigationItem(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun AppTopBar(
-    onOpenSettings: () -> Unit,
     onNavigateUp: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
-    TopAppBar(
-        modifier = modifier,
-        title = {},
-        navigationIcon = {
-            onNavigateUp?.let { navigateUp ->
-                LiquidGlassToolbarButton(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = "Navigate back",
-                    onClick = navigateUp,
-                )
-            }
-        },
-        actions = {
+    onNavigateUp?.let { navigateUp ->
+        Box(
+            modifier = modifier
+                .statusBarsPadding()
+                .padding(start = 16.dp, top = 8.dp),
+        ) {
             LiquidGlassToolbarButton(
-                imageVector = Icons.Outlined.Settings,
-                contentDescription = "Open settings and privacy",
-                onClick = onOpenSettings,
+                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                contentDescription = "Navigate back",
+                onClick = navigateUp,
             )
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Transparent,
-        ),
-    )
+        }
+    }
 }
 
 @Composable
