@@ -2,8 +2,10 @@ package com.dmitriim.localaiplayground.source.settings
 
 import android.app.Application
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.DataMigration
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -26,6 +28,13 @@ class DataStoreAssistantPreferencesRepository(
 ) : AssistantPreferencesRepository {
     private val store: DataStore<Preferences> = PreferenceDataStoreFactory.create(
         produceFile = { application.preferencesDataStoreFile("assistant-preferences") },
+        migrations = listOf(
+            LegacyChatDefaultsMigration(
+                maxOutputTokensKey = CHAT_MAX_OUTPUT,
+                contextSizeKey = CHAT_CONTEXT,
+                migrationCompletedKey = CHAT_DEFAULTS_MIGRATED,
+            ),
+        ),
     )
 
     override val preferences: Flow<AssistantPreferences> = store.data.map { values ->
@@ -39,9 +48,9 @@ class DataStoreAssistantPreferencesRepository(
                 temperature = values[CHAT_TEMPERATURE] ?: 0.7f,
                 topK = values[CHAT_TOP_K] ?: 40,
                 topP = values[CHAT_TOP_P] ?: 0.9f,
-                maxOutputTokens = values[CHAT_MAX_OUTPUT] ?: 128,
+                maxOutputTokens = values[CHAT_MAX_OUTPUT] ?: 256,
                 seed = values[CHAT_SEED]?.takeIf { it >= 0 },
-                contextSize = values[CHAT_CONTEXT] ?: 512,
+                contextSize = values[CHAT_CONTEXT] ?: 2_048,
                 threadCount = values[CHAT_THREADS] ?: 0,
             ),
             speechInput = AssistantSpeechInputPreferences(
@@ -100,6 +109,7 @@ class DataStoreAssistantPreferencesRepository(
         val CHAT_MAX_OUTPUT = intPreferencesKey("chat_max_output")
         val CHAT_SEED = intPreferencesKey("chat_seed")
         val CHAT_CONTEXT = intPreferencesKey("chat_context")
+        val CHAT_DEFAULTS_MIGRATED = booleanPreferencesKey("chat_defaults_migrated_v2")
         val CHAT_THREADS = intPreferencesKey("chat_threads")
         val STT_MODEL = stringPreferencesKey("stt_model")
         val STT_LANGUAGE = stringPreferencesKey("stt_language")
@@ -111,5 +121,34 @@ class DataStoreAssistantPreferencesRepository(
         val TTS_VOLUME = floatPreferencesKey("tts_volume")
         val TTS_SENTENCE_SILENCE = floatPreferencesKey("tts_sentence_silence")
         val TTS_THREADS = intPreferencesKey("tts_threads")
+    }
+}
+
+private class LegacyChatDefaultsMigration(
+    private val maxOutputTokensKey: Preferences.Key<Int>,
+    private val contextSizeKey: Preferences.Key<Int>,
+    private val migrationCompletedKey: Preferences.Key<Boolean>,
+) : DataMigration<Preferences> {
+    override suspend fun shouldMigrate(currentData: Preferences): Boolean =
+        currentData[migrationCompletedKey] != true
+
+    override suspend fun migrate(currentData: Preferences): Preferences =
+        currentData.toMutablePreferences().apply {
+            if (this[maxOutputTokensKey] == LEGACY_MAX_OUTPUT_TOKENS) {
+                this[maxOutputTokensKey] = DEFAULT_MAX_OUTPUT_TOKENS
+            }
+            if (this[contextSizeKey] == LEGACY_CONTEXT_SIZE) {
+                this[contextSizeKey] = DEFAULT_CONTEXT_SIZE
+            }
+            this[migrationCompletedKey] = true
+        }
+
+    override suspend fun cleanUp() = Unit
+
+    private companion object {
+        const val LEGACY_MAX_OUTPUT_TOKENS = 128
+        const val DEFAULT_MAX_OUTPUT_TOKENS = 256
+        const val LEGACY_CONTEXT_SIZE = 512
+        const val DEFAULT_CONTEXT_SIZE = 2_048
     }
 }

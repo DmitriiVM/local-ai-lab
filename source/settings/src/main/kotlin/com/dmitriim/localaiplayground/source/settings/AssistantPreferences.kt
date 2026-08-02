@@ -15,9 +15,9 @@ data class AssistantChatPreferences(
     val temperature: Float = 0.7f,
     val topK: Int = 40,
     val topP: Float = 0.9f,
-    val maxOutputTokens: Int = 128,
+    val maxOutputTokens: Int = 256,
     val seed: Int? = null,
-    val contextSize: Int = 512,
+    val contextSize: Int = 2_048,
     val threadCount: Int = 0,
 )
 

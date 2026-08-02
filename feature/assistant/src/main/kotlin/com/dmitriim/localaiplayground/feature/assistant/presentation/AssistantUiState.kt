@@ -151,9 +151,9 @@ data class ChatSettings(
     val temperature: String = "0.7",
     val topK: String = "40",
     val topP: String = "0.9",
-    val maxOutputTokens: String = "128",
+    val maxOutputTokens: String = "256",
     val seed: String = "",
-    val contextSize: String = "512",
+    val contextSize: String = "2048",
     val threadCount: String = "0",
 ) {
     fun toEffective(): EffectiveChatSettings {
