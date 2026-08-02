@@ -45,13 +45,13 @@ class SettingsViewModel(
         mutableState.update { it.copy(storage = runRepository.storageUsage()) }
     }
 
-    fun requestClearHistory() = mutableState.update { it.copy(pendingHistoryClear = true) }
+    fun requestClearRunHistory() = mutableState.update { it.copy(pendingRunHistoryClear = true) }
 
-    fun dismissClearHistory() = mutableState.update { it.copy(pendingHistoryClear = false) }
+    fun dismissClearRunHistory() = mutableState.update { it.copy(pendingRunHistoryClear = false) }
 
-    fun clearHistory() = viewModelScope.launch(Dispatchers.IO) {
-        runRepository.clearHistory()
-        mutableState.update { it.copy(pendingHistoryClear = false, storage = runRepository.storageUsage()) }
+    fun clearRunHistory() = viewModelScope.launch(Dispatchers.IO) {
+        runRepository.clearRuns()
+        mutableState.update { it.copy(pendingRunHistoryClear = false, storage = runRepository.storageUsage()) }
     }
 
     fun clearTemporaryMedia() = viewModelScope.launch(Dispatchers.IO) {
@@ -64,5 +64,5 @@ class SettingsViewModel(
 data class SettingsUiState(
     val settings: AppSettings = AppSettings(),
     val storage: StorageUsage = StorageUsage(),
-    val pendingHistoryClear: Boolean = false,
+    val pendingRunHistoryClear: Boolean = false,
 )

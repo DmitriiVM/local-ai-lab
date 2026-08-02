@@ -15,6 +15,6 @@ interface RunRepository {
     suspend fun saveRun(record: RunRecord)
     suspend fun saveConversation(record: ConversationRecord, messages: List<ConversationMessageRecord>)
     suspend fun deleteConversation(id: String)
-    suspend fun clearHistory()
+    suspend fun clearRuns()
     suspend fun storageUsage(): StorageUsage
 }

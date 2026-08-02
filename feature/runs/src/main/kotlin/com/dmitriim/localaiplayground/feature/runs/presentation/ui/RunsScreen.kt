@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.feature.runs.presentation.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -11,13 +12,24 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
@@ -36,11 +48,20 @@ fun RunsScreen(
     onStatusFilter: (RunStatus?) -> Unit,
     onSelectRun: (String) -> Unit,
     onCloseDetails: () -> Unit,
+    onRequestClearRunHistory: () -> Unit,
+    onDismissClearRunHistory: () -> Unit,
+    onClearRunHistory: () -> Unit,
     onShare: () -> Unit,
     onRepeat: () -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
     val selected = state.selectedRun
+    if (state.pendingRunHistoryClear) {
+        ClearRunHistoryDialog(
+            onDismiss = onDismissClearRunHistory,
+            onConfirm = onClearRunHistory,
+        )
+    }
     if (selected != null) {
         RunDetails(selected, onCloseDetails, onShare, onRepeat)
         return
@@ -53,7 +74,18 @@ fun RunsScreen(
         ),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        item { Text("Runs", style = MaterialTheme.typography.headlineMedium) }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text("Runs", style = MaterialTheme.typography.headlineMedium)
+                RunsOverflowMenu(
+                    hasRuns = state.runs.isNotEmpty(),
+                    onClearRunHistory = onRequestClearRunHistory,
+                )
+            }
+        }
         item {
             Text(
                 text = "Saved settings, results, and metrics remain readable " +
@@ -74,6 +106,58 @@ fun RunsScreen(
             items(state.filteredRuns.size, key = { state.filteredRuns[it].id }) { index ->
                 RunRow(state.filteredRuns[index], onSelectRun)
             }
+        }
+    }
+}
+
+@Composable
+private fun ClearRunHistoryDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Clear run history?") },
+        text = {
+            Text(
+                "This removes saved runs, but leaves conversations, installed models, " +
+                    "and exported files untouched.",
+            )
+        },
+        confirmButton = {
+            OutlinedButton(onClick = onConfirm) { Text("Clear run history") }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) { Text("Cancel") }
+        },
+    )
+}
+
+@Composable
+private fun RunsOverflowMenu(
+    hasRuns: Boolean,
+    onClearRunHistory: () -> Unit,
+) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector = Icons.Outlined.MoreVert,
+                contentDescription = "More run actions",
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            DropdownMenuItem(
+                text = { Text("Clear run history") },
+                onClick = {
+                    expanded = false
+                    onClearRunHistory()
+                },
+                enabled = hasRuns,
+            )
         }
     }
 }

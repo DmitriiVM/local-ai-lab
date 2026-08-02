@@ -38,6 +38,9 @@ fun RunsRoute(navigator: AppNavigator, viewModel: RunsViewModel = metroViewModel
         onStatusFilter = viewModel::setStatusFilter,
         onSelectRun = viewModel::selectRun,
         onCloseDetails = viewModel::closeDetails,
+        onRequestClearRunHistory = viewModel::requestClearRunHistory,
+        onDismissClearRunHistory = viewModel::dismissClearRunHistory,
+        onClearRunHistory = viewModel::clearRunHistory,
         onShare = viewModel::prepareShare,
         onRepeat = {
             viewModel.repeatSelected()?.let { run -> navigator.navigate(run.capability.replayTarget) }

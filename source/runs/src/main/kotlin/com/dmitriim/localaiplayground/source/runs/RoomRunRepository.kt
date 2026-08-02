@@ -44,11 +44,7 @@ class RoomRunRepository(
 
     override suspend fun deleteConversation(id: String) = conversationDao.deleteConversation(id)
 
-    override suspend fun clearHistory() {
-        runDao.clear()
-        conversationDao.clearMessages()
-        conversationDao.clearConversations()
-    }
+    override suspend fun clearRuns() = runDao.clear()
 
     override suspend fun storageUsage(): StorageUsage = StorageUsage(
         modelsBytes = directoryBytes(File(application.filesDir, "models")),

@@ -17,8 +17,8 @@ fun SettingsRoute(
         onOpenDeviceAndRuntimes = onOpenDeviceAndRuntimes,
         onUpdate = viewModel::update,
         onClearTemporaryMedia = viewModel::clearTemporaryMedia,
-        onRequestClearHistory = viewModel::requestClearHistory,
-        onDismissClearHistory = viewModel::dismissClearHistory,
-        onClearHistory = viewModel::clearHistory,
+        onRequestClearRunHistory = viewModel::requestClearRunHistory,
+        onDismissClearRunHistory = viewModel::dismissClearRunHistory,
+        onClearRunHistory = viewModel::clearRunHistory,
     )
 }

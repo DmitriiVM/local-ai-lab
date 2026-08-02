@@ -12,6 +12,7 @@ import com.dmitriim.localaiplayground.source.runs.RunReplayStore
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,6 +50,15 @@ class RunsViewModel(
 
     fun closeDetails() = mutableState.update { it.copy(selectedRunId = null) }
 
+    fun requestClearRunHistory() = mutableState.update { it.copy(pendingRunHistoryClear = true) }
+
+    fun dismissClearRunHistory() = mutableState.update { it.copy(pendingRunHistoryClear = false) }
+
+    fun clearRunHistory() = viewModelScope.launch(Dispatchers.IO) {
+        runRepository.clearRuns()
+        mutableState.update { it.copy(pendingRunHistoryClear = false, selectedRunId = null) }
+    }
+
     fun prepareShare() {
         val run = state.value.selectedRun ?: return
         runCatching { exporter.export(run) }
@@ -67,6 +77,7 @@ data class RunsUiState(
     val status: RunStatus? = null,
     val selectedRunId: String? = null,
     val pendingShareUri: String? = null,
+    val pendingRunHistoryClear: Boolean = false,
     val errorMessage: String? = null,
 ) {
     val filteredRuns: List<RunRecord>

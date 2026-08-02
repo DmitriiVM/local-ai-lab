@@ -36,19 +36,19 @@ fun SettingsScreen(
     onOpenDeviceAndRuntimes: () -> Unit,
     onUpdate: ((AppSettings) -> AppSettings) -> Unit,
     onClearTemporaryMedia: () -> Unit,
-    onRequestClearHistory: () -> Unit,
-    onDismissClearHistory: () -> Unit,
-    onClearHistory: () -> Unit,
+    onRequestClearRunHistory: () -> Unit,
+    onDismissClearRunHistory: () -> Unit,
+    onClearRunHistory: () -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
     val settings = state.settings
-    if (state.pendingHistoryClear) {
+    if (state.pendingRunHistoryClear) {
         AlertDialog(
-            onDismissRequest = onDismissClearHistory,
-            title = { Text("Clear saved history?") },
-            text = { Text("This removes saved runs and conversations, but leaves installed models and explicitly exported files untouched.") },
-            confirmButton = { OutlinedButton(onClick = onClearHistory) { Text("Clear history") } },
-            dismissButton = { OutlinedButton(onClick = onDismissClearHistory) { Text("Cancel") } },
+            onDismissRequest = onDismissClearRunHistory,
+            title = { Text("Clear run history?") },
+            text = { Text("This removes saved runs, but leaves conversations, installed models, and exported files untouched.") },
+            confirmButton = { OutlinedButton(onClick = onClearRunHistory) { Text("Clear run history") } },
+            dismissButton = { OutlinedButton(onClick = onDismissClearRunHistory) { Text("Cancel") } },
         )
     }
     Column(
@@ -101,7 +101,13 @@ fun SettingsScreen(
             StorageLine("Generated audio", state.storage.generatedAudioBytes)
             StorageLine("History", state.storage.historyBytes)
             OutlinedButton(onClick = onClearTemporaryMedia, modifier = Modifier.fillMaxWidth()) { Text("Clear temporary media") }
-            OutlinedButton(onClick = { if (settings.confirmDestructiveActions) onRequestClearHistory() else onClearHistory() }, modifier = Modifier.fillMaxWidth()) { Text("Clear run & conversation history") }
+            OutlinedButton(
+                onClick = {
+                    if (settings.confirmDestructiveActions) onRequestClearRunHistory()
+                    else onClearRunHistory()
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Clear run history") }
             Text("Inference content stays on this device. Model downloads are the only feature that uses network access, and only after you start one.", style = MaterialTheme.typography.bodySmall)
         }
     }
