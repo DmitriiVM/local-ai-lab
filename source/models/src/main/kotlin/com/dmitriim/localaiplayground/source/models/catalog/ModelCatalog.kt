@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.source.models.catalog
 
 import com.dmitriim.localaiplayground.core.model.library.CatalogModel
 import com.dmitriim.localaiplayground.source.models.catalog.chat.ChatModelCatalog
+import com.dmitriim.localaiplayground.source.models.catalog.chat.LiteRtLmChatModelCatalog
 import com.dmitriim.localaiplayground.source.models.catalog.stt.SpeechToTextModelCatalog
 import com.dmitriim.localaiplayground.source.models.catalog.tts.chatterboxCatalogEntry
 import com.dmitriim.localaiplayground.source.models.catalog.tts.kokoroCatalogEntry
@@ -14,6 +15,7 @@ internal object ModelCatalog {
     val entries: List<CatalogModel> = buildList {
         add(chatterboxCatalogEntry)
         addAll(ChatModelCatalog.entries)
+        addAll(LiteRtLmChatModelCatalog.entries)
         add(pocketTtsCatalogEntry)
         add(kokoroCatalogEntry)
         addAll(SpeechToTextModelCatalog.entries)

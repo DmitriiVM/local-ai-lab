@@ -19,6 +19,7 @@ commonsCompress = "1.28.0"
 datastore = "1.2.1"
 onnxRuntime = "1.27.0"
 vosk = "0.3.75"
+litertLm = "0.15.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -56,6 +57,7 @@ metrox-viewmodel-compose = { group = "dev.zacsweers.metro", name = "metrox-viewm
 commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commonsCompress" }
 onnxruntime-android = { group = "com.microsoft.onnxruntime", name = "onnxruntime-android", version.ref = "onnxRuntime" }
 vosk-android = { group = "com.alphacephei", name = "vosk-android", version.ref = "vosk" }
+litertlm-android = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertLm" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

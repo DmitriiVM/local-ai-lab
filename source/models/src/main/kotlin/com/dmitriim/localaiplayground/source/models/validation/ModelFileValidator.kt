@@ -34,11 +34,12 @@ class ModelFileValidator(
                 return validationFailure(manifest, ModelValidationState.INVALID, "${spec.relativePath} has an unexpected checksum.")
             }
         }
-        val adapter = adapters.find(manifest.profileType)
-            ?: return validationFailure(manifest, ModelValidationState.INCOMPATIBLE, "No packaged adapter supports ${manifest.profileType.value}.")
-        if (adapter.engineId != manifest.engineId) {
-            return validationFailure(manifest, ModelValidationState.INCOMPATIBLE, "${manifest.profileType.value} requires ${adapter.engineId.value}.")
-        }
+        val adapter = adapters.find(manifest.engineId, manifest.profileType)
+            ?: return validationFailure(
+                manifest,
+                ModelValidationState.INCOMPATIBLE,
+                "No packaged adapter supports ${manifest.engineId.value}/${manifest.profileType.value}.",
+            )
         val result = adapter.validate(manifest, directory)
         return if (result.valid) {
             Log.i(TAG, "Model file validation passed: modelId=${manifest.modelId.value}")
@@ -56,7 +57,8 @@ class ModelFileValidator(
         },
     )
 
-    fun hasValidatorFor(manifest: ModelManifest): Boolean = adapters.find(manifest.profileType)?.engineId == manifest.engineId
+    fun hasValidatorFor(manifest: ModelManifest): Boolean =
+        adapters.find(manifest.engineId, manifest.profileType) != null
 
     private fun validationFailure(
         manifest: ModelManifest,

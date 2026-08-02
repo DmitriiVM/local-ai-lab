@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class ModelFormat {
     GGUF,
+    LITERT_LM,
     ONNX,
     BINARY,
     ARCHIVE,

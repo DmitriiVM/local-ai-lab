@@ -70,10 +70,9 @@ class InstalledModelService(
 
     override suspend fun import(request: ModelImportRequest): Result<ModelId> = runCatching {
         require(request.documentUris.isNotEmpty() || request.directoryUri != null) { "Select model files or an extracted model directory." }
-        val adapter = requireNotNull(adapters.find(request.profileType)) {
-            "No packaged adapter supports ${request.profileType.value}."
+        val adapter = requireNotNull(adapters.find(request.engineId, request.profileType)) {
+            "No packaged adapter supports ${request.engineId.value}/${request.profileType.value}."
         }
-        require(adapter.engineId == request.engineId) { "${request.profileType.value} requires ${adapter.engineId.value}." }
         val importDefinition = requireNotNull(adapter.importDefinition(request.profileType)) {
             "${adapter.id} does not support importing ${request.profileType.value}."
         }

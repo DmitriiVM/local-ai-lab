@@ -47,6 +47,7 @@ dependencies {
     implementation(project(":ai:api"))
     implementation(project(":ai:chatterbox"))
     implementation(project(":ai:llamacpp"))
+    implementation(project(":ai:litertlm"))
     implementation(project(":ai:sherpa"))
     implementation(project(":ai:vosk"))
     implementation(project(":ai:system"))
