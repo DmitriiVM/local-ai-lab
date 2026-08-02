@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.buildlogic
+package com.dmitriim.localaiplayground.buildlogic.android
 
 import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.JavaVersion
@@ -9,6 +9,7 @@ import org.gradle.kotlin.dsl.configure
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("com.android.application")
+        pluginManager.apply("local-ai.android-static-analysis")
 
         extensions.configure<ApplicationExtension> {
             compileSdk {

@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.buildlogic
+package com.dmitriim.localaiplayground.buildlogic.android
 
 import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
