@@ -3,6 +3,7 @@ package com.dmitriim.localaiplayground.feature.device.presentation.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
@@ -21,18 +22,26 @@ fun DeviceScreen(
     onRefresh: () -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
+    val systemNavigationPadding = if (dimensions.bottomNavigationOverlayClearance == 0.dp) {
+        Modifier.navigationBarsPadding()
+    } else {
+        Modifier
+    }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .then(systemNavigationPadding)
+            .padding(horizontal = 20.dp),
         contentPadding = PaddingValues(
             top = dimensions.topBarOverlayClearance,
-            bottom = dimensions.bottomNavigationOverlayClearance,
+            bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
             Text(
-                text = "Device",
+                text = "Device & runtimes",
                 modifier = Modifier.padding(top = 20.dp),
                 style = MaterialTheme.typography.headlineMedium,
             )

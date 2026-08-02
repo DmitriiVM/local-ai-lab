@@ -20,7 +20,7 @@ data object DeviceKey : NavKey
 @ContributesIntoSet(AppScope::class, binding<NavigationEntryProvider>())
 class DeviceNavigationEntryProvider : NavigationEntryProvider {
     override val target = NavigationTarget.DEVICE
-    override val topLevelDestination = TopLevelDestination.DEVICE
+    override val hostDestination = TopLevelDestination.SETTINGS
     override val startKey: NavKey = DeviceKey
 
     override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? =

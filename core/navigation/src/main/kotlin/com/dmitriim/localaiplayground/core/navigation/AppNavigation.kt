@@ -7,7 +7,7 @@ enum class TopLevelDestination {
     PLAYGROUND,
     MODELS,
     RUNS,
-    DEVICE,
+    SETTINGS,
 }
 
 enum class NavigationTarget {

@@ -7,10 +7,14 @@ import com.dmitriim.localaiplayground.feature.settings.presentation.ui.SettingsS
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 @Composable
-fun SettingsRoute(viewModel: SettingsViewModel = metroViewModel()) {
+fun SettingsRoute(
+    onOpenDeviceAndRuntimes: () -> Unit,
+    viewModel: SettingsViewModel = metroViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     SettingsScreen(
         state = state,
+        onOpenDeviceAndRuntimes = onOpenDeviceAndRuntimes,
         onUpdate = viewModel::update,
         onClearTemporaryMedia = viewModel::clearTemporaryMedia,
         onRequestClearHistory = viewModel::requestClearHistory,

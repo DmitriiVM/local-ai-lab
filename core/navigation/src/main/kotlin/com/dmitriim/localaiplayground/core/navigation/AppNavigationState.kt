@@ -26,15 +26,15 @@ fun rememberAppNavigationState(
     val runsStack = rememberNavBackStack(
         registry.startKey(TopLevelDestination.RUNS),
     )
-    val deviceStack = rememberNavBackStack(
-        registry.startKey(TopLevelDestination.DEVICE),
+    val settingsStack = rememberNavBackStack(
+        registry.startKey(TopLevelDestination.SETTINGS),
     )
-    val stacks = remember(playgroundStack, modelsStack, runsStack, deviceStack) {
+    val stacks = remember(playgroundStack, modelsStack, runsStack, settingsStack) {
         TopLevelBackStacks(
             playground = playgroundStack,
             models = modelsStack,
             runs = runsStack,
-            device = deviceStack,
+            settings = settingsStack,
         )
     }
     val selectedDestination = rememberSaveable {
@@ -112,13 +112,13 @@ internal data class TopLevelBackStacks(
     val playground: NavBackStack<NavKey>,
     val models: NavBackStack<NavKey>,
     val runs: NavBackStack<NavKey>,
-    val device: NavBackStack<NavKey>,
+    val settings: NavBackStack<NavKey>,
 ) {
     operator fun get(destination: TopLevelDestination): NavBackStack<NavKey> =
         when (destination) {
             TopLevelDestination.PLAYGROUND -> playground
             TopLevelDestination.MODELS -> models
             TopLevelDestination.RUNS -> runs
-            TopLevelDestination.DEVICE -> device
+            TopLevelDestination.SETTINGS -> settings
         }
 }

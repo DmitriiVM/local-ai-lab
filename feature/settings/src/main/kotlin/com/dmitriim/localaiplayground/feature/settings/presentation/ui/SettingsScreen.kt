@@ -8,14 +8,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.settings.presentation.SettingsUiState
@@ -28,6 +33,7 @@ import com.dmitriim.localaiplayground.source.settings.ThreadCountPolicy
 @Composable
 fun SettingsScreen(
     state: SettingsUiState,
+    onOpenDeviceAndRuntimes: () -> Unit,
     onUpdate: ((AppSettings) -> AppSettings) -> Unit,
     onClearTemporaryMedia: () -> Unit,
     onRequestClearHistory: () -> Unit,
@@ -46,12 +52,33 @@ fun SettingsScreen(
         )
     }
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, top = dimensions.topBarOverlayClearance + 20.dp, end = 20.dp, bottom = 20.dp + dimensions.bottomNavigationOverlayClearance),
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, top = dimensions.topBarOverlayClearance + 20.dp, end = 20.dp, bottom = 44.dp + dimensions.bottomNavigationOverlayClearance),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text("Settings", style = MaterialTheme.typography.headlineMedium)
+        Card(
+            onClick = onOpenDeviceAndRuntimes,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text("Device & runtimes", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Hardware, runtime availability, and diagnostics",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                Text("›", style = MaterialTheme.typography.headlineSmall)
+            }
+        }
         SettingsCard("Appearance") {
-            EnumSelector("Theme", settings.theme, ThemePreference.entries, ThemePreference::name) { value -> onUpdate { it.copy(theme = value) } }
+            EnumRadioGroup("Theme", settings.theme, ThemePreference.entries, ThemePreference::name) { value -> onUpdate { it.copy(theme = value) } }
             Toggle("Keep screen awake during active inference", settings.keepScreenAwake) { value -> onUpdate { it.copy(keepScreenAwake = value) } }
             Toggle("Confirm before deleting history", settings.confirmDestructiveActions) { value -> onUpdate { it.copy(confirmDestructiveActions = value) } }
             Toggle("Show advanced controls", settings.showAdvancedControls) { value -> onUpdate { it.copy(showAdvancedControls = value) } }
@@ -63,8 +90,8 @@ fun SettingsScreen(
             Text("The app retains one successful WAV until the next successful synthesis, as documented in the Stage 5 policy.", style = MaterialTheme.typography.bodySmall)
         }
         if (settings.showAdvancedControls) SettingsCard("Performance defaults") {
-            EnumSelector("Thread policy", settings.threadCountPolicy, ThreadCountPolicy.entries, ThreadCountPolicy::label) { value -> onUpdate { it.copy(threadCountPolicy = value) } }
-            EnumSelector("Unload models", settings.modelUnloadPolicy, ModelUnloadPolicy.entries, ModelUnloadPolicy::label) { value -> onUpdate { it.copy(modelUnloadPolicy = value) } }
+            EnumRadioGroup("Thread policy", settings.threadCountPolicy, ThreadCountPolicy.entries, ThreadCountPolicy::label) { value -> onUpdate { it.copy(threadCountPolicy = value) } }
+            EnumRadioGroup("Unload models", settings.modelUnloadPolicy, ModelUnloadPolicy.entries, ModelUnloadPolicy::label) { value -> onUpdate { it.copy(modelUnloadPolicy = value) } }
             Toggle("Warm up selected model", settings.warmUpSelectedModel) { value -> onUpdate { it.copy(warmUpSelectedModel = value) } }
             EnumSelector("Metric detail", settings.metricDetail, MetricDetail.entries, MetricDetail::label) { value -> onUpdate { it.copy(metricDetail = value) } }
         }
@@ -86,11 +113,53 @@ private fun SettingsCard(title: String, content: @Composable () -> Unit) = Card(
 }
 
 @Composable
-private fun Toggle(label: String, checked: Boolean, onChanged: (Boolean) -> Unit) = Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(label, Modifier.weight(1f)); Switch(checked, onChanged) }
+private fun Toggle(
+    label: String,
+    checked: Boolean,
+    onChanged: (Boolean) -> Unit,
+) = Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically,
+) {
+    Text(label, Modifier.weight(1f))
+    Switch(
+        checked = checked,
+        onCheckedChange = onChanged,
+        modifier = Modifier.scale(0.82f),
+    )
+}
 
 @Composable
 private fun <T> EnumSelector(label: String, selected: T, values: Iterable<T>, text: (T) -> String, onSelected: (T) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(label); Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { values.forEach { value -> OutlinedButton(onClick = { onSelected(value) }) { Text(text(value) + if (value == selected) " ✓" else "") } } } }
+}
+
+@Composable
+private fun <T> EnumRadioGroup(
+    label: String,
+    selected: T,
+    values: Iterable<T>,
+    text: (T) -> String,
+    onSelected: (T) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(label)
+        values.forEach { value ->
+            val isSelected = value == selected
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(role = Role.RadioButton) { onSelected(value) }
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(selected = isSelected, onClick = null)
+                Text(text(value))
+            }
+        }
+    }
 }
 
 @Composable
