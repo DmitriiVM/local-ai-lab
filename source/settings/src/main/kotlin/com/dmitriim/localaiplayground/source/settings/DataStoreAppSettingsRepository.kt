@@ -14,10 +14,10 @@ import com.dmitriim.localaiplayground.core.di.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import java.nio.charset.StandardCharsets
 import java.util.Base64
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @Inject
 @SingleIn(AppScope::class)
@@ -106,8 +106,7 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
         store.edit { values -> values[STT_SELECTED_MODEL] = modelId }
     }
 
-    private inline fun <reified T : Enum<T>> String.asEnum(default: T): T =
-        enumValues<T>().firstOrNull { it.name == this } ?: default
+    private inline fun <reified T : Enum<T>> String.asEnum(default: T): T = enumValues<T>().firstOrNull { it.name == this } ?: default
 
     private companion object {
         val THEME = stringPreferencesKey("theme")
@@ -126,8 +125,7 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
         val TTS_VOICE_SELECTIONS = stringSetPreferencesKey("tts_voice_selections")
         val STT_SELECTED_MODEL = stringPreferencesKey("stt_selected_model")
 
-        fun encodeVoiceSelection(modelId: String, voiceId: String): String =
-            "${encode(modelId)}:${encode(voiceId)}"
+        fun encodeVoiceSelection(modelId: String, voiceId: String): String = "${encode(modelId)}:${encode(voiceId)}"
 
         fun decodeVoiceSelection(value: String): Pair<String, String>? = runCatching {
             val separator = value.indexOf(':')

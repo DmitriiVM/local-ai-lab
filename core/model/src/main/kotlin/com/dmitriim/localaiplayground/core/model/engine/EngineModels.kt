@@ -36,10 +36,7 @@ sealed interface EngineAvailability {
         val fallbackReason: String? = null,
     ) : EngineAvailability
 
-    data class Unsupported(
-        override val descriptor: EngineDescriptor,
-        val reason: String,
-    ) : EngineAvailability
+    data class Unsupported(override val descriptor: EngineDescriptor, val reason: String) : EngineAvailability
 
     data class TemporarilyUnavailable(
         override val descriptor: EngineDescriptor,

@@ -46,10 +46,22 @@ class SherpaTextToSpeechEngine : TextToSpeechBackend {
     override fun load(request: TextToSpeechLoadRequest): TextToSpeechLoadResult = synchronized(lock) {
         val requestedDirectory = File(request.modelDirectory).canonicalPath
         val threads = effectiveThreads(request.threadCount)
-        Log.i(TAG, "Sherpa TTS load requested: directory=$requestedDirectory, requestedThreads=${request.threadCount}, effectiveThreads=$threads")
+        Log.i(
+            TAG,
+            "Sherpa TTS load requested: directory=$requestedDirectory, requestedThreads=${request.threadCount}, effectiveThreads=$threads",
+        )
         val active = tts
-        if (active != null && loadedDirectory == requestedDirectory && loadedProfile == request.profileType && loadedThreadCount == threads) {
-            Log.i(TAG, "Sherpa TTS model reuse: sampleRateHz=${active.sampleRate()}, speakers=${active.numSpeakers().coerceAtLeast(1)}")
+        if (active != null &&
+            loadedDirectory == requestedDirectory &&
+            loadedProfile == request.profileType &&
+            loadedThreadCount == threads
+        ) {
+            Log.i(
+                TAG,
+                "Sherpa TTS model reuse: sampleRateHz=${active.sampleRate()}, speakers=${active.numSpeakers().coerceAtLeast(
+                    1,
+                )}",
+            )
             return TextToSpeechLoadResult(
                 effectiveThreadCount = threads,
                 loadDurationMs = 0,
@@ -68,17 +80,34 @@ class SherpaTextToSpeechEngine : TextToSpeechBackend {
         val config = OfflineTtsConfig().apply {
             model = OfflineTtsModelConfig().apply {
                 when (request.profileType) {
-                    ModelProfileIds.SUPERTONIC_TTS -> supertonic = OfflineTtsSupertonicModelConfig().apply {
-                        durationPredictor = File(requestedDirectory, "duration_predictor.int8.onnx").absolutePath
-                        textEncoder = File(requestedDirectory, "text_encoder.int8.onnx").absolutePath
-                        vectorEstimator = File(requestedDirectory, "vector_estimator.int8.onnx").absolutePath
-                        vocoder = File(requestedDirectory, "vocoder.int8.onnx").absolutePath
-                        ttsJson = File(requestedDirectory, "tts.json").absolutePath
-                        unicodeIndexer = File(requestedDirectory, "unicode_indexer.bin").absolutePath
-                        voiceStyle = File(requestedDirectory, "voice.bin").absolutePath
-                    }
+                    ModelProfileIds.SUPERTONIC_TTS ->
+                        supertonic =
+                            OfflineTtsSupertonicModelConfig().apply {
+                                durationPredictor =
+                                    File(
+                                        requestedDirectory,
+                                        "duration_predictor.int8.onnx",
+                                    ).absolutePath
+                                textEncoder =
+                                    File(
+                                        requestedDirectory,
+                                        "text_encoder.int8.onnx",
+                                    ).absolutePath
+                                vectorEstimator =
+                                    File(
+                                        requestedDirectory,
+                                        "vector_estimator.int8.onnx",
+                                    ).absolutePath
+                                vocoder =
+                                    File(requestedDirectory, "vocoder.int8.onnx").absolutePath
+                                ttsJson = File(requestedDirectory, "tts.json").absolutePath
+                                unicodeIndexer =
+                                    File(requestedDirectory, "unicode_indexer.bin").absolutePath
+                                voiceStyle = File(requestedDirectory, "voice.bin").absolutePath
+                            }
                     ModelProfileIds.PIPER_VITS_TTS -> vits = OfflineTtsVitsModelConfig().apply {
-                        model = File(requestedDirectory, "en_US-lessac-medium.onnx").absolutePath
+                        model =
+                            File(requestedDirectory, "en_US-lessac-medium.onnx").absolutePath
                         tokens = File(requestedDirectory, "tokens.txt").absolutePath
                         dataDir = File(requestedDirectory, "espeak-ng-data").absolutePath
                     }
@@ -96,9 +125,11 @@ class SherpaTextToSpeechEngine : TextToSpeechBackend {
                         lmMain = File(requestedDirectory, "lm_main.int8.onnx").absolutePath
                         encoder = File(requestedDirectory, "encoder.onnx").absolutePath
                         decoder = File(requestedDirectory, "decoder.int8.onnx").absolutePath
-                        textConditioner = File(requestedDirectory, "text_conditioner.onnx").absolutePath
+                        textConditioner =
+                            File(requestedDirectory, "text_conditioner.onnx").absolutePath
                         vocabJson = File(requestedDirectory, "vocab.json").absolutePath
-                        tokenScoresJson = File(requestedDirectory, "token_scores.json").absolutePath
+                        tokenScoresJson =
+                            File(requestedDirectory, "token_scores.json").absolutePath
                         voiceEmbeddingCacheCapacity = 1
                     }
                     else -> error("Unsupported TTS profile: ${request.profileType.value}")
@@ -194,7 +225,10 @@ class SherpaTextToSpeechEngine : TextToSpeechBackend {
         }
         check(!cancelled.get()) { "Speech synthesis was cancelled." }
         require(audio.samples.isNotEmpty()) { "The voice model returned no audio." }
-        Log.i(TAG, "Sherpa TTS synthesis completed: samples=${audio.samples.size}, sampleRateHz=${audio.sampleRate}")
+        Log.i(
+            TAG,
+            "Sherpa TTS synthesis completed: samples=${audio.samples.size}, sampleRateHz=${audio.sampleRate}",
+        )
         return TextToSpeechResult(
             samples = audio.samples,
             sampleRateHz = audio.sampleRate,
@@ -228,39 +262,65 @@ class SherpaTextToSpeechEngine : TextToSpeechBackend {
     private fun validateRequiredFiles(profile: ModelProfileId, directory: File) {
         when (profile) {
             ModelProfileIds.SUPERTONIC_TTS -> {
-                val required = SherpaProfiles.missingFiles(directory, SherpaProfiles.supertonic3RequiredFiles)
-                require(required.isEmpty()) { "Supertonic model files are missing: ${required.joinToString()}" }
+                val required = SherpaProfiles.missingFiles(
+                    directory,
+                    SherpaProfiles.supertonic3RequiredFiles,
+                )
+                require(required.isEmpty()) {
+                    "Supertonic model files are missing: ${required.joinToString()}"
+                }
             }
             ModelProfileIds.PIPER_VITS_TTS -> {
                 val required = listOf("en_US-lessac-medium.onnx", "tokens.txt")
                     .filterNot { File(directory, it).isFile }
-                require(required.isEmpty()) { "Piper model files are missing: ${required.joinToString()}" }
-                require(File(directory, "espeak-ng-data").isDirectory) { "Piper frontend data directory is missing." }
+                require(required.isEmpty()) {
+                    "Piper model files are missing: ${required.joinToString()}"
+                }
+                require(File(directory, "espeak-ng-data").isDirectory) {
+                    "Piper frontend data directory is missing."
+                }
             }
             ModelProfileIds.KOKORO_TTS -> {
                 val required = listOf(
-                    "model.onnx", "voices.bin", "tokens.txt", "lexicon-us-en.txt", "lexicon-zh.txt",
-                    "date-zh.fst", "number-zh.fst", "phone-zh.fst",
+                    "model.onnx",
+                    "voices.bin",
+                    "tokens.txt",
+                    "lexicon-us-en.txt",
+                    "lexicon-zh.txt",
+                    "date-zh.fst",
+                    "number-zh.fst",
+                    "phone-zh.fst",
                 ).filterNot { File(directory, it).isFile }
-                require(required.isEmpty()) { "Kokoro model files are missing: ${required.joinToString()}" }
-                require(File(directory, "espeak-ng-data").isDirectory) { "Kokoro frontend data directory is missing." }
-                require(File(directory, "dict").isDirectory) { "Kokoro dictionary data directory is missing." }
+                require(required.isEmpty()) {
+                    "Kokoro model files are missing: ${required.joinToString()}"
+                }
+                require(File(directory, "espeak-ng-data").isDirectory) {
+                    "Kokoro frontend data directory is missing."
+                }
+                require(File(directory, "dict").isDirectory) {
+                    "Kokoro dictionary data directory is missing."
+                }
             }
             ModelProfileIds.POCKET_TTS -> {
                 val required = listOf(
-                    "lm_flow.int8.onnx", "lm_main.int8.onnx", "encoder.onnx", "decoder.int8.onnx",
-                    "text_conditioner.onnx", "vocab.json", "token_scores.json", pocketDefaultReferencePath,
+                    "lm_flow.int8.onnx",
+                    "lm_main.int8.onnx",
+                    "encoder.onnx",
+                    "decoder.int8.onnx",
+                    "text_conditioner.onnx",
+                    "vocab.json",
+                    "token_scores.json",
+                    pocketDefaultReferencePath,
                 ).filterNot { File(directory, it).isFile }
-                require(required.isEmpty()) { "Pocket TTS model files are missing: ${required.joinToString()}" }
+                require(required.isEmpty()) {
+                    "Pocket TTS model files are missing: ${required.joinToString()}"
+                }
             }
             else -> error("Unsupported TTS profile: ${profile.value}")
         }
     }
 
-    private data class Pcm16Wave(
-        val sampleRateHz: Int,
-        val samples: FloatArray,
-    ) {
+    private data class Pcm16Wave(val sampleRateHz: Int, val samples: FloatArray) {
         companion object {
             fun read(file: File): Pcm16Wave = RandomAccessFile(file, "r").use { input ->
                 require(readAscii(input, 4) == "RIFF") { "Pocket TTS reference is not a RIFF WAV." }
@@ -273,7 +333,9 @@ class SherpaTextToSpeechEngine : TextToSpeechBackend {
                 while (input.filePointer + 8 <= input.length()) {
                     val chunk = readAscii(input, 4)
                     val size = Integer.reverseBytes(input.readInt())
-                    require(size >= 0 && input.filePointer + size <= input.length()) { "Pocket TTS reference WAV is invalid." }
+                    require(size >= 0 && input.filePointer + size <= input.length()) {
+                        "Pocket TTS reference WAV is invalid."
+                    }
                     when (chunk) {
                         "fmt " -> {
                             require(size >= 16) { "Pocket TTS reference WAV format is invalid." }

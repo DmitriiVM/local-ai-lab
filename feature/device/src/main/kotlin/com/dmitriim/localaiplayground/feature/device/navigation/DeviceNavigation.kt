@@ -23,6 +23,5 @@ class DeviceNavigationEntryProvider : NavigationEntryProvider {
     override val hostDestination = TopLevelDestination.SETTINGS
     override val startKey: NavKey = DeviceKey
 
-    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? =
-        if (key == DeviceKey) NavEntry(key) { DeviceRoute() } else null
+    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? = if (key == DeviceKey) NavEntry(key) { DeviceRoute() } else null
 }

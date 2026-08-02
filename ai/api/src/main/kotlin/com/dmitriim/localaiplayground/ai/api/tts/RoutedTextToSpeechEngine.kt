@@ -12,12 +12,12 @@ import dev.zacsweers.metro.SingleIn
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
-class RoutedTextToSpeechEngine(
-    backends: Set<TextToSpeechBackend>,
-) : TextToSpeechEngine {
+class RoutedTextToSpeechEngine(backends: Set<TextToSpeechBackend>) : TextToSpeechEngine {
     private val lock = Any()
     private val byEngineId = backends.associateBy(TextToSpeechBackend::engineId).also { indexed ->
-        require(indexed.size == backends.size) { "More than one TTS backend declares the same engine ID." }
+        require(indexed.size == backends.size) {
+            "More than one TTS backend declares the same engine ID."
+        }
     }
     private var active: TextToSpeechBackend? = null
 

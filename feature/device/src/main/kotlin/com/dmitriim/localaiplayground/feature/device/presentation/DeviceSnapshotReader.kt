@@ -22,7 +22,9 @@ internal fun readDeviceSnapshot(application: Application): DeviceSnapshot {
     }
     val thermalState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         "Thermal status ${application.getSystemService(PowerManager::class.java).currentThermalStatus}"
-    } else "Thermal status unavailable before Android 10"
+    } else {
+        "Thermal status unavailable before Android 10"
+    }
     return DeviceSnapshot(
         deviceName = "${Build.MANUFACTURER} ${Build.MODEL}",
         androidVersion = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})",
@@ -36,5 +38,4 @@ internal fun readDeviceSnapshot(application: Application): DeviceSnapshot {
     )
 }
 
-private fun Long.toGiB(): String =
-    String.format(Locale.US, "%.2f GiB", toDouble() / 1024 / 1024 / 1024)
+private fun Long.toGiB(): String = String.format(Locale.US, "%.2f GiB", toDouble() / 1024 / 1024 / 1024)

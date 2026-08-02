@@ -76,16 +76,15 @@ private fun SpeechOutputSettings.toDomain(
     )
 }
 
-private fun TtsVoiceOption.toCondition(): TextToSpeechVoiceCondition =
-    platformVoiceId?.let(TextToSpeechVoiceCondition::PlatformVoice)
-        ?: reference?.let { reference ->
-            TextToSpeechVoiceCondition.ReferenceAudio(
-                referenceId = reference.id,
-                displayName = reference.displayName,
-                pcmFilePath = reference.pcmFilePath,
-                sampleRateHz = reference.sampleRateHz,
-            )
-        }
-        ?: TextToSpeechVoiceCondition.FixedSpeaker(
-            requireNotNull(speakerId) { "The selected fixed voice has no speaker ID." },
+private fun TtsVoiceOption.toCondition(): TextToSpeechVoiceCondition = platformVoiceId?.let(TextToSpeechVoiceCondition::PlatformVoice)
+    ?: reference?.let { reference ->
+        TextToSpeechVoiceCondition.ReferenceAudio(
+            referenceId = reference.id,
+            displayName = reference.displayName,
+            pcmFilePath = reference.pcmFilePath,
+            sampleRateHz = reference.sampleRateHz,
         )
+    }
+    ?: TextToSpeechVoiceCondition.FixedSpeaker(
+        requireNotNull(speakerId) { "The selected fixed voice has no speaker ID." },
+    )

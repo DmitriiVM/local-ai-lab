@@ -46,16 +46,24 @@ internal fun RunRecord.toEntity(json: Json) = RunEntity(
     linkedRunIdsJson = json.encodeToString(linkedRunIds),
 )
 
-internal fun ConversationEntity.toDomain() =
-    ConversationRecord(id, ConversationKind.valueOf(kind), title, createdAtEpochMs, updatedAtEpochMs)
+internal fun ConversationEntity.toDomain() = ConversationRecord(id, ConversationKind.valueOf(kind), title, createdAtEpochMs, updatedAtEpochMs)
 
-internal fun ConversationRecord.toEntity() =
-    ConversationEntity(id, kind.name, title, createdAtEpochMs, updatedAtEpochMs)
+internal fun ConversationRecord.toEntity() = ConversationEntity(id, kind.name, title, createdAtEpochMs, updatedAtEpochMs)
 
 internal fun ConversationMessageEntity.toDomain() = ConversationMessageRecord(
-    id, conversationId, ConversationMessageRole.valueOf(role), content, createdAtEpochMs, incomplete,
+    id,
+    conversationId,
+    ConversationMessageRole.valueOf(role),
+    content,
+    createdAtEpochMs,
+    incomplete,
 )
 
 internal fun ConversationMessageRecord.toEntity() = ConversationMessageEntity(
-    id, conversationId, role.name, content, createdAtEpochMs, incomplete,
+    id,
+    conversationId,
+    role.name,
+    content,
+    createdAtEpochMs,
+    incomplete,
 )

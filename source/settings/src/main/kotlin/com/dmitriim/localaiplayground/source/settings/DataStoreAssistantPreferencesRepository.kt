@@ -1,17 +1,17 @@
 package com.dmitriim.localaiplayground.source.settings
 
 import android.app.Application
-import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataMigration
-import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import dev.zacsweers.metro.ContributesBinding
@@ -129,19 +129,17 @@ private class LegacyChatDefaultsMigration(
     private val contextSizeKey: Preferences.Key<Int>,
     private val migrationCompletedKey: Preferences.Key<Boolean>,
 ) : DataMigration<Preferences> {
-    override suspend fun shouldMigrate(currentData: Preferences): Boolean =
-        currentData[migrationCompletedKey] != true
+    override suspend fun shouldMigrate(currentData: Preferences): Boolean = currentData[migrationCompletedKey] != true
 
-    override suspend fun migrate(currentData: Preferences): Preferences =
-        currentData.toMutablePreferences().apply {
-            if (this[maxOutputTokensKey] == LEGACY_MAX_OUTPUT_TOKENS) {
-                this[maxOutputTokensKey] = DEFAULT_MAX_OUTPUT_TOKENS
-            }
-            if (this[contextSizeKey] == LEGACY_CONTEXT_SIZE) {
-                this[contextSizeKey] = DEFAULT_CONTEXT_SIZE
-            }
-            this[migrationCompletedKey] = true
+    override suspend fun migrate(currentData: Preferences): Preferences = currentData.toMutablePreferences().apply {
+        if (this[maxOutputTokensKey] == LEGACY_MAX_OUTPUT_TOKENS) {
+            this[maxOutputTokensKey] = DEFAULT_MAX_OUTPUT_TOKENS
         }
+        if (this[contextSizeKey] == LEGACY_CONTEXT_SIZE) {
+            this[contextSizeKey] = DEFAULT_CONTEXT_SIZE
+        }
+        this[migrationCompletedKey] = true
+    }
 
     override suspend fun cleanUp() = Unit
 

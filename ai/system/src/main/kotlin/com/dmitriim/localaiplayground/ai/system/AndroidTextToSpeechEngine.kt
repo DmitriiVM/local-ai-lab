@@ -24,9 +24,6 @@ import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.ByteBuffer
@@ -35,14 +32,17 @@ import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @Inject
 @SingleIn(AppScope::class)
 @ContributesIntoSet(AppScope::class, binding = binding<TextToSpeechBackend>())
 @ContributesBinding(AppScope::class, binding = binding<SystemTextToSpeechSupport>())
-class AndroidTextToSpeechEngine(
-    private val application: Application,
-) : TextToSpeechBackend, SystemTextToSpeechSupport {
+class AndroidTextToSpeechEngine(private val application: Application) :
+    TextToSpeechBackend,
+    SystemTextToSpeechSupport {
     override val engineId = EngineId("android-text-to-speech")
 
     private val lock = Any()
@@ -52,7 +52,9 @@ class AndroidTextToSpeechEngine(
 
     private var textToSpeech: TextToSpeech? = null
     private var initialization: Initialization? = null
+
     @Volatile private var activeSession: SynthesisSession? = null
+
     @Volatile private var cancelled = false
 
     override val isLoaded: Boolean
@@ -210,10 +212,9 @@ class AndroidTextToSpeechEngine(
         }
     }
 
-    private fun isUsableOnDeviceVoice(voice: Voice): Boolean =
-        !voice.isNetworkConnectionRequired &&
-            TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in voice.features.orEmpty() &&
-            voice.locale.language.lowercase() in SUPPORTED_LANGUAGES
+    private fun isUsableOnDeviceVoice(voice: Voice): Boolean = !voice.isNetworkConnectionRequired &&
+        TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in voice.features.orEmpty() &&
+        voice.locale.language.lowercase() in SUPPORTED_LANGUAGES
 
     private fun toSystemVoice(voice: Voice): SystemTextToSpeechVoice {
         val localeName = voice.locale.getDisplayName(Locale.getDefault())
@@ -227,18 +228,21 @@ class AndroidTextToSpeechEngine(
 
     private class Initialization {
         val latch = CountDownLatch(1)
+
         @Volatile var failure: Throwable? = null
     }
 
-    private class SynthesisSession(
-        private val utteranceId: String,
-    ) {
+    private class SynthesisSession(private val utteranceId: String) {
         private val audio = ByteArrayOutputStream()
         private val completion = CountDownLatch(1)
+
         @Volatile var sampleRateHz: Int = 0
             private set
+
         @Volatile private var audioFormat: Int = AudioFormat.ENCODING_INVALID
+
         @Volatile private var channelCount: Int = 0
+
         @Volatile var failure: Throwable? = null
             private set
 
@@ -268,12 +272,20 @@ class AndroidTextToSpeechEngine(
 
             @Deprecated("Deprecated by Android")
             override fun onError(id: String) {
-                if (id == utteranceId) fail(IllegalStateException("Android speech synthesis failed."))
+                if (id ==
+                    utteranceId
+                ) {
+                    fail(IllegalStateException("Android speech synthesis failed."))
+                }
             }
 
             override fun onError(id: String, errorCode: Int) {
                 if (id == utteranceId) {
-                    fail(IllegalStateException("Android speech synthesis failed with error $errorCode."))
+                    fail(
+                        IllegalStateException(
+                            "Android speech synthesis failed with error $errorCode.",
+                        ),
+                    )
                 }
             }
 
@@ -300,7 +312,9 @@ class AndroidTextToSpeechEngine(
                 AudioFormat.ENCODING_PCM_8BIT -> 1
                 AudioFormat.ENCODING_PCM_16BIT -> 2
                 AudioFormat.ENCODING_PCM_FLOAT -> 4
-                else -> error("Android TextToSpeech returned unsupported audio encoding $audioFormat.")
+                else -> error(
+                    "Android TextToSpeech returned unsupported audio encoding $audioFormat.",
+                )
             }
             val frameSize = bytesPerSample * channelCount
             require(bytes.size % frameSize == 0) {

@@ -1,10 +1,10 @@
 package com.dmitriim.localaiplayground.core.audio.input.storage
 
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
+import java.io.FileInputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
-import java.io.FileInputStream
 
 /** Reads PCM16 without retaining an entire long recording in JVM memory. */
 internal object PcmSegmentReader {

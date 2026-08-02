@@ -148,7 +148,7 @@ class SpeechToTextViewModel(
                 replaceInput(input)
                 mutableState.update { it.copy(level = null, operation = SttOperation.IDLE) }
                 transcribe(input)
-            } catch (cancelled: CancellationException) {
+            } catch (_: CancellationException) {
                 Log.i(TAG, "STT UI recording cancelled.")
                 mutableState.update { it.copy(operation = SttOperation.IDLE, level = null) }
             } catch (error: Throwable) {
@@ -180,7 +180,7 @@ class SpeechToTextViewModel(
                 replaceInput(input)
                 mutableState.update { it.copy(operation = SttOperation.IDLE) }
                 transcribe(input)
-            } catch (cancelled: CancellationException) {
+            } catch (_: CancellationException) {
                 Log.i(TAG, "STT UI import cancelled.")
                 mutableState.update { it.copy(operation = SttOperation.IDLE) }
             } catch (error: Throwable) {
@@ -264,7 +264,7 @@ class SpeechToTextViewModel(
                         }
                     }
                 }
-            } catch (cancelled: CancellationException) {
+            } catch (_: CancellationException) {
                 Log.i(TAG, "STT UI transcription cancelled.")
                 mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = "Transcription cancelled.") }
                 persistSttRun(snapshotForPersistence(RunStatus.CANCELLED, startedAt, model, input, null, snapshot, null, "Transcription cancelled."))

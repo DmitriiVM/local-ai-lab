@@ -65,7 +65,9 @@ internal fun AssistantListenSettingsSheet(
                         draft.copy(
                             languageCode = model.languages.firstOrNull()?.let(::normalizeLanguageCode) ?: "en",
                         )
-                    } else draft
+                    } else {
+                        draft
+                    }
                     draftModelId = modelId
                     draft = candidate
                     commit(modelId, candidate)
@@ -90,11 +92,11 @@ internal fun AssistantListenSettingsSheet(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     languages.drop(3).forEach { language ->
                         FilterChip(
-                        selected = draft.languageCode == language.code,
-                        onClick = {
-                            draft = draft.copy(languageCode = language.code).also { candidate -> commit(draftModelId, candidate) }
-                        },
-                        enabled = enabled,
+                            selected = draft.languageCode == language.code,
+                            onClick = {
+                                draft = draft.copy(languageCode = language.code).also { candidate -> commit(draftModelId, candidate) }
+                            },
+                            enabled = enabled,
                             label = { Text(language.label) },
                         )
                     }

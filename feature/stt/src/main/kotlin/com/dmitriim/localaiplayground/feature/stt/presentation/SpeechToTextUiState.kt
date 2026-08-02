@@ -70,9 +70,8 @@ internal fun CatalogModel.toSpeechModelOption(): SpeechModelOption = SpeechModel
     installed = false,
 )
 
-internal fun InstalledModel.isReadySpeechModel(): Boolean =
-    AiCapability.SPEECH_TO_TEXT in manifest.capabilities &&
-        validationState == ModelValidationState.READY
+internal fun InstalledModel.isReadySpeechModel(): Boolean = AiCapability.SPEECH_TO_TEXT in manifest.capabilities &&
+    validationState == ModelValidationState.READY
 
 internal fun androidSpeechRecognizerOption() = SpeechModelOption(
     id = BuiltInSpeechToTextModels.ANDROID_SPEECH_RECOGNIZER,

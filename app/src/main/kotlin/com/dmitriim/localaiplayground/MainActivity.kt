@@ -28,7 +28,9 @@ class MainActivity : ComponentActivity() {
 
         val graph = (application as LocalAiPlaygroundApplication).graph
         setContent {
-            val settings by graph.settingsRepository.settings.collectAsStateWithLifecycle(initialValue = AppSettings())
+            val settings by graph.settingsRepository.settings.collectAsStateWithLifecycle(
+                initialValue = AppSettings(),
+            )
             val darkTheme = when (settings.theme) {
                 ThemePreference.SYSTEM -> isSystemInDarkTheme()
                 ThemePreference.LIGHT -> false
@@ -44,8 +46,11 @@ class MainActivity : ComponentActivity() {
                     statusBarStyle = systemBarStyle,
                     navigationBarStyle = systemBarStyle,
                 )
-                if (settings.keepScreenAwake) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                if (settings.keepScreenAwake) {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                } else {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                }
             }
             CompositionLocalProvider(
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,

@@ -26,6 +26,5 @@ object SherpaProfiles {
         "voice.bin",
     )
 
-    fun missingFiles(modelDirectory: File, requiredFiles: Set<String>): Set<String> =
-        requiredFiles.filterNot { File(modelDirectory, it).isFile }.toSet()
+    fun missingFiles(modelDirectory: File, requiredFiles: Set<String>): Set<String> = requiredFiles.filterNot { File(modelDirectory, it).isFile }.toSet()
 }

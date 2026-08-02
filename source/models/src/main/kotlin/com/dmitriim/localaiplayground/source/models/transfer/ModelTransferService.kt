@@ -20,6 +20,13 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
+import java.io.File
+import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URI
+import java.util.UUID
+import java.util.zip.ZipInputStream
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -29,13 +36,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.net.HttpURLConnection
-import java.net.URI
-import java.util.UUID
-import java.util.zip.ZipInputStream
-import kotlin.coroutines.coroutineContext
 
 /** Owns scheduling, network transfer progress, and transactional catalog installation. */
 @Inject
@@ -46,7 +46,8 @@ class ModelTransferService(
     private val installedModels: InstalledModelService,
     private val diagnostics: ModelDiagnosticsService,
     private val transferState: ModelTransferStateStore,
-) : ModelTransfers, ModelDownloadExecutor {
+) : ModelTransfers,
+    ModelDownloadExecutor {
     override val catalog: Flow<List<CatalogModel>> = MutableStateFlow(ModelCatalog.entries).asStateFlow()
     override val transfers: Flow<Map<ModelId, ModelTransferState>> = transferState.transfers
 
@@ -320,8 +321,7 @@ class ModelTransferService(
     }
 
     /** Tar tools commonly emit a harmless "./" prefix; root and traversal checks run after removing it. */
-    private fun String.normalizedArchivePath(): String =
-        replace('\\', '/').removePrefix("./")
+    private fun String.normalizedArchivePath(): String = replace('\\', '/').removePrefix("./")
 
     private suspend fun downloadTo(
         url: String,

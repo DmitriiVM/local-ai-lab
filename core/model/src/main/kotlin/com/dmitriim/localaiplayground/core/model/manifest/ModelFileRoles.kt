@@ -45,9 +45,6 @@ value class ModelFileRole(val value: String) {
     }
 }
 
-@Suppress("unused")
-private val _legacyRoleCompatibility = Unit
-
 object ModelFileRoles {
     val PRIMARY_MODEL = ModelFileRole("PRIMARY_MODEL")
     val ENCODER = ModelFileRole("ENCODER")

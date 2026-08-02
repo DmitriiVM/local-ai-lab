@@ -65,8 +65,9 @@ class ModelDiagnosticsService(
                 details += "${directory.name}: manifest is missing or unreadable."
             } else {
                 val result = validator.validate(manifest, directory)
-                if (result.first == ModelValidationState.READY) validCapabilities += manifest.capabilities
-                else {
+                if (result.first == ModelValidationState.READY) {
+                    validCapabilities += manifest.capabilities
+                } else {
                     filesValid = false
                     details += "${manifest.displayName}: ${result.second}"
                 }

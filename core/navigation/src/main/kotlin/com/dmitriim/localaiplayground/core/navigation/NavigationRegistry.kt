@@ -20,14 +20,11 @@ internal class NavigationRegistry(
         }
     }
 
-    fun provider(target: NavigationTarget): NavigationEntryProvider =
-        checkNotNull(providersByTarget[target])
+    fun provider(target: NavigationTarget): NavigationEntryProvider = checkNotNull(providersByTarget[target])
 
-    fun startKey(destination: TopLevelDestination): NavKey =
-        allProviders.single { it.topLevelDestination == destination }.startKey
+    fun startKey(destination: TopLevelDestination): NavKey = allProviders.single { it.topLevelDestination == destination }.startKey
 
-    fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? =
-        allProviders.firstNotNullOfOrNull { provider ->
-            provider.entryFor(key, navigator)
-        }
+    fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? = allProviders.firstNotNullOfOrNull { provider ->
+        provider.entryFor(key, navigator)
+    }
 }

@@ -13,26 +13,35 @@ import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.di.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.withContext
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.sqrt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 
 /** Sole owner of the active [AudioRecord] session. */
 @Inject
 @SingleIn(AppScope::class)
 class MicrophoneCapture(private val application: Application) {
     private val lock = Any()
+
     @Volatile private var activeRecord: AudioRecord? = null
+
     @Volatile private var capturing = false
 
     @SuppressLint("MissingPermission") // Guarded by the explicit runtime check immediately below.
-    suspend fun capture(output: File, sampleRateHz: Int, onLevel: (AudioLevel) -> Unit): PcmAudioInput =
+    suspend fun capture(
+        output: File,
+        sampleRateHz: Int,
+        onLevel: (AudioLevel) -> Unit,
+    ): PcmAudioInput =
         withContext(Dispatchers.IO) {
-            check(application.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            check(
+                application.checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
+                    PackageManager.PERMISSION_GRANTED,
+            ) {
                 "Microphone permission is required before recording."
             }
             val minBufferBytes = AudioRecord.getMinBufferSize(
@@ -40,8 +49,13 @@ class MicrophoneCapture(private val application: Application) {
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
             )
-            require(minBufferBytes > 0) { "This device cannot capture mono PCM audio at $sampleRateHz Hz." }
-            Log.i(TAG, "Microphone capture preparing: sampleRateHz=$sampleRateHz, minBufferBytes=$minBufferBytes")
+            require(minBufferBytes > 0) {
+                "This device cannot capture mono PCM audio at $sampleRateHz Hz."
+            }
+            Log.i(
+                TAG,
+                "Microphone capture preparing: sampleRateHz=$sampleRateHz, minBufferBytes=$minBufferBytes",
+            )
             val record = AudioRecord(
                 MediaRecorder.AudioSource.VOICE_RECOGNITION,
                 sampleRateHz,
@@ -49,7 +63,9 @@ class MicrophoneCapture(private val application: Application) {
                 AudioFormat.ENCODING_PCM_16BIT,
                 minBufferBytes.coerceAtLeast(sampleRateHz / 5 * PCM16_BYTES),
             )
-            require(record.state == AudioRecord.STATE_INITIALIZED) { "Android could not initialize the microphone." }
+            require(record.state == AudioRecord.STATE_INITIALIZED) {
+                "Android could not initialize the microphone."
+            }
             synchronized(lock) {
                 check(activeRecord == null) { "A recording session is already active." }
                 activeRecord = record
@@ -68,16 +84,31 @@ class MicrophoneCapture(private val application: Application) {
                             read > 0 -> {
                                 stream.writePcm16(samples, read)
                                 frameCount += read
-                                onLevel(samples.toAudioLevel(read, frameCount * 1_000 / sampleRateHz))
+                                onLevel(
+                                    samples.toAudioLevel(read, frameCount * 1_000 / sampleRateHz),
+                                )
                             }
-                            read == AudioRecord.ERROR_DEAD_OBJECT -> error("The microphone became unavailable.")
-                            read < 0 && capturing -> error("Microphone capture failed (code $read).")
+                            read == AudioRecord.ERROR_DEAD_OBJECT -> error(
+                                "The microphone became unavailable.",
+                            )
+                            read < 0 && capturing -> error(
+                                "Microphone capture failed (code $read).",
+                            )
                         }
                     }
                 }
                 require(frameCount > 0) { "No audio was captured." }
-                Log.i(TAG, "Microphone capture completed: frames=$frameCount, durationMs=${frameCount * 1_000 / sampleRateHz}")
-                PcmAudioInput(output, "Microphone recording", frameCount * 1_000 / sampleRateHz, sampleRateHz, "Live microphone")
+                Log.i(
+                    TAG,
+                    "Microphone capture completed: frames=$frameCount, durationMs=${frameCount * 1_000 / sampleRateHz}",
+                )
+                PcmAudioInput(
+                    output,
+                    "Microphone recording",
+                    frameCount * 1_000 / sampleRateHz,
+                    sampleRateHz,
+                    "Live microphone",
+                )
             } catch (error: Throwable) {
                 Log.e(TAG, "Microphone capture failed: ${error.message}", error)
                 output.delete()

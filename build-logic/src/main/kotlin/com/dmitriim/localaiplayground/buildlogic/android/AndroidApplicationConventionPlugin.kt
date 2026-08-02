@@ -13,7 +13,9 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
         extensions.configure<ApplicationExtension> {
             compileSdk {
-                version = release(36) { minorApiLevel = 1 }
+                version = release(AndroidSdkVersions.COMPILE_SDK_MAJOR) {
+                    minorApiLevel = AndroidSdkVersions.COMPILE_SDK_MINOR
+                }
             }
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_11

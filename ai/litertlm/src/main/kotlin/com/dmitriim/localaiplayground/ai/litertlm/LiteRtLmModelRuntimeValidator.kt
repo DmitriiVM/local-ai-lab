@@ -26,22 +26,32 @@ class LiteRtLmModelRuntimeValidator : ModelAdapter {
     override val profileTypes = setOf(ModelProfileIds.LLM)
     override val capabilities = setOf(AiCapability.CHAT)
 
-    override fun capabilitiesFor(profileType: ModelProfileId) =
-        if (profileType in profileTypes) capabilities else emptySet()
+    override fun capabilitiesFor(profileType: ModelProfileId) = if (profileType in profileTypes) capabilities else emptySet()
 
     override fun importDefinition(profileType: ModelProfileId) = when (profileType) {
         ModelProfileIds.LLM -> ModelImportDefinition(
             displayName = "LiteRT-LM chat model",
             format = ModelFormat.LITERT_LM,
-            files = listOf(ModelImportFileDefinition(role = ModelFileRoles.PRIMARY_MODEL, extension = ".litertlm")),
+            files = listOf(
+                ModelImportFileDefinition(
+                    role = ModelFileRoles.PRIMARY_MODEL,
+                    extension = ".litertlm",
+                ),
+            ),
         )
         else -> null
     }
 
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
-        require(manifest.engineId == engineId) { "Unsupported LiteRT-LM engine: ${manifest.engineId.value}" }
-        require(manifest.profileType in profileTypes) { "Unsupported LiteRT-LM profile: ${manifest.profileType.value}" }
-        require(manifest.format == ModelFormat.LITERT_LM) { "The LiteRT-LM manifest has an incompatible format." }
+        require(manifest.engineId == engineId) {
+            "Unsupported LiteRT-LM engine: ${manifest.engineId.value}"
+        }
+        require(manifest.profileType in profileTypes) {
+            "Unsupported LiteRT-LM profile: ${manifest.profileType.value}"
+        }
+        require(manifest.format == ModelFormat.LITERT_LM) {
+            "The LiteRT-LM manifest has an incompatible format."
+        }
         val specification = manifest.files.firstOrNull {
             it.required && it.role == ModelFileRoles.PRIMARY_MODEL && !it.directory
         } ?: error("The LiteRT-LM manifest does not declare a primary file.")

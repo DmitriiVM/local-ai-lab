@@ -7,10 +7,9 @@ internal fun interface PromptTokenEstimator {
 
 /** Treats every UTF-8 byte as a token and reserves additional template/special-token overhead. */
 internal object ConservativeUtf8PromptTokenEstimator : PromptTokenEstimator {
-    override fun estimate(prompt: String): Int =
-        (prompt.toByteArray(Charsets.UTF_8).size.toLong() + SPECIAL_TOKEN_ALLOWANCE)
-            .coerceAtMost(Int.MAX_VALUE.toLong())
-            .toInt()
+    override fun estimate(prompt: String): Int = (prompt.toByteArray(Charsets.UTF_8).size.toLong() + SPECIAL_TOKEN_ALLOWANCE)
+        .coerceAtMost(Int.MAX_VALUE.toLong())
+        .toInt()
 
     private const val SPECIAL_TOKEN_ALLOWANCE = 64
 }

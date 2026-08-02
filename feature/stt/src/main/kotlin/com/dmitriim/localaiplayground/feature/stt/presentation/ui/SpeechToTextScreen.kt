@@ -191,7 +191,10 @@ private fun SpeechModelPicker(
                             },
                         )
                     },
-                    onClick = { onSelect(model.id); expanded = false },
+                    onClick = {
+                        onSelect(model.id)
+                        expanded = false
+                    },
                     enabled = model.installed,
                 )
             }

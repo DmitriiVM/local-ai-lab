@@ -23,19 +23,34 @@ data class DecodedAudio(val frames: Long, val mimeType: String)
 @SingleIn(AppScope::class)
 class PlatformAudioDecoder(private val application: Application) {
     fun decodeToMonoPcm(uri: Uri, output: File, targetRateHz: Int): DecodedAudio {
-        Log.i(TAG, "Audio import decode requested: uriScheme=${uri.scheme}, targetRateHz=$targetRateHz")
+        Log.i(
+            TAG,
+            "Audio import decode requested: uriScheme=${uri.scheme}, targetRateHz=$targetRateHz",
+        )
         val extractor = MediaExtractor()
         var codec: MediaCodec? = null
         try {
             extractor.setDataSource(application, uri, null)
             val track = (0 until extractor.trackCount).firstOrNull { index ->
-                extractor.getTrackFormat(index).getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true
+                extractor.getTrackFormat(
+                    index,
+                ).getString(MediaFormat.KEY_MIME)?.startsWith("audio/") ==
+                    true
             } ?: error("The selected file has no supported audio track.")
             val format = extractor.getTrackFormat(track)
             val mime = requireNotNull(format.getString(MediaFormat.KEY_MIME))
-            Log.i(TAG, "Audio import track selected: track=$track, mimeType=$mime, sourceRateHz=${format.getInteger(MediaFormat.KEY_SAMPLE_RATE)}, channels=${format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)}")
+            Log.i(
+                TAG,
+                "Audio import track selected: track=$track, mimeType=$mime, sourceRateHz=${format.getInteger(
+                    MediaFormat.KEY_SAMPLE_RATE,
+                )}, channels=${format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)}",
+            )
             extractor.selectTrack(track)
-            codec = MediaCodec.createDecoderByType(mime).also { it.configure(format, null, null, 0); it.start() }
+            codec =
+                MediaCodec.createDecoderByType(mime).also {
+                    it.configure(format, null, null, 0)
+                    it.start()
+                }
             var inputEnded = false
             var outputEnded = false
             val info = MediaCodec.BufferInfo()
@@ -48,7 +63,13 @@ class PlatformAudioDecoder(private val application: Application) {
                             val buffer = requireNotNull(codec.getInputBuffer(index))
                             val size = extractor.readSampleData(buffer, 0)
                             if (size < 0) {
-                                codec.queueInputBuffer(index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                                codec.queueInputBuffer(
+                                    index,
+                                    0,
+                                    0,
+                                    0,
+                                    MediaCodec.BUFFER_FLAG_END_OF_STREAM,
+                                )
                                 inputEnded = true
                             } else {
                                 codec.queueInputBuffer(index, 0, size, extractor.sampleTime, 0)
@@ -57,24 +78,43 @@ class PlatformAudioDecoder(private val application: Application) {
                         }
                     }
                     when (val index = codec.dequeueOutputBuffer(info, CODEC_TIMEOUT_US)) {
-                        MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> writer = PcmResamplingWriter(stream, codec.outputFormat, targetRateHz)
+                        MediaCodec.INFO_OUTPUT_FORMAT_CHANGED ->
+                            writer =
+                                PcmResamplingWriter(stream, codec.outputFormat, targetRateHz)
                         MediaCodec.INFO_TRY_AGAIN_LATER -> Unit
                         else -> if (index >= 0) {
                             if (info.size > 0) {
-                                val activeWriter = requireNotNull(writer) { "Audio decoder produced samples before its output format." }
-                                val buffer = requireNotNull(codec.getOutputBuffer(index)).duplicate().apply {
+                                val activeWriter =
+                                    requireNotNull(writer) {
+                                        "Audio decoder produced samples before its output format."
+                                    }
+                                val buffer = requireNotNull(
+                                    codec.getOutputBuffer(index),
+                                ).duplicate().apply {
                                     position(info.offset)
                                     limit(info.offset + info.size)
                                 }
                                 activeWriter.write(buffer)
                             }
                             codec.releaseOutputBuffer(index, false)
-                            if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) outputEnded = true
+                            if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM !=
+                                0
+                            ) {
+                                outputEnded = true
+                            }
                         }
                     }
                 }
-                return DecodedAudio(requireNotNull(writer) { "No decoded PCM was produced." }.writtenFrames, mime).also {
-                    Log.i(TAG, "Audio import decode completed: frames=${it.frames}, mimeType=${it.mimeType}")
+                return DecodedAudio(
+                    requireNotNull(writer) {
+                        "No decoded PCM was produced."
+                    }.writtenFrames,
+                    mime,
+                ).also {
+                    Log.i(
+                        TAG,
+                        "Audio import decode completed: frames=${it.frames}, mimeType=${it.mimeType}",
+                    )
                 }
             }
         } catch (error: Throwable) {
@@ -102,7 +142,9 @@ private class PcmResamplingWriter(
     private val channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
     private val encoding = if (format.containsKey(MediaFormat.KEY_PCM_ENCODING)) {
         format.getInteger(MediaFormat.KEY_PCM_ENCODING)
-    } else AudioFormat.ENCODING_PCM_16BIT
+    } else {
+        AudioFormat.ENCODING_PCM_16BIT
+    }
     private var sourceFrame = 0L
     private var nextOutputAt = 0.0
     var writtenFrames = 0L

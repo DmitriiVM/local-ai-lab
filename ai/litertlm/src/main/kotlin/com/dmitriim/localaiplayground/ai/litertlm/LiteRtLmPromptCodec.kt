@@ -39,14 +39,8 @@ internal object LiteRtLmPromptCodec {
     }
 
     @Serializable
-    private data class PromptEnvelope(
-        val version: Int,
-        val messages: List<PromptMessage>,
-    )
+    private data class PromptEnvelope(val version: Int, val messages: List<PromptMessage>)
 
     @Serializable
-    private data class PromptMessage(
-        val role: String,
-        val content: String,
-    )
+    private data class PromptMessage(val role: String, val content: String)
 }

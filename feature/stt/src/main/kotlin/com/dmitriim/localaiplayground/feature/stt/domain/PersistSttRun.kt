@@ -6,10 +6,10 @@ import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.core.model.service.RunRepository
 import dev.zacsweers.metro.Inject
+import java.util.UUID
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import java.util.UUID
 
 @Inject
 class PersistSttRun(private val runRepository: RunRepository) {
@@ -24,19 +24,23 @@ class PersistSttRun(private val runRepository: RunRepository) {
                 model = snapshot.model,
                 input = snapshot.inputDescription,
                 output = snapshot.transcript,
-                parametersJson = Json.encodeToString(buildJsonObject {
-                    put("language", snapshot.languageCode)
-                    put("threadCount", snapshot.threadCount)
-                }),
+                parametersJson = Json.encodeToString(
+                    buildJsonObject {
+                        put("language", snapshot.languageCode)
+                        put("threadCount", snapshot.threadCount)
+                    },
+                ),
                 metricsJson = snapshot.metrics?.let { metrics ->
-                    Json.encodeToString(buildJsonObject {
-                        put("audioDurationMs", metrics.audioDurationMs)
-                        put("processingDurationMs", metrics.processingDurationMs)
-                        put("timeToFinalMs", metrics.timeToFinalMs)
-                        put("segmentCount", metrics.segmentCount)
-                        put("loadDurationMs", metrics.loadDurationMs)
-                        put("effectiveThreadCount", metrics.effectiveThreadCount)
-                    })
+                    Json.encodeToString(
+                        buildJsonObject {
+                            put("audioDurationMs", metrics.audioDurationMs)
+                            put("processingDurationMs", metrics.processingDurationMs)
+                            put("timeToFinalMs", metrics.timeToFinalMs)
+                            put("segmentCount", metrics.segmentCount)
+                            put("loadDurationMs", metrics.loadDurationMs)
+                            put("effectiveThreadCount", metrics.effectiveThreadCount)
+                        },
+                    )
                 } ?: "{}",
                 errorMessage = snapshot.errorMessage,
             ),

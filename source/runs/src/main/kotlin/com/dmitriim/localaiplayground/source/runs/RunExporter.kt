@@ -6,14 +6,17 @@ import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import java.io.File
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.io.File
 
 @Inject
 @SingleIn(AppScope::class)
 class RunExporter(private val application: Application) {
-    private val json = Json { prettyPrint = true; encodeDefaults = true }
+    private val json = Json {
+        prettyPrint = true
+        encodeDefaults = true
+    }
 
     fun export(record: RunRecord): String {
         val directory = File(application.cacheDir, "run-exports").also(File::mkdirs)

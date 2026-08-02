@@ -8,12 +8,12 @@ import dev.zacsweers.metro.SingleIn
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
-class RoutedSpeechToTextEngine(
-    backends: Set<SpeechToTextBackend>,
-) : SpeechToTextEngine {
+class RoutedSpeechToTextEngine(backends: Set<SpeechToTextBackend>) : SpeechToTextEngine {
     private val lock = Any()
     private val byEngineId = backends.associateBy(SpeechToTextBackend::engineId).also {
-        require(it.size == backends.size) { "More than one STT backend declares the same engine ID." }
+        require(it.size == backends.size) {
+            "More than one STT backend declares the same engine ID."
+        }
     }
     private var active: SpeechToTextBackend? = null
 
@@ -35,9 +35,8 @@ class RoutedSpeechToTextEngine(
         return backend.load(request)
     }
 
-    override fun transcribe(request: SpeechToTextRequest): SpeechToTextResult =
-        synchronized(lock) { checkNotNull(active) { "Load a speech model before transcription." } }
-            .transcribe(request)
+    override fun transcribe(request: SpeechToTextRequest): SpeechToTextResult = synchronized(lock) { checkNotNull(active) { "Load a speech model before transcription." } }
+        .transcribe(request)
 
     override fun cancel() {
         synchronized(lock) { active }?.cancel()

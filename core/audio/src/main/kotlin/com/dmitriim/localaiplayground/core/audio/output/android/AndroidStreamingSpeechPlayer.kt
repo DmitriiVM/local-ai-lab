@@ -19,9 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
-class AndroidStreamingSpeechPlayer(
-    application: Application,
-) : StreamingSpeechPlayer {
+class AndroidStreamingSpeechPlayer(application: Application) : StreamingSpeechPlayer {
     private val audioManager = application.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     private val mutableState = MutableStateFlow(SpeechPlaybackState())
     override val state: StateFlow<SpeechPlaybackState> = mutableState.asStateFlow()

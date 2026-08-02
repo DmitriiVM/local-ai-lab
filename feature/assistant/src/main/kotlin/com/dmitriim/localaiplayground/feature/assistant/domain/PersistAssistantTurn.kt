@@ -8,8 +8,8 @@ import com.dmitriim.localaiplayground.core.model.conversation.ConversationRecord
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import com.dmitriim.localaiplayground.core.model.service.RunRepository
 import dev.zacsweers.metro.Inject
-import kotlinx.serialization.json.Json
 import java.util.UUID
+import kotlinx.serialization.json.Json
 
 @Inject
 class PersistAssistantTurn(private val runRepository: RunRepository) {

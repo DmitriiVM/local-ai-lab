@@ -53,10 +53,13 @@ internal fun ChatMetricsCard(metrics: ChatMetrics) {
             if (expanded) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     MetricRow("Model", metrics.modelName)
-                    MetricRow("Startup", buildString {
-                        append(if (metrics.coldStart) "Cold" else "Warm")
-                        metrics.effectiveThreadCount?.let { append(" · $it threads") }
-                    })
+                    MetricRow(
+                        "Startup",
+                        buildString {
+                            append(if (metrics.coldStart) "Cold" else "Warm")
+                            metrics.effectiveThreadCount?.let { append(" · $it threads") }
+                        },
+                    )
                     MetricRow("Load", "${metrics.loadDurationMs}\u00A0ms")
                     metrics.promptTokens?.let { tokens ->
                         MetricRow("Prompt", buildMetricValue(tokens, metrics.promptTokensPerSecond))
@@ -114,11 +117,10 @@ private fun buildMetricValue(tokens: Int, rate: Double?): String = buildString {
     rate?.let { append(" · ${formatRate(it)}\u00A0tok/s") }
 }
 
-private fun formatDuration(milliseconds: Long): String =
-    if (milliseconds < 1_000) {
-        "$milliseconds\u00A0ms"
-    } else {
-        "${(milliseconds / 100.0).roundToInt() / 10.0}\u00A0s"
-    }
+private fun formatDuration(milliseconds: Long): String = if (milliseconds < 1_000) {
+    "$milliseconds\u00A0ms"
+} else {
+    "${(milliseconds / 100.0).roundToInt() / 10.0}\u00A0s"
+}
 
 private fun formatRate(value: Double): String = "${(value * 10).roundToInt() / 10.0}"

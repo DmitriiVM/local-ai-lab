@@ -9,6 +9,7 @@ enum class AiCapability {
     SPEECH_TO_TEXT,
     TEXT_TO_SPEECH,
     VOICE_ACTIVITY_DETECTION,
+
     /** A composite feature capability, not a capability declared by an individual model. */
     VOICE_ASSISTANT,
 }

@@ -39,6 +39,7 @@ class SherpaSpeechToTextEngine : SpeechToTextBackend {
     private val lock = Any()
     private var offlineRecognizer: OfflineRecognizer? = null
     private var onlineRecognizer: OnlineRecognizer? = null
+
     @Volatile private var cancelled = false
     private var loadedModelKey: String? = null
     private var loadedThreads = 0
@@ -47,7 +48,9 @@ class SherpaSpeechToTextEngine : SpeechToTextBackend {
         get() = synchronized(lock) { offlineRecognizer != null || onlineRecognizer != null }
 
     override fun load(request: SpeechToTextLoadRequest): SpeechToTextLoadResult = synchronized(lock) {
-        require(request.engineId == engineId) { "Unsupported STT engine: ${request.engineId.value}" }
+        require(request.engineId == engineId) {
+            "Unsupported STT engine: ${request.engineId.value}"
+        }
         require(request.profileType in SUPPORTED_PROFILES) {
             "Unsupported sherpa-onnx STT profile: ${request.profileType.value}"
         }
@@ -75,7 +78,10 @@ class SherpaSpeechToTextEngine : SpeechToTextBackend {
         }
 
         unloadLocked()
-        Log.i(TAG, "Sherpa STT load requested: profile=${request.profileType.value}, language=${request.languageCode}, threads=$threads")
+        Log.i(
+            TAG,
+            "Sherpa STT load requested: profile=${request.profileType.value}, language=${request.languageCode}, threads=$threads",
+        )
         val duration = try {
             measureTimeMillis {
                 if (request.profileType == ModelProfileIds.ZIPFORMER_STT) {
@@ -109,7 +115,10 @@ class SherpaSpeechToTextEngine : SpeechToTextBackend {
                 else -> transcribeOnline(checkNotNull(online), request)
             }
         }
-        Log.i(TAG, "Sherpa STT inference completed: processingMs=$duration, transcriptLength=${text.length}")
+        Log.i(
+            TAG,
+            "Sherpa STT inference completed: processingMs=$duration, transcriptLength=${text.length}",
+        )
         SpeechToTextResult(text.trim(), duration)
     }
 
@@ -117,60 +126,69 @@ class SherpaSpeechToTextEngine : SpeechToTextBackend {
         request: SpeechToTextLoadRequest,
         files: Map<ModelFileRole, File>,
         threads: Int,
-    ) = OfflineRecognizer(null, OfflineRecognizerConfig().apply {
-        modelConfig = OfflineModelConfig().apply {
-            tokens = files.require(ModelFileRoles.TOKENS).path
-            numThreads = threads
-            provider = "cpu"
-            debug = false
-            when (request.profileType) {
-                ModelProfileIds.WHISPER_STT -> whisper = OfflineWhisperModelConfig().apply {
+    ) = OfflineRecognizer(
+        null,
+        OfflineRecognizerConfig().apply {
+            modelConfig = OfflineModelConfig().apply {
+                tokens = files.require(ModelFileRoles.TOKENS).path
+                numThreads = threads
+                provider = "cpu"
+                debug = false
+                when (request.profileType) {
+                    ModelProfileIds.WHISPER_STT -> whisper = OfflineWhisperModelConfig().apply {
+                        encoder = files.require(ModelFileRoles.ENCODER).path
+                        decoder = files.require(ModelFileRoles.DECODER).path
+                        language = request.languageCode
+                        task = "transcribe"
+                        enableSegmentTimestamps = true
+                    }
+                    ModelProfileIds.PARAKEET_CTC_STT,
+                    ModelProfileIds.GIGAAM_CTC_STT,
+                    -> nemo = OfflineNemoEncDecCtcModelConfig().apply {
+                        model = files.require(ModelFileRoles.PRIMARY_MODEL).path
+                    }
+                    ModelProfileIds.SENSE_VOICE_STT ->
+                        senseVoice =
+                            OfflineSenseVoiceModelConfig().apply {
+                                model = files.require(ModelFileRoles.PRIMARY_MODEL).path
+                                language = request.languageCode
+                                useInverseTextNormalization = true
+                            }
+                    ModelProfileIds.PARAFORMER_STT ->
+                        paraformer =
+                            OfflineParaformerModelConfig().apply {
+                                model = files.require(ModelFileRoles.PRIMARY_MODEL).path
+                            }
+                    ModelProfileIds.MOONSHINE_STT ->
+                        moonshine =
+                            OfflineMoonshineModelConfig().apply {
+                                encoder = files.require(ModelFileRoles.ENCODER).path
+                                mergedDecoder = files.require(ModelFileRoles.MERGED_DECODER).path
+                            }
+                    else -> error("Unsupported offline STT profile: ${request.profileType.value}")
+                }
+            }
+        },
+    )
+
+    private fun createOnlineZipformer(files: Map<ModelFileRole, File>, threads: Int) = OnlineRecognizer(
+        null,
+        OnlineRecognizerConfig().apply {
+            modelConfig = OnlineModelConfig().apply {
+                transducer = OnlineTransducerModelConfig().apply {
                     encoder = files.require(ModelFileRoles.ENCODER).path
                     decoder = files.require(ModelFileRoles.DECODER).path
-                    language = request.languageCode
-                    task = "transcribe"
-                    enableSegmentTimestamps = true
+                    joiner = files.require(ModelFileRoles.JOINER).path
                 }
-                ModelProfileIds.PARAKEET_CTC_STT,
-                ModelProfileIds.GIGAAM_CTC_STT,
-                -> nemo = OfflineNemoEncDecCtcModelConfig().apply {
-                    model = files.require(ModelFileRoles.PRIMARY_MODEL).path
-                }
-                ModelProfileIds.SENSE_VOICE_STT -> senseVoice = OfflineSenseVoiceModelConfig().apply {
-                    model = files.require(ModelFileRoles.PRIMARY_MODEL).path
-                    language = request.languageCode
-                    useInverseTextNormalization = true
-                }
-                ModelProfileIds.PARAFORMER_STT -> paraformer = OfflineParaformerModelConfig().apply {
-                    model = files.require(ModelFileRoles.PRIMARY_MODEL).path
-                }
-                ModelProfileIds.MOONSHINE_STT -> moonshine = OfflineMoonshineModelConfig().apply {
-                    encoder = files.require(ModelFileRoles.ENCODER).path
-                    mergedDecoder = files.require(ModelFileRoles.MERGED_DECODER).path
-                }
-                else -> error("Unsupported offline STT profile: ${request.profileType.value}")
+                tokens = files.require(ModelFileRoles.TOKENS).path
+                numThreads = threads
+                provider = "cpu"
+                debug = false
             }
-        }
-    })
-
-    private fun createOnlineZipformer(
-        files: Map<ModelFileRole, File>,
-        threads: Int,
-    ) = OnlineRecognizer(null, OnlineRecognizerConfig().apply {
-        modelConfig = OnlineModelConfig().apply {
-            transducer = OnlineTransducerModelConfig().apply {
-                encoder = files.require(ModelFileRoles.ENCODER).path
-                decoder = files.require(ModelFileRoles.DECODER).path
-                joiner = files.require(ModelFileRoles.JOINER).path
-            }
-            tokens = files.require(ModelFileRoles.TOKENS).path
-            numThreads = threads
-            provider = "cpu"
-            debug = false
-        }
-        enableEndpoint = false
-        decodingMethod = "greedy_search"
-    })
+            enableEndpoint = false
+            decodingMethod = "greedy_search"
+        },
+    )
 
     private fun transcribeOffline(
         recognizer: OfflineRecognizer,
@@ -224,8 +242,14 @@ class SherpaSpeechToTextEngine : SpeechToTextBackend {
         cancelled = false
     }
 
-    private fun requiredRoles(profileType: com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId) = when (profileType) {
-        ModelProfileIds.WHISPER_STT -> setOf(ModelFileRoles.ENCODER, ModelFileRoles.DECODER, ModelFileRoles.TOKENS)
+    private fun requiredRoles(
+        profileType: com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId,
+    ) = when (profileType) {
+        ModelProfileIds.WHISPER_STT -> setOf(
+            ModelFileRoles.ENCODER,
+            ModelFileRoles.DECODER,
+            ModelFileRoles.TOKENS,
+        )
         ModelProfileIds.PARAKEET_CTC_STT,
         ModelProfileIds.GIGAAM_CTC_STT,
         ModelProfileIds.SENSE_VOICE_STT,
@@ -245,8 +269,7 @@ class SherpaSpeechToTextEngine : SpeechToTextBackend {
         else -> emptySet()
     }
 
-    private fun Map<ModelFileRole, File>.require(role: ModelFileRole): File =
-        requireNotNull(this[role]) { "Missing ${role.value} model file." }
+    private fun Map<ModelFileRole, File>.require(role: ModelFileRole): File = requireNotNull(this[role]) { "Missing ${role.value} model file." }
 
     private fun effectiveThreads(requested: Int): Int = requested.takeIf { it > 0 }
         ?: Runtime.getRuntime().availableProcessors().coerceIn(1, 4)

@@ -8,8 +8,8 @@ import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlaye
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffectsProcessor
 import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import dev.zacsweers.metro.Inject
-import kotlinx.coroutines.CancellationException
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.CancellationException
 
 /** Synthesizes an ephemeral sample without retaining audio or creating run history. */
 @Inject

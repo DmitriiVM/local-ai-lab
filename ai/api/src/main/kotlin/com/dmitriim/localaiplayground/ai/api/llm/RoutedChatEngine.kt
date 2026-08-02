@@ -10,12 +10,12 @@ import dev.zacsweers.metro.SingleIn
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
-class RoutedChatEngine(
-    runtimes: Set<LlmRuntime>,
-) : ChatEngine {
+class RoutedChatEngine(runtimes: Set<LlmRuntime>) : ChatEngine {
     private val lock = Any()
     private val byEngineId = runtimes.associateBy(LlmRuntime::engineId).also { indexed ->
-        require(indexed.size == runtimes.size) { "More than one LLM runtime declares the same engine ID." }
+        require(indexed.size == runtimes.size) {
+            "More than one LLM runtime declares the same engine ID."
+        }
         runtimes.forEach(::validateOptionalOperations)
     }
     private var active: LlmRuntime? = null
@@ -23,8 +23,7 @@ class RoutedChatEngine(
     override val isLoaded: Boolean
         get() = synchronized(lock) { active?.isLoaded == true }
 
-    override fun capabilitiesFor(engineId: EngineId): LlmEngineCapabilities? =
-        byEngineId[engineId]?.capabilities
+    override fun capabilitiesFor(engineId: EngineId): LlmEngineCapabilities? = byEngineId[engineId]?.capabilities
 
     override fun activeChatFormatter(): LlmChatFormatter? = activeRuntime() as? LlmChatFormatter
 
@@ -67,7 +66,9 @@ class RoutedChatEngine(
     }
 
     private fun validateOptionalOperations(runtime: LlmRuntime) {
-        if (runtime.capabilities.chatTemplateHandling == LlmChatTemplateHandling.ENGINE_FORMATS_MESSAGES) {
+        if (runtime.capabilities.chatTemplateHandling ==
+            LlmChatTemplateHandling.ENGINE_FORMATS_MESSAGES
+        ) {
             require(runtime is LlmChatFormatter) {
                 "${runtime.engineId.value} declares engine chat formatting but does not implement LlmChatFormatter."
             }
@@ -78,7 +79,9 @@ class RoutedChatEngine(
             }
         }
         when (runtime.capabilities.contextManagement) {
-            LlmContextManagement.EXACT_CALLER_BUDGET -> require(runtime.capabilities.tokenCounting) {
+            LlmContextManagement.EXACT_CALLER_BUDGET -> require(
+                runtime.capabilities.tokenCounting,
+            ) {
                 "${runtime.engineId.value} declares exact caller context budgeting without token counting."
             }
             LlmContextManagement.ESTIMATED_CALLER_BUDGET,
@@ -89,7 +92,9 @@ class RoutedChatEngine(
             require(LlmLoadOption.CONTEXT_SIZE in runtime.capabilities.loadOptions) {
                 "${runtime.engineId.value} declares caller context budgeting without a context-size control."
             }
-            require(LlmGenerationOption.MAX_OUTPUT_TOKENS in runtime.capabilities.generationOptions) {
+            require(
+                LlmGenerationOption.MAX_OUTPUT_TOKENS in runtime.capabilities.generationOptions,
+            ) {
                 "${runtime.engineId.value} declares caller context budgeting without a maximum-output control."
             }
         }

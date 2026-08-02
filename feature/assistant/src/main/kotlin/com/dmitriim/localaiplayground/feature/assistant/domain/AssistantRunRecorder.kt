@@ -8,10 +8,10 @@ import com.dmitriim.localaiplayground.core.model.service.RunRepository
 import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionMetrics
 import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisMetrics
 import dev.zacsweers.metro.Inject
+import java.util.UUID
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import java.util.UUID
 
 @Inject
 class AssistantRunRecorder(

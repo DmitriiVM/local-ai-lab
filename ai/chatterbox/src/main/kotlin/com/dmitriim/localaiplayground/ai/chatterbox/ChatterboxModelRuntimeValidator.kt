@@ -25,19 +25,23 @@ class ChatterboxModelRuntimeValidator : ModelAdapter {
     override val profileTypes = setOf(ModelProfileIds.CHATTERBOX_TURBO_Q4)
     override val capabilities = setOf(AiCapability.TEXT_TO_SPEECH)
 
-    override fun capabilitiesFor(profileType: com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId) =
-        if (profileType in profileTypes) capabilities else emptySet()
+    override fun capabilitiesFor(
+        profileType: com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId,
+    ) = if (profileType in profileTypes) capabilities else emptySet()
 
-    override fun importDefinition(profileType: com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId) =
-        if (profileType == ModelProfileIds.CHATTERBOX_TURBO_Q4) {
-            ModelImportDefinition(
-                displayName = "Chatterbox Turbo Q4 (English)",
-                format = ModelFormat.ONNX,
-                files = REQUIRED_FILES.map { (path, role) ->
-                    ModelImportFileDefinition(role, relativePath = path)
-                },
-            )
-        } else null
+    override fun importDefinition(
+        profileType: com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId,
+    ) = if (profileType == ModelProfileIds.CHATTERBOX_TURBO_Q4) {
+        ModelImportDefinition(
+            displayName = "Chatterbox Turbo Q4 (English)",
+            format = ModelFormat.ONNX,
+            files = REQUIRED_FILES.map { (path, role) ->
+                ModelImportFileDefinition(role, relativePath = path)
+            },
+        )
+    } else {
+        null
+    }
 
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
         require(manifest.profileType == ModelProfileIds.CHATTERBOX_TURBO_Q4)
@@ -46,13 +50,19 @@ class ChatterboxModelRuntimeValidator : ModelAdapter {
         require(manifest.ttsVoiceMode == TtsVoiceMode.REFERENCE_AUDIO) {
             "Chatterbox Turbo requires reference-audio voice metadata."
         }
-        require(manifest.languages.map(String::lowercase).any { it == "english" || it == "en" }) {
+        require(
+            manifest.languages.map(String::lowercase).any {
+                it == "english" || it == "en"
+            },
+        ) {
             "Chatterbox Turbo must declare English support."
         }
         val missing = REQUIRED_FILES.keys.filterNot { File(directory, it).isFile }
         require(missing.isEmpty()) { "Missing Chatterbox files: ${missing.joinToString()}" }
         REQUIRED_FILES.keys.filter { it.endsWith(".onnx") }.forEach { graph ->
-            require(File(directory, "${graph}_data").isFile) { "$graph external data is missing." }
+            require(File(directory, "${graph}_data").isFile) {
+                "$graph external data is missing."
+            }
         }
         ChatterboxTokenizer(File(directory, "tokenizer.json"))
     }.fold(

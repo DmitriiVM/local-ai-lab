@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.ai.system
 
+import android.annotation.TargetApi
 import android.app.Application
 import android.content.Intent
 import android.media.AudioFormat
@@ -38,29 +39,32 @@ import kotlin.system.measureTimeMillis
 @Inject
 @SingleIn(AppScope::class)
 @ContributesIntoSet(AppScope::class, binding = binding<SpeechToTextBackend>())
-class AndroidSpeechRecognizerEngine(
-    private val application: Application,
-) : SpeechToTextBackend {
+class AndroidSpeechRecognizerEngine(private val application: Application) : SpeechToTextBackend {
     override val engineId = EngineId("android-speech-recognizer")
 
     private val lock = Any()
     private val mainHandler = Handler(Looper.getMainLooper())
     private var recognizer: SpeechRecognizer? = null
     private var languageCode: String? = null
+
     @Volatile private var activeSession: RecognitionSession? = null
+
     @Volatile private var activeAudioSink: ParcelFileDescriptor? = null
+
     @Volatile private var cancelled = false
 
     override val isLoaded: Boolean
         get() = synchronized(lock) { recognizer != null }
 
     override fun load(request: SpeechToTextLoadRequest): SpeechToTextLoadResult = synchronized(lock) {
-        require(request.engineId == engineId) { "Unsupported STT engine: ${request.engineId.value}" }
+        require(request.engineId == engineId) {
+            "Unsupported STT engine: ${request.engineId.value}"
+        }
         require(request.profileType == ModelProfileIds.ANDROID_SPEECH_RECOGNIZER_STT) {
             "Unsupported Android speech profile: ${request.profileType.value}"
         }
-        require(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            "Android SpeechRecognizer audio input requires Android 13 or newer."
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            error("Android SpeechRecognizer audio input requires Android 13 or newer.")
         }
         require(SpeechRecognizer.isOnDeviceRecognitionAvailable(application)) {
             "The device does not provide an on-device Android speech recognition service."
@@ -74,14 +78,24 @@ class AndroidSpeechRecognizerEngine(
                 SpeechRecognizer.createOnDeviceSpeechRecognizer(application)
             }
         }
-        languageCode = resolveLanguageTag(checkNotNull(recognizer), request.languageCode).also { resolvedLanguage ->
-            Log.i(TAG, "Android SpeechRecognizer language resolved: requested=${request.languageCode}, resolved=$resolvedLanguage")
-        }
+        languageCode =
+            resolveLanguageTag(
+                checkNotNull(recognizer),
+                request.languageCode,
+            ).also { resolvedLanguage ->
+                Log.i(
+                    TAG,
+                    "Android SpeechRecognizer language resolved: requested=${request.languageCode}, resolved=$resolvedLanguage",
+                )
+            }
         cancelled = false
         SpeechToTextLoadResult(1, duration, coldStart = true)
     }
 
     override fun transcribe(request: SpeechToTextRequest): SpeechToTextResult = synchronized(lock) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            error("Android SpeechRecognizer audio input requires Android 13 or newer.")
+        }
         require(request.samples.isNotEmpty()) { "The audio input is empty." }
         check(!cancelled) { "Transcription was cancelled." }
         val activeRecognizer = checkNotNull(recognizer) {
@@ -96,7 +110,10 @@ class AndroidSpeechRecognizerEngine(
         activeAudioSink = sink
 
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM,
+            )
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, locale)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
@@ -123,7 +140,10 @@ class AndroidSpeechRecognizerEngine(
                 }.exceptionOrNull()
                 if (writeFailure != null) session.resolveWriteFailure(writeFailure)
                 activeAudioSink = null
-                Log.i(TAG, "Android SpeechRecognizer audio replay completed: samples=${request.samples.size}")
+                Log.i(
+                    TAG,
+                    "Android SpeechRecognizer audio replay completed: samples=${request.samples.size}",
+                )
                 if (!session.isCompleted) {
                     onMain { activeRecognizer.stopListening() }
                     Log.i(TAG, "Android SpeechRecognizer finalization requested.")
@@ -182,11 +202,7 @@ class AndroidSpeechRecognizerEngine(
         cancelled = false
     }
 
-    private fun writePcm16(
-        sink: ParcelFileDescriptor,
-        samples: FloatArray,
-        sampleRateHz: Int,
-    ) {
+    private fun writePcm16(sink: ParcelFileDescriptor, samples: FloatArray, sampleRateHz: Int) {
         ParcelFileDescriptor.AutoCloseOutputStream(sink).use { output ->
             val buffer = ByteArray(PCM_CHUNK_SAMPLES * 2)
             val leadingSamples = sampleRateHz * LEADING_SILENCE_MS / MILLIS_PER_SECOND
@@ -215,12 +231,9 @@ class AndroidSpeechRecognizerEngine(
     }
 
     /** Android's on-device recognizers apply live voice-activity detection to injected PCM. */
-    private fun paceAudioReplay(
-        startedAtNs: Long,
-        writtenSamples: Int,
-        sampleRateHz: Int,
-    ) {
-        val targetElapsedNs = writtenSamples.toLong() * NANOS_PER_SECOND / sampleRateHz.coerceAtLeast(1)
+    private fun paceAudioReplay(startedAtNs: Long, writtenSamples: Int, sampleRateHz: Int) {
+        val targetElapsedNs =
+            writtenSamples.toLong() * NANOS_PER_SECOND / sampleRateHz.coerceAtLeast(1)
         val remainingNs = targetElapsedNs - (System.nanoTime() - startedAtNs)
         if (remainingNs > 0) {
             Thread.sleep(
@@ -246,12 +259,16 @@ class AndroidSpeechRecognizerEngine(
         requestedLanguage: String,
     ): String {
         val fallback = platformLanguageFallback(requestedLanguage)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return fallback
         if (Looper.myLooper() == Looper.getMainLooper()) return fallback
         val support = RecognitionSupportSession()
         onMain {
             recognizer.checkRecognitionSupport(
                 Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                    putExtra(
+                        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM,
+                    )
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE, fallback)
                 },
                 Executor { command -> mainHandler.post(command) },
@@ -279,20 +296,22 @@ class AndroidSpeechRecognizerEngine(
             recognitionSupport.pendingOnDeviceLanguages.size +
             recognitionSupport.supportedOnDeviceLanguages.size
         if (reportedLanguageCount == 0) {
-            Log.w(TAG, "Android SpeechRecognizer did not report language availability; using fallback=$fallback")
+            Log.w(
+                TAG,
+                "Android SpeechRecognizer did not report language availability; using fallback=$fallback",
+            )
             return fallback
         }
         error("The selected language is not supported by the on-device recognizer.")
     }
 
-    private fun matchingLanguage(
-        languages: List<String>,
-        requestedLanguage: String,
-    ): String? {
+    private fun matchingLanguage(languages: List<String>, requestedLanguage: String): String? {
         val requestedLocale = Locale.forLanguageTag(requestedLanguage)
         return languages.firstOrNull { it.equals(requestedLanguage, ignoreCase = true) }
             ?: languages.firstOrNull {
-                Locale.forLanguageTag(it).language.equals(requestedLocale.language, ignoreCase = true)
+                Locale.forLanguageTag(
+                    it,
+                ).language.equals(requestedLocale.language, ignoreCase = true)
             }
     }
 
@@ -300,20 +319,31 @@ class AndroidSpeechRecognizerEngine(
         recognizer: SpeechRecognizer,
         languageTag: String,
     ): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
         val request = runCatching {
             onMain {
                 recognizer.triggerModelDownload(
                     Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                        putExtra(
+                            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM,
+                        )
                         putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
                     },
                 )
             }
         }
         request.onSuccess {
-            Log.i(TAG, "Android SpeechRecognizer language model download requested: language=$languageTag")
+            Log.i(
+                TAG,
+                "Android SpeechRecognizer language model download requested: language=$languageTag",
+            )
         }.onFailure { error ->
-            Log.e(TAG, "Android SpeechRecognizer could not request language model download: language=$languageTag", error)
+            Log.e(
+                TAG,
+                "Android SpeechRecognizer could not request language model download: language=$languageTag",
+                error,
+            )
         }
         return request.isSuccess
     }
@@ -344,8 +374,10 @@ class AndroidSpeechRecognizerEngine(
         else -> languageCode
     }
 
+    @TargetApi(Build.VERSION_CODES.TIRAMISU)
     private class RecognitionSupportSession : RecognitionSupportCallback {
         private val latch = CountDownLatch(1)
+
         @Volatile private var recognitionSupport: RecognitionSupport? = null
 
         override fun onSupportResult(recognitionSupport: RecognitionSupport) {
@@ -370,6 +402,7 @@ class AndroidSpeechRecognizerEngine(
         private val latch = CountDownLatch(1)
         private val segmentTranscript = StringBuilder()
         private var partialTranscript = ""
+
         @Volatile var result: Result<String> = Result.failure(
             IllegalStateException("Android SpeechRecognizer did not return a result."),
         )
@@ -384,7 +417,10 @@ class AndroidSpeechRecognizerEngine(
                 val text = finalText
                     .ifBlank { segmentTranscript.toString() }
                     .ifBlank { partialTranscript }
-                Log.i(TAG, "Android SpeechRecognizer final result received: transcriptLength=${text.length}")
+                Log.i(
+                    TAG,
+                    "Android SpeechRecognizer final result received: transcriptLength=${text.length}",
+                )
                 succeed(text)
             }
 
@@ -415,7 +451,10 @@ class AndroidSpeechRecognizerEngine(
                     .orEmpty()
                 if (text.isNotEmpty()) {
                     partialTranscript = text
-                    Log.i(TAG, "Android SpeechRecognizer partial result received: transcriptLength=${text.length}")
+                    Log.i(
+                        TAG,
+                        "Android SpeechRecognizer partial result received: transcriptLength=${text.length}",
+                    )
                 }
             }
             override fun onSegmentResults(segmentResults: Bundle) {
@@ -495,10 +534,7 @@ class AndroidSpeechRecognizerEngine(
         }
     }
 
-    private class AndroidSpeechRecognitionException(
-        val errorCode: Int,
-        message: String,
-    ) : IllegalStateException(message)
+    private class AndroidSpeechRecognitionException(val errorCode: Int, message: String) : IllegalStateException(message)
 
     private companion object {
         const val TAG = "AiP123Stt"

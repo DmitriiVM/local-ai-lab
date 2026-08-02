@@ -106,7 +106,9 @@ object StageZeroSherpa {
                 while (input.filePointer + 8 <= input.length()) {
                     val chunk = readAscii(input, 4)
                     val size = Integer.reverseBytes(input.readInt())
-                    require(size >= 0 && input.filePointer + size <= input.length()) { "Invalid WAV chunk" }
+                    require(size >= 0 && input.filePointer + size <= input.length()) {
+                        "Invalid WAV chunk"
+                    }
                     when (chunk) {
                         "fmt " -> {
                             require(size >= 16) { "Invalid WAV format chunk" }
@@ -129,7 +131,9 @@ object StageZeroSherpa {
                     if (size % 2 == 1 && input.filePointer < input.length()) input.skipBytes(1)
                 }
                 val data = requireNotNull(pcmData) { "WAV data chunk is missing" }
-                require(sampleRate > 0 && channels == 1 && bitsPerSample == 16) { "WAV format chunk is missing" }
+                require(sampleRate > 0 && channels == 1 && bitsPerSample == 16) {
+                    "WAV format chunk is missing"
+                }
                 val samples = FloatArray(data.size / 2)
                 for (index in samples.indices) {
                     val lo = data[index * 2].toInt() and 0xff

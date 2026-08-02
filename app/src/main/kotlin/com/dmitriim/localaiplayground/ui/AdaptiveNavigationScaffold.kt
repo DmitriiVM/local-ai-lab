@@ -177,7 +177,6 @@ private fun LiquidGlassNavigationBar(
                 )
             }
         }
-
     }
 }
 
@@ -267,10 +266,7 @@ private fun LiquidGlassNavigationItem(
 }
 
 @Composable
-private fun AppTopBar(
-    onNavigateUp: (() -> Unit)?,
-    modifier: Modifier = Modifier,
-) {
+private fun AppTopBar(onNavigateUp: (() -> Unit)?, modifier: Modifier = Modifier) {
     onNavigateUp?.let { navigateUp ->
         Box(
             modifier = modifier

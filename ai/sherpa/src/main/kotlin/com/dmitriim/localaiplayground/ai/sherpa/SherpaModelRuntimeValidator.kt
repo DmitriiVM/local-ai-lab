@@ -62,8 +62,14 @@ class SherpaModelRuntimeValidator : ModelAdapter {
             displayName = "Whisper STT bundle",
             format = ModelFormat.ONNX,
             files = listOf(
-                ModelImportFileDefinition(ModelFileRoles.ENCODER, relativePath = "base-encoder.int8.onnx"),
-                ModelImportFileDefinition(ModelFileRoles.DECODER, relativePath = "base-decoder.int8.onnx"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.ENCODER,
+                    relativePath = "base-encoder.int8.onnx",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.DECODER,
+                    relativePath = "base-decoder.int8.onnx",
+                ),
                 ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "base-tokens.txt"),
             ),
         )
@@ -75,7 +81,10 @@ class SherpaModelRuntimeValidator : ModelAdapter {
             displayName = "Single-model STT bundle",
             format = ModelFormat.ONNX,
             files = listOf(
-                ModelImportFileDefinition(ModelFileRoles.PRIMARY_MODEL, relativePath = "model.int8.onnx"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.PRIMARY_MODEL,
+                    relativePath = "model.int8.onnx",
+                ),
                 ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
             ),
         )
@@ -83,9 +92,18 @@ class SherpaModelRuntimeValidator : ModelAdapter {
             displayName = "Streaming Zipformer bundle",
             format = ModelFormat.ONNX,
             files = listOf(
-                ModelImportFileDefinition(ModelFileRoles.ENCODER, relativePath = "encoder-epoch-99-avg-1.int8.onnx"),
-                ModelImportFileDefinition(ModelFileRoles.DECODER, relativePath = "decoder-epoch-99-avg-1.int8.onnx"),
-                ModelImportFileDefinition(ModelFileRoles.JOINER, relativePath = "joiner-epoch-99-avg-1.int8.onnx"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.ENCODER,
+                    relativePath = "encoder-epoch-99-avg-1.int8.onnx",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.DECODER,
+                    relativePath = "decoder-epoch-99-avg-1.int8.onnx",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.JOINER,
+                    relativePath = "joiner-epoch-99-avg-1.int8.onnx",
+                ),
                 ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
             ),
         )
@@ -93,8 +111,14 @@ class SherpaModelRuntimeValidator : ModelAdapter {
             displayName = "Moonshine STT bundle",
             format = ModelFormat.ONNX,
             files = listOf(
-                ModelImportFileDefinition(ModelFileRoles.ENCODER, relativePath = "encoder_model.ort"),
-                ModelImportFileDefinition(ModelFileRoles.MERGED_DECODER, relativePath = "decoder_model_merged.ort"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.ENCODER,
+                    relativePath = "encoder_model.ort",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.MERGED_DECODER,
+                    relativePath = "decoder_model_merged.ort",
+                ),
                 ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
             ),
         )
@@ -102,12 +126,27 @@ class SherpaModelRuntimeValidator : ModelAdapter {
             displayName = "Supertonic TTS bundle",
             format = ModelFormat.ONNX,
             files = listOf(
-                ModelImportFileDefinition(ModelFileRoles.DURATION_PREDICTOR, relativePath = "duration_predictor.int8.onnx"),
-                ModelImportFileDefinition(ModelFileRoles.TEXT_ENCODER, relativePath = "text_encoder.int8.onnx"),
-                ModelImportFileDefinition(ModelFileRoles.VECTOR_ESTIMATOR, relativePath = "vector_estimator.int8.onnx"),
-                ModelImportFileDefinition(ModelFileRoles.VOCODER, relativePath = "vocoder.int8.onnx"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.DURATION_PREDICTOR,
+                    relativePath = "duration_predictor.int8.onnx",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.TEXT_ENCODER,
+                    relativePath = "text_encoder.int8.onnx",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.VECTOR_ESTIMATOR,
+                    relativePath = "vector_estimator.int8.onnx",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.VOCODER,
+                    relativePath = "vocoder.int8.onnx",
+                ),
                 ModelImportFileDefinition(ModelFileRoles.CONFIG, relativePath = "tts.json"),
-                ModelImportFileDefinition(ModelFileRoles.UNICODE_INDEXER, relativePath = "unicode_indexer.bin"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.UNICODE_INDEXER,
+                    relativePath = "unicode_indexer.bin",
+                ),
                 ModelImportFileDefinition(ModelFileRoles.VOICE_STYLE, relativePath = "voice.bin"),
             ),
         )
@@ -115,9 +154,16 @@ class SherpaModelRuntimeValidator : ModelAdapter {
             displayName = "Piper Lessac Medium (English)",
             format = ModelFormat.ONNX,
             files = listOf(
-                ModelImportFileDefinition(ModelFileRoles.VITS_MODEL, relativePath = "en_US-lessac-medium.onnx"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.VITS_MODEL,
+                    relativePath = "en_US-lessac-medium.onnx",
+                ),
                 ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
-                ModelImportFileDefinition(ModelFileRoles.FRONTEND_DATA, relativePath = "espeak-ng-data", directory = true),
+                ModelImportFileDefinition(
+                    ModelFileRoles.FRONTEND_DATA,
+                    relativePath = "espeak-ng-data",
+                    directory = true,
+                ),
             ),
         )
         ModelProfileIds.KOKORO_TTS -> ModelImportDefinition(
@@ -125,29 +171,67 @@ class SherpaModelRuntimeValidator : ModelAdapter {
             format = ModelFormat.ONNX,
             files = listOf(
                 ModelImportFileDefinition(ModelFileRoles.KOKORO_MODEL, relativePath = "model.onnx"),
-                ModelImportFileDefinition(ModelFileRoles.VOICE_EMBEDDINGS, relativePath = "voices.bin"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.VOICE_EMBEDDINGS,
+                    relativePath = "voices.bin",
+                ),
                 ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
-                ModelImportFileDefinition(ModelFileRoles.LEXICON, relativePath = "lexicon-us-en.txt"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.LEXICON,
+                    relativePath = "lexicon-us-en.txt",
+                ),
                 ModelImportFileDefinition(ModelFileRoles.LEXICON, relativePath = "lexicon-zh.txt"),
                 ModelImportFileDefinition(ModelFileRoles.TEXT_RULES, relativePath = "date-zh.fst"),
-                ModelImportFileDefinition(ModelFileRoles.TEXT_RULES, relativePath = "number-zh.fst"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.TEXT_RULES,
+                    relativePath = "number-zh.fst",
+                ),
                 ModelImportFileDefinition(ModelFileRoles.TEXT_RULES, relativePath = "phone-zh.fst"),
-                ModelImportFileDefinition(ModelFileRoles.FRONTEND_DATA, relativePath = "espeak-ng-data", directory = true),
-                ModelImportFileDefinition(ModelFileRoles.DICTIONARY_DATA, relativePath = "dict", directory = true),
+                ModelImportFileDefinition(
+                    ModelFileRoles.FRONTEND_DATA,
+                    relativePath = "espeak-ng-data",
+                    directory = true,
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.DICTIONARY_DATA,
+                    relativePath = "dict",
+                    directory = true,
+                ),
             ),
         )
         ModelProfileIds.POCKET_TTS -> ModelImportDefinition(
             displayName = "Pocket TTS INT8 (English)",
             format = ModelFormat.ONNX,
             files = listOf(
-                ModelImportFileDefinition(ModelFileRoles.LM_FLOW, relativePath = "lm_flow.int8.onnx"),
-                ModelImportFileDefinition(ModelFileRoles.LM_MAIN, relativePath = "lm_main.int8.onnx"),
-                ModelImportFileDefinition(ModelFileRoles.POCKET_ENCODER, relativePath = "encoder.onnx"),
-                ModelImportFileDefinition(ModelFileRoles.POCKET_DECODER, relativePath = "decoder.int8.onnx"),
-                ModelImportFileDefinition(ModelFileRoles.TEXT_CONDITIONER, relativePath = "text_conditioner.onnx"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.LM_FLOW,
+                    relativePath = "lm_flow.int8.onnx",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.LM_MAIN,
+                    relativePath = "lm_main.int8.onnx",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.POCKET_ENCODER,
+                    relativePath = "encoder.onnx",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.POCKET_DECODER,
+                    relativePath = "decoder.int8.onnx",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.TEXT_CONDITIONER,
+                    relativePath = "text_conditioner.onnx",
+                ),
                 ModelImportFileDefinition(ModelFileRoles.VOCABULARY, relativePath = "vocab.json"),
-                ModelImportFileDefinition(ModelFileRoles.TOKEN_SCORES, relativePath = "token_scores.json"),
-                ModelImportFileDefinition(ModelFileRoles.REFERENCE_AUDIO, relativePath = "test_wavs/bria.wav"),
+                ModelImportFileDefinition(
+                    ModelFileRoles.TOKEN_SCORES,
+                    relativePath = "token_scores.json",
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.REFERENCE_AUDIO,
+                    relativePath = "test_wavs/bria.wav",
+                ),
             ),
         )
         else -> null
@@ -157,8 +241,12 @@ class SherpaModelRuntimeValidator : ModelAdapter {
         val missing = manifest.files.filter { it.required }
             .map { File(directory, it.relativePath) }
             .filterNot { it.canRead() && (it.isFile || it.isDirectory) }
-        require(missing.isEmpty()) { "Missing required files: ${missing.joinToString { it.name }}" }
-        require(manifest.profileType in profileTypes) { "Unsupported sherpa-onnx profile: ${manifest.profileType.value}" }
+        require(missing.isEmpty()) {
+            "Missing required files: ${missing.joinToString { it.name }}"
+        }
+        require(manifest.profileType in profileTypes) {
+            "Unsupported sherpa-onnx profile: ${manifest.profileType.value}"
+        }
     }.fold(
         onSuccess = { RuntimeValidationResult(valid = true) },
         onFailure = { RuntimeValidationResult(valid = false, message = it.message) },

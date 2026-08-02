@@ -38,10 +38,7 @@ enum class CatalogArchiveFormat {
 }
 
 @Serializable
-data class CatalogDownloadFile(
-    val relativePath: String,
-    val url: String,
-)
+data class CatalogDownloadFile(val relativePath: String, val url: String)
 
 @Serializable
 data class CatalogModel(

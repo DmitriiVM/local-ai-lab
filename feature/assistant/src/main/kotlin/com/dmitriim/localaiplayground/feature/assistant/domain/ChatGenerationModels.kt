@@ -1,8 +1,8 @@
 package com.dmitriim.localaiplayground.feature.assistant.domain
 
+import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
-import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 
 internal data class ChatGenerationRequest(
     val modelId: ModelId,

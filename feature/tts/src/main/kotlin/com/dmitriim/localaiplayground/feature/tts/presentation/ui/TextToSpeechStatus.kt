@@ -91,7 +91,7 @@ internal fun TextToSpeechMetricsCard(metrics: SpeechSynthesisMetrics) {
     }
 }
 
-private fun formatOptionalDuration(durationMs: Long?): String = durationMs?.let { "${it} ms" } ?: "unavailable"
+private fun formatOptionalDuration(durationMs: Long?): String = durationMs?.let { "$it ms" } ?: "unavailable"
 
 private fun formatDuration(durationMs: Long): String {
     val seconds = durationMs / 1_000

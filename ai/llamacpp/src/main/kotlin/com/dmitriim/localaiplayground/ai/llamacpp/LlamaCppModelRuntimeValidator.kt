@@ -26,20 +26,23 @@ class LlamaCppModelRuntimeValidator : ModelAdapter {
     override val profileTypes = setOf(ModelProfileIds.LLM)
     override val capabilities = setOf(AiCapability.CHAT)
 
-    override fun capabilitiesFor(profileType: ModelProfileId) =
-        if (profileType in profileTypes) capabilities else emptySet()
+    override fun capabilitiesFor(profileType: ModelProfileId) = if (profileType in profileTypes) capabilities else emptySet()
 
     override fun importDefinition(profileType: ModelProfileId) = when (profileType) {
         ModelProfileIds.LLM -> ModelImportDefinition(
             displayName = "GGUF chat model",
             format = ModelFormat.GGUF,
-            files = listOf(ModelImportFileDefinition(role = ModelFileRoles.PRIMARY_MODEL, extension = ".gguf")),
+            files = listOf(
+                ModelImportFileDefinition(role = ModelFileRoles.PRIMARY_MODEL, extension = ".gguf"),
+            ),
         )
         else -> null
     }
 
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
-        require(manifest.profileType in profileTypes) { "Unsupported llama.cpp profile: ${manifest.profileType.value}" }
+        require(manifest.profileType in profileTypes) {
+            "Unsupported llama.cpp profile: ${manifest.profileType.value}"
+        }
         val file = manifest.files.firstOrNull { it.required }
             ?.let { File(directory, it.relativePath) }
             ?: error("The GGUF manifest does not declare a primary file.")
@@ -47,7 +50,9 @@ class LlamaCppModelRuntimeValidator : ModelAdapter {
         RandomAccessFile(file, "r").use { input ->
             val signature = ByteArray(4)
             input.readFully(signature)
-            require(signature.toString(Charsets.US_ASCII) == "GGUF") { "The selected file is not a GGUF model." }
+            require(signature.toString(Charsets.US_ASCII) == "GGUF") {
+                "The selected file is not a GGUF model."
+            }
         }
     }.fold(
         onSuccess = { RuntimeValidationResult(valid = true) },

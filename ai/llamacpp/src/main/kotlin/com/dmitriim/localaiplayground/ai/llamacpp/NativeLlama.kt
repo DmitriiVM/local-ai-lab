@@ -2,10 +2,10 @@ package com.dmitriim.localaiplayground.ai.llamacpp
 
 import android.content.Context
 import android.util.Log
-import com.dmitriim.localaiplayground.ai.api.llm.LlmChatTemplateHandling
-import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.ai.api.llm.LlmChatFormatter
 import com.dmitriim.localaiplayground.ai.api.llm.LlmChatMessage
+import com.dmitriim.localaiplayground.ai.api.llm.LlmChatTemplateHandling
+import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.ai.api.llm.LlmEngineCapabilities
 import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
 import com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationOption
@@ -28,7 +28,10 @@ import kotlin.concurrent.withLock
 import kotlin.system.measureTimeMillis
 
 /** JNI-backed llama.cpp engine. It owns one model/context and serializes native access. */
-class NativeLlama(context: Context) : LlmRuntime, LlmChatFormatter, LlmTokenCounter {
+class NativeLlama(context: Context) :
+    LlmRuntime,
+    LlmChatFormatter,
+    LlmTokenCounter {
     private val native = NativeBridge(context.applicationInfo.nativeLibraryDir)
     private val lock = ReentrantLock()
     private var activeRequest: LlmLoadRequest? = null
@@ -68,13 +71,24 @@ class NativeLlama(context: Context) : LlmRuntime, LlmChatFormatter, LlmTokenCoun
             "The llama.cpp runtime requires an artifact-backed model."
         }
         val artifact = requireNotNull(
-            reference.artifacts.firstOrNull { it.role == ModelFileRoles.PRIMARY_MODEL && !it.directory },
+            reference.artifacts.firstOrNull {
+                it.role == ModelFileRoles.PRIMARY_MODEL &&
+                    !it.directory
+            },
         ) { "The llama.cpp model does not declare a primary model file." }
         val contextSize = request.options.contextSize ?: DEFAULT_CONTEXT_SIZE
         val threadCount = request.options.threadCount ?: DEFAULT_THREAD_COUNT
         val computePreference = request.options.computePreference
-        Log.i(TAG, "llama.cpp load requested: model=${File(artifact.path).name}, contextSize=$contextSize, requestedThreads=$threadCount, compute=$computePreference")
-        require(computePreference == ComputePreference.AUTO || computePreference == ComputePreference.CPU) {
+        Log.i(
+            TAG,
+            "llama.cpp load requested: model=${File(
+                artifact.path,
+            ).name}, contextSize=$contextSize, requestedThreads=$threadCount, compute=$computePreference",
+        )
+        require(
+            computePreference == ComputePreference.AUTO ||
+                computePreference == ComputePreference.CPU,
+        ) {
             "The llama.cpp runtime supports CPU compute only; requested $computePreference."
         }
         require(contextSize >= 128) { "Context size must be at least 128 tokens." }
@@ -93,7 +107,9 @@ class NativeLlama(context: Context) : LlmRuntime, LlmChatFormatter, LlmTokenCoun
         val coldStart = !isLoaded
         val durationMs = try {
             measureTimeMillis {
-                native.requireSuccess(native.nativeLoad(model.absolutePath, contextSize, threadCount))
+                native.requireSuccess(
+                    native.nativeLoad(model.absolutePath, contextSize, threadCount),
+                )
             }
         } catch (error: Throwable) {
             Log.e(TAG, "llama.cpp model load failed: ${error.message}", error)
@@ -101,7 +117,10 @@ class NativeLlama(context: Context) : LlmRuntime, LlmChatFormatter, LlmTokenCoun
         }
         isLoaded = true
         activeRequest = request
-        Log.i(TAG, "llama.cpp model loaded: coldStart=$coldStart, loadMs=$durationMs, effectiveThreads=${native.nativeEffectiveThreads()}")
+        Log.i(
+            TAG,
+            "llama.cpp model loaded: coldStart=$coldStart, loadMs=$durationMs, effectiveThreads=${native.nativeEffectiveThreads()}",
+        )
         LlmLoadResult(
             effectiveComputePreference = ComputePreference.CPU,
             loadDurationMs = durationMs,
@@ -119,7 +138,10 @@ class NativeLlama(context: Context) : LlmRuntime, LlmChatFormatter, LlmTokenCoun
                 messages.map { it.content }.toTypedArray(),
             ).also { formatted ->
                 check(!formatted.startsWith("ERROR:")) { formatted.removePrefix("ERROR:") }
-                Log.i(TAG, "llama.cpp chat prompt formatted: messages=${messages.size}, promptChars=${formatted.length}")
+                Log.i(
+                    TAG,
+                    "llama.cpp chat prompt formatted: messages=${messages.size}, promptChars=${formatted.length}",
+                )
             }
         } catch (error: Throwable) {
             Log.e(TAG, "llama.cpp chat prompt formatting failed: ${error.message}", error)
@@ -132,7 +154,10 @@ class NativeLlama(context: Context) : LlmRuntime, LlmChatFormatter, LlmTokenCoun
         try {
             native.nativeTokenCount(prompt).also { count ->
                 check(count >= 0) { "Could not tokenize the formatted chat prompt." }
-                Log.i(TAG, "llama.cpp prompt tokenized: promptChars=${prompt.length}, tokens=$count")
+                Log.i(
+                    TAG,
+                    "llama.cpp prompt tokenized: promptChars=${prompt.length}, tokens=$count",
+                )
             }
         } catch (error: Throwable) {
             Log.e(TAG, "llama.cpp prompt tokenization failed: ${error.message}", error)
@@ -140,7 +165,10 @@ class NativeLlama(context: Context) : LlmRuntime, LlmChatFormatter, LlmTokenCoun
         }
     }
 
-    override fun generate(request: LlmGenerationRequest, onToken: (String) -> Unit): LlmGenerationResult = lock.withLock {
+    override fun generate(
+        request: LlmGenerationRequest,
+        onToken: (String) -> Unit,
+    ): LlmGenerationResult = lock.withLock {
         check(isLoaded) { "Load a model before generating text." }
         val maxTokens = request.options.maxTokens ?: DEFAULT_MAX_TOKENS
         val temperature = request.options.temperature ?: DEFAULT_TEMPERATURE
@@ -152,7 +180,10 @@ class NativeLlama(context: Context) : LlmRuntime, LlmChatFormatter, LlmTokenCoun
         require(temperature in 0f..2f) { "Temperature must be between 0 and 2." }
         require(topK in 1..200) { "Top-K must be between 1 and 200." }
         require(topP in 0.05f..1f) { "Top-P must be between 0.05 and 1." }
-        Log.i(TAG, "llama.cpp generation started: promptChars=${request.prompt.length}, maxTokens=$maxTokens, temperature=$temperature, topK=$topK, topP=$topP, seed=$seed")
+        Log.i(
+            TAG,
+            "llama.cpp generation started: promptChars=${request.prompt.length}, maxTokens=$maxTokens, temperature=$temperature, topK=$topK, topP=$topP, seed=$seed",
+        )
         val result = try {
             native.nativeGenerate(
                 prompt = request.prompt,
@@ -178,7 +209,10 @@ class NativeLlama(context: Context) : LlmRuntime, LlmChatFormatter, LlmTokenCoun
             totalDurationMs = result[7].toLong(),
             finishReason = LlmFinishReason.valueOf(result[8]),
         ).also { generation ->
-            Log.i(TAG, "llama.cpp generation completed: outputChars=${generation.text.length}, promptTokens=${generation.promptTokenCount}, generatedTokens=${generation.generatedTokenCount}, firstTokenMs=${generation.firstTokenLatencyMs}, totalMs=${generation.totalDurationMs}, finishReason=${generation.finishReason}")
+            Log.i(
+                TAG,
+                "llama.cpp generation completed: outputChars=${generation.text.length}, promptTokens=${generation.promptTokenCount}, generatedTokens=${generation.generatedTokenCount}, firstTokenMs=${generation.firstTokenLatencyMs}, totalMs=${generation.totalDurationMs}, finishReason=${generation.finishReason}",
+            )
         }
     }
 
@@ -242,9 +276,7 @@ class NativeLlama(context: Context) : LlmRuntime, LlmChatFormatter, LlmTokenCoun
     }
 }
 
-private class NativeTokenCallback(
-    private val callback: (String) -> Unit,
-) {
+private class NativeTokenCallback(private val callback: (String) -> Unit) {
     @Suppress("unused") // Called from JNI.
     fun onToken(token: String) = callback(token)
 }

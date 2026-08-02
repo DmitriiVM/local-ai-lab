@@ -74,9 +74,10 @@ internal fun AssistantSpeakSettingsSheet(
                     val modelId = ModelId(value)
                     val model = models.firstOrNull { it.id == modelId }
                     val language = assistantTtsLanguages.firstOrNull { candidate ->
-                        model?.languages?.isEmpty() == true || model?.languages?.any {
-                            com.dmitriim.localaiplayground.feature.assistant.presentation.normalizeLanguageCode(it) == candidate.code
-                        } == true
+                        model?.languages?.isEmpty() == true ||
+                            model?.languages?.any {
+                                com.dmitriim.localaiplayground.feature.assistant.presentation.normalizeLanguageCode(it) == candidate.code
+                            } == true
                     }?.code ?: "en"
                     val candidate = draft.copy(languageCode = language)
                     val voiceId = model?.compatibleVoices(language)?.firstOrNull()?.id
@@ -91,9 +92,10 @@ internal fun AssistantSpeakSettingsSheet(
             Text("Speech language", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 assistantTtsLanguages.forEach { language ->
-                    val supported = selectedModel?.languages?.isEmpty() == true || selectedModel?.languages?.any {
-                        com.dmitriim.localaiplayground.feature.assistant.presentation.normalizeLanguageCode(it) == language.code
-                    } == true
+                    val supported = selectedModel?.languages?.isEmpty() == true ||
+                        selectedModel?.languages?.any {
+                            com.dmitriim.localaiplayground.feature.assistant.presentation.normalizeLanguageCode(it) == language.code
+                        } == true
                     FilterChip(
                         selected = draft.languageCode == language.code,
                         onClick = {
@@ -182,7 +184,10 @@ private fun VoicePicker(
             voices.forEach { (id, name) ->
                 DropdownMenuItem(
                     text = { Text(name) },
-                    onClick = { onSelect(id); expanded = false },
+                    onClick = {
+                        onSelect(id)
+                        expanded = false
+                    },
                 )
             }
         }

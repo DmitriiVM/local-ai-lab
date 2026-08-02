@@ -1,7 +1,7 @@
 package com.dmitriim.localaiplayground.ai.api.model
 
-import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId
 import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId
 import dev.zacsweers.metro.Inject
 
 /** Resolves one adapter per persisted engine/profile pair and rejects ambiguous app packaging. */
@@ -24,6 +24,5 @@ class ModelAdapterRegistry(adapters: Set<ModelAdapter>) {
         }
     }
 
-    fun find(engineId: EngineId, profileType: ModelProfileId): ModelAdapter? =
-        byEngineAndProfile[engineId to profileType]
+    fun find(engineId: EngineId, profileType: ModelProfileId): ModelAdapter? = byEngineAndProfile[engineId to profileType]
 }

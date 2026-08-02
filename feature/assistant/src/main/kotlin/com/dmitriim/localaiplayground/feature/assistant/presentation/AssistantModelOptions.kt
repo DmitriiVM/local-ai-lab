@@ -151,25 +151,24 @@ private fun ModelManifest.toTtsOption(
     )
 }
 
-private fun androidTextToSpeechOption(voices: List<SystemTextToSpeechVoice>): TtsModelOption =
-    TtsModelOption(
-        id = BuiltInTextToSpeechModels.ANDROID_TEXT_TO_SPEECH,
-        displayName = "Android On-device TextToSpeech",
-        engineId = EngineId("android-text-to-speech"),
-        profileType = ModelProfileIds.ANDROID_TEXT_TO_SPEECH_TTS,
-        languages = voices.mapTo(linkedSetOf()) { normalizeLanguageCode(it.languageTag) },
-        speakerCount = null,
-        voiceMode = TtsVoiceMode.PLATFORM,
-        supportedControls = setOf(TtsControl.LANGUAGE, TtsControl.SPEAKER, TtsControl.SPEECH_RATE),
-        voices = voices.map { voice ->
-            TtsVoiceOption(
-                id = voice.id,
-                displayName = voice.displayName,
-                speakerId = null,
-                languages = setOf(voice.languageTag),
-                description = voice.description,
-                platformVoiceId = voice.id,
-            )
-        },
-        installed = true,
-    )
+private fun androidTextToSpeechOption(voices: List<SystemTextToSpeechVoice>): TtsModelOption = TtsModelOption(
+    id = BuiltInTextToSpeechModels.ANDROID_TEXT_TO_SPEECH,
+    displayName = "Android On-device TextToSpeech",
+    engineId = EngineId("android-text-to-speech"),
+    profileType = ModelProfileIds.ANDROID_TEXT_TO_SPEECH_TTS,
+    languages = voices.mapTo(linkedSetOf()) { normalizeLanguageCode(it.languageTag) },
+    speakerCount = null,
+    voiceMode = TtsVoiceMode.PLATFORM,
+    supportedControls = setOf(TtsControl.LANGUAGE, TtsControl.SPEAKER, TtsControl.SPEECH_RATE),
+    voices = voices.map { voice ->
+        TtsVoiceOption(
+            id = voice.id,
+            displayName = voice.displayName,
+            speakerId = null,
+            languages = setOf(voice.languageTag),
+            description = voice.description,
+            platformVoiceId = voice.id,
+        )
+    },
+    installed = true,
+)

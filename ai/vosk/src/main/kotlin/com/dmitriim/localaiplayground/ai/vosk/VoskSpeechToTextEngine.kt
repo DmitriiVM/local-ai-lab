@@ -13,14 +13,14 @@ import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
+import java.io.File
+import kotlin.math.roundToInt
+import kotlin.system.measureTimeMillis
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.vosk.Model
 import org.vosk.Recognizer
-import java.io.File
-import kotlin.math.roundToInt
-import kotlin.system.measureTimeMillis
 
 @Inject
 @SingleIn(AppScope::class)
@@ -31,13 +31,16 @@ class VoskSpeechToTextEngine : SpeechToTextBackend {
     private val lock = Any()
     private var model: Model? = null
     private var modelPath: String? = null
+
     @Volatile private var cancelled = false
 
     override val isLoaded: Boolean
         get() = synchronized(lock) { model != null }
 
     override fun load(request: SpeechToTextLoadRequest): SpeechToTextLoadResult = synchronized(lock) {
-        require(request.engineId == engineId) { "Unsupported STT engine: ${request.engineId.value}" }
+        require(request.engineId == engineId) {
+            "Unsupported STT engine: ${request.engineId.value}"
+        }
         require(request.profileType == ModelProfileIds.VOSK_STT) {
             "Unsupported Vosk profile: ${request.profileType.value}"
         }
@@ -71,9 +74,10 @@ class VoskSpeechToTextEngine : SpeechToTextBackend {
                     check(!cancelled) { "Transcription was cancelled." }
                     val size = minOf(chunkSize, request.samples.size - offset)
                     repeat(size) { index ->
-                        pcm[index] = (request.samples[offset + index].coerceIn(-1f, 1f) * Short.MAX_VALUE)
-                            .roundToInt()
-                            .toShort()
+                        pcm[index] =
+                            (request.samples[offset + index].coerceIn(-1f, 1f) * Short.MAX_VALUE)
+                                .roundToInt()
+                                .toShort()
                     }
                     if (recognizer.acceptWaveForm(pcm, size)) {
                         appendTranscript(transcript, recognizer.result)

@@ -301,7 +301,7 @@ class AssistantViewModel(
                 mutableState.update { it.copy(operation = AssistantOperation.Speaking, statusMessage = "Previewing ${voice.displayName}…", errorMessage = null) }
                 speechOutput.preview(model.id, model, voice, snapshot.speechOutputSettings)
                 mutableState.update { it.copy(operation = AssistantOperation.Idle, statusMessage = "Voice preview completed.") }
-            } catch (cancelled: CancellationException) {
+            } catch (_: CancellationException) {
                 mutableState.update { it.copy(operation = AssistantOperation.Idle, statusMessage = "Voice preview stopped.") }
             } catch (error: Throwable) {
                 mutableState.update { it.copy(operation = AssistantOperation.Idle, errorMessage = error.message ?: "Could not preview this voice.") }
@@ -423,7 +423,7 @@ class AssistantViewModel(
                     error = response.speechError,
                 )
             }
-        } catch (cancelled: CancellationException) {
+        } catch (_: CancellationException) {
             withContext(NonCancellable) {
                 if (activeLinkedRunIds.isEmpty()) {
                     activeLinkedRunIds += runRecorder.recordSpeechInput(
@@ -942,8 +942,7 @@ private fun AssistantUiState.toPreferences() = AssistantPreferences(
     ),
 )
 
-private fun ChatSettings.toEffectiveOrDefault(contextSize: Int): EffectiveChatSettings =
-    runCatching(::toEffective).getOrElse { ChatSettings(contextSize = contextSize.toString()).toEffective() }
+private fun ChatSettings.toEffectiveOrDefault(contextSize: Int): EffectiveChatSettings = runCatching(::toEffective).getOrElse { ChatSettings(contextSize = contextSize.toString()).toEffective() }
 
 private fun SpeechModelOption.toRunSnapshot() = RunModelSnapshot(id.value, displayName, engineId.value)
 
@@ -955,5 +954,4 @@ private fun appendTranscript(existing: String, transcript: String): String = whe
     else -> "$existing $transcript"
 }
 
-private fun rate(tokens: Int?, durationMs: Long): Double? =
-    tokens?.let { count -> durationMs.takeIf { it > 0 }?.let { count * 1_000.0 / it } }
+private fun rate(tokens: Int?, durationMs: Long): Double? = tokens?.let { count -> durationMs.takeIf { it > 0 }?.let { count * 1_000.0 / it } }

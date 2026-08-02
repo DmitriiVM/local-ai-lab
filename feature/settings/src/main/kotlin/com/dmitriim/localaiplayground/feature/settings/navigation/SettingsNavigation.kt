@@ -23,14 +23,13 @@ class SettingsNavigationEntryProvider : NavigationEntryProvider {
     override val topLevelDestination = TopLevelDestination.SETTINGS
     override val startKey: NavKey = SettingsKey
 
-    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? =
-        if (key == SettingsKey) {
-            NavEntry(key) {
-                SettingsRoute(
-                    onOpenDeviceAndRuntimes = { navigator.navigate(NavigationTarget.DEVICE) },
-                )
-            }
-        } else {
-            null
+    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? = if (key == SettingsKey) {
+        NavEntry(key) {
+            SettingsRoute(
+                onOpenDeviceAndRuntimes = { navigator.navigate(NavigationTarget.DEVICE) },
+            )
         }
+    } else {
+        null
+    }
 }

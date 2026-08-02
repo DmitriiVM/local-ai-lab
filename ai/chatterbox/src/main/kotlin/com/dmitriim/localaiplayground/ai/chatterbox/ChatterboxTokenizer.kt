@@ -1,12 +1,12 @@
 package com.dmitriim.localaiplayground.ai.chatterbox
 
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.regex.Pattern
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.regex.Pattern
 
 /** Minimal, pinned GPT-2 byte-level BPE implementation for Chatterbox's tokenizer.json. */
 internal class ChatterboxTokenizer(tokenizerFile: File) {
@@ -21,7 +21,8 @@ internal class ChatterboxTokenizer(tokenizerFile: File) {
         .toMap()
     private val addedTokens = root.getValue("added_tokens").jsonArray.associate { value ->
         val token = value.jsonObject
-        token.getValue("content").jsonPrimitive.content to token.getValue("id").jsonPrimitive.content.toLong()
+        token.getValue("content").jsonPrimitive.content to
+            token.getValue("id").jsonPrimitive.content.toLong()
     }
     private val specialPattern = Pattern.compile(
         addedTokens.keys
@@ -114,7 +115,9 @@ internal class ChatterboxTokenizer(tokenizerFile: File) {
                 if (byte !in visible) values += 256 + extra++
             }
             Array(256) { byte ->
-                val index = if (byte in visible) visible.indexOf(byte) else {
+                val index = if (byte in visible) {
+                    visible.indexOf(byte)
+                } else {
                     visible.size + (0 until byte).count { it !in visible }
                 }
                 String(Character.toChars(values[index]))

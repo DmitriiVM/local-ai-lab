@@ -1,12 +1,12 @@
 package com.dmitriim.localaiplayground.feature.assistant.presentation
 
+import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.ai.api.llm.LlmEngineCapabilities
 import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
-import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoice
-import com.dmitriim.localaiplayground.core.model.engine.EngineId
 import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId
 import com.dmitriim.localaiplayground.core.model.manifest.TtsControl
@@ -43,9 +43,11 @@ data class AssistantUiState(
     val selectedVoice: TtsVoiceOption? get() = compatibleVoices.firstOrNull { it.id == selectedVoiceId }
     val isIdle: Boolean get() = operation == AssistantOperation.Idle
     val canSend: Boolean
-        get() = isIdle && input.isNotBlank() && selectedChatModel?.let { model ->
-            model.installed && model.capabilities != null
-        } == true
+        get() = isIdle &&
+            input.isNotBlank() &&
+            selectedChatModel?.let { model ->
+                model.installed && model.capabilities != null
+            } == true
     val canDictate: Boolean get() = isIdle && selectedSpeechModel?.installed == true
     val voiceConfigurationError: String?
         get() = when {
@@ -94,9 +96,10 @@ data class SpeechModelOption(
     val sampleRateHz: Int,
     val installed: Boolean,
 ) {
-    fun supports(languageCode: String): Boolean = languages.isEmpty() || languages.any {
-        normalizeLanguageCode(it) == languageCode
-    }
+    fun supports(languageCode: String): Boolean = languages.isEmpty() ||
+        languages.any {
+            normalizeLanguageCode(it) == languageCode
+        }
 }
 
 data class TtsModelOption(
@@ -140,8 +143,7 @@ data class ChatMessage(
 ) {
     companion object {
         fun user(content: String) = ChatMessage(UUID.randomUUID().toString(), ChatMessageRole.USER, content)
-        fun assistant(id: String, content: String, streaming: Boolean) =
-            ChatMessage(id, ChatMessageRole.ASSISTANT, content, streaming)
+        fun assistant(id: String, content: String, streaming: Boolean) = ChatMessage(id, ChatMessageRole.ASSISTANT, content, streaming)
     }
 }
 

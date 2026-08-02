@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.source.models.transfer
 
+import android.annotation.TargetApi
 import android.app.Application
 import android.app.job.JobInfo
 import android.app.job.JobScheduler
@@ -34,6 +35,7 @@ internal class ModelTransferScheduler(
         WorkManager.getInstance(application).cancelUniqueWork(workName(modelId))
     }
 
+    @TargetApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private fun scheduleUserInitiatedTransfer(entry: CatalogModel) {
         val extras = PersistableBundle().apply { putString(MODEL_ID_KEY, entry.manifest.modelId.value) }
         val network = NetworkRequest.Builder()

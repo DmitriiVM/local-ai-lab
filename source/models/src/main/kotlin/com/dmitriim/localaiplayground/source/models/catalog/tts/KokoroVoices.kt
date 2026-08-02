@@ -98,14 +98,17 @@ private fun kokoroOverallQuality(id: String): String? = when (id) {
     "af_heart" -> "A"
     "af_alloy", "af_nova", "bf_isabella", "jf_gongitsune",
     "hf_alpha", "hf_beta", "hm_omega", "hm_psi", "if_sara", "im_nicola",
-    "bm_fable", "bm_george", "jf_tebukuro" -> "C"
+    "bm_fable", "bm_george", "jf_tebukuro",
+    -> "C"
     "af_aoede", "af_kore", "af_sarah", "am_fenrir", "am_michael", "am_puck",
-    "jf_alpha" -> "C+"
+    "jf_alpha",
+    -> "C+"
     "af_bella" -> "A-"
     "af_nicole", "bf_emma", "ff_siwis" -> "B-"
     "af_jessica", "af_river", "am_echo", "am_eric", "am_liam", "am_onyx",
     "bf_alice", "bf_lily", "bm_daniel", "zf_xiaobei", "zf_xiaoni", "zf_xiaoxiao",
-    "zf_xiaoyi", "zm_yunjian", "zm_yunxi", "zm_yunxia", "zm_yunyang" -> "D"
+    "zf_xiaoyi", "zm_yunjian", "zm_yunxi", "zm_yunxia", "zm_yunyang",
+    -> "D"
     "af_sky", "jf_nezumi", "jm_kumo" -> "C-"
     "am_adam" -> "F+"
     "am_santa" -> "D-"

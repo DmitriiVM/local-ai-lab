@@ -23,6 +23,5 @@ class PlaygroundNavigationEntryProvider : NavigationEntryProvider {
     override val topLevelDestination = TopLevelDestination.PLAYGROUND
     override val startKey: NavKey = PlaygroundKey
 
-    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? =
-        if (key == PlaygroundKey) NavEntry(key) { PlaygroundRoute(navigator) } else null
+    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? = if (key == PlaygroundKey) NavEntry(key) { PlaygroundRoute(navigator) } else null
 }

@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.feature.settings.presentation.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.clickable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -89,11 +89,13 @@ fun SettingsScreen(
             Text("Generated audio: latest successful WAV", style = MaterialTheme.typography.titleSmall)
             Text("The app retains one successful WAV until the next successful synthesis, as documented in the Stage 5 policy.", style = MaterialTheme.typography.bodySmall)
         }
-        if (settings.showAdvancedControls) SettingsCard("Performance defaults") {
-            EnumRadioGroup("Thread policy", settings.threadCountPolicy, ThreadCountPolicy.entries, ThreadCountPolicy::label) { value -> onUpdate { it.copy(threadCountPolicy = value) } }
-            EnumRadioGroup("Unload models", settings.modelUnloadPolicy, ModelUnloadPolicy.entries, ModelUnloadPolicy::label) { value -> onUpdate { it.copy(modelUnloadPolicy = value) } }
-            Toggle("Warm up selected model", settings.warmUpSelectedModel) { value -> onUpdate { it.copy(warmUpSelectedModel = value) } }
-            EnumSelector("Metric detail", settings.metricDetail, MetricDetail.entries, MetricDetail::label) { value -> onUpdate { it.copy(metricDetail = value) } }
+        if (settings.showAdvancedControls) {
+            SettingsCard("Performance defaults") {
+                EnumRadioGroup("Thread policy", settings.threadCountPolicy, ThreadCountPolicy.entries, ThreadCountPolicy::label) { value -> onUpdate { it.copy(threadCountPolicy = value) } }
+                EnumRadioGroup("Unload models", settings.modelUnloadPolicy, ModelUnloadPolicy.entries, ModelUnloadPolicy::label) { value -> onUpdate { it.copy(modelUnloadPolicy = value) } }
+                Toggle("Warm up selected model", settings.warmUpSelectedModel) { value -> onUpdate { it.copy(warmUpSelectedModel = value) } }
+                EnumSelector("Metric detail", settings.metricDetail, MetricDetail.entries, MetricDetail::label) { value -> onUpdate { it.copy(metricDetail = value) } }
+            }
         }
         SettingsCard("Storage & privacy") {
             StorageLine("Models", state.storage.modelsBytes)
@@ -103,8 +105,11 @@ fun SettingsScreen(
             OutlinedButton(onClick = onClearTemporaryMedia, modifier = Modifier.fillMaxWidth()) { Text("Clear temporary media") }
             OutlinedButton(
                 onClick = {
-                    if (settings.confirmDestructiveActions) onRequestClearRunHistory()
-                    else onClearRunHistory()
+                    if (settings.confirmDestructiveActions) {
+                        onRequestClearRunHistory()
+                    } else {
+                        onClearRunHistory()
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Clear run history") }
@@ -115,7 +120,10 @@ fun SettingsScreen(
 
 @Composable
 private fun SettingsCard(title: String, content: @Composable () -> Unit) = Card(Modifier.fillMaxWidth()) {
-    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) { Text(title, style = MaterialTheme.typography.titleMedium); content() }
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(title, style = MaterialTheme.typography.titleMedium)
+        content()
+    }
 }
 
 @Composable
@@ -138,7 +146,10 @@ private fun Toggle(
 
 @Composable
 private fun <T> EnumSelector(label: String, selected: T, values: Iterable<T>, text: (T) -> String, onSelected: (T) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(label); Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { values.forEach { value -> OutlinedButton(onClick = { onSelected(value) }) { Text(text(value) + if (value == selected) " ✓" else "") } } } }
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(label)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { values.forEach { value -> OutlinedButton(onClick = { onSelected(value) }) { Text(text(value) + if (value == selected) " ✓" else "") } } }
+    }
 }
 
 @Composable
@@ -169,9 +180,16 @@ private fun <T> EnumRadioGroup(
 }
 
 @Composable
-private fun StorageLine(label: String, bytes: Long) = Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(label); Text(bytes.readable()) }
+private fun StorageLine(label: String, bytes: Long) = Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    Text(label)
+    Text(bytes.readable())
+}
 
-private fun Long.readable(): String = when { this < 1_024 -> "$this B"; this < 1_048_576 -> "${this / 1_024} KB"; else -> "${"%.1f".format(this / 1_048_576.0)} MB" }
+private fun Long.readable(): String = when {
+    this < 1_024 -> "$this B"
+    this < 1_048_576 -> "${this / 1_024} KB"
+    else -> "${"%.1f".format(this / 1_048_576.0)} MB"
+}
 private val ThreadCountPolicy.label get() = name.lowercase().replace('_', ' ').replaceFirstChar(Char::uppercase)
 private val ModelUnloadPolicy.label get() = name.lowercase().replace('_', ' ').replaceFirstChar(Char::uppercase)
 private val MetricDetail.label get() = name.lowercase().replaceFirstChar(Char::uppercase)

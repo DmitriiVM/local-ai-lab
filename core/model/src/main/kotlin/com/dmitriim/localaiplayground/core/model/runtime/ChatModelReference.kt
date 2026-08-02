@@ -21,7 +21,9 @@ sealed interface ChatModelReference {
         val artifacts: List<ModelArtifactReference>,
     ) : ChatModelReference {
         init {
-            require(artifacts.isNotEmpty()) { "An artifact-backed model needs at least one artifact." }
+            require(artifacts.isNotEmpty()) {
+                "An artifact-backed model needs at least one artifact."
+            }
         }
     }
 

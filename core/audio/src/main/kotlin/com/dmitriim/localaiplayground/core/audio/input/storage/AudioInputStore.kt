@@ -32,7 +32,10 @@ class AudioInputStore(
         Log.i(TAG, "STT input cache initialized: directory=${directory.name}")
     }
 
-    suspend fun capture(sampleRateHz: Int = STT_SAMPLE_RATE_HZ, onLevel: (AudioLevel) -> Unit): PcmAudioInput {
+    suspend fun capture(
+        sampleRateHz: Int = STT_SAMPLE_RATE_HZ,
+        onLevel: (AudioLevel) -> Unit,
+    ): PcmAudioInput {
         Log.i(TAG, "STT microphone capture requested: sampleRateHz=$sampleRateHz")
         return microphoneCapture.capture(newInputFile(), sampleRateHz, onLevel)
     }
@@ -44,7 +47,10 @@ class AudioInputStore(
 
     suspend fun importAudio(uri: Uri, targetSampleRateHz: Int = STT_SAMPLE_RATE_HZ): PcmAudioInput {
         val output = newInputFile()
-        Log.i(TAG, "STT audio import requested: uriScheme=${uri.scheme}, targetRateHz=$targetSampleRateHz")
+        Log.i(
+            TAG,
+            "STT audio import requested: uriScheme=${uri.scheme}, targetRateHz=$targetSampleRateHz",
+        )
         return try {
             val decoded = decoder.decodeToMonoPcm(uri, output, targetSampleRateHz)
             require(decoded.frames > 0) { "The selected file contains no decodable audio." }
@@ -55,7 +61,10 @@ class AudioInputStore(
                 sampleRateHz = targetSampleRateHz,
                 sourceDescription = "Imported ${decoded.mimeType}",
             ).also { input ->
-                Log.i(TAG, "STT audio import completed: durationMs=${input.durationMs}, sampleRateHz=${input.sampleRateHz}, frames=${decoded.frames}")
+                Log.i(
+                    TAG,
+                    "STT audio import completed: durationMs=${input.durationMs}, sampleRateHz=${input.sampleRateHz}, frames=${decoded.frames}",
+                )
             }
         } catch (error: Throwable) {
             Log.e(TAG, "STT audio import failed: ${error.message}", error)
@@ -67,8 +76,7 @@ class AudioInputStore(
         }
     }
 
-    suspend fun forEachSegment(input: PcmAudioInput, onSegment: (FloatArray) -> Unit) =
-        PcmSegmentReader.forEachSegment(input, onSegment)
+    suspend fun forEachSegment(input: PcmAudioInput, onSegment: (FloatArray) -> Unit) = PcmSegmentReader.forEachSegment(input, onSegment)
 
     fun clear(input: PcmAudioInput?) {
         input?.file?.takeIf { it.parentFile == directory }?.let { file ->
@@ -85,7 +93,11 @@ class AudioInputStore(
     private fun newInputFile(): File = File(directory, "stt-${UUID.randomUUID()}.pcm")
 
     private fun displayName(uri: Uri): String = application.contentResolver.query(
-        uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null,
+        uri,
+        arrayOf(OpenableColumns.DISPLAY_NAME),
+        null,
+        null,
+        null,
     )?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
         ?: uri.lastPathSegment?.substringAfterLast('/') ?: "Imported audio"
 

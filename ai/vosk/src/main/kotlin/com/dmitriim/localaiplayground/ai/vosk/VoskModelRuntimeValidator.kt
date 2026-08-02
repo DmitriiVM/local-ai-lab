@@ -25,26 +25,38 @@ class VoskModelRuntimeValidator : ModelAdapter {
     override val profileTypes = setOf(ModelProfileIds.VOSK_STT)
     override val capabilities = setOf(AiCapability.SPEECH_TO_TEXT)
 
-    override fun capabilitiesFor(profileType: ModelProfileId) =
-        if (profileType == ModelProfileIds.VOSK_STT) capabilities else emptySet()
+    override fun capabilitiesFor(profileType: ModelProfileId) = if (profileType == ModelProfileIds.VOSK_STT) capabilities else emptySet()
 
-    override fun importDefinition(profileType: ModelProfileId) =
-        if (profileType == ModelProfileIds.VOSK_STT) {
-            ModelImportDefinition(
-                displayName = "Vosk model directory",
-                format = ModelFormat.BINARY,
-                files = listOf(
-                    ModelImportFileDefinition(ModelFileRoles.PRIMARY_MODEL, relativePath = "am", directory = true),
-                    ModelImportFileDefinition(ModelFileRoles.CONFIG, relativePath = "conf", directory = true),
-                    ModelImportFileDefinition(ModelFileRoles.VOCABULARY, relativePath = "graph", directory = true),
+    override fun importDefinition(profileType: ModelProfileId) = if (profileType == ModelProfileIds.VOSK_STT) {
+        ModelImportDefinition(
+            displayName = "Vosk model directory",
+            format = ModelFormat.BINARY,
+            files = listOf(
+                ModelImportFileDefinition(
+                    ModelFileRoles.PRIMARY_MODEL,
+                    relativePath = "am",
+                    directory = true,
                 ),
-            )
-        } else {
-            null
-        }
+                ModelImportFileDefinition(
+                    ModelFileRoles.CONFIG,
+                    relativePath = "conf",
+                    directory = true,
+                ),
+                ModelImportFileDefinition(
+                    ModelFileRoles.VOCABULARY,
+                    relativePath = "graph",
+                    directory = true,
+                ),
+            ),
+        )
+    } else {
+        null
+    }
 
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
-        require(manifest.profileType == ModelProfileIds.VOSK_STT) { "Unsupported Vosk profile." }
+        require(manifest.profileType == ModelProfileIds.VOSK_STT) {
+            "Unsupported Vosk profile."
+        }
         listOf("am", "conf", "graph").forEach { name ->
             require(File(directory, name).isDirectory) { "Missing Vosk $name directory." }
         }

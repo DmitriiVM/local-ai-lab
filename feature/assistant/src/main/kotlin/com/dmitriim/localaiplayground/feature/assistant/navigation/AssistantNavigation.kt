@@ -23,6 +23,5 @@ class AssistantNavigationEntryProvider : NavigationEntryProvider {
     override val hostDestination = TopLevelDestination.PLAYGROUND
     override val startKey: NavKey = AssistantKey
 
-    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? =
-        if (key == AssistantKey) NavEntry(key) { AssistantRoute(navigator) } else null
+    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? = if (key == AssistantKey) NavEntry(key) { AssistantRoute(navigator) } else null
 }

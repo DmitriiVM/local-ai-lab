@@ -1,2 +1,39 @@
 config:
   validation: true
+
+complexity:
+  ComplexCondition:
+    allowedConditions: 6
+  CyclomaticComplexMethod:
+    allowedComplexity: 35
+  LargeClass:
+    allowedLines: 1200
+  LongMethod:
+    allowedLines: 220
+  NestedBlockDepth:
+    allowedDepth: 8
+  TooManyFunctions:
+    allowedFunctionsPerClass: 40
+    allowedFunctionsPerFile: 30
+
+exceptions:
+  TooGenericExceptionCaught:
+    allowedExceptionNameRegex: '(_|error|expected|ignored).*'
+
+naming:
+  FunctionNaming:
+    functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
+  MatchingDeclarationName:
+    active: false
+  TopLevelPropertyNaming:
+    active: false
+
+style:
+  LoopWithTooManyJumpStatements:
+    maxJumpCount: 3
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: false
+  ReturnCount:
+    max: 6

@@ -104,8 +104,7 @@ class AppNavigationState internal constructor(
         }
     }
 
-    internal fun entryFor(key: NavKey): NavEntry<NavKey>? =
-        registry.entryFor(key, this)
+    internal fun entryFor(key: NavKey): NavEntry<NavKey>? = registry.entryFor(key, this)
 }
 
 internal data class TopLevelBackStacks(
@@ -114,11 +113,10 @@ internal data class TopLevelBackStacks(
     val runs: NavBackStack<NavKey>,
     val settings: NavBackStack<NavKey>,
 ) {
-    operator fun get(destination: TopLevelDestination): NavBackStack<NavKey> =
-        when (destination) {
-            TopLevelDestination.PLAYGROUND -> playground
-            TopLevelDestination.MODELS -> models
-            TopLevelDestination.RUNS -> runs
-            TopLevelDestination.SETTINGS -> settings
-        }
+    operator fun get(destination: TopLevelDestination): NavBackStack<NavKey> = when (destination) {
+        TopLevelDestination.PLAYGROUND -> playground
+        TopLevelDestination.MODELS -> models
+        TopLevelDestination.RUNS -> runs
+        TopLevelDestination.SETTINGS -> settings
+    }
 }

@@ -14,6 +14,10 @@ class RunReplayStore {
     private val mutablePending = MutableStateFlow<RunRecord?>(null)
     val pending: StateFlow<RunRecord?> = mutablePending
 
-    fun select(run: RunRecord) { mutablePending.value = run }
-    fun consume(id: String) { if (mutablePending.value?.id == id) mutablePending.value = null }
+    fun select(run: RunRecord) {
+        mutablePending.value = run
+    }
+    fun consume(id: String) {
+        if (mutablePending.value?.id == id) mutablePending.value = null
+    }
 }

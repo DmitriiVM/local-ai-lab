@@ -3,7 +3,7 @@ package com.dmitriim.localaiplayground.core.model.conversation
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class ConversationKind { ASSISTANT }
+enum class ConversationKind { ASSISTANT, }
 
 @Serializable
 enum class ConversationMessageRole { USER, ASSISTANT }

@@ -44,21 +44,26 @@ class ModelFileValidator(
         return if (result.valid) {
             Log.i(TAG, "Model file validation passed: modelId=${manifest.modelId.value}")
             ModelValidationState.READY to null
-        } else validationFailure(manifest, ModelValidationState.INVALID, result.message ?: "Engine metadata validation failed.")
+        } else {
+            validationFailure(manifest, ModelValidationState.INVALID, result.message ?: "Engine metadata validation failed.")
+        }
     }
 
     fun enrichChecksums(manifest: ModelManifest, directory: File): ModelManifest = manifest.copy(
         files = manifest.files.map { spec ->
             val file = File(directory, spec.relativePath)
-            if (!file.isFile || spec.directory) spec else spec.copy(
-                expectedBytes = spec.expectedBytes ?: file.length(),
-                sha256 = spec.sha256 ?: file.sha256(),
-            )
+            if (!file.isFile || spec.directory) {
+                spec
+            } else {
+                spec.copy(
+                    expectedBytes = spec.expectedBytes ?: file.length(),
+                    sha256 = spec.sha256 ?: file.sha256(),
+                )
+            }
         },
     )
 
-    fun hasValidatorFor(manifest: ModelManifest): Boolean =
-        adapters.find(manifest.engineId, manifest.profileType) != null
+    fun hasValidatorFor(manifest: ModelManifest): Boolean = adapters.find(manifest.engineId, manifest.profileType) != null
 
     private fun validationFailure(
         manifest: ModelManifest,

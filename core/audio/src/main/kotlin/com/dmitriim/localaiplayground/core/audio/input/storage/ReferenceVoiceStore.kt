@@ -9,14 +9,14 @@ import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
 import com.dmitriim.localaiplayground.core.di.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.Properties
 import java.util.UUID
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 data class ReferenceVoice(
     val id: String,
@@ -71,7 +71,9 @@ class ReferenceVoiceStore(
             }
             persist(
                 temporary = temporary,
-                displayName = displayName(uri).substringBeforeLast('.').ifBlank { "Imported voice" },
+                displayName = displayName(uri).substringBeforeLast('.').ifBlank {
+                    "Imported voice"
+                },
                 durationMs = durationMs.coerceAtMost(MAX_REFERENCE_DURATION_MS),
                 sourceDescription = "Imported ${decoded.mimeType}",
             )
@@ -85,8 +87,7 @@ class ReferenceVoiceStore(
         }
     }
 
-    fun resolve(id: String): ReferenceVoice? =
-        mutableVoices.value.firstOrNull { it.id == id && File(it.pcmFilePath).isFile }
+    fun resolve(id: String): ReferenceVoice? = mutableVoices.value.firstOrNull { it.id == id && File(it.pcmFilePath).isFile }
 
     fun delete(id: String) {
         val voice = mutableVoices.value.firstOrNull { it.id == id } ?: return
@@ -124,13 +125,18 @@ class ReferenceVoiceStore(
             setProperty("durationMs", voice.durationMs.toString())
             setProperty("createdAtEpochMs", voice.createdAtEpochMs.toString())
             setProperty("sourceDescription", voice.sourceDescription)
-            FileOutputStream(metadataFile(id)).use { store(it, "Local AI Playground reference voice") }
+            FileOutputStream(metadataFile(id)).use {
+                store(it, "Local AI Playground reference voice")
+            }
         }
         mutableVoices.value = loadVoices()
         return voice
     }
 
-    private fun loadVoices(): List<ReferenceVoice> = directory.listFiles { file -> file.extension == "properties" }
+    private fun loadVoices(): List<ReferenceVoice> = directory.listFiles { file ->
+        file.extension ==
+            "properties"
+    }
         .orEmpty()
         .mapNotNull { metadata ->
             runCatching {
@@ -144,7 +150,9 @@ class ReferenceVoiceStore(
                     id = id,
                     displayName = requireNotNull(values.getProperty("displayName")),
                     durationMs = requireNotNull(values.getProperty("durationMs")).toLong(),
-                    createdAtEpochMs = requireNotNull(values.getProperty("createdAtEpochMs")).toLong(),
+                    createdAtEpochMs = requireNotNull(
+                        values.getProperty("createdAtEpochMs"),
+                    ).toLong(),
                     sourceDescription = requireNotNull(values.getProperty("sourceDescription")),
                     pcmFilePath = pcm.absolutePath,
                 )

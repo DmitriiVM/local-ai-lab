@@ -41,7 +41,9 @@ import kotlin.concurrent.withLock
 import kotlin.system.measureTimeMillis
 
 /** LiteRT-LM Kotlin-SDK runtime. It owns one engine and creates a conversation per app chat turn. */
-class LiteRtLmRuntime(context: Context) : LlmRuntime, LlmChatFormatter {
+class LiteRtLmRuntime(context: Context) :
+    LlmRuntime,
+    LlmChatFormatter {
     private val applicationContext = context.applicationContext
     private val lock = ReentrantLock()
     private var engine: Engine? = null
@@ -77,7 +79,9 @@ class LiteRtLmRuntime(context: Context) : LlmRuntime, LlmChatFormatter {
 
     override fun load(request: LlmLoadRequest): LlmLoadResult = lock.withLock {
         val reference = request.model
-        require(reference.engineId == engineId) { "Unsupported LLM engine: ${reference.engineId.value}" }
+        require(reference.engineId == engineId) {
+            "Unsupported LLM engine: ${reference.engineId.value}"
+        }
         require(reference.profileType == ModelProfileIds.LLM) {
             "Unsupported chat profile: ${reference.profileType.value}"
         }
@@ -85,7 +89,10 @@ class LiteRtLmRuntime(context: Context) : LlmRuntime, LlmChatFormatter {
             "The LiteRT-LM runtime requires an artifact-backed model."
         }
         val artifact = requireNotNull(
-            reference.artifacts.firstOrNull { it.role == ModelFileRoles.PRIMARY_MODEL && !it.directory },
+            reference.artifacts.firstOrNull {
+                it.role == ModelFileRoles.PRIMARY_MODEL &&
+                    !it.directory
+            },
         ) { "The LiteRT-LM model does not declare a primary model file." }
         val model = File(artifact.path)
         require(model.isFile && model.canRead()) { "Model file is not readable: ${model.name}" }
@@ -95,7 +102,9 @@ class LiteRtLmRuntime(context: Context) : LlmRuntime, LlmChatFormatter {
         val contextSize = request.options.contextSize
         require(contextSize == null || contextSize > 0) { "Context size must be positive." }
         val requestedThreads = request.options.threadCount
-        require(requestedThreads == null || requestedThreads >= 0) { "Thread count cannot be negative." }
+        require(requestedThreads == null || requestedThreads >= 0) {
+            "Thread count cannot be negative."
+        }
         val backend = backendFor(request.options.computePreference, requestedThreads)
         if (isLoaded && activeRequest == request) {
             return LlmLoadResult(
@@ -113,7 +122,10 @@ class LiteRtLmRuntime(context: Context) : LlmRuntime, LlmChatFormatter {
                 modelPath = model.absolutePath,
                 backend = backend,
                 maxNumTokens = contextSize,
-                cacheDir = File(applicationContext.cacheDir, CACHE_DIRECTORY).also(File::mkdirs).absolutePath,
+                cacheDir = File(
+                    applicationContext.cacheDir,
+                    CACHE_DIRECTORY,
+                ).also(File::mkdirs).absolutePath,
             ),
         )
         val durationMs = try {
@@ -157,12 +169,17 @@ class LiteRtLmRuntime(context: Context) : LlmRuntime, LlmChatFormatter {
         }
         val systemInstruction = messages.firstOrNull { it.role == LlmChatRole.SYSTEM }?.content
         val history = messages
-            .filterIndexed { index, message -> index < latestUserIndex && message.role != LlmChatRole.SYSTEM }
+            .filterIndexed { index, message ->
+                index < latestUserIndex &&
+                    message.role != LlmChatRole.SYSTEM
+            }
             .map { message ->
                 when (message.role) {
                     LlmChatRole.USER -> Message.user(message.content)
                     LlmChatRole.ASSISTANT -> Message.model(message.content)
-                    LlmChatRole.SYSTEM -> error("System instructions must precede conversation history.")
+                    LlmChatRole.SYSTEM -> error(
+                        "System instructions must precede conversation history.",
+                    )
                 }
             }
         val options = request.options
@@ -171,7 +188,9 @@ class LiteRtLmRuntime(context: Context) : LlmRuntime, LlmChatFormatter {
         val samplerConfig = samplerConfig(request)
         val conversation = loadedEngine.createConversation(
             ConversationConfig(
-                systemInstruction = systemInstruction?.takeIf(String::isNotBlank)?.let(Contents::of),
+                systemInstruction = systemInstruction?.takeIf(
+                    String::isNotBlank,
+                )?.let(Contents::of),
                 initialMessages = history,
                 samplerConfig = samplerConfig,
                 maxOutputToken = maxTokens,
@@ -265,7 +284,11 @@ class LiteRtLmRuntime(context: Context) : LlmRuntime, LlmChatFormatter {
 
     private fun samplerConfig(request: LlmGenerationRequest): SamplerConfig? {
         val options = request.options
-        if (options.temperature == null && options.topK == null && options.topP == null && options.seed == null) {
+        if (options.temperature == null &&
+            options.topK == null &&
+            options.topP == null &&
+            options.seed == null
+        ) {
             return null
         }
         return SamplerConfig(
@@ -287,8 +310,12 @@ class LiteRtLmRuntime(context: Context) : LlmRuntime, LlmChatFormatter {
             effectiveComputePreference = ComputePreference.GPU
             effectiveThreadCount = null
         }
-        ComputePreference.NPU -> error("This build does not bundle the vendor NPU libraries required by LiteRT-LM.")
-        ComputePreference.SYSTEM_SERVICE -> error("LiteRT-LM does not use an Android system service backend.")
+        ComputePreference.NPU -> error(
+            "This build does not bundle the vendor NPU libraries required by LiteRT-LM.",
+        )
+        ComputePreference.SYSTEM_SERVICE -> error(
+            "LiteRT-LM does not use an Android system service backend.",
+        )
     }
 
     private fun closeEngine() {

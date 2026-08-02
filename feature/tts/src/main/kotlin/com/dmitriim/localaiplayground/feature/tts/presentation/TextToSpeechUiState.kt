@@ -119,8 +119,7 @@ internal fun InstalledModel.toTtsModelOption(catalog: List<CatalogModel>): TtsMo
     return manifest.toTtsModelOption(metadata, installed = true)
 }
 
-internal fun CatalogModel.toTtsModelOption(): TtsModelOption =
-    manifest.toTtsModelOption(manifest, installed = false)
+internal fun CatalogModel.toTtsModelOption(): TtsModelOption = manifest.toTtsModelOption(manifest, installed = false)
 
 private fun ModelManifest.toTtsModelOption(
     metadata: ModelManifest,
@@ -176,9 +175,8 @@ internal fun TtsModelOption.compatibleVoices(language: TtsLanguage): List<TtsVoi
     }
 }
 
-internal fun InstalledModel.isReadyTtsModel(): Boolean =
-    AiCapability.TEXT_TO_SPEECH in manifest.capabilities &&
-        validationState == ModelValidationState.READY
+internal fun InstalledModel.isReadyTtsModel(): Boolean = AiCapability.TEXT_TO_SPEECH in manifest.capabilities &&
+    validationState == ModelValidationState.READY
 
 internal fun androidTextToSpeechOption(
     systemVoices: List<SystemTextToSpeechVoice>,

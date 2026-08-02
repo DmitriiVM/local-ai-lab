@@ -34,7 +34,8 @@ internal fun buildCapabilityReadiness(
         .flatMapTo(mutableSetOf()) { it.descriptor.capabilities }
 
     when {
-        relevant.isEmpty() || !availableCapabilities.containsAll(requiredCapabilities) &&
+        relevant.isEmpty() ||
+            !availableCapabilities.containsAll(requiredCapabilities) &&
             relevant.all { it is EngineAvailability.Unsupported } ->
             CapabilityReadiness(
                 capability = capability,
@@ -66,12 +67,14 @@ internal fun buildCapabilityReadiness(
                     explanation = "A compatible validated local model is installed.",
                     engines = relevant,
                 )
-            } else CapabilityReadiness(
-                capability = capability,
-                state = CapabilityReadinessState.MODEL_REQUIRED,
-                explanation = "The local runtime is available. Import a compatible model in Models.",
-                engines = relevant,
-            )
+            } else {
+                CapabilityReadiness(
+                    capability = capability,
+                    state = CapabilityReadinessState.MODEL_REQUIRED,
+                    explanation = "The local runtime is available. Import a compatible model in Models.",
+                    engines = relevant,
+                )
+            }
         }
     }
 }

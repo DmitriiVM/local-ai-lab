@@ -1,7 +1,6 @@
 package com.dmitriim.localaiplayground.core.audio.processing
 
 import dev.zacsweers.metro.Inject
-import kotlinx.coroutines.CancellationException
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -15,6 +14,7 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.math.tanh
+import kotlinx.coroutines.CancellationException
 
 /**
  * Offline mono speech effects. Processing a complete synthesis keeps pitch and
@@ -314,7 +314,12 @@ class SpeechAudioEffectsProcessor {
                 Biquad.lowShelf(sampleRateHz, LOW_EQ_HZ.coerceBelowNyquist(sampleRateHz), it)
             },
             midDb.takeIf { abs(it) >= EFFECT_EPSILON }?.let {
-                Biquad.peaking(sampleRateHz, MID_EQ_HZ.coerceBelowNyquist(sampleRateHz), MID_EQ_Q, it)
+                Biquad.peaking(
+                    sampleRateHz,
+                    MID_EQ_HZ.coerceBelowNyquist(sampleRateHz),
+                    MID_EQ_Q,
+                    it,
+                )
             },
             highDb.takeIf { abs(it) >= EFFECT_EPSILON }?.let {
                 Biquad.highShelf(sampleRateHz, HIGH_EQ_HZ.coerceBelowNyquist(sampleRateHz), it)
@@ -328,11 +333,7 @@ class SpeechAudioEffectsProcessor {
         }
     }
 
-    private fun applySaturation(
-        samples: FloatArray,
-        driveDb: Float,
-        isCancelled: () -> Boolean,
-    ) {
+    private fun applySaturation(samples: FloatArray, driveDb: Float, isCancelled: () -> Boolean) {
         val drive = 10.0.pow(driveDb / 20.0)
         val normalization = tanh(drive).coerceAtLeast(0.0001)
         samples.indices.forEach { index ->
@@ -412,8 +413,7 @@ class SpeechAudioEffectsProcessor {
         return result
     }
 
-    private fun Float.coerceBelowNyquist(sampleRateHz: Int): Float =
-        coerceAtMost(sampleRateHz * 0.45f)
+    private fun Float.coerceBelowNyquist(sampleRateHz: Int): Float = coerceAtMost(sampleRateHz * 0.45f)
 
     private fun checkNotCancelled(isCancelled: () -> Boolean) {
         if (isCancelled()) throw CancellationException("Speech audio processing was cancelled.")

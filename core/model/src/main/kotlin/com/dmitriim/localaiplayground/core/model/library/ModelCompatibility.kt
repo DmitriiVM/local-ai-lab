@@ -6,7 +6,4 @@ enum class ModelCompatibilityState {
     ADVISORY_WARNING,
 }
 
-data class ModelCompatibility(
-    val state: ModelCompatibilityState,
-    val reasons: List<String>,
-)
+data class ModelCompatibility(val state: ModelCompatibilityState, val reasons: List<String>)

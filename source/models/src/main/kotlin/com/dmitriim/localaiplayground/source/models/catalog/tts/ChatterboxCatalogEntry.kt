@@ -86,15 +86,14 @@ internal val chatterboxCatalogEntry: CatalogModel = CatalogModel(
     ),
 )
 
-private fun chatterboxFiles(vararg relativePaths: String): List<CatalogDownloadFile> =
-    relativePaths.map { relativePath ->
-        CatalogDownloadFile(
-            relativePath = relativePath,
-            url = "https://huggingface.co/$chatterboxRepository/resolve/$chatterboxRevision/" +
-                if (relativePath.endsWith(".onnx") || relativePath.endsWith(".onnx_data")) {
-                    "onnx/$relativePath"
-                } else {
-                    relativePath
-                },
-        )
-    }
+private fun chatterboxFiles(vararg relativePaths: String): List<CatalogDownloadFile> = relativePaths.map { relativePath ->
+    CatalogDownloadFile(
+        relativePath = relativePath,
+        url = "https://huggingface.co/$chatterboxRepository/resolve/$chatterboxRevision/" +
+            if (relativePath.endsWith(".onnx") || relativePath.endsWith(".onnx_data")) {
+                "onnx/$relativePath"
+            } else {
+                relativePath
+            },
+    )
+}

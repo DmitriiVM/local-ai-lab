@@ -36,9 +36,7 @@ import kotlin.system.measureTimeMillis
 @Inject
 @SingleIn(AppScope::class)
 @ContributesIntoSet(AppScope::class, binding = binding<TextToSpeechBackend>())
-class ChatterboxTextToSpeechEngine(
-    private val application: Application,
-) : TextToSpeechBackend {
+class ChatterboxTextToSpeechEngine(private val application: Application) : TextToSpeechBackend {
     override val engineId = EngineId("chatterbox-onnx")
     private val lock = Any()
     private val cancelled = AtomicBoolean(false)
@@ -64,7 +62,9 @@ class ChatterboxTextToSpeechEngine(
         unloadLocked()
         val missing = ChatterboxModelRuntimeValidator.REQUIRED_FILES.keys
             .filterNot { File(directory, it).isFile }
-        require(missing.isEmpty()) { "Chatterbox model files are missing: ${missing.joinToString()}" }
+        require(missing.isEmpty()) {
+            "Chatterbox model files are missing: ${missing.joinToString()}"
+        }
         var created: Runtime? = null
         val loadMs = measureTimeMillis {
             val options = OrtSession.SessionOptions()
@@ -73,10 +73,22 @@ class ChatterboxTextToSpeechEngine(
                 options.setInterOpNumThreads(1)
                 options.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)
                 created = Runtime(
-                    speechEncoder = environment.createSession(File(directory, SPEECH_ENCODER).path, options),
-                    embedTokens = environment.createSession(File(directory, EMBED_TOKENS).path, options),
-                    languageModel = environment.createSession(File(directory, LANGUAGE_MODEL).path, options),
-                    conditionalDecoder = environment.createSession(File(directory, CONDITIONAL_DECODER).path, options),
+                    speechEncoder = environment.createSession(
+                        File(directory, SPEECH_ENCODER).path,
+                        options,
+                    ),
+                    embedTokens = environment.createSession(
+                        File(directory, EMBED_TOKENS).path,
+                        options,
+                    ),
+                    languageModel = environment.createSession(
+                        File(directory, LANGUAGE_MODEL).path,
+                        options,
+                    ),
+                    conditionalDecoder = environment.createSession(
+                        File(directory, CONDITIONAL_DECODER).path,
+                        options,
+                    ),
                     tokenizer = ChatterboxTokenizer(File(directory, "tokenizer.json")),
                 )
             } finally {
@@ -87,7 +99,10 @@ class ChatterboxTextToSpeechEngine(
         loadedDirectory = directory.path
         loadedThreads = threads
         cancelled.set(false)
-        Log.i(TAG, "Chatterbox sessions loaded: directory=${directory.name}, loadMs=$loadMs, threads=$threads")
+        Log.i(
+            TAG,
+            "Chatterbox sessions loaded: directory=${directory.name}, loadMs=$loadMs, threads=$threads",
+        )
         TextToSpeechLoadResult(threads, loadMs, true, SAMPLE_RATE_HZ, null)
     }
 
@@ -149,7 +164,9 @@ class ChatterboxTextToSpeechEngine(
                             val rawEmbeddings = embedResult.tensor(0)
                             val embeddings = if (iteration == 0) {
                                 concatenateEmbeddings(conditioning.result.tensor(0), rawEmbeddings)
-                            } else null
+                            } else {
+                                null
+                            }
                             val effectiveEmbeddings = embeddings ?: rawEmbeddings
                             val embeddingShape = effectiveEmbeddings.info.shape
                             val batchSize = embeddingShape[0].toInt()
@@ -157,7 +174,11 @@ class ChatterboxTextToSpeechEngine(
                             val attention = if (iteration == 0) {
                                 LongArray(sequenceLength) { 1L }
                             } else {
-                                LongArray(inputIds.size + conditioning.result.tensor(0).info.shape[1].toInt() + iteration) { 1L }
+                                LongArray(
+                                    inputIds.size +
+                                        conditioning.result.tensor(0).info.shape[1].toInt() +
+                                        iteration,
+                                ) { 1L }
                             }
                             val positions = if (iteration == 0) {
                                 LongArray(sequenceLength) { it.toLong() }
@@ -166,7 +187,9 @@ class ChatterboxTextToSpeechEngine(
                             }
                             val initialCache = if (iteration == 0) {
                                 createEmptyCache(active.languageModel.inputInfo, batchSize)
-                            } else emptyMap()
+                            } else {
+                                emptyMap()
+                            }
                             OnnxTensor.createTensor(
                                 environment,
                                 LongBuffer.wrap(attention),
@@ -307,7 +330,8 @@ class ChatterboxTextToSpeechEngine(
         val textShape = text.info.shape
         require(conditionShape.size == 3 && textShape.size == 3)
         require(conditionShape[0] == textShape[0] && conditionShape[2] == textShape[2])
-        val combined = FloatArray(condition.info.numElements.toInt() + text.info.numElements.toInt())
+        val combined =
+            FloatArray(condition.info.numElements.toInt() + text.info.numElements.toInt())
         condition.floatValues().copyInto(combined)
         text.floatValues().copyInto(combined, condition.info.numElements.toInt())
         return OnnxTensor.createTensor(
@@ -328,7 +352,11 @@ class ChatterboxTextToSpeechEngine(
             put(
                 name,
                 when (type) {
-                    OnnxJavaType.FLOAT -> OnnxTensor.createTensor(environment, FloatBuffer.allocate(0), shape)
+                    OnnxJavaType.FLOAT -> OnnxTensor.createTensor(
+                        environment,
+                        FloatBuffer.allocate(0),
+                        shape,
+                    )
                     OnnxJavaType.FLOAT16 -> OnnxTensor.createTensor(
                         environment,
                         ShortBuffer.allocate(0),
@@ -346,7 +374,9 @@ class ChatterboxTextToSpeechEngine(
         val file = File(reference.pcmFilePath)
         require(file.isFile) { "The selected reference voice was deleted." }
         val sampleCount = (file.length() / 2).coerceAtMost(MAX_REFERENCE_SAMPLES.toLong()).toInt()
-        require(sampleCount >= MIN_REFERENCE_SAMPLES) { "Reference voice must be at least 5 seconds." }
+        require(sampleCount >= MIN_REFERENCE_SAMPLES) {
+            "Reference voice must be at least 5 seconds."
+        }
         val bytes = ByteArray(sampleCount * 2)
         FileInputStream(file).use { input ->
             var offset = 0
@@ -386,15 +416,11 @@ class ChatterboxTextToSpeechEngine(
         }
     }
 
-    private data class Conditioning(
-        val referenceId: String,
-        val result: OrtSession.Result,
-    ) : AutoCloseable {
+    private data class Conditioning(val referenceId: String, val result: OrtSession.Result) : AutoCloseable {
         override fun close() = result.close()
     }
 
-    private fun OrtSession.Result.tensor(index: Int): OnnxTensor =
-        get(index) as? OnnxTensor ?: error("Chatterbox output $index is not a tensor.")
+    private fun OrtSession.Result.tensor(index: Int): OnnxTensor = get(index) as? OnnxTensor ?: error("Chatterbox output $index is not a tensor.")
 
     private fun OnnxTensor.floatValues(): FloatArray {
         val buffer = requireNotNull(floatBuffer) { "Expected a floating-point Chatterbox tensor." }

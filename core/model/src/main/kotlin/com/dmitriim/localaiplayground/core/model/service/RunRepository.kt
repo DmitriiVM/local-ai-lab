@@ -13,7 +13,10 @@ interface RunRepository {
     fun observeRun(id: String): Flow<RunRecord?>
     fun observeMessages(conversationId: String): Flow<List<ConversationMessageRecord>>
     suspend fun saveRun(record: RunRecord)
-    suspend fun saveConversation(record: ConversationRecord, messages: List<ConversationMessageRecord>)
+    suspend fun saveConversation(
+        record: ConversationRecord,
+        messages: List<ConversationMessageRecord>,
+    )
     suspend fun deleteConversation(id: String)
     suspend fun clearRuns()
     suspend fun storageUsage(): StorageUsage

@@ -41,8 +41,10 @@ class GeneratedAudioStore(private val application: Application) {
         writeWave(partialFile, samples, sampleRateHz)
         require(readMetadata(partialFile) != null) { "The generated WAV could not be validated." }
         backupFile.delete()
-        if (latestFile.exists()) require(latestFile.renameTo(backupFile)) {
-            "Could not preserve the previous generated audio during replacement."
+        if (latestFile.exists()) {
+            require(latestFile.renameTo(backupFile)) {
+                "Could not preserve the previous generated audio during replacement."
+            }
         }
         try {
             if (!partialFile.renameTo(latestFile)) {
@@ -57,7 +59,10 @@ class GeneratedAudioStore(private val application: Application) {
             throw error
         }
         return requireNotNull(readMetadata(latestFile)).also {
-            Log.i(TAG, "Generated WAV saved: bytes=${latestFile.length()}, durationMs=${it.durationMs}")
+            Log.i(
+                TAG,
+                "Generated WAV saved: bytes=${latestFile.length()}, durationMs=${it.durationMs}",
+            )
         }
     }
 
@@ -89,7 +94,10 @@ class GeneratedAudioStore(private val application: Application) {
 
     fun export(audio: GeneratedAudioFile, destination: Uri) {
         val source = checkedFile(audio)
-        Log.i(TAG, "Exporting generated WAV: bytes=${source.length()}, destinationScheme=${destination.scheme}")
+        Log.i(
+            TAG,
+            "Exporting generated WAV: bytes=${source.length()}, destinationScheme=${destination.scheme}",
+        )
         application.contentResolver.openOutputStream(destination, "w")?.use { output ->
             FileInputStream(source).use { input -> input.copyTo(output) }
         } ?: error("Android could not open the selected export destination.")
@@ -98,7 +106,10 @@ class GeneratedAudioStore(private val application: Application) {
 
     fun streamPcm16(audio: GeneratedAudioFile, onChunk: (ByteArray) -> Boolean) {
         val source = checkedFile(audio)
-        Log.i(TAG, "Streaming retained WAV for replay: bytes=${source.length()}, samples=${audio.sampleCount}")
+        Log.i(
+            TAG,
+            "Streaming retained WAV for replay: bytes=${source.length()}, samples=${audio.sampleCount}",
+        )
         BufferedInputStream(FileInputStream(source)).use { input ->
             var remaining = audio.sampleCount.toLong() * PCM_BYTES_PER_SAMPLE
             var skipped = 0L
@@ -129,7 +140,9 @@ class GeneratedAudioStore(private val application: Application) {
 
     private fun writeWave(file: File, samples: FloatArray, sampleRateHz: Int) {
         val dataBytes = Math.multiplyExact(samples.size, PCM_BYTES_PER_SAMPLE)
-        val header = ByteBuffer.allocate(WAV_HEADER_BYTES.toInt()).order(ByteOrder.LITTLE_ENDIAN).apply {
+        val header = ByteBuffer.allocate(
+            WAV_HEADER_BYTES.toInt(),
+        ).order(ByteOrder.LITTLE_ENDIAN).apply {
             put("RIFF".toByteArray(Charsets.US_ASCII))
             putInt(36 + dataBytes)
             put("WAVE".toByteArray(Charsets.US_ASCII))
@@ -182,7 +195,11 @@ class GeneratedAudioStore(private val application: Application) {
             require(java.lang.Short.reverseBytes(input.readShort()).toInt() == 16)
             require(readAscii(input, 4) == "data")
             val dataBytes = Integer.reverseBytes(input.readInt())
-            require(sampleRate > 0 && dataBytes >= 0 && dataBytes.toLong() + WAV_HEADER_BYTES <= file.length())
+            require(
+                sampleRate > 0 &&
+                    dataBytes >= 0 &&
+                    dataBytes.toLong() + WAV_HEADER_BYTES <= file.length(),
+            )
             GeneratedAudioFile(
                 filePath = file.absolutePath,
                 sampleRateHz = sampleRate,

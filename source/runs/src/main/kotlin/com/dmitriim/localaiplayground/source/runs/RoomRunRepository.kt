@@ -11,10 +11,10 @@ import com.dmitriim.localaiplayground.source.database.ModelDatabaseProvider
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import java.io.File
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
-import java.io.File
 
 @Inject
 @SingleIn(AppScope::class)
@@ -34,13 +34,11 @@ class RoomRunRepository(
 
     override fun observeRun(id: String): Flow<RunRecord?> = runDao.observe(id).map { it?.toDomain(json) }
 
-    override fun observeMessages(conversationId: String): Flow<List<ConversationMessageRecord>> =
-        conversationDao.observeMessages(conversationId).map { entities -> entities.map { it.toDomain() } }
+    override fun observeMessages(conversationId: String): Flow<List<ConversationMessageRecord>> = conversationDao.observeMessages(conversationId).map { entities -> entities.map { it.toDomain() } }
 
     override suspend fun saveRun(record: RunRecord) = runDao.upsert(record.toEntity(json))
 
-    override suspend fun saveConversation(record: ConversationRecord, messages: List<ConversationMessageRecord>) =
-        conversationDao.replaceConversation(record.toEntity(), messages.map { it.toEntity() })
+    override suspend fun saveConversation(record: ConversationRecord, messages: List<ConversationMessageRecord>) = conversationDao.replaceConversation(record.toEntity(), messages.map { it.toEntity() })
 
     override suspend fun deleteConversation(id: String) = conversationDao.deleteConversation(id)
 
@@ -55,8 +53,7 @@ class RoomRunRepository(
             application.getDatabasePath("$DATABASE_NAME-shm").length(),
     )
 
-    private fun directoryBytes(directory: File): Long =
-        directory.takeIf(File::exists)?.walkTopDown()?.filter(File::isFile)?.sumOf(File::length) ?: 0
+    private fun directoryBytes(directory: File): Long = directory.takeIf(File::exists)?.walkTopDown()?.filter(File::isFile)?.sumOf(File::length) ?: 0
 
     private companion object {
         const val DATABASE_NAME = "local-ai-playground.db"

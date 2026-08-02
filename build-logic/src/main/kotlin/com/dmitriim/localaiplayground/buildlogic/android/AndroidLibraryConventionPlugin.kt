@@ -13,10 +13,12 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
         extensions.configure<LibraryExtension> {
             compileSdk {
-                version = release(36) { minorApiLevel = 1 }
+                version = release(AndroidSdkVersions.COMPILE_SDK_MAJOR) {
+                    minorApiLevel = AndroidSdkVersions.COMPILE_SDK_MINOR
+                }
             }
             defaultConfig {
-                minSdk = 26
+                minSdk = AndroidSdkVersions.MIN_SDK
             }
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_11

@@ -18,7 +18,6 @@ android {
             abiFilters += "arm64-v8a"
         }
     }
-
 }
 
 dependencies {

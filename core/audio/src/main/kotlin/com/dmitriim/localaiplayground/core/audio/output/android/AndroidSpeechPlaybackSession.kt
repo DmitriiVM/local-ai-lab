@@ -12,10 +12,10 @@ import com.dmitriim.localaiplayground.core.audio.output.api.SpeechPlaybackSessio
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackMetrics
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackState
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
-import kotlinx.coroutines.delay
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 
 internal class AndroidSpeechPlaybackSession(
     private val audioManager: AudioManager,
@@ -28,7 +28,9 @@ internal class AndroidSpeechPlaybackSession(
 ) : SpeechPlaybackSession {
     private val closed = AtomicBoolean(false)
     private val stopped = AtomicBoolean(false)
+
     @Volatile private var paused = false
+
     @Volatile private var pausedByFocus = false
     private var started = false
     private var playbackStarted = false
@@ -44,7 +46,9 @@ internal class AndroidSpeechPlaybackSession(
         .setUsage(AudioAttributes.USAGE_ASSISTANT)
         .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
         .build()
-    private val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+    private val focusRequest = AudioFocusRequest.Builder(
+        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+    )
         .setAudioAttributes(attributes)
         .setOnAudioFocusChangeListener(::onAudioFocusChange)
         .build()
@@ -78,7 +82,13 @@ internal class AndroidSpeechPlaybackSession(
             error("Android could not initialize speech playback at $sampleRateHz Hz.")
         }
         track.setVolume(volume)
-        Log.i(TAG, "AudioTrack initialized: sampleRateHz=$sampleRateHz, minBufferBytes=$minimum, bufferBytes=${max(minimum, capacity160Ms)}")
+        Log.i(
+            TAG,
+            "AudioTrack initialized: sampleRateHz=$sampleRateHz, minBufferBytes=$minimum, bufferBytes=${max(
+                minimum,
+                capacity160Ms,
+            )}",
+        )
     }
 
     override fun write(samples: FloatArray): Boolean {
@@ -129,7 +139,10 @@ internal class AndroidSpeechPlaybackSession(
                 }
                 count == 0 -> Thread.sleep(WRITE_POLL_MS)
                 else -> {
-                    Log.e(TAG, "AudioTrack write failed: result=$count, offset=$offset, totalBytes=${pcm16.size}")
+                    Log.e(
+                        TAG,
+                        "AudioTrack write failed: result=$count, offset=$offset, totalBytes=${pcm16.size}",
+                    )
                     error("Android speech playback failed while writing PCM: $count.")
                 }
             }
@@ -143,14 +156,20 @@ internal class AndroidSpeechPlaybackSession(
         while (!stopped.get() && !closed.get()) {
             refresh()
             if (!paused && presentedFrames() >= framesWritten) {
-                Log.i(TAG, "AudioTrack drained: framesPresented=${presentedFrames()}, underruns=${track.underrunCount - underrunsAtStart}")
+                Log.i(
+                    TAG,
+                    "AudioTrack drained: framesPresented=${presentedFrames()}, underruns=${track.underrunCount - underrunsAtStart}",
+                )
                 return
             }
             if (
                 !paused &&
                 SystemClock.elapsedRealtimeNanos() - lastProgressNanos > STALL_TIMEOUT_NANOS
             ) {
-                Log.e(TAG, "AudioTrack drain stalled: framesWritten=$framesWritten, framesPresented=${presentedFrames()}, paused=$paused")
+                Log.e(
+                    TAG,
+                    "AudioTrack drain stalled: framesWritten=$framesWritten, framesPresented=${presentedFrames()}, paused=$paused",
+                )
                 error("Android speech playback stopped making progress.")
             }
             delay(DRAIN_POLL_MS)
@@ -275,7 +294,10 @@ internal class AndroidSpeechPlaybackSession(
             val presentedFrames = timestamp.framePosition - framePositionAtStart
             val elapsedForFrames = presentedFrames * NANOS_PER_SECOND / sampleRateHz
             firstPresentationNanos = timestamp.nanoTime - elapsedForFrames
-            Log.i(TAG, "AudioTrack first presentation timestamp received: framePosition=${timestamp.framePosition}")
+            Log.i(
+                TAG,
+                "AudioTrack first presentation timestamp received: framePosition=${timestamp.framePosition}",
+            )
         }
     }
 

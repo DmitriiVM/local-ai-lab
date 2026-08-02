@@ -12,9 +12,7 @@ import dev.zacsweers.metro.SingleIn
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
-class AndroidSpeechRecognizerSupport(
-    private val application: Application,
-) : SystemSpeechToTextSupport {
+class AndroidSpeechRecognizerSupport(private val application: Application) : SystemSpeechToTextSupport {
     override val isOnDeviceRecognizerAvailable: Boolean
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             SpeechRecognizer.isOnDeviceRecognitionAvailable(application)

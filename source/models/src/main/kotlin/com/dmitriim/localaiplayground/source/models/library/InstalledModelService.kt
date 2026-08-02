@@ -27,6 +27,9 @@ import com.dmitriim.localaiplayground.source.models.validation.totalFileBytes
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import java.io.File
+import java.io.FileOutputStream
+import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -35,9 +38,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import java.io.File
-import java.io.FileOutputStream
-import java.util.UUID
 
 @Inject
 @SingleIn(AppScope::class)
@@ -51,7 +51,10 @@ class InstalledModelService(
     @param:ApplicationCoroutineScope private val applicationScope: CoroutineScope,
 ) : ModelLibrary {
     private val dao = databaseProvider.database.installedModelDao()
-    private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
     internal val rootDirectory = File(application.filesDir, "models")
 
     override val installedModels: Flow<List<InstalledModel>> = dao.observeAll().map { records ->
@@ -211,21 +214,20 @@ class InstalledModelService(
         installedAtEpochMs = System.currentTimeMillis(),
     )
 
-    private fun roleSpecsForImport(definition: ModelImportDefinition, names: List<String>): List<ModelFileSpec> =
-        definition.files.map { file ->
-            val relativePath = when {
-                file.directory -> {
-                    val path = requireNotNull(file.relativePath)
-                    require(names.any { it.startsWith("$path/") }) { "Missing $path directory." }
-                    path
-                }
-                file.relativePath != null -> names.firstOrNull { it == file.relativePath }
-                    ?: error("Missing ${file.relativePath}. Select all required companion files.")
-                else -> names.singleOrNull { it.endsWith(requireNotNull(file.extension), ignoreCase = true) }
-                    ?: error("Select exactly one ${file.extension} file.")
+    private fun roleSpecsForImport(definition: ModelImportDefinition, names: List<String>): List<ModelFileSpec> = definition.files.map { file ->
+        val relativePath = when {
+            file.directory -> {
+                val path = requireNotNull(file.relativePath)
+                require(names.any { it.startsWith("$path/") }) { "Missing $path directory." }
+                path
             }
-            ModelFileSpec(relativePath, file.role, directory = file.directory)
+            file.relativePath != null -> names.firstOrNull { it == file.relativePath }
+                ?: error("Missing ${file.relativePath}. Select all required companion files.")
+            else -> names.singleOrNull { it.endsWith(requireNotNull(file.extension), ignoreCase = true) }
+                ?: error("Select exactly one ${file.extension} file.")
         }
+        ModelFileSpec(relativePath, file.role, directory = file.directory)
+    }
 
     private suspend fun reconcileInstalledModels() {
         dao.all().forEach { record ->
@@ -261,7 +263,11 @@ class InstalledModelService(
     }
 
     private fun documentName(uri: android.net.Uri): String = application.contentResolver.query(
-        uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null,
+        uri,
+        arrayOf(OpenableColumns.DISPLAY_NAME),
+        null,
+        null,
+        null,
     )?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
         ?: uri.lastPathSegment?.substringAfterLast('/') ?: error("The selected document has no name.")
 

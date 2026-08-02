@@ -12,6 +12,7 @@ import com.dmitriim.localaiplayground.core.result.OperationState
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import java.util.concurrent.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.concurrent.CancellationException
 
 @Inject
 @ViewModelKey
@@ -62,7 +62,7 @@ class PlaygroundViewModel(
             }
             try {
                 availabilitySource.refresh()
-            } catch (cancelled: CancellationException) {
+            } catch (_: CancellationException) {
                 mutableState.update {
                     it.copy(
                         operation = OperationState.Error(

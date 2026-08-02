@@ -10,6 +10,8 @@ import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioSt
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffectsProcessor
 import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import dev.zacsweers.metro.Inject
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -19,8 +21,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
 
 /** Coordinates one bounded native synthesis stream, Android playback, and WAV retention. */
 @Inject
@@ -142,10 +142,11 @@ class SynthesizeSpeech(
                     }
                     chunkCount += 1
                     streamedSampleCount += chunk.size
-                    !cancelled.get() && (
-                        chunks == null ||
-                            chunks.trySendBlocking(chunk.copyOf()).isSuccess
-                        )
+                    !cancelled.get() &&
+                        (
+                            chunks == null ||
+                                chunks.trySendBlocking(chunk.copyOf()).isSuccess
+                            )
                 }
             } finally {
                 chunks?.close()

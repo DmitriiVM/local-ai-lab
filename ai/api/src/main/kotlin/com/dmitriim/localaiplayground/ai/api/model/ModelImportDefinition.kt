@@ -17,6 +17,8 @@ data class ModelImportFileDefinition(
     val directory: Boolean = false,
 ) {
     init {
-        require((relativePath == null) != (extension == null)) { "An import file must declare one path or extension." }
+        require((relativePath == null) != (extension == null)) {
+            "An import file must declare one path or extension."
+        }
     }
 }

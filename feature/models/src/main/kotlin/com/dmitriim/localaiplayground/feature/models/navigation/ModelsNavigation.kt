@@ -20,17 +20,16 @@ class ModelsNavigationEntryProvider : NavigationEntryProvider {
     override val topLevelDestination = TopLevelDestination.MODELS
     override val startKey: NavKey = ModelsKey
 
-    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? =
-        when (key) {
-            ModelsKey -> NavEntry(key) {
-                ModelsRoute(navigator)
-            }
-            is ModelDetailsKey -> NavEntry(key) {
-                ModelDetailsRoute(
-                    modelId = key.modelId,
-                    onNavigateBack = navigator::navigateBack,
-                )
-            }
-            else -> null
+    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? = when (key) {
+        ModelsKey -> NavEntry(key) {
+            ModelsRoute(navigator)
         }
+        is ModelDetailsKey -> NavEntry(key) {
+            ModelDetailsRoute(
+                modelId = key.modelId,
+                onNavigateBack = navigator::navigateBack,
+            )
+        }
+        else -> null
+    }
 }

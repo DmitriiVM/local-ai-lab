@@ -10,6 +10,7 @@ import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import java.util.concurrent.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,7 +21,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.CancellationException
 
 @Inject
 @ViewModelKey
@@ -55,7 +55,7 @@ class DeviceViewModel(
                 val diagnostics = withContext(Dispatchers.IO) { modelDiagnostics.runDiagnostics() }
                 availabilitySource.refresh()
                 mutableState.update { it.copy(snapshot = snapshot, diagnostics = diagnostics, refreshing = false) }
-            } catch (cancelled: CancellationException) {
+            } catch (_: CancellationException) {
                 mutableState.update {
                     it.copy(
                         refreshing = false,
