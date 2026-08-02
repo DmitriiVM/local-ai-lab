@@ -1,15 +1,11 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("local-ai.android.library")
     alias(libs.plugins.ksp)
     alias(libs.plugins.metro)
 }
 
 android {
     namespace = "com.dmitriim.localaiplayground.source.database"
-    compileSdk {
-        version = release(36) { minorApiLevel = 1 }
-    }
-    defaultConfig { minSdk = 26 }
 }
 
 dependencies {

@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("local-ai.android.library")
     alias(libs.plugins.metro)
 }
 
@@ -11,8 +11,4 @@ dependencies {
 
 android {
     namespace = "com.dmitriim.localaiplayground.core.audio"
-    compileSdk {
-        version = release(36) { minorApiLevel = 1 }
-    }
-    defaultConfig { minSdk = 26 }
 }

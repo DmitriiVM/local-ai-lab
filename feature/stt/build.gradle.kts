@@ -1,17 +1,11 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.compose)
+    id("local-ai.android.compose-library")
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.metro)
 }
 
 android {
     namespace = "com.dmitriim.localaiplayground.feature.stt"
-    compileSdk {
-        version = release(36) { minorApiLevel = 1 }
-    }
-    defaultConfig { minSdk = 26 }
-    buildFeatures { compose = true }
 }
 
 dependencies {

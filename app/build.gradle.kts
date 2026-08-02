@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.application)
+    id("local-ai.android.application")
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.metro)
@@ -7,12 +7,6 @@ plugins {
 
 android {
     namespace = "com.dmitriim.localaiplayground"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
-
     defaultConfig {
         applicationId = "com.dmitriim.localaiplayground"
         minSdk = 26
@@ -32,10 +26,6 @@ android {
                 enable = false
             }
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         buildConfig = true

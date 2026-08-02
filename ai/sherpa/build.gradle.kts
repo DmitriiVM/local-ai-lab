@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("local-ai.android.library")
     alias(libs.plugins.metro)
 }
 
@@ -13,23 +13,12 @@ val strippedSherpaAar by tasks.registering(Zip::class) {
 
 android {
     namespace = "com.dmitriim.localaiplayground.ai.sherpa"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
-
     defaultConfig {
-        minSdk = 26
         ndk {
             abiFilters += "arm64-v8a"
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
 }
 
 dependencies {
