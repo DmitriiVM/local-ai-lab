@@ -8,6 +8,10 @@ android {
     namespace = "com.dmitriim.localaiplayground.source.database"
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation(project(":core:di"))
     implementation(project(":core:model"))

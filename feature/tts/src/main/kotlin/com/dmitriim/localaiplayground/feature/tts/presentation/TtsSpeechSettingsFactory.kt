@@ -1,7 +1,7 @@
 package com.dmitriim.localaiplayground.feature.tts.presentation
 
 import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisSettings
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisSettings
 
 internal object TtsSpeechSettingsFactory {
     fun create(

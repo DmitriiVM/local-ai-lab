@@ -17,11 +17,12 @@ import com.dmitriim.localaiplayground.core.model.service.ModelLibrary
 import com.dmitriim.localaiplayground.core.model.service.ModelTransfers
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
 import com.dmitriim.localaiplayground.feature.stt.domain.PersistSttRun
-import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionEvent
-import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionRequest
+import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionEvent
+import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionMetrics
+import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionRequest
+import com.dmitriim.localaiplayground.core.voice.stt.SttTranscriptionSettings
+import com.dmitriim.localaiplayground.core.voice.stt.TranscribeAudio
 import com.dmitriim.localaiplayground.feature.stt.domain.SttRunSnapshot
-import com.dmitriim.localaiplayground.feature.stt.domain.SttTranscriptionSettings
-import com.dmitriim.localaiplayground.feature.stt.domain.TranscribeAudio
 import com.dmitriim.localaiplayground.source.runs.RunReplayStore
 import com.dmitriim.localaiplayground.source.settings.AppSettingsRepository
 import dev.zacsweers.metro.ContributesIntoMap
@@ -334,7 +335,7 @@ class SpeechToTextViewModel(
         input: PcmAudioInput,
         transcript: String?,
         state: SpeechToTextUiState,
-        metrics: com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionMetrics?,
+        metrics: SpeechTranscriptionMetrics?,
         error: String?,
     ) = SttRunSnapshot(
         status = status,

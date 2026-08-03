@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.feature.tts.domain
+package com.dmitriim.localaiplayground.core.voice.tts
 
 import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects

@@ -24,7 +24,7 @@ android {
     buildTypes {
         release {
             optimization {
-                enable = false
+                enable = true
             }
         }
     }
@@ -44,12 +44,11 @@ dependencies {
     implementation(project(":ai:system"))
     implementation(project(":core:audio"))
     implementation(project(":core:di"))
-    implementation(project(":core:files"))
-    implementation(project(":core:metrics"))
     implementation(project(":core:model"))
     implementation(project(":core:navigation"))
     implementation(project(":core:result"))
     implementation(project(":core:ui"))
+    implementation(project(":core:voice"))
     implementation(project(":feature:assistant"))
     implementation(project(":feature:device"))
     implementation(project(":feature:models"))
@@ -80,6 +79,7 @@ dependencies {
     implementation(libs.metro.runtime)
     implementation(libs.metrox.viewmodel)
     implementation(libs.metrox.viewmodel.compose)
+    implementation(libs.onnxruntime.android)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

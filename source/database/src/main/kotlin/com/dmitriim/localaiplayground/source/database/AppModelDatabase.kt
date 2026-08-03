@@ -11,7 +11,7 @@ import androidx.room.RoomDatabase
         ConversationMessageEntity::class,
     ],
     version = 1,
-    exportSchema = false,
+    exportSchema = true,
 )
 abstract class AppModelDatabase : RoomDatabase() {
     abstract fun installedModelDao(): InstalledModelDao

@@ -3,15 +3,15 @@ package com.dmitriim.localaiplayground.feature.assistant.domain
 import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.voice.tts.PreviewSpeech
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechPreviewRequest
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisEvent
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisRequest
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisSettings
+import com.dmitriim.localaiplayground.core.voice.tts.SynthesizeSpeech
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechOutputSettings
 import com.dmitriim.localaiplayground.feature.assistant.presentation.TtsModelOption
 import com.dmitriim.localaiplayground.feature.assistant.presentation.TtsVoiceOption
-import com.dmitriim.localaiplayground.feature.tts.domain.PreviewSpeech
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechPreviewRequest
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisEvent
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisRequest
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisSettings
-import com.dmitriim.localaiplayground.feature.tts.domain.SynthesizeSpeech
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 

@@ -3,6 +3,7 @@ package com.dmitriim.localaiplayground.feature.tts.domain
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
 import com.dmitriim.localaiplayground.core.model.runs.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisMetrics
 
 data class TtsRunSnapshot(
     val status: RunStatus,

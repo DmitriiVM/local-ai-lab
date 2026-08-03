@@ -6,6 +6,10 @@ import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.model.runs.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
+import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionEvent
+import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionMetrics
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisEvent
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisMetrics
 import com.dmitriim.localaiplayground.feature.assistant.domain.AssistantAudioRecorder
 import com.dmitriim.localaiplayground.feature.assistant.domain.AssistantRunRecorder
 import com.dmitriim.localaiplayground.feature.assistant.domain.AssistantSpeechOutput
@@ -14,10 +18,6 @@ import com.dmitriim.localaiplayground.feature.assistant.domain.ChatGenerationEve
 import com.dmitriim.localaiplayground.feature.assistant.domain.ChatGenerationRequest
 import com.dmitriim.localaiplayground.feature.assistant.domain.GenerateAssistantResponse
 import com.dmitriim.localaiplayground.feature.assistant.domain.PersistAssistantTurn
-import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionEvent
-import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionMetrics
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisEvent
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisMetrics
 import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope

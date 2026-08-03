@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.feature.stt.domain
+package com.dmitriim.localaiplayground.core.voice.stt
 
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId

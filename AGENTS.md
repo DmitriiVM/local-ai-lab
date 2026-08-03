@@ -14,8 +14,6 @@ Local AI Playground is a native Android app for running AI models locally.
 - `:ai:vosk` — Vosk STT adapter and model validation.
 - `:core:audio` — audio capture/decoding, storage, playback, and effects processing.
 - `:core:di` — application Metro scope and ViewModel integration.
-- `:core:files` — reserved for reusable file primitives; currently empty.
-- `:core:metrics` — reserved for shared metrics primitives; currently empty.
 - `:core:model` — shared domain models and service contracts for models, engines, conversations, and runs.
 - `:core:navigation` — Navigation 3 state, contracts, host, and feature registry.
 - `:core:result` — shared errors, operation state, foreground coordination, and status presentation.

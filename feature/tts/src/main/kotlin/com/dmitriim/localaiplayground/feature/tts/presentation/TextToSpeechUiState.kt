@@ -19,8 +19,8 @@ import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileIds
 import com.dmitriim.localaiplayground.core.model.manifest.TtsControl
 import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceDescriptor
 import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisMetrics
-import com.dmitriim.localaiplayground.feature.tts.domain.SynthesizeSpeech
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisMetrics
+import com.dmitriim.localaiplayground.core.voice.tts.SynthesizeSpeech
 
 data class TextToSpeechUiState(
     val models: List<TtsModelOption> = emptyList(),

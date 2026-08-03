@@ -10,7 +10,7 @@ import com.dmitriim.localaiplayground.core.model.library.InstalledModel
 import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode
-import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionMetrics
+import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionMetrics
 
 data class SpeechToTextUiState(
     val models: List<SpeechModelOption> = emptyList(),

@@ -2,10 +2,10 @@ package com.dmitriim.localaiplayground.feature.assistant.domain
 
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
-import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionEvent
-import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionRequest
-import com.dmitriim.localaiplayground.feature.stt.domain.SttTranscriptionSettings
-import com.dmitriim.localaiplayground.feature.stt.domain.TranscribeAudio
+import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionEvent
+import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionRequest
+import com.dmitriim.localaiplayground.core.voice.stt.SttTranscriptionSettings
+import com.dmitriim.localaiplayground.core.voice.stt.TranscribeAudio
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 

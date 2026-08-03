@@ -2,7 +2,7 @@ package com.dmitriim.localaiplayground.feature.tts.presentation
 
 import com.dmitriim.localaiplayground.core.model.runs.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisMetrics
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisMetrics
 import com.dmitriim.localaiplayground.feature.tts.domain.TtsRunSnapshot
 
 internal object TtsRunSnapshotFactory {

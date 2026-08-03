@@ -7,11 +7,11 @@ import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStat
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
 import com.dmitriim.localaiplayground.feature.tts.domain.PersistTtsRun
-import com.dmitriim.localaiplayground.feature.tts.domain.PreviewSpeech
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechPreviewRequest
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisEvent
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisRequest
-import com.dmitriim.localaiplayground.feature.tts.domain.SynthesizeSpeech
+import com.dmitriim.localaiplayground.core.voice.tts.PreviewSpeech
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechPreviewRequest
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisEvent
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisRequest
+import com.dmitriim.localaiplayground.core.voice.tts.SynthesizeSpeech
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

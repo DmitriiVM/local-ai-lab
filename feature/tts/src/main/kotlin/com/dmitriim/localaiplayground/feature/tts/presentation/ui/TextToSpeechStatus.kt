@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackState
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
-import com.dmitriim.localaiplayground.feature.tts.domain.SpeechSynthesisMetrics
+import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisMetrics
 
 @Composable
 internal fun TextToSpeechPlaybackStatus(playback: SpeechPlaybackState) {
@@ -68,9 +68,9 @@ internal fun TextToSpeechMetricsCard(metrics: SpeechSynthesisMetrics) {
                 "${metrics.sampleRateHz} Hz · underruns: ${metrics.playbackUnderrunCount} · " +
                     "load: ${formatDuration(metrics.loadDurationMs)} · threads: ${metrics.effectiveThreadCount}",
             )
-            if (metrics.conditioningDurationMs != null) {
+            metrics.conditioningDurationMs?.let { conditioningDurationMs ->
                 Text(
-                    "Chatterbox conditioning: ${formatDuration(metrics.conditioningDurationMs)} " +
+                    "Chatterbox conditioning: ${formatDuration(conditioningDurationMs)} " +
                         "(${if (metrics.conditioningCacheHit == true) "cache hit" else "encoded"}) · " +
                         "tokens: ${formatOptionalDuration(metrics.tokenGenerationDurationMs)} · " +
                         "decoder: ${formatOptionalDuration(metrics.decoderDurationMs)}",

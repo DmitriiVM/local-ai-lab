@@ -5,6 +5,7 @@ import com.dmitriim.localaiplayground.core.model.runs.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.core.model.service.RunRepository
+import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionMetrics
 import dev.zacsweers.metro.Inject
 import java.util.UUID
 import kotlinx.serialization.json.Json

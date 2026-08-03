@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.feature.tts.domain
+package com.dmitriim.localaiplayground.core.voice.tts
 
 import android.app.Application
 import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechEngine

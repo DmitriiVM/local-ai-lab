@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:navigation"))
     implementation(project(":core:result"))
+    implementation(project(":core:voice"))
     implementation(project(":source:runs"))
     implementation(project(":source:settings"))
     implementation(platform(libs.androidx.compose.bom))

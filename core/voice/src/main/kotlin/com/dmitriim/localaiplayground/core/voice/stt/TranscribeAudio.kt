@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.feature.stt.domain
+package com.dmitriim.localaiplayground.core.voice.stt
 
 import android.os.SystemClock
 import android.util.Log

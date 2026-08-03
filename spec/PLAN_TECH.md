@@ -124,9 +124,8 @@ Use Gradle modules from the application-foundation stage:
 ├── :core:di
 ├── :core:model
 ├── :core:result
-├── :core:metrics
-├── :core:files
 ├── :core:audio
+├── :core:voice
 ├── :ai:api
 ├── :ai:llamacpp
 ├── :ai:sherpa

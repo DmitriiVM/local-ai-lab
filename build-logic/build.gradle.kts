@@ -35,6 +35,11 @@ gradlePlugin {
             implementationClass =
                 "com.dmitriim.localaiplayground.buildlogic.dependency.SherpaOnnxConventionPlugin"
         }
+        register("featureBoundaries") {
+            id = "local-ai.feature-boundaries"
+            implementationClass =
+                "com.dmitriim.localaiplayground.buildlogic.dependency.FeatureBoundaryConventionPlugin"
+        }
         register("androidLint") {
             id = "local-ai.android-lint"
             implementationClass =

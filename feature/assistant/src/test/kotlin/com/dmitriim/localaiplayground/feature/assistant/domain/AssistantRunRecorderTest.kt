@@ -7,7 +7,7 @@ import com.dmitriim.localaiplayground.core.model.device.StorageUsage
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.core.model.service.RunRepository
-import com.dmitriim.localaiplayground.feature.stt.domain.SpeechTranscriptionMetrics
+import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionMetrics
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
