@@ -45,13 +45,7 @@ data class TextToSpeechUiState(
 ) {
     val selectedModel: TtsModelOption? get() = models.firstOrNull { it.id == selectedModelId }
     val compatibleVoices: List<TtsVoiceOption>
-        get() = selectedModel?.let { model ->
-            if (model.voiceMode == TtsVoiceMode.REFERENCE_AUDIO) {
-                referenceVoices.map(ReferenceVoice::toTtsVoiceOption)
-            } else {
-                model.compatibleVoices(language)
-            }
-        }.orEmpty()
+        get() = TtsVoiceResolver.forModel(selectedModel, language, referenceVoices)
     val selectedVoice: TtsVoiceOption?
         get() = compatibleVoices.firstOrNull { it.id == selectedVoiceId }
     val characterLimit: Int get() = SynthesizeSpeech.MAX_TEXT_CHARACTERS
@@ -158,15 +152,6 @@ private fun ModelManifest.toTtsModelOption(
         installed = installed,
     )
 }
-
-private fun ReferenceVoice.toTtsVoiceOption() = TtsVoiceOption(
-    id = id,
-    displayName = displayName,
-    speakerId = null,
-    languages = setOf("en"),
-    description = "${durationMs / 1_000.0} s · $sourceDescription",
-    reference = this,
-)
 
 internal fun TtsModelOption.compatibleVoices(language: TtsLanguage): List<TtsVoiceOption> {
     if (languages.none { languageCode(it) == language.code }) return emptyList()
