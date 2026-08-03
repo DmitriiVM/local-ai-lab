@@ -18,5 +18,4 @@
 .externalNativeBuild
 .cxx
 local.properties
-/third_party/llama.cpp/
 /third_party/stage0-models/

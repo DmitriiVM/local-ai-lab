@@ -17,7 +17,7 @@ endif()
 set(LLAMA_SRC "${CMAKE_CURRENT_LIST_DIR}/../../../../../third_party/llama.cpp")
 
 if(NOT EXISTS "${LLAMA_SRC}/CMakeLists.txt")
-    message(FATAL_ERROR "Pinned llama.cpp source is missing at ${LLAMA_SRC}")
+    message(FATAL_ERROR "Vendored llama.cpp source is missing at ${LLAMA_SRC}")
 endif()
 
 add_subdirectory("${LLAMA_SRC}" llama-build)
