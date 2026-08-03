@@ -18,6 +18,7 @@ work = "2.11.2"
 commonsCompress = "1.28.0"
 datastore = "1.2.1"
 onnxRuntime = "1.27.0"
+sherpaOnnx = "v1.13.4"
 vosk = "0.3.75"
 litertLm = "0.15.0"
 detekt = "2.0.0-alpha.5"
@@ -60,6 +61,7 @@ metrox-viewmodel = { group = "dev.zacsweers.metro", name = "metrox-viewmodel", v
 metrox-viewmodel-compose = { group = "dev.zacsweers.metro", name = "metrox-viewmodel-compose", version.ref = "metro" }
 commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commonsCompress" }
 onnxruntime-android = { group = "com.microsoft.onnxruntime", name = "onnxruntime-android", version.ref = "onnxRuntime" }
+sherpa-onnx = { group = "com.github.k2-fsa", name = "sherpa-onnx", version.ref = "sherpaOnnx" }
 vosk-android = { group = "com.alphacephei", name = "vosk-android", version.ref = "vosk" }
 litertlm-android = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertLm" }
 detekt-gradle-plugin = { group = "dev.detekt", name = "dev.detekt.gradle.plugin", version.ref = "detekt" }

@@ -1,5 +1,6 @@
 plugins {
     id("local-ai.android.application")
+    id("local-ai.sherpa-onnx")
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.metro)
