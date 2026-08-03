@@ -16,4 +16,5 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.metro.runtime)
+    testImplementation(libs.junit)
 }

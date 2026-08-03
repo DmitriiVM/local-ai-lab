@@ -6,6 +6,9 @@ plugins {
 
 android {
     namespace = "com.dmitriim.localaiplayground.feature.assistant"
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -32,4 +35,5 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.metrox.viewmodel)
     implementation(libs.metrox.viewmodel.compose)
+    testImplementation(libs.junit)
 }

@@ -10,9 +10,6 @@ import com.dmitriim.localaiplayground.core.di.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.util.Properties
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -104,8 +101,7 @@ class ReferenceVoiceStore(
     ): ReferenceVoice {
         val id = UUID.randomUUID().toString()
         val pcm = File(directory, "$id.pcm")
-        val retainedBytes = (durationMs * REFERENCE_SAMPLE_RATE_HZ / 1_000 * PCM16_BYTES)
-            .coerceAtMost(MAX_REFERENCE_PCM_BYTES)
+        val retainedBytes = ReferenceVoiceMetadataCodec.retainedPcmBytes(durationMs)
         java.io.RandomAccessFile(temporary, "rw").use { it.setLength(retainedBytes) }
         if (!temporary.renameTo(pcm)) {
             temporary.copyTo(pcm, overwrite = false)
@@ -114,21 +110,12 @@ class ReferenceVoiceStore(
         val voice = ReferenceVoice(
             id = id,
             displayName = displayName.take(80),
-            durationMs = pcm.length() / PCM16_BYTES * 1_000 / REFERENCE_SAMPLE_RATE_HZ,
+            durationMs = ReferenceVoiceMetadataCodec.durationMs(pcm.length()),
             createdAtEpochMs = System.currentTimeMillis(),
             sourceDescription = sourceDescription,
             pcmFilePath = pcm.absolutePath,
         )
-        Properties().apply {
-            setProperty("id", voice.id)
-            setProperty("displayName", voice.displayName)
-            setProperty("durationMs", voice.durationMs.toString())
-            setProperty("createdAtEpochMs", voice.createdAtEpochMs.toString())
-            setProperty("sourceDescription", voice.sourceDescription)
-            FileOutputStream(metadataFile(id)).use {
-                store(it, "Local AI Playground reference voice")
-            }
-        }
+        ReferenceVoiceMetadataCodec.write(metadataFile(id), voice)
         mutableVoices.value = loadVoices()
         return voice
     }
@@ -138,26 +125,7 @@ class ReferenceVoiceStore(
             "properties"
     }
         .orEmpty()
-        .mapNotNull { metadata ->
-            runCatching {
-                val values = Properties().apply {
-                    FileInputStream(metadata).use(::load)
-                }
-                val id = requireNotNull(values.getProperty("id"))
-                val pcm = File(directory, "$id.pcm")
-                require(pcm.isFile)
-                ReferenceVoice(
-                    id = id,
-                    displayName = requireNotNull(values.getProperty("displayName")),
-                    durationMs = requireNotNull(values.getProperty("durationMs")).toLong(),
-                    createdAtEpochMs = requireNotNull(
-                        values.getProperty("createdAtEpochMs"),
-                    ).toLong(),
-                    sourceDescription = requireNotNull(values.getProperty("sourceDescription")),
-                    pcmFilePath = pcm.absolutePath,
-                )
-            }.getOrNull()
-        }
+        .mapNotNull { metadata -> ReferenceVoiceMetadataCodec.read(directory, metadata) }
         .sortedByDescending(ReferenceVoice::createdAtEpochMs)
 
     private fun metadataFile(id: String) = File(directory, "$id.properties")
@@ -178,8 +146,5 @@ class ReferenceVoiceStore(
         const val REFERENCE_SAMPLE_RATE_HZ = 24_000
         const val MIN_REFERENCE_DURATION_MS = 5_000L
         const val MAX_REFERENCE_DURATION_MS = 10_000L
-        private const val PCM16_BYTES = 2L
-        private const val MAX_REFERENCE_PCM_BYTES =
-            MAX_REFERENCE_DURATION_MS * REFERENCE_SAMPLE_RATE_HZ / 1_000 * PCM16_BYTES
     }
 }

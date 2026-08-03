@@ -124,7 +124,7 @@ class DataStoreAssistantPreferencesRepository(
     }
 }
 
-private class LegacyChatDefaultsMigration(
+internal class LegacyChatDefaultsMigration(
     private val maxOutputTokensKey: Preferences.Key<Int>,
     private val contextSizeKey: Preferences.Key<Int>,
     private val migrationCompletedKey: Preferences.Key<Boolean>,

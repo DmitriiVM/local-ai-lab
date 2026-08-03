@@ -16,4 +16,5 @@ dependencies {
     implementation(project(":core:di"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.onnxruntime.android)
+    testImplementation(libs.junit)
 }

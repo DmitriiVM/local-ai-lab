@@ -12,6 +12,7 @@ import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import dev.zacsweers.metro.Inject
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -112,6 +113,7 @@ class SynthesizeSpeech(
                         for (chunk in requireNotNull(chunks)) {
                             if (!activeSession.write(chunk)) {
                                 Log.w(TAG, "TTS playback stopped accepting audio; cancelling native synthesis.")
+                                playbackFailure.set(CancellationException("Speech playback stopped accepting audio."))
                                 textToSpeechEngine.cancel()
                                 break
                             }

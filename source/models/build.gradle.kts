@@ -6,6 +6,9 @@ plugins {
 
 android {
     namespace = "com.dmitriim.localaiplayground.source.models"
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -21,4 +24,5 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.metro.runtime)
+    testImplementation(libs.junit)
 }

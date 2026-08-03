@@ -14,7 +14,6 @@ import com.dmitriim.localaiplayground.core.model.library.InstalledModel
 import com.dmitriim.localaiplayground.core.model.library.ModelImportRequest
 import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
-import com.dmitriim.localaiplayground.core.model.manifest.ModelFileSpec
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
 import com.dmitriim.localaiplayground.core.model.manifest.ModelSource
@@ -87,11 +86,11 @@ class InstalledModelService(
                 val copiedNames = request.documentUris.map { uriString ->
                     val uri = uriString.toUri()
                     val name = documentName(uri)
-                    require(isSafeName(name)) { "The document name is not safe to install." }
+                    require(ModelImportPolicy.isSafeFileName(name)) { "The document name is not safe to install." }
                     require(copiedNamesSafe(temporary, name)) { "More than one selected document is named $name." }
                     application.contentResolver.openInputStream(uri).use { input ->
                         requireNotNull(input) { "The selected document is no longer readable." }
-                        val destination = File(temporary, name)
+                        val destination = ModelImportPolicy.destination(temporary, name)
                         FileOutputStream(destination).use { output -> input.copyTo(output) }
                         Log.i(TAG, "Model import file copied: name=$name, bytes=${destination.length()}")
                     }
@@ -158,7 +157,7 @@ class InstalledModelService(
         require(validation.first == ModelValidationState.READY) { validation.second ?: "Model validation failed." }
         val enriched = validator.enrichChecksums(manifest, temporary)
         File(temporary, "manifest.json").writeText(json.encodeToString(enriched))
-        val finalDirectory = File(rootDirectory, directoryName(enriched.modelId))
+        val finalDirectory = File(rootDirectory, ModelImportPolicy.directoryName(enriched.modelId))
         withContext(NonCancellable) {
             require(!finalDirectory.exists()) { "A model with this ID is already installed." }
             require(temporary.renameTo(finalDirectory)) { "Could not complete the model installation transaction." }
@@ -178,7 +177,7 @@ class InstalledModelService(
             if (File(rootDirectory, record.localDirectoryName).isDirectory) return@withContext true
             dao.delete(record.modelId)
         }
-        val directory = File(rootDirectory, directoryName(modelId))
+        val directory = File(rootDirectory, ModelImportPolicy.directoryName(modelId))
         val manifest = readInstalledManifest(directory) ?: return@withContext false
         if (manifest.modelId != modelId) return@withContext false
         val validation = validator.validate(manifest, directory)
@@ -209,25 +208,10 @@ class InstalledModelService(
         engineId = request.engineId,
         profileType = request.profileType,
         format = definition.format,
-        files = roleSpecsForImport(definition, copiedNames),
+        files = ModelImportPolicy.roleSpecs(definition, copiedNames),
         source = ModelSource(null, licenseName = "User supplied", attribution = "Imported from a user-selected document."),
         installedAtEpochMs = System.currentTimeMillis(),
     )
-
-    private fun roleSpecsForImport(definition: ModelImportDefinition, names: List<String>): List<ModelFileSpec> = definition.files.map { file ->
-        val relativePath = when {
-            file.directory -> {
-                val path = requireNotNull(file.relativePath)
-                require(names.any { it.startsWith("$path/") }) { "Missing $path directory." }
-                path
-            }
-            file.relativePath != null -> names.firstOrNull { it == file.relativePath }
-                ?: error("Missing ${file.relativePath}. Select all required companion files.")
-            else -> names.singleOrNull { it.endsWith(requireNotNull(file.extension), ignoreCase = true) }
-                ?: error("Select exactly one ${file.extension} file.")
-        }
-        ModelFileSpec(relativePath, file.role, directory = file.directory)
-    }
 
     private suspend fun reconcileInstalledModels() {
         dao.all().forEach { record ->
@@ -295,8 +279,6 @@ class InstalledModelService(
         )
     }.getOrNull()
 
-    private fun directoryName(id: ModelId): String = id.value.replace(Regex("[^A-Za-z0-9._-]"), "_")
-    private fun isSafeName(name: String) = name.isNotBlank() && !name.contains('/') && !name.contains('\\') && name != "." && name != ".."
     private fun copiedNamesSafe(directory: File, name: String) = !File(directory, name).exists()
 
     private fun copyDirectoryTree(treeUri: android.net.Uri, destinationRoot: File): List<String> {
@@ -320,10 +302,9 @@ class InstalledModelService(
                 val mimeIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
                 while (cursor.moveToNext()) {
                     val name = cursor.getString(nameIndex)
-                    require(isSafeName(name)) { "The selected directory contains an unsafe path." }
+                    require(ModelImportPolicy.isSafeFileName(name)) { "The selected directory contains an unsafe path." }
                     val relative = listOfNotNull(relativeParent.takeIf(String::isNotBlank), name).joinToString(File.separator)
-                    val target = File(destinationRoot, relative)
-                    require(target.canonicalPath.startsWith(destinationRoot.canonicalPath + File.separator)) { "The selected directory contains an unsafe path." }
+                    val target = ModelImportPolicy.destination(destinationRoot, relative)
                     val documentId = cursor.getString(idIndex)
                     if (cursor.getString(mimeIndex) == DocumentsContract.Document.MIME_TYPE_DIR) {
                         require(target.mkdirs() || target.isDirectory) { "Could not copy model directory $relative." }

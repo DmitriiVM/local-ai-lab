@@ -14,8 +14,6 @@ import com.dmitriim.localaiplayground.core.di.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import java.nio.charset.StandardCharsets
-import java.util.Base64
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -47,7 +45,7 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
     override val ttsSelection: Flow<TtsSelectionPreferences> = store.data.map { values ->
         TtsSelectionPreferences(
             selectedModelId = values[TTS_SELECTED_MODEL],
-            voiceIdsByModel = values[TTS_VOICE_SELECTIONS].orEmpty().mapNotNull(::decodeVoiceSelection).toMap(),
+            voiceIdsByModel = values[TTS_VOICE_SELECTIONS].orEmpty().mapNotNull(TtsVoiceSelectionCodec::decode).toMap(),
         )
     }
     override val sttSelectedModel: Flow<String?> = store.data.map { values -> values[STT_SELECTED_MODEL] }
@@ -79,12 +77,12 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
     override suspend fun updateTtsVoice(modelId: String, voiceId: String) {
         store.edit { values ->
             val selections = values[TTS_VOICE_SELECTIONS].orEmpty()
-                .mapNotNull(::decodeVoiceSelection)
+                .mapNotNull(TtsVoiceSelectionCodec::decode)
                 .toMap()
                 .toMutableMap()
                 .apply { put(modelId, voiceId) }
             values[TTS_VOICE_SELECTIONS] = selections.mapTo(mutableSetOf()) { (savedModelId, savedVoiceId) ->
-                encodeVoiceSelection(savedModelId, savedVoiceId)
+                TtsVoiceSelectionCodec.encode(savedModelId, savedVoiceId)
             }
         }
     }
@@ -92,12 +90,12 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
     override suspend fun clearTtsVoice(modelId: String) {
         store.edit { values ->
             val selections = values[TTS_VOICE_SELECTIONS].orEmpty()
-                .mapNotNull(::decodeVoiceSelection)
+                .mapNotNull(TtsVoiceSelectionCodec::decode)
                 .toMap()
                 .toMutableMap()
                 .apply { remove(modelId) }
             values[TTS_VOICE_SELECTIONS] = selections.mapTo(mutableSetOf()) { (savedModelId, savedVoiceId) ->
-                encodeVoiceSelection(savedModelId, savedVoiceId)
+                TtsVoiceSelectionCodec.encode(savedModelId, savedVoiceId)
             }
         }
     }
@@ -124,22 +122,5 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
         val TTS_SELECTED_MODEL = stringPreferencesKey("tts_selected_model")
         val TTS_VOICE_SELECTIONS = stringSetPreferencesKey("tts_voice_selections")
         val STT_SELECTED_MODEL = stringPreferencesKey("stt_selected_model")
-
-        fun encodeVoiceSelection(modelId: String, voiceId: String): String = "${encode(modelId)}:${encode(voiceId)}"
-
-        fun decodeVoiceSelection(value: String): Pair<String, String>? = runCatching {
-            val separator = value.indexOf(':')
-            require(separator > 0 && separator < value.lastIndex)
-            decode(value.substring(0, separator)) to decode(value.substring(separator + 1))
-        }.getOrNull()
-
-        fun encode(value: String): String = Base64.getUrlEncoder()
-            .withoutPadding()
-            .encodeToString(value.toByteArray(StandardCharsets.UTF_8))
-
-        fun decode(value: String): String = String(
-            Base64.getUrlDecoder().decode(value),
-            StandardCharsets.UTF_8,
-        )
     }
 }

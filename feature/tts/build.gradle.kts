@@ -6,6 +6,10 @@ plugins {
 
 android {
     namespace = "com.dmitriim.localaiplayground.feature.tts"
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -29,4 +33,5 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.metrox.viewmodel)
     implementation(libs.metrox.viewmodel.compose)
+    testImplementation(libs.junit)
 }
