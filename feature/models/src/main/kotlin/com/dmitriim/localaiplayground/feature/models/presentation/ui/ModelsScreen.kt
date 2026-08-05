@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.engine.EngineId
 import com.dmitriim.localaiplayground.core.model.library.CatalogModel
 import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localaiplayground.core.model.library.InstalledModel
@@ -50,9 +51,16 @@ fun ModelsScreen(
 ) {
     val dimensions = LocalAppDimensions.current
     var typeFilter by rememberSaveable { mutableStateOf(ModelTypeFilter.ALL) }
+    var runtimeFilter by rememberSaveable { mutableStateOf<String?>(null) }
     var installationFilter by rememberSaveable { mutableStateOf(ModelInstallationFilter.ALL) }
-    val modelItems = uiState.toModelListItems()
+    val allModelItems = uiState.toModelListItems()
+    val runtimeIds = allModelItems
+        .map { it.manifest.engineId }
+        .distinct()
+        .sortedBy { it.displayLabel }
+    val modelItems = allModelItems
         .filter { typeFilter.matches(it.manifest) }
+        .filter { runtimeFilter == null || it.manifest.engineId.value == runtimeFilter }
         .filter { installationFilter.matches(it) }
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
@@ -72,8 +80,11 @@ fun ModelsScreen(
         item {
             ModelFilters(
                 typeFilter = typeFilter,
+                runtimeIds = runtimeIds,
+                runtimeFilter = runtimeFilter,
                 installationFilter = installationFilter,
                 onTypeFilterChange = { typeFilter = it },
+                onRuntimeFilterChange = { runtimeFilter = it },
                 onInstallationFilterChange = { installationFilter = it },
             )
         }
@@ -120,8 +131,11 @@ fun ModelsScreen(
 @Composable
 private fun ModelFilters(
     typeFilter: ModelTypeFilter,
+    runtimeIds: List<EngineId>,
+    runtimeFilter: String?,
     installationFilter: ModelInstallationFilter,
     onTypeFilterChange: (ModelTypeFilter) -> Unit,
+    onRuntimeFilterChange: (String?) -> Unit,
     onInstallationFilterChange: (ModelInstallationFilter) -> Unit,
 ) {
     Card {
@@ -129,7 +143,6 @@ private fun ModelFilters(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text("Show models", style = MaterialTheme.typography.titleMedium)
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(ModelTypeFilter.entries.size) { index ->
                     val filter = ModelTypeFilter.entries[index]
@@ -140,7 +153,23 @@ private fun ModelFilters(
                     )
                 }
             }
-            Text("Availability", style = MaterialTheme.typography.titleMedium)
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                item {
+                    FilterChip(
+                        selected = runtimeFilter == null,
+                        onClick = { onRuntimeFilterChange(null) },
+                        label = { Text("All") },
+                    )
+                }
+                items(runtimeIds.size) { index ->
+                    val runtime = runtimeIds[index]
+                    FilterChip(
+                        selected = runtimeFilter == runtime.value,
+                        onClick = { onRuntimeFilterChange(runtime.value) },
+                        label = { Text(runtime.displayLabel) },
+                    )
+                }
+            }
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(ModelInstallationFilter.entries.size) { index ->
                     val filter = ModelInstallationFilter.entries[index]
@@ -154,6 +183,12 @@ private fun ModelFilters(
         }
     }
 }
+
+private val EngineId.displayLabel: String
+    get() = when (value) {
+        "litert-lm" -> "LiteRT-LM"
+        else -> value
+    }
 
 private enum class ModelTypeFilter(
     val label: String,
