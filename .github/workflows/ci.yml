@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-analysis:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Android build
+        uses: ./.github/actions/setup-android-build
+
+      - name: Run static analysis
+        run: ./gradlew staticAnalysis --no-daemon
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Android build
+        uses: ./.github/actions/setup-android-build
+
+      - name: Run JVM unit tests
+        run: ./gradlew testDebugUnitTest --no-daemon
+
+  debug-apk:
+    name: Debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Android build
+        uses: ./.github/actions/setup-android-build
+
+      - name: Assemble debug APK
+        run: ./gradlew :app:assembleDebug --no-daemon
+
+      - name: Upload debug APK
+        if: success()
+        uses: actions/upload-artifact@v6
+        with:
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
