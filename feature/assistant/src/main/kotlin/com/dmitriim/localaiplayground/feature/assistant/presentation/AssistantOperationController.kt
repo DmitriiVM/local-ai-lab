@@ -415,16 +415,28 @@ internal class AssistantOperationController(
                 if (event is SpeechSynthesisEvent.Completed) metrics = event.metrics
             }
             activeLinkedRunIds += runRecorder.recordSpeechOutput(
-                RunStatus.SUCCEEDED, startedAt, model.toRunSnapshot(), text, snapshot.speechOutputSettings.languageCode,
-                voice.id, metrics, null,
+                status = RunStatus.SUCCEEDED,
+                startedAtEpochMs = startedAt,
+                model = model.toRunSnapshot(),
+                text = text,
+                languageCode = snapshot.speechOutputSettings.languageCode,
+                voiceId = voice.id,
+                metrics = metrics,
+                error = null,
             )
             state.update { it.copy(operation = AssistantOperation.Idle, speakingMessageId = null, statusMessage = null) }
             SpeechOutcome(succeeded = true)
         } catch (cancelled: CancellationException) {
             withContext(NonCancellable) {
                 activeLinkedRunIds += runRecorder.recordSpeechOutput(
-                    RunStatus.CANCELLED, startedAt, model.toRunSnapshot(), text, snapshot.speechOutputSettings.languageCode,
-                    voice.id, metrics, "Speech playback cancelled.",
+                    status = RunStatus.CANCELLED,
+                    startedAtEpochMs = startedAt,
+                    model = model.toRunSnapshot(),
+                    text = text,
+                    languageCode = snapshot.speechOutputSettings.languageCode,
+                    voiceId = voice.id,
+                    metrics = metrics,
+                    error = "Speech playback cancelled.",
                 )
             }
             state.update { it.copy(operation = AssistantOperation.Idle, speakingMessageId = null, statusMessage = "Speech stopped.") }
@@ -433,8 +445,14 @@ internal class AssistantOperationController(
             val message = error.message ?: "Could not speak this response."
             withContext(NonCancellable) {
                 activeLinkedRunIds += runRecorder.recordSpeechOutput(
-                    RunStatus.FAILED, startedAt, model.toRunSnapshot(), text, snapshot.speechOutputSettings.languageCode,
-                    voice.id, metrics, message,
+                    status = RunStatus.FAILED,
+                    startedAtEpochMs = startedAt,
+                    model = model.toRunSnapshot(),
+                    text = text,
+                    languageCode = snapshot.speechOutputSettings.languageCode,
+                    voiceId = voice.id,
+                    metrics = metrics,
+                    error = message,
                 )
             }
             state.update { it.copy(operation = AssistantOperation.Idle, speakingMessageId = null, errorMessage = message, statusMessage = null) }

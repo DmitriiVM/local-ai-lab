@@ -9,7 +9,6 @@ import com.dmitriim.localaiplayground.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoiceStore
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
-import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import com.dmitriim.localaiplayground.core.model.service.ModelLibrary
@@ -173,8 +172,8 @@ class AssistantViewModel(
 
     fun speakMessage(messageId: String) = operationController.speakMessage(messageId)
 
-    fun previewVoice(modelId: ModelId, voiceId: String, settings: SpeechOutputSettings): String? =
-        operationController.previewVoice(modelId, voiceId, settings)
+    fun previewVoice(modelId: ModelId, voiceId: String, settings: SpeechOutputSettings): String? = operationController
+        .previewVoice(modelId, voiceId, settings)
 
     fun regenerate() = operationController.regenerate()
 

@@ -29,26 +29,29 @@ abstract class StripOnnxRuntimeFromAarTransform : TransformAction<TransformParam
 
         ZipFile(inputAar).use { input ->
             ZipOutputStream(outputAar.outputStream().buffered()).use { output ->
-                input.entries().asSequence()
-                    .filterNot { it.name.matches(ONNX_RUNTIME_NATIVE_LIBRARY) }
-                    .forEach { entry ->
-                        output.putNextEntry(entry.copyForOutput())
-                        if (!entry.isDirectory) {
-                            input.getInputStream(entry).use { it.copyTo(output) }
-                        }
-                        output.closeEntry()
-                    }
+                input.copyEntriesTo(output)
             }
         }
     }
 
-    private fun ZipEntry.copyForOutput(): ZipEntry =
-        ZipEntry(name).also { copy ->
-            copy.time = time
-            copy.comment = comment
-            copy.extra = extra
-            copy.method = ZipEntry.DEFLATED
-        }
+    private fun ZipFile.copyEntriesTo(output: ZipOutputStream) {
+        entries().asSequence()
+            .filterNot { it.name.matches(ONNX_RUNTIME_NATIVE_LIBRARY) }
+            .forEach { entry ->
+                output.putNextEntry(entry.copyForOutput())
+                if (!entry.isDirectory) {
+                    getInputStream(entry).use { it.copyTo(output) }
+                }
+                output.closeEntry()
+            }
+    }
+
+    private fun ZipEntry.copyForOutput(): ZipEntry = ZipEntry(name).also { copy ->
+        copy.time = time
+        copy.comment = comment
+        copy.extra = extra
+        copy.method = ZipEntry.DEFLATED
+    }
 
     private companion object {
         val ONNX_RUNTIME_NATIVE_LIBRARY = Regex("jni/[^/]+/libonnxruntime\\.so")

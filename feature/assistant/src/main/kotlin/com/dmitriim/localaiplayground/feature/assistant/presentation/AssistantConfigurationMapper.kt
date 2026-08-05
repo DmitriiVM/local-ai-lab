@@ -108,5 +108,6 @@ private fun AssistantChatPreferences.toUi() = ChatSettings(
     threadCount = threadCount.toString(),
 )
 
-private fun ChatSettings.toEffectiveOrDefault(contextSize: Int): EffectiveChatSettings =
-    runCatching(::toEffective).getOrElse { ChatSettings(contextSize = contextSize.toString()).toEffective() }
+private fun ChatSettings.toEffectiveOrDefault(contextSize: Int): EffectiveChatSettings = runCatching(::toEffective).getOrElse {
+    ChatSettings(contextSize = contextSize.toString()).toEffective()
+}

@@ -20,16 +20,16 @@ internal object TtsSpeechSettingsFactory {
         audioEffects = state.audioEffects,
     )
 
-    private fun voiceCondition(voice: TtsVoiceOption): TextToSpeechVoiceCondition =
-        voice.platformVoiceId?.let(TextToSpeechVoiceCondition::PlatformVoice)
-            ?: voice.reference?.let { reference ->
-                TextToSpeechVoiceCondition.ReferenceAudio(
-                    referenceId = reference.id,
-                    displayName = reference.displayName,
-                    pcmFilePath = reference.pcmFilePath,
-                    sampleRateHz = reference.sampleRateHz,
-                )
-            } ?: TextToSpeechVoiceCondition.FixedSpeaker(
-            requireNotNull(voice.speakerId) { "The selected fixed voice has no speaker ID." },
-        )
+    private fun voiceCondition(voice: TtsVoiceOption): TextToSpeechVoiceCondition = voice.platformVoiceId
+        ?.let(TextToSpeechVoiceCondition::PlatformVoice)
+        ?: voice.reference?.let { reference ->
+            TextToSpeechVoiceCondition.ReferenceAudio(
+                referenceId = reference.id,
+                displayName = reference.displayName,
+                pcmFilePath = reference.pcmFilePath,
+                sampleRateHz = reference.sampleRateHz,
+            )
+        } ?: TextToSpeechVoiceCondition.FixedSpeaker(
+        requireNotNull(voice.speakerId) { "The selected fixed voice has no speaker ID." },
+    )
 }

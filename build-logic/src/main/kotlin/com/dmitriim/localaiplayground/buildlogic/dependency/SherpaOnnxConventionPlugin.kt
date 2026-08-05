@@ -2,8 +2,8 @@ package com.dmitriim.localaiplayground.buildlogic.dependency
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.attributes.Attribute
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition
+import org.gradle.api.attributes.Attribute
 import org.gradle.kotlin.dsl.registerTransform
 
 class SherpaOnnxConventionPlugin : Plugin<Project> {
