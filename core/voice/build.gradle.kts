@@ -5,6 +5,10 @@ plugins {
 
 android {
     namespace = "com.dmitriim.localaiplayground.core.voice"
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
