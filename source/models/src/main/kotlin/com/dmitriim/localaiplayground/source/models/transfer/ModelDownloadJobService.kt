@@ -26,10 +26,9 @@ class ModelDownloadJobService : JobService() {
             )
         }
         runningJob = scope.launch {
-            val success = ModelDownloadRuntime.executor
+            val result = ModelDownloadRuntime.executor
                 ?.executeScheduledDownload(ModelId(modelId))
-                ?.isSuccess == true
-            jobFinished(params, !success)
+            jobFinished(params, result?.isSuccess != true && result?.shouldRetryDownload() == true)
         }
         return true
     }

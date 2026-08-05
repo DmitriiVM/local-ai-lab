@@ -7,6 +7,8 @@ import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioSt
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.device.StorageUsage
 import com.dmitriim.localaiplayground.core.model.service.RunRepository
+import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
+import com.dmitriim.localaiplayground.core.model.service.ModelDownloadCredentials
 import com.dmitriim.localaiplayground.source.settings.AppSettings
 import com.dmitriim.localaiplayground.source.settings.AppSettingsRepository
 import dev.zacsweers.metro.ContributesIntoMap
@@ -28,12 +30,18 @@ class SettingsViewModel(
     private val runRepository: RunRepository,
     private val audioInputStore: AudioInputStore,
     private val generatedAudioStore: GeneratedAudioStore,
+    private val downloadCredentials: ModelDownloadCredentials,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(SettingsUiState())
     val state: StateFlow<SettingsUiState> = mutableState.asStateFlow()
 
     init {
         viewModelScope.launch { settingsRepository.settings.collectLatest { settings -> mutableState.update { it.copy(settings = settings) } } }
+        viewModelScope.launch {
+            downloadCredentials.huggingFaceCredentialStatus.collectLatest { status ->
+                mutableState.update { it.copy(huggingFaceCredentialStatus = status) }
+            }
+        }
         refreshStorage()
     }
 
@@ -59,10 +67,45 @@ class SettingsViewModel(
         generatedAudioStore.clearLatest()
         mutableState.update { it.copy(storage = runRepository.storageUsage()) }
     }
+
+    fun requestHuggingFaceToken() = mutableState.update {
+        it.copy(showHuggingFaceTokenDialog = true, huggingFaceTokenError = null)
+    }
+
+    fun dismissHuggingFaceToken() = mutableState.update {
+        it.copy(showHuggingFaceTokenDialog = false, isSavingHuggingFaceToken = false, huggingFaceTokenError = null)
+    }
+
+    fun saveHuggingFaceToken(token: String) = viewModelScope.launch {
+        mutableState.update { it.copy(isSavingHuggingFaceToken = true, huggingFaceTokenError = null) }
+        downloadCredentials.saveHuggingFaceToken(token).fold(
+            onSuccess = {
+                mutableState.update {
+                    it.copy(showHuggingFaceTokenDialog = false, isSavingHuggingFaceToken = false)
+                }
+            },
+            onFailure = { error ->
+                mutableState.update {
+                    it.copy(
+                        isSavingHuggingFaceToken = false,
+                        huggingFaceTokenError = error.message ?: "The token could not be saved.",
+                    )
+                }
+            },
+        )
+    }
+
+    fun clearHuggingFaceToken() = viewModelScope.launch {
+        downloadCredentials.clearHuggingFaceToken()
+    }
 }
 
 data class SettingsUiState(
     val settings: AppSettings = AppSettings(),
     val storage: StorageUsage = StorageUsage(),
     val pendingRunHistoryClear: Boolean = false,
+    val huggingFaceCredentialStatus: HuggingFaceCredentialStatus = HuggingFaceCredentialStatus.MISSING,
+    val showHuggingFaceTokenDialog: Boolean = false,
+    val isSavingHuggingFaceToken: Boolean = false,
+    val huggingFaceTokenError: String? = null,
 )

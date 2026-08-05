@@ -20,5 +20,9 @@ fun SettingsRoute(
         onRequestClearRunHistory = viewModel::requestClearRunHistory,
         onDismissClearRunHistory = viewModel::dismissClearRunHistory,
         onClearRunHistory = viewModel::clearRunHistory,
+        onRequestHuggingFaceToken = viewModel::requestHuggingFaceToken,
+        onDismissHuggingFaceToken = viewModel::dismissHuggingFaceToken,
+        onSaveHuggingFaceToken = viewModel::saveHuggingFaceToken,
+        onClearHuggingFaceToken = viewModel::clearHuggingFaceToken,
     )
 }

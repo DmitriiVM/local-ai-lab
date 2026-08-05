@@ -7,11 +7,14 @@ import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.engine.EngineId
 import com.dmitriim.localaiplayground.core.model.library.ModelImportRequest
 import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
+import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
 import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileIds
 import com.dmitriim.localaiplayground.core.model.service.ModelDiagnostics
+import com.dmitriim.localaiplayground.core.model.service.ModelDownloadCredentials
+import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
 import com.dmitriim.localaiplayground.core.model.service.ModelLibrary
 import com.dmitriim.localaiplayground.core.model.service.ModelTransfers
 import dev.zacsweers.metro.ContributesIntoMap
@@ -31,21 +34,28 @@ class ModelsViewModel(
     private val modelLibrary: ModelLibrary,
     private val modelTransfers: ModelTransfers,
     private val modelDiagnostics: ModelDiagnostics,
+    private val downloadCredentials: ModelDownloadCredentials,
 ) : ViewModel() {
     private val mutableUiState = MutableStateFlow(ModelsUiState())
     val uiState: StateFlow<ModelsUiState> = mutableUiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            combine(modelLibrary.installedModels, modelTransfers.catalog, modelTransfers.transfers) { installed, catalog, transfers ->
-                Triple(installed, catalog, transfers)
-            }.collect { (installed, catalog, transfers) ->
+            combine(
+                modelLibrary.installedModels,
+                modelTransfers.catalog,
+                modelTransfers.transfers,
+                downloadCredentials.huggingFaceCredentialStatus,
+            ) { installed, catalog, transfers, credentialStatus ->
+                ModelData(installed, catalog, transfers, credentialStatus)
+            }.collect { data ->
                 mutableUiState.update { current ->
                     current.copy(
                         isModelDataLoaded = true,
-                        installed = installed,
-                        catalog = catalog,
-                        transfers = transfers,
+                        installed = data.installed,
+                        catalog = data.catalog,
+                        transfers = data.transfers,
+                        huggingFaceCredentialStatus = data.credentialStatus,
                     )
                 }
             }
@@ -129,11 +139,69 @@ class ModelsViewModel(
         }
     }
 
-    fun download(modelId: ModelId) = launchOperation("download") {
+    fun download(modelId: ModelId) {
+        val entry = mutableUiState.value.catalog.firstOrNull { it.manifest.modelId == modelId }
+        if (entry?.download?.authentication == CatalogDownloadAuthentication.HUGGING_FACE_USER_TOKEN &&
+            mutableUiState.value.huggingFaceCredentialStatus == HuggingFaceCredentialStatus.MISSING
+        ) {
+            requestHuggingFaceToken(modelId)
+            return
+        }
+        launchOperation("download") {
         Log.i(TAG, "Models UI download requested: modelId=${modelId.value}")
         modelTransfers.download(modelId).getOrThrow()
         Log.i(TAG, "Models UI download scheduled: modelId=${modelId.value}")
         "Download scheduled."
+        }
+    }
+
+    fun requestHuggingFaceToken(modelId: ModelId) {
+        mutableUiState.update {
+            it.copy(
+                pendingHuggingFaceTokenModelId = modelId,
+                huggingFaceTokenError = null,
+            )
+        }
+    }
+
+    fun dismissHuggingFaceToken() {
+        mutableUiState.update {
+            it.copy(
+                pendingHuggingFaceTokenModelId = null,
+                isSavingHuggingFaceToken = false,
+                huggingFaceTokenError = null,
+            )
+        }
+    }
+
+    fun saveHuggingFaceTokenAndDownload(token: String) {
+        val modelId = mutableUiState.value.pendingHuggingFaceTokenModelId ?: return
+        viewModelScope.launch {
+            mutableUiState.update { it.copy(isSavingHuggingFaceToken = true, huggingFaceTokenError = null) }
+            val result = downloadCredentials.saveHuggingFaceToken(token)
+                .mapCatching {
+                    modelTransfers.download(modelId).getOrThrow()
+                }
+            result.fold(
+                onSuccess = {
+                    mutableUiState.update {
+                        it.copy(
+                            pendingHuggingFaceTokenModelId = null,
+                            isSavingHuggingFaceToken = false,
+                            message = "Download scheduled.",
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    mutableUiState.update {
+                        it.copy(
+                            isSavingHuggingFaceToken = false,
+                            huggingFaceTokenError = error.message ?: "The token could not be saved.",
+                        )
+                    }
+                },
+            )
+        }
     }
 
     fun validate(modelId: ModelId) {
@@ -231,6 +299,13 @@ class ModelsViewModel(
         const val TAG = "AiP123Models"
     }
 }
+
+private data class ModelData(
+    val installed: List<com.dmitriim.localaiplayground.core.model.library.InstalledModel>,
+    val catalog: List<com.dmitriim.localaiplayground.core.model.library.CatalogModel>,
+    val transfers: Map<ModelId, com.dmitriim.localaiplayground.core.model.library.ModelTransferState>,
+    val credentialStatus: com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus,
+)
 
 private val ModelProfileId.displayName: String
     get() = when (this) {

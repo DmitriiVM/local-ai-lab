@@ -28,10 +28,13 @@ class ModelDownloadWorker(
         )
         return ModelDownloadRuntime.executor
             ?.executeScheduledDownload(ModelId(modelId))
-            ?.fold(
-                onSuccess = { Result.success() },
-                onFailure = { Result.retry() },
-            )
+            ?.let { result ->
+                when {
+                    result.isSuccess -> Result.success()
+                    result.shouldRetryDownload() -> Result.retry()
+                    else -> Result.failure()
+                }
+            }
             ?: Result.retry()
     }
 }

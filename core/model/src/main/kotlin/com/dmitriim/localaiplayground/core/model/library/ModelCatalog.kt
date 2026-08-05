@@ -19,7 +19,14 @@ data class CatalogDownload(
     val sha256: String? = null,
     val files: List<CatalogDownloadFile> = emptyList(),
     val archive: CatalogDownloadArchive? = null,
+    val authentication: CatalogDownloadAuthentication = CatalogDownloadAuthentication.NONE,
 )
+
+@Serializable
+enum class CatalogDownloadAuthentication {
+    NONE,
+    HUGGING_FACE_USER_TOKEN,
+}
 
 @Serializable
 data class CatalogDownloadArchive(

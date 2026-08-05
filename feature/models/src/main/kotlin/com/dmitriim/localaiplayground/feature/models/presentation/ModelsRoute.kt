@@ -55,5 +55,8 @@ fun ModelDetailsRoute(
         onDelete = viewModel::requestDelete,
         onConfirmDelete = viewModel::confirmDelete,
         onCancelDelete = viewModel::cancelDelete,
+        onRequestHuggingFaceToken = viewModel::requestHuggingFaceToken,
+        onSaveHuggingFaceToken = viewModel::saveHuggingFaceTokenAndDownload,
+        onDismissHuggingFaceToken = viewModel::dismissHuggingFaceToken,
     )
 }

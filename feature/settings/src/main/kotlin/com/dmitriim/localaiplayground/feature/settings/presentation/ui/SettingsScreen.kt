@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
 import com.dmitriim.localaiplayground.feature.settings.presentation.SettingsUiState
 import com.dmitriim.localaiplayground.source.settings.AppSettings
 import com.dmitriim.localaiplayground.source.settings.MetricDetail
@@ -39,6 +40,10 @@ fun SettingsScreen(
     onRequestClearRunHistory: () -> Unit,
     onDismissClearRunHistory: () -> Unit,
     onClearRunHistory: () -> Unit,
+    onRequestHuggingFaceToken: () -> Unit,
+    onDismissHuggingFaceToken: () -> Unit,
+    onSaveHuggingFaceToken: (String) -> Unit,
+    onClearHuggingFaceToken: () -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
     val settings = state.settings
@@ -49,6 +54,14 @@ fun SettingsScreen(
             text = { Text("This removes saved runs, but leaves conversations, installed models, and exported files untouched.") },
             confirmButton = { OutlinedButton(onClick = onClearRunHistory) { Text("Clear run history") } },
             dismissButton = { OutlinedButton(onClick = onDismissClearRunHistory) { Text("Cancel") } },
+        )
+    }
+    if (state.showHuggingFaceTokenDialog) {
+        HuggingFaceTokenDialog(
+            saving = state.isSavingHuggingFaceToken,
+            error = state.huggingFaceTokenError,
+            onSave = onSaveHuggingFaceToken,
+            onDismiss = onDismissHuggingFaceToken,
         )
     }
     Column(
@@ -95,6 +108,24 @@ fun SettingsScreen(
                 EnumRadioGroup("Unload models", settings.modelUnloadPolicy, ModelUnloadPolicy.entries, ModelUnloadPolicy::label) { value -> onUpdate { it.copy(modelUnloadPolicy = value) } }
                 Toggle("Warm up selected model", settings.warmUpSelectedModel) { value -> onUpdate { it.copy(warmUpSelectedModel = value) } }
                 EnumSelector("Metric detail", settings.metricDetail, MetricDetail.entries, MetricDetail::label) { value -> onUpdate { it.copy(metricDetail = value) } }
+            }
+        }
+        SettingsCard("Model downloads") {
+            Text("Hugging Face token", style = MaterialTheme.typography.titleSmall)
+            when (state.huggingFaceCredentialStatus) {
+                HuggingFaceCredentialStatus.MISSING -> {
+                    Text("No token configured. Required only for gated model downloads.", style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text("Configure token") }
+                }
+                HuggingFaceCredentialStatus.USER_CONFIGURED -> {
+                    Text("A token is encrypted and stored on this device.", style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text("Replace token") }
+                    OutlinedButton(onClick = onClearHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text("Remove token") }
+                }
+                HuggingFaceCredentialStatus.DEBUG_CONFIGURED -> {
+                    Text("A development token is supplied by local.properties in this debug build.", style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text("Use my token instead") }
+                }
             }
         }
         SettingsCard("Storage & privacy") {

@@ -5,6 +5,7 @@ import android.util.Log
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.library.CatalogArchiveFormat
 import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadArchive
+import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadFile
 import com.dmitriim.localaiplayground.core.model.library.CatalogModel
 import com.dmitriim.localaiplayground.core.model.library.ModelCompatibilityState
@@ -13,6 +14,7 @@ import com.dmitriim.localaiplayground.core.model.manifest.ModelFileSpec
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.service.ModelTransfers
 import com.dmitriim.localaiplayground.source.models.catalog.ModelCatalog
+import com.dmitriim.localaiplayground.source.models.credentials.HuggingFaceTokenStore
 import com.dmitriim.localaiplayground.source.models.diagnostics.ModelDiagnosticsService
 import com.dmitriim.localaiplayground.source.models.library.InstalledModelService
 import com.dmitriim.localaiplayground.source.models.validation.sha256
@@ -43,6 +45,7 @@ class ModelTransferService(
     private val installedModels: InstalledModelService,
     private val diagnostics: ModelDiagnosticsService,
     private val transferState: ModelTransferStateStore,
+    private val huggingFaceTokens: HuggingFaceTokenStore,
 ) : ModelTransfers,
     ModelDownloadExecutor {
     override val catalog: Flow<List<CatalogModel>> = MutableStateFlow(ModelCatalog.entries).asStateFlow()
@@ -106,12 +109,13 @@ class ModelTransferService(
 
     private suspend fun downloadAndInstall(entry: CatalogModel) {
         val modelId = entry.manifest.modelId
+        val authorizationToken = credentialFor(entry)
         val temporary = temporaryDirectory(modelId)
         Log.i(TAG, "Catalog model transfer started: modelId=${modelId.value}, stagingDirectory=${temporary.name}")
         transferState.update { it + (modelId to ModelTransferState.Running(0, entry.download.expectedBytes)) }
         try {
             entry.download.archive?.let { archive ->
-                downloadAndExtractArchive(entry, archive, temporary)
+                downloadAndExtractArchive(entry, archive, temporary, authorizationToken)
                 transferState.update { it + (modelId to ModelTransferState.Installing) }
                 installedModels.installDirectory(entry.manifest.copy(installedAtEpochMs = System.currentTimeMillis()), temporary)
                 transferState.update { it + (modelId to ModelTransferState.Completed) }
@@ -148,7 +152,15 @@ class ModelTransferService(
                 }
                 val parent = requireNotNull(destination.parentFile)
                 require(parent.isDirectory || parent.mkdirs()) { "Could not prepare the model installation directory." }
-                downloadTo(download.url, destination, expectedBytes, modelId, completedBeforeFile, entry.download.expectedBytes)
+                downloadTo(
+                    url = download.url,
+                    destination = destination,
+                    expectedBytes = expectedBytes,
+                    modelId = modelId,
+                    completedBeforeFile = completedBeforeFile,
+                    totalBytes = entry.download.expectedBytes,
+                    authorizationToken = authorizationToken,
+                )
                 require(destination.length() == expectedBytes) {
                     "Downloaded size for ${download.relativePath} does not match the catalog."
                 }
@@ -180,6 +192,7 @@ class ModelTransferService(
         entry: CatalogModel,
         archive: CatalogDownloadArchive,
         temporary: File,
+        authorizationToken: String?,
     ) {
         require(archive.expectedBytes == entry.download.expectedBytes) {
             "The catalog archive size does not match the download total."
@@ -190,12 +203,13 @@ class ModelTransferService(
         )
         Log.i(TAG, "Catalog archive download started: modelId=${entry.manifest.modelId.value}, bytes=${archive.expectedBytes}")
         downloadTo(
-            archive.url,
-            archiveFile,
-            archive.expectedBytes,
-            entry.manifest.modelId,
+            url = archive.url,
+            destination = archiveFile,
+            expectedBytes = archive.expectedBytes,
+            modelId = entry.manifest.modelId,
             completedBeforeFile = 0,
             totalBytes = entry.download.expectedBytes,
+            authorizationToken = authorizationToken,
         )
         require(archiveFile.length() == archive.expectedBytes) { "Downloaded archive size does not match the catalog." }
         require(archiveFile.sha256().equals(archive.sha256, ignoreCase = true)) { "Downloaded archive checksum does not match the catalog." }
@@ -211,24 +225,47 @@ class ModelTransferService(
         modelId: ModelId,
         completedBeforeFile: Long,
         totalBytes: Long,
+        authorizationToken: String?,
     ) {
         var currentUrl = url
         repeat(5) {
             coroutineContext.ensureActive()
-            val connection = (URI(currentUrl).toURL().openConnection() as HttpURLConnection).apply {
+            val currentUri = URI(currentUrl)
+            require(currentUri.scheme == HTTPS_SCHEME) { "Model downloads must use HTTPS." }
+            val connection = (currentUri.toURL().openConnection() as HttpURLConnection).apply {
                 instanceFollowRedirects = false
                 connectTimeout = 15_000
                 readTimeout = 30_000
+                if (currentUri.host == HUGGING_FACE_HOST && authorizationToken != null) {
+                    setRequestProperty("Authorization", "Bearer $authorizationToken")
+                }
             }
             try {
                 val status = connection.responseCode
                 if (status in 300..399) {
                     val location = requireNotNull(connection.getHeaderField("Location")) { "Redirect without a target." }
-                    currentUrl = URI(currentUrl).resolve(location).toString()
+                    val redirectUri = currentUri.resolve(location)
+                    require(redirectUri.scheme == HTTPS_SCHEME) { "Model downloads must use HTTPS." }
+                    currentUrl = redirectUri.toString()
                     Log.i(TAG, "Catalog model download redirected: modelId=${modelId.value}, redirect=${it + 1}")
                     return@repeat
                 }
-                require(status in 200..299) { "Download failed with HTTP $status." }
+                when (status) {
+                    HTTP_UNAUTHORIZED -> throw ModelDownloadFailure(
+                        "Hugging Face token is invalid or expired.",
+                        retryable = false,
+                    )
+                    HTTP_FORBIDDEN -> throw ModelDownloadFailure(
+                        "Access denied. Open the model source, accept its license, and verify repository access.",
+                        retryable = false,
+                    )
+                }
+                if (status !in 200..299) {
+                    throw ModelDownloadFailure(
+                        "Download failed with HTTP $status.",
+                        retryable = status == HTTP_REQUEST_TIMEOUT || status == HTTP_TOO_MANY_REQUESTS || status >= 500,
+                    )
+                }
                 Log.i(TAG, "Catalog model HTTP response accepted: modelId=${modelId.value}, status=$status")
                 connection.getHeaderFieldLong("Content-Length", -1).takeIf { it >= 0 }?.let { announced ->
                     require(announced == expectedBytes) { "Server response length does not match the catalog." }
@@ -257,6 +294,15 @@ class ModelTransferService(
         error("The download redirected too many times.")
     }
 
+    private fun credentialFor(entry: CatalogModel): String? = when (entry.download.authentication) {
+        CatalogDownloadAuthentication.NONE -> null
+        CatalogDownloadAuthentication.HUGGING_FACE_USER_TOKEN -> huggingFaceTokens.tokenOrNull()
+            ?: throw ModelDownloadFailure(
+                "A Hugging Face access token is required for this model.",
+                retryable = false,
+            )
+    }
+
     private fun catalogEntry(modelId: ModelId) = ModelCatalog.entries.firstOrNull { it.manifest.modelId == modelId }
         ?: error("This catalog model is no longer available in the bundled catalog.")
 
@@ -267,6 +313,12 @@ class ModelTransferService(
 
     private companion object {
         const val TAG = "AiP123Models"
+        const val HUGGING_FACE_HOST = "huggingface.co"
+        const val HTTPS_SCHEME = "https"
+        const val HTTP_REQUEST_TIMEOUT = 408
+        const val HTTP_UNAUTHORIZED = 401
+        const val HTTP_FORBIDDEN = 403
+        const val HTTP_TOO_MANY_REQUESTS = 429
     }
 }
 

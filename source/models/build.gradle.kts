@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("local-ai.android.library")
     alias(libs.plugins.kotlin.serialization)
@@ -6,6 +8,28 @@ plugins {
 
 android {
     namespace = "com.dmitriim.localaiplayground.source.models"
+    buildFeatures {
+        buildConfig = true
+    }
+    val localProperties = Properties().apply {
+        rootProject.file("local.properties")
+            .takeIf { it.isFile }
+            ?.inputStream()
+            ?.use(::load)
+    }
+    fun buildConfigString(value: String) = "\"${value.replace("\\", "\\\\").replace("\"", "\\\"")}\""
+    buildTypes {
+        debug {
+            buildConfigField(
+                "String",
+                "HUGGING_FACE_ACCESS_TOKEN",
+                buildConfigString(localProperties.getProperty("huggingFaceAccessToken").orEmpty()),
+            )
+        }
+        release {
+            buildConfigField("String", "HUGGING_FACE_ACCESS_TOKEN", "\"\"")
+        }
+    }
     testOptions {
         unitTests.isReturnDefaultValues = true
     }

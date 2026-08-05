@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.model.library.CatalogModel
+import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localaiplayground.core.model.library.InstalledModel
 import com.dmitriim.localaiplayground.core.model.library.ModelCompatibilityState
 import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
@@ -68,6 +69,9 @@ fun ModelDetailsScreen(
     onDelete: (ModelId) -> Unit,
     onConfirmDelete: () -> Unit,
     onCancelDelete: () -> Unit,
+    onRequestHuggingFaceToken: (ModelId) -> Unit,
+    onSaveHuggingFaceToken: (String) -> Unit,
+    onDismissHuggingFaceToken: () -> Unit,
 ) {
     val catalogModel = uiState.catalog.firstOrNull { it.manifest.modelId == modelId }
     val installedModel = uiState.installed.firstOrNull { it.manifest.modelId == modelId }
@@ -84,6 +88,7 @@ fun ModelDetailsScreen(
             onCancelTransfer = { onCancelTransfer(modelId) },
             onValidate = { onValidate(modelId) },
             onDelete = { onDelete(modelId) },
+            onRequestHuggingFaceToken = { onRequestHuggingFaceToken(modelId) },
         )
         !uiState.isModelDataLoaded -> ModelDetailsLoading()
         else -> ModelUnavailable(uiState.message, onNavigateBack)
@@ -103,6 +108,15 @@ fun ModelDetailsScreen(
             dismissButton = { OutlinedButton(onClick = onCancelDelete) { Text("Cancel") } },
         )
     }
+
+    if (uiState.pendingHuggingFaceTokenModelId == modelId) {
+        HuggingFaceTokenDialog(
+            saving = uiState.isSavingHuggingFaceToken,
+            error = uiState.huggingFaceTokenError,
+            onSave = onSaveHuggingFaceToken,
+            onDismiss = onDismissHuggingFaceToken,
+        )
+    }
 }
 
 @Composable
@@ -116,6 +130,7 @@ private fun ModelDetailsContent(
     onCancelTransfer: () -> Unit,
     onValidate: () -> Unit,
     onDelete: () -> Unit,
+    onRequestHuggingFaceToken: () -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
     val uriHandler = LocalUriHandler.current
@@ -219,6 +234,16 @@ private fun ModelDetailsContent(
                             Text("Open source")
                         }
                     }
+                }
+            }
+
+            if (catalogModel?.download?.authentication == CatalogDownloadAuthentication.HUGGING_FACE_USER_TOKEN) {
+                item {
+                    HuggingFaceAccessSection(
+                        accessUrl = manifest.source.url,
+                        credentialStatus = uiState.huggingFaceCredentialStatus,
+                        onConfigure = onRequestHuggingFaceToken,
+                    )
                 }
             }
 
@@ -363,7 +388,7 @@ private fun InstallationDetails(
 }
 
 @Composable
-private fun DetailsSection(
+internal fun DetailsSection(
     title: String,
     content: @Composable ColumnScope.() -> Unit,
 ) {

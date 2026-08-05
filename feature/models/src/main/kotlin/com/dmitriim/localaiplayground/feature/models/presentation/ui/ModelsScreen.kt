@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.model.library.CatalogModel
+import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localaiplayground.core.model.library.InstalledModel
 import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
@@ -95,6 +96,7 @@ fun ModelsScreen(
                     is ModelListItem.Catalog -> CatalogModelCard(
                         model = item.model,
                         transfer = uiState.transfers[item.manifest.modelId],
+                        huggingFaceCredentialStatus = uiState.huggingFaceCredentialStatus,
                         onOpenDetails = onOpenDetails,
                         onDownload = onDownload,
                         onCancel = onCancelTransfer,
@@ -238,15 +240,21 @@ private fun InstalledModelCard(
 private fun CatalogModelCard(
     model: CatalogModel,
     transfer: ModelTransferState?,
+    huggingFaceCredentialStatus: com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus,
     onOpenDetails: (ModelId) -> Unit,
     onDownload: (ModelId) -> Unit,
     onCancel: (ModelId) -> Unit,
 ) {
     val manifest = model.manifest
+    val accessRequired = model.download.authentication == CatalogDownloadAuthentication.HUGGING_FACE_USER_TOKEN &&
+        huggingFaceCredentialStatus == com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus.MISSING
     Card(onClick = { onOpenDetails(manifest.modelId) }) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             ModelCardHeader(name = manifest.displayName, status = transfer.statusLabel())
             ModelCardMetadata(manifest = manifest, size = model.download.expectedBytes.toReadableBytes())
+            if (accessRequired) {
+                Text("Hugging Face access required", style = MaterialTheme.typography.bodySmall)
+            }
             when {
                 transfer == ModelTransferState.Queued -> {
                     ModelCardAction { OutlinedButton(onClick = { onCancel(manifest.modelId) }) { Text("Cancel") } }
@@ -257,13 +265,25 @@ private fun CatalogModelCard(
                     ModelCardAction { OutlinedButton(onClick = { onCancel(manifest.modelId) }) { Text("Cancel") } }
                 }
                 transfer is ModelTransferState.Failed -> {
-                    ModelCardAction { Button(onClick = { onDownload(manifest.modelId) }) { Text("Retry") } }
+                    ModelCardAction {
+                        Button(onClick = { if (accessRequired) onOpenDetails(manifest.modelId) else onDownload(manifest.modelId) }) {
+                            Text(if (accessRequired) "Set up access" else "Retry")
+                        }
+                    }
                 }
                 transfer == ModelTransferState.Cancelled -> {
-                    ModelCardAction { Button(onClick = { onDownload(manifest.modelId) }) { Text("Download") } }
+                    ModelCardAction {
+                        Button(onClick = { if (accessRequired) onOpenDetails(manifest.modelId) else onDownload(manifest.modelId) }) {
+                            Text(if (accessRequired) "Set up access" else "Download")
+                        }
+                    }
                 }
                 transfer == ModelTransferState.Idle || transfer == null ->
-                    ModelCardAction { Button(onClick = { onDownload(manifest.modelId) }) { Text("Download") } }
+                    ModelCardAction {
+                        Button(onClick = { if (accessRequired) onOpenDetails(manifest.modelId) else onDownload(manifest.modelId) }) {
+                            Text(if (accessRequired) "Set up access" else "Download")
+                        }
+                    }
             }
         }
     }

@@ -5,6 +5,7 @@ import com.dmitriim.localaiplayground.core.model.library.InstalledModel
 import com.dmitriim.localaiplayground.core.model.library.ModelCompatibility
 import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
 
 data class ModelsUiState(
     val isModelDataLoaded: Boolean = false,
@@ -20,6 +21,10 @@ data class ModelsUiState(
     val pendingDelete: InstalledModel? = null,
     val validatingModelIds: Set<ModelId> = emptySet(),
     val validationFeedback: Map<ModelId, ModelValidationFeedback> = emptyMap(),
+    val huggingFaceCredentialStatus: HuggingFaceCredentialStatus = HuggingFaceCredentialStatus.MISSING,
+    val pendingHuggingFaceTokenModelId: ModelId? = null,
+    val isSavingHuggingFaceToken: Boolean = false,
+    val huggingFaceTokenError: String? = null,
 ) {
     val isEmpty: Boolean get() = installed.isEmpty()
 }
