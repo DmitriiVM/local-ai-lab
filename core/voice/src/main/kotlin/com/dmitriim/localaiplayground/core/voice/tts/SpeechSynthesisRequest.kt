@@ -3,11 +3,13 @@ package com.dmitriim.localaiplayground.core.voice.tts
 import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import java.util.UUID
 
 data class SpeechSynthesisRequest(
     val modelId: ModelId,
     val text: String,
     val settings: SpeechSynthesisSettings,
+    val runId: String = UUID.randomUUID().toString(),
 )
 
 data class SpeechSynthesisSettings(

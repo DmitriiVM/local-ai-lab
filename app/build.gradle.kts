@@ -27,6 +27,12 @@ android {
                 enable = true
             }
         }
+        create("profile") {
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release")
+            signingConfig = signingConfigs.getByName("debug")
+            buildConfigField("boolean", "PROFILE_BUILD", "true")
+        }
     }
     buildFeatures {
         buildConfig = true
@@ -46,10 +52,12 @@ dependencies {
     implementation(project(":core:di"))
     implementation(project(":core:model"))
     implementation(project(":core:navigation"))
+    implementation(project(":core:performance"))
     implementation(project(":core:result"))
     implementation(project(":core:ui"))
     implementation(project(":core:voice"))
     implementation(project(":feature:assistant"))
+    implementation(project(":feature:benchmark"))
     implementation(project(":feature:device"))
     implementation(project(":feature:models"))
     implementation(project(":feature:playground"))

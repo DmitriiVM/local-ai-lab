@@ -7,6 +7,7 @@ import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessag
 import com.dmitriim.localaiplayground.core.model.conversation.ConversationRecord
 import com.dmitriim.localaiplayground.core.model.runs.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunKind
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.source.database.ConversationEntity
 import com.dmitriim.localaiplayground.source.database.ConversationMessageEntity
@@ -15,6 +16,8 @@ import kotlinx.serialization.json.Json
 
 internal fun RunEntity.toDomain(json: Json) = RunRecord(
     id = id,
+    kind = RunKind.valueOf(kind),
+    benchmarkSessionId = benchmarkSessionId,
     capability = AiCapability.valueOf(capability),
     status = RunStatus.valueOf(status),
     startedAtEpochMs = startedAtEpochMs,
@@ -30,6 +33,8 @@ internal fun RunEntity.toDomain(json: Json) = RunRecord(
 
 internal fun RunRecord.toEntity(json: Json) = RunEntity(
     id = id,
+    kind = kind.name,
+    benchmarkSessionId = benchmarkSessionId,
     capability = capability.name,
     status = status.name,
     startedAtEpochMs = startedAtEpochMs,

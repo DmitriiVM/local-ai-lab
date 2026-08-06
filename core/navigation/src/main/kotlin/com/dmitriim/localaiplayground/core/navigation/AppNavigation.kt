@@ -15,6 +15,7 @@ enum class NavigationTarget {
     MODELS,
     RUNS,
     DEVICE,
+    BENCHMARK,
     SETTINGS,
     ASSISTANT,
     SPEECH_TO_TEXT,

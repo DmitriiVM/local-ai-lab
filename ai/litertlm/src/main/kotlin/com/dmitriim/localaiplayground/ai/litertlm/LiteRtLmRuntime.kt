@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.ai.litertlm
 
 import android.content.Context
 import android.util.Log
+import androidx.tracing.Trace
 import com.dmitriim.localaiplayground.ai.api.llm.LlmChatFormatter
 import com.dmitriim.localaiplayground.ai.api.llm.LlmChatMessage
 import com.dmitriim.localaiplayground.ai.api.llm.LlmChatRole
@@ -232,36 +233,41 @@ class LiteRtLmRuntime(context: Context) :
         val startedNanos = System.nanoTime()
         val firstTokenNanos = AtomicLong(0)
 
-        conversation.sendMessageAsync(
-            text = userMessage,
-            callback = object : MessageCallback {
-                override fun onMessage(message: Message) {
-                    val chunk = message.toString()
-                    if (chunk.isEmpty()) return
-                    firstTokenNanos.compareAndSet(0, System.nanoTime())
-                    synchronized(outputLock) { output.append(chunk) }
-                    onToken(chunk)
-                }
-
-                override fun onDone() = done.countDown()
-
-                override fun onError(throwable: Throwable) {
-                    if (throwable is java.util.concurrent.CancellationException) {
-                        cancelled.set(true)
-                    } else {
-                        error.set(throwable)
-                    }
-                    done.countDown()
-                }
-            },
-            maxOutputToken = maxTokens,
-        )
+        Trace.beginSection("LocalAiPlayground:litert-lm-runtime")
         try {
-            done.await()
-        } catch (interrupted: InterruptedException) {
-            runCatching { conversation.cancelProcess() }
-            Thread.currentThread().interrupt()
-            throw interrupted
+            conversation.sendMessageAsync(
+                text = userMessage,
+                callback = object : MessageCallback {
+                    override fun onMessage(message: Message) {
+                        val chunk = message.toString()
+                        if (chunk.isEmpty()) return
+                        firstTokenNanos.compareAndSet(0, System.nanoTime())
+                        synchronized(outputLock) { output.append(chunk) }
+                        onToken(chunk)
+                    }
+
+                    override fun onDone() = done.countDown()
+
+                    override fun onError(throwable: Throwable) {
+                        if (throwable is java.util.concurrent.CancellationException) {
+                            cancelled.set(true)
+                        } else {
+                            error.set(throwable)
+                        }
+                        done.countDown()
+                    }
+                },
+                maxOutputToken = maxTokens,
+            )
+            try {
+                done.await()
+            } catch (interrupted: InterruptedException) {
+                runCatching { conversation.cancelProcess() }
+                Thread.currentThread().interrupt()
+                throw interrupted
+            }
+        } finally {
+            Trace.endSection()
         }
         error.get()?.let { throw it }
         val finishedNanos = System.nanoTime()

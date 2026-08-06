@@ -1,0 +1,28 @@
+# Record with: perfetto -c /data/local/tmp/inference-trace.pbtxt -o /data/misc/perfetto-traces/local-ai-inference.perfetto-trace
+# The app's async slices are named LocalAiPlayground:<run-id> and
+# LocalAiPlayground:<run-id>:<phase>.
+buffers { size_kb: 65536 fill_policy: RING_BUFFER }
+duration_ms: 120000
+data_sources {
+  config {
+    name: "linux.ftrace"
+    ftrace_config {
+      atrace_categories: "app"
+      atrace_categories: "sched"
+      atrace_categories: "freq"
+      atrace_categories: "memory"
+      atrace_apps: "com.dmitriim.localaiplayground"
+      ftrace_events: "sched/sched_switch"
+      ftrace_events: "sched/sched_waking"
+      ftrace_events: "power/cpu_frequency"
+      ftrace_events: "power/cpu_idle"
+    }
+  }
+}
+data_sources { config { name: "linux.process_stats" process_stats_config { scan_all_processes_on_start: true } } }
+data_sources { config { name: "android.process_stats" } }
+data_sources { config { name: "android.packages_list" } }
+data_sources { config { name: "android.power" } }
+data_sources { config { name: "android.system_info" } }
+data_sources { config { name: "android.surfaceflinger.frametimeline" } }
+

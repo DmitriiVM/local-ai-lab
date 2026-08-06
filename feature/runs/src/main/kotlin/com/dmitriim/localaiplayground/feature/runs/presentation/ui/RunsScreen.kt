@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
+import com.dmitriim.localaiplayground.core.model.runs.RunKind
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
@@ -217,7 +218,7 @@ private fun RunRow(run: RunRecord, onSelect: (String) -> Unit) {
     Card(modifier = Modifier.fillMaxWidth().clickable { onSelect(run.id) }) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                text = "${run.capability.label} · ${run.status.label}",
+                text = "${run.kind.label} · ${run.capability.label} · ${run.status.label}",
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
@@ -264,7 +265,7 @@ private fun RunDetails(
         }
         item {
             Text(
-                text = "${run.capability.label} run",
+                text = "${run.kind.label} · ${run.capability.label}",
                 style = MaterialTheme.typography.headlineMedium,
             )
         }
@@ -326,3 +327,8 @@ private val AiCapability.filterLabel get() = when (this) {
 }
 
 private val RunStatus.label get() = name.lowercase().replaceFirstChar(Char::uppercase)
+
+private val RunKind.label get() = when (this) {
+    RunKind.INFERENCE -> "Inference"
+    RunKind.BENCHMARK_SESSION -> "Benchmark session"
+}

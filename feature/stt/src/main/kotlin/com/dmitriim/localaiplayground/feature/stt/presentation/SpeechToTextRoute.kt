@@ -6,11 +6,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dmitriim.localaiplayground.core.navigation.AppNavigator
+import com.dmitriim.localaiplayground.core.navigation.NavigationTarget
 import com.dmitriim.localaiplayground.feature.stt.presentation.ui.SpeechToTextScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 @Composable
-fun SpeechToTextRoute(viewModel: SpeechToTextViewModel = metroViewModel()) {
+fun SpeechToTextRoute(
+    navigator: AppNavigator,
+    viewModel: SpeechToTextViewModel = metroViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val microphonePermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) viewModel.startRecording() else viewModel.microphonePermissionDenied()
@@ -27,6 +32,9 @@ fun SpeechToTextRoute(viewModel: SpeechToTextViewModel = metroViewModel()) {
         onStopRecording = viewModel::stopRecording,
         onImportAudio = { audioPicker.launch(arrayOf("audio/*")) },
         onRepeat = viewModel::repeatTranscription,
+        onProfile = {
+            if (viewModel.prepareProfile()) navigator.navigate(NavigationTarget.BENCHMARK)
+        },
         onCancel = viewModel::cancel,
         onClear = viewModel::clear,
     )

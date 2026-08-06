@@ -61,7 +61,8 @@ class RunsViewModel(
 
     fun prepareShare() {
         val run = state.value.selectedRun ?: return
-        runCatching { exporter.export(run) }
+        val linkedRuns = state.value.runs.filter { it.id in run.linkedRunIds }
+        runCatching { exporter.export(run, linkedRuns) }
             .onSuccess { uri -> mutableState.update { it.copy(pendingShareUri = uri, errorMessage = null) } }
             .onFailure { error -> mutableState.update { it.copy(errorMessage = error.message ?: "Could not create the run export.") } }
     }

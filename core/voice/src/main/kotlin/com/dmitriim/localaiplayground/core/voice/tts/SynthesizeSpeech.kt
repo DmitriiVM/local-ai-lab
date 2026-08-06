@@ -9,6 +9,10 @@ import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
 import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffectsProcessor
 import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.performance.InferencePhase
+import com.dmitriim.localaiplayground.core.performance.InferenceProfiler
+import com.dmitriim.localaiplayground.core.performance.NoOpInferenceProfiler
 import dev.zacsweers.metro.Inject
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -31,6 +35,7 @@ class SynthesizeSpeech(
     private val player: StreamingSpeechPlayer,
     private val generatedAudioStore: GeneratedAudioStore,
     private val audioEffectsProcessor: SpeechAudioEffectsProcessor,
+    private val profiler: InferenceProfiler = NoOpInferenceProfiler,
 ) {
     private val cancelled = AtomicBoolean(false)
 
@@ -51,18 +56,23 @@ class SynthesizeSpeech(
         cancelled.set(false)
         generatedAudioStore.discardPartial()
         val runAnchorNanos = System.nanoTime()
+        val profile = profiler.start(request.runId, AiCapability.TEXT_TO_SPEECH)
         var completed = false
         try {
-            val model = modelResolver.resolveTextToSpeechModel(request.modelId).getOrThrow()
+            val model = profile.trace(InferencePhase.MODEL_RESOLUTION) {
+                modelResolver.resolveTextToSpeechModel(request.modelId).getOrThrow()
+            }
             Log.i(TAG, "TTS model resolved: name=${model.displayName}, directory=${model.modelDirectory}")
-            val load = textToSpeechEngine.load(
-                TextToSpeechLoadRequest(
-                    engineId = model.engineId,
-                    profileType = model.profileType,
-                    modelDirectory = model.modelDirectory,
-                    threadCount = request.settings.threadCount,
-                ),
-            )
+            val load = profile.trace(InferencePhase.MODEL_LOAD) {
+                textToSpeechEngine.load(
+                    TextToSpeechLoadRequest(
+                        engineId = model.engineId,
+                        profileType = model.profileType,
+                        modelDirectory = model.modelDirectory,
+                        threadCount = request.settings.threadCount,
+                    ),
+                )
+            }
             Log.i(
                 TAG,
                 "TTS model loaded: coldStart=${load.coldStart}, loadMs=${load.loadDurationMs}, " +
@@ -129,7 +139,8 @@ class SynthesizeSpeech(
 
             val synthesisStartedNanos = System.nanoTime()
             val result = try {
-                textToSpeechEngine.synthesize(
+                profile.trace(InferencePhase.SYNTHESIS) {
+                    textToSpeechEngine.synthesize(
                     TextToSpeechRequest(
                         text = request.text,
                         languageCode = request.settings.languageCode,
@@ -137,18 +148,19 @@ class SynthesizeSpeech(
                         speed = request.settings.speed,
                         sentenceSilenceScale = request.settings.sentenceSilenceScale,
                     ),
-                ) { chunk ->
-                    if (firstChunkNanos == null && chunk.isNotEmpty()) {
-                        firstChunkNanos = System.nanoTime()
-                        Log.i(TAG, "TTS first native audio chunk received: samples=${chunk.size}")
-                    }
-                    chunkCount += 1
-                    streamedSampleCount += chunk.size
-                    !cancelled.get() &&
-                        (
-                            chunks == null ||
-                                chunks.trySendBlocking(chunk.copyOf()).isSuccess
+                    ) { chunk ->
+                        if (firstChunkNanos == null && chunk.isNotEmpty()) {
+                            firstChunkNanos = System.nanoTime()
+                            Log.i(TAG, "TTS first native audio chunk received: samples=${chunk.size}")
+                        }
+                        chunkCount += 1
+                        streamedSampleCount += chunk.size
+                        !cancelled.get() &&
+                            (
+                                chunks == null ||
+                                    chunks.trySendBlocking(chunk.copyOf()).isSuccess
                             )
+                    }
                 }
             } finally {
                 chunks?.close()
@@ -163,12 +175,14 @@ class SynthesizeSpeech(
                 "The voice model changed sample rate during synthesis."
             }
             val effectsStartedNanos = System.nanoTime()
-            val outputSamples = audioEffectsProcessor.process(
-                samples = result.samples,
-                sampleRateHz = result.sampleRateHz,
-                effects = request.settings.audioEffects,
-                isCancelled = cancelled::get,
-            )
+            val outputSamples = profile.trace(InferencePhase.AUDIO_EFFECTS) {
+                audioEffectsProcessor.process(
+                    samples = result.samples,
+                    sampleRateHz = result.sampleRateHz,
+                    effects = request.settings.audioEffects,
+                    isCancelled = cancelled::get,
+                )
+            }
             val effectsDurationMs = nanosToMillis(System.nanoTime() - effectsStartedNanos)
             if (session == null) {
                 session = player.open(
@@ -194,7 +208,7 @@ class SynthesizeSpeech(
             Log.i(TAG, "TTS WAV retained: durationMs=${output.durationMs}, samples=${output.sampleCount}")
             emit(SpeechSynthesisEvent.Synthesized(output, synthesisDurationMs))
             val activeSession = requireNotNull(session)
-            activeSession.awaitDrained()
+            profile.trace(InferencePhase.AUDIO_PLAYBACK) { activeSession.awaitDrained() }
             val playbackMetrics = activeSession.metrics()
             Log.i(
                 TAG,
@@ -205,6 +219,7 @@ class SynthesizeSpeech(
             )
             player.release(completed = true)
             completed = true
+            val telemetry = profile.finish()
             emit(
                 SpeechSynthesisEvent.Completed(
                     output = output,
@@ -227,6 +242,7 @@ class SynthesizeSpeech(
                         conditioningCacheHit = result.stageMetrics.conditioningCacheHit,
                         peakProcessPssBytes = result.stageMetrics.peakProcessPssBytes,
                         availableDeviceMemoryBytes = result.stageMetrics.availableDeviceMemoryBytes,
+                        telemetry = telemetry,
                     ),
                 ),
             )
@@ -234,6 +250,7 @@ class SynthesizeSpeech(
             Log.e(TAG, "TTS synthesis flow failed: ${error.message}", error)
             throw error
         } finally {
+            profile.finish()
             if (!completed) {
                 generatedAudioStore.discardPartial()
                 player.release(completed = false)

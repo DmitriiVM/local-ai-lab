@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":ai:api"))
     implementation(project(":core:audio"))
     implementation(project(":core:model"))
+    implementation(project(":core:performance"))
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.metro.runtime)
     testImplementation(libs.junit)

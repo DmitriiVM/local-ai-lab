@@ -6,8 +6,8 @@ import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.core.model.service.RunRepository
 import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionMetrics
+import com.dmitriim.localaiplayground.core.performance.putInferenceTelemetry
 import dev.zacsweers.metro.Inject
-import java.util.UUID
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -17,7 +17,7 @@ class PersistSttRun(private val runRepository: RunRepository) {
     suspend operator fun invoke(snapshot: SttRunSnapshot) {
         runRepository.saveRun(
             RunRecord(
-                id = UUID.randomUUID().toString(),
+                id = snapshot.runId,
                 capability = AiCapability.SPEECH_TO_TEXT,
                 status = snapshot.status,
                 startedAtEpochMs = snapshot.startedAtEpochMs,
@@ -37,9 +37,11 @@ class PersistSttRun(private val runRepository: RunRepository) {
                             put("audioDurationMs", metrics.audioDurationMs)
                             put("processingDurationMs", metrics.processingDurationMs)
                             put("timeToFinalMs", metrics.timeToFinalMs)
+                            put("realTimeFactor", metrics.realTimeFactor)
                             put("segmentCount", metrics.segmentCount)
                             put("loadDurationMs", metrics.loadDurationMs)
                             put("effectiveThreadCount", metrics.effectiveThreadCount)
+                            putInferenceTelemetry(metrics.telemetry)
                         },
                     )
                 } ?: "{}",
@@ -50,6 +52,7 @@ class PersistSttRun(private val runRepository: RunRepository) {
 }
 
 data class SttRunSnapshot(
+    val runId: String,
     val status: RunStatus,
     val startedAtEpochMs: Long,
     val model: RunModelSnapshot?,

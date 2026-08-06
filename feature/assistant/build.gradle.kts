@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":core:audio"))
     implementation(project(":core:di"))
     implementation(project(":core:model"))
+    implementation(project(":core:performance"))
     implementation(project(":core:navigation"))
     implementation(project(":core:result"))
     implementation(project(":core:voice"))

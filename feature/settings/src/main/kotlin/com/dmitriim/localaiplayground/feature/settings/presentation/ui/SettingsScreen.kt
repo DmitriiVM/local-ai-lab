@@ -90,6 +90,14 @@ fun SettingsScreen(
                 Text("›", style = MaterialTheme.typography.headlineSmall)
             }
         }
+        if (settings.showAdvancedControls) {
+            SettingsCard("Performance defaults") {
+                EnumRadioGroup("Thread policy", settings.threadCountPolicy, ThreadCountPolicy.entries, ThreadCountPolicy::label) { value -> onUpdate { it.copy(threadCountPolicy = value) } }
+                EnumRadioGroup("Unload models", settings.modelUnloadPolicy, ModelUnloadPolicy.entries, ModelUnloadPolicy::label) { value -> onUpdate { it.copy(modelUnloadPolicy = value) } }
+                Toggle("Warm up selected model", settings.warmUpSelectedModel) { value -> onUpdate { it.copy(warmUpSelectedModel = value) } }
+                EnumSelector("Metric detail", settings.metricDetail, MetricDetail.entries, MetricDetail::label) { value -> onUpdate { it.copy(metricDetail = value) } }
+            }
+        }
         SettingsCard("Appearance") {
             EnumRadioGroup("Theme", settings.theme, ThemePreference.entries, ThemePreference::name) { value -> onUpdate { it.copy(theme = value) } }
             Toggle("Keep screen awake during active inference", settings.keepScreenAwake) { value -> onUpdate { it.copy(keepScreenAwake = value) } }
@@ -101,14 +109,6 @@ fun SettingsScreen(
             Text("Recordings are temporary and are cleared when you clear media.", style = MaterialTheme.typography.bodySmall)
             Text("Generated audio: latest successful WAV", style = MaterialTheme.typography.titleSmall)
             Text("The app retains one successful WAV until the next successful synthesis, as documented in the Stage 5 policy.", style = MaterialTheme.typography.bodySmall)
-        }
-        if (settings.showAdvancedControls) {
-            SettingsCard("Performance defaults") {
-                EnumRadioGroup("Thread policy", settings.threadCountPolicy, ThreadCountPolicy.entries, ThreadCountPolicy::label) { value -> onUpdate { it.copy(threadCountPolicy = value) } }
-                EnumRadioGroup("Unload models", settings.modelUnloadPolicy, ModelUnloadPolicy.entries, ModelUnloadPolicy::label) { value -> onUpdate { it.copy(modelUnloadPolicy = value) } }
-                Toggle("Warm up selected model", settings.warmUpSelectedModel) { value -> onUpdate { it.copy(warmUpSelectedModel = value) } }
-                EnumSelector("Metric detail", settings.metricDetail, MetricDetail.entries, MetricDetail::label) { value -> onUpdate { it.copy(metricDetail = value) } }
-            }
         }
         SettingsCard("Model downloads") {
             Text("Hugging Face token", style = MaterialTheme.typography.titleSmall)

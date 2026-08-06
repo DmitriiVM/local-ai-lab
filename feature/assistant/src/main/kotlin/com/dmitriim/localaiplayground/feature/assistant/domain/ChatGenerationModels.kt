@@ -3,11 +3,13 @@ package com.dmitriim.localaiplayground.feature.assistant.domain
 import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import java.util.UUID
 
 internal data class ChatGenerationRequest(
     val modelId: ModelId,
     val turns: List<ChatTurn>,
     val config: ChatGenerationConfig,
+    val runId: String = UUID.randomUUID().toString(),
 )
 
 internal data class ChatTurn(

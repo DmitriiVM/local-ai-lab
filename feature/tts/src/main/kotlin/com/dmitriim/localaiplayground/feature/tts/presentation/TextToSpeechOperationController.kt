@@ -19,6 +19,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 /** Owns the single foreground TTS operation and translates its outcomes into screen state. */
 internal class TextToSpeechOperationController(
@@ -226,6 +227,7 @@ internal class TextToSpeechOperationController(
             return
         }
         val startedAt = System.currentTimeMillis()
+        val runId = UUID.randomUUID().toString()
         val model = snapshot.selectedModel
         Log.i(TAG, "TTS UI synthesis started: model=${model?.displayName}, textLength=${snapshot.text.length}, language=${snapshot.language.code}, voice=${voice.id}, speaker=${voice.speakerId}, speed=${snapshot.speed}, silenceScale=${snapshot.sentenceSilenceScale}, volume=${snapshot.volume}, threads=$threads, audioEffects=${snapshot.audioEffects}")
         state.update {
@@ -248,6 +250,7 @@ internal class TextToSpeechOperationController(
                         modelId = modelId,
                         text = snapshot.text,
                         settings = TtsSpeechSettingsFactory.create(snapshot, voice, threads),
+                        runId = runId,
                     ),
                 ).collect { event ->
                     when (event) {
@@ -271,14 +274,14 @@ internal class TextToSpeechOperationController(
                             )
                         }.also {
                             Log.i(TAG, "TTS UI received completed event: synthesisMs=${event.metrics.synthesisDurationMs}, underruns=${event.metrics.playbackUnderrunCount}")
-                            persistTtsRun(TtsRunSnapshotFactory.create(RunStatus.SUCCEEDED, startedAt, model, snapshot, event.metrics, null))
+                            persistTtsRun(TtsRunSnapshotFactory.create(runId, RunStatus.SUCCEEDED, startedAt, model, snapshot, event.metrics, null))
                         }
                     }
                 }
             } catch (_: CancellationException) {
                 Log.i(TAG, "TTS UI operation cancelled.")
                 state.update { it.copy(operation = TtsOperation.IDLE, statusMessage = "Speech operation stopped.") }
-                persistTtsRun(TtsRunSnapshotFactory.create(RunStatus.CANCELLED, startedAt, model, snapshot, null, "Speech operation stopped."))
+                persistTtsRun(TtsRunSnapshotFactory.create(runId, RunStatus.CANCELLED, startedAt, model, snapshot, null, "Speech operation stopped."))
             } catch (error: Throwable) {
                 Log.e(TAG, "TTS UI operation failed: ${error.message}", error)
                 val message = error.message ?: "Local speech synthesis failed."
@@ -289,7 +292,7 @@ internal class TextToSpeechOperationController(
                         statusMessage = null,
                     )
                 }
-                persistTtsRun(TtsRunSnapshotFactory.create(RunStatus.FAILED, startedAt, model, snapshot, null, message))
+                persistTtsRun(TtsRunSnapshotFactory.create(runId, RunStatus.FAILED, startedAt, model, snapshot, null, message))
             }
         }.also(::registerForegroundCancellation)
     }

@@ -6,6 +6,7 @@ import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisMetrics
 
 data class TtsRunSnapshot(
+    val runId: String,
     val status: RunStatus,
     val startedAtEpochMs: Long,
     val model: RunModelSnapshot?,

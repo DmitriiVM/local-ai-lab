@@ -19,5 +19,9 @@ class TextToSpeechNavigationEntryProvider : NavigationEntryProvider {
     override val hostDestination = TopLevelDestination.PLAYGROUND
     override val startKey: NavKey = TextToSpeechKey
 
-    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? = if (key == TextToSpeechKey) NavEntry(key) { TextToSpeechRoute() } else null
+    override fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? = if (key == TextToSpeechKey) {
+        NavEntry(key) { TextToSpeechRoute(navigator) }
+    } else {
+        null
+    }
 }

@@ -3,8 +3,8 @@ package com.dmitriim.localaiplayground.feature.tts.domain
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import com.dmitriim.localaiplayground.core.model.service.RunRepository
+import com.dmitriim.localaiplayground.core.performance.putInferenceTelemetry
 import dev.zacsweers.metro.Inject
-import java.util.UUID
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -14,7 +14,7 @@ class PersistTtsRun(private val runRepository: RunRepository) {
     suspend operator fun invoke(snapshot: TtsRunSnapshot) {
         runRepository.saveRun(
             RunRecord(
-                id = UUID.randomUUID().toString(),
+                id = snapshot.runId,
                 capability = AiCapability.TEXT_TO_SPEECH,
                 status = snapshot.status,
                 startedAtEpochMs = snapshot.startedAtEpochMs,
@@ -51,8 +51,10 @@ class PersistTtsRun(private val runRepository: RunRepository) {
                             put("timeToFirstPresentationMs", metrics.timeToFirstPresentationMs)
                             put("synthesisDurationMs", metrics.synthesisDurationMs)
                             put("generatedAudioDurationMs", metrics.generatedAudioDurationMs)
+                            put("realTimeFactor", metrics.realTimeFactor)
                             put("sampleRateHz", metrics.sampleRateHz)
                             put("playbackUnderrunCount", metrics.playbackUnderrunCount)
+                            put("loadDurationMs", metrics.loadDurationMs)
                             put("effectiveThreadCount", metrics.effectiveThreadCount)
                             put("conditioningDurationMs", metrics.conditioningDurationMs)
                             put("tokenGenerationDurationMs", metrics.tokenGenerationDurationMs)
@@ -61,6 +63,7 @@ class PersistTtsRun(private val runRepository: RunRepository) {
                             put("conditioningCacheHit", metrics.conditioningCacheHit)
                             put("peakProcessPssBytes", metrics.peakProcessPssBytes)
                             put("availableDeviceMemoryBytes", metrics.availableDeviceMemoryBytes)
+                            putInferenceTelemetry(metrics.telemetry)
                         },
                     )
                 } ?: "{}",

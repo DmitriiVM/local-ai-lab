@@ -1,6 +1,7 @@
 package com.dmitriim.localaiplayground.core.voice.tts
 
 import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
+import com.dmitriim.localaiplayground.core.performance.InferenceTelemetry
 
 sealed interface SpeechSynthesisEvent {
     data class Prepared(
@@ -40,4 +41,5 @@ data class SpeechSynthesisMetrics(
     val conditioningCacheHit: Boolean? = null,
     val peakProcessPssBytes: Long? = null,
     val availableDeviceMemoryBytes: Long? = null,
+    val telemetry: InferenceTelemetry? = null,
 )

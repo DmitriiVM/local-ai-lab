@@ -6,10 +6,12 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "runs",
-    indices = [Index("completedAtEpochMs"), Index("capability"), Index("status"), Index("modelId")],
+    indices = [Index("completedAtEpochMs"), Index("capability"), Index("status"), Index("modelId"), Index("benchmarkSessionId")],
 )
 data class RunEntity(
     @PrimaryKey val id: String,
+    val kind: String,
+    val benchmarkSessionId: String?,
     val capability: String,
     val status: String,
     val startedAtEpochMs: Long,

@@ -4,10 +4,13 @@ import com.dmitriim.localaiplayground.core.model.conversation.ConversationMessag
 import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import com.dmitriim.localaiplayground.core.model.runs.RunModelSnapshot
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
+import com.dmitriim.localaiplayground.core.performance.InferenceTelemetry
+import com.dmitriim.localaiplayground.core.performance.putInferenceTelemetry
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 data class ChatPersistenceSnapshot(
+    val runId: String,
     val conversationId: String,
     val status: RunStatus,
     val startedAtEpochMs: Long,
@@ -53,6 +56,7 @@ data class ChatRunMetrics(
     val totalDurationMs: Long,
     val finishReason: String,
     val effectiveThreadCount: Int?,
+    val telemetry: InferenceTelemetry? = null,
 ) {
     fun toJson() = buildJsonObject {
         put("coldStart", coldStart)
@@ -63,6 +67,7 @@ data class ChatRunMetrics(
         put("totalDurationMs", totalDurationMs)
         put("finishReason", finishReason)
         put("effectiveThreadCount", effectiveThreadCount)
+        putInferenceTelemetry(telemetry)
     }
 }
 

@@ -7,6 +7,7 @@ import com.dmitriim.localaiplayground.feature.tts.domain.TtsRunSnapshot
 
 internal object TtsRunSnapshotFactory {
     fun create(
+        runId: String,
         status: RunStatus,
         startedAt: Long,
         model: TtsModelOption?,
@@ -16,6 +17,7 @@ internal object TtsRunSnapshotFactory {
     ): TtsRunSnapshot {
         val voice = requireNotNull(state.selectedVoice)
         return TtsRunSnapshot(
+            runId = runId,
             status = status,
             startedAtEpochMs = startedAt,
             model = model?.let { RunModelSnapshot(it.id.value, it.displayName, it.engineId.value) },

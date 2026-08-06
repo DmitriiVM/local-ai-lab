@@ -23,8 +23,11 @@ import com.dmitriim.localaiplayground.core.voice.stt.SttTranscriptionSettings
 import com.dmitriim.localaiplayground.core.voice.stt.TranscribeAudio
 import com.dmitriim.localaiplayground.feature.stt.domain.PersistSttRun
 import com.dmitriim.localaiplayground.feature.stt.domain.SttRunSnapshot
+import com.dmitriim.localaiplayground.core.performance.BenchmarkWorkload
+import com.dmitriim.localaiplayground.core.performance.ProfileLaunchCoordinator
 import com.dmitriim.localaiplayground.source.runs.RunReplayStore
 import com.dmitriim.localaiplayground.source.settings.AppSettingsRepository
+import java.util.UUID
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -56,6 +59,7 @@ class SpeechToTextViewModel(
     private val replayStore: RunReplayStore,
     private val settingsRepository: AppSettingsRepository,
     private val systemSpeechSupport: SystemSpeechToTextSupport,
+    private val profileLaunchCoordinator: ProfileLaunchCoordinator,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(SpeechToTextUiState())
     val state: StateFlow<SpeechToTextUiState> = mutableState.asStateFlow()
@@ -200,6 +204,34 @@ class SpeechToTextViewModel(
         mutableState.value.input?.let(::transcribe)
     }
 
+    fun prepareProfile(): Boolean {
+        val snapshot = mutableState.value
+        if (operationJob?.isActive == true || snapshot.operation != SttOperation.IDLE) return false
+        val model = snapshot.selectedModel
+        val input = snapshot.input
+        val threads = snapshot.threadCount.toIntOrNull()
+        val error = when {
+            model?.installed != true -> "Select an installed speech-to-text model."
+            input == null -> "Record or import audio before profiling."
+            threads !in 0..64 -> "Thread count must be between 0 and 64."
+            else -> null
+        }
+        if (error != null) {
+            mutableState.update { it.copy(errorMessage = error) }
+            return false
+        }
+        profileLaunchCoordinator.open(
+            BenchmarkWorkload.SpeechToText(
+                modelId = requireNotNull(model).id,
+                modelDisplayName = model.displayName,
+                input = requireNotNull(input),
+                languageCode = snapshot.language.whisperCode,
+                threadCount = snapshot.threadCount,
+            ),
+        )
+        return true
+    }
+
     fun cancel() {
         if (operationJob?.isActive != true) return
         Log.i(TAG, "STT UI cancellation requested: operation=${mutableState.value.operation}")
@@ -226,6 +258,7 @@ class SpeechToTextViewModel(
         val snapshot = mutableState.value
         val modelId = snapshot.selectedModelId ?: return
         val startedAt = System.currentTimeMillis()
+        val runId = UUID.randomUUID().toString()
         val model = snapshot.selectedModel
         Log.i(
             TAG,
@@ -243,6 +276,7 @@ class SpeechToTextViewModel(
                             languageCode = snapshot.language.whisperCode,
                             threadCount = snapshot.threadCount,
                         ),
+                        runId = runId,
                     ),
                 ).collect { event ->
                     when (event) {
@@ -261,18 +295,18 @@ class SpeechToTextViewModel(
                             )
                         }.also {
                             Log.i(TAG, "STT UI received completed event: transcriptLength=${event.transcript.length}, segments=${event.metrics.segmentCount}, totalMs=${event.metrics.timeToFinalMs}")
-                            persistSttRun(snapshotForPersistence(RunStatus.SUCCEEDED, startedAt, model, input, event.transcript, snapshot, event.metrics, null))
+                            persistSttRun(snapshotForPersistence(runId, RunStatus.SUCCEEDED, startedAt, model, input, event.transcript, snapshot, event.metrics, null))
                         }
                     }
                 }
             } catch (_: CancellationException) {
                 Log.i(TAG, "STT UI transcription cancelled.")
                 mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = "Transcription cancelled.") }
-                persistSttRun(snapshotForPersistence(RunStatus.CANCELLED, startedAt, model, input, null, snapshot, null, "Transcription cancelled."))
+                persistSttRun(snapshotForPersistence(runId, RunStatus.CANCELLED, startedAt, model, input, null, snapshot, null, "Transcription cancelled."))
             } catch (error: Throwable) {
                 Log.e(TAG, "STT UI transcription failed: ${error.message}", error)
                 mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = error.message ?: "Local transcription failed.") }
-                persistSttRun(snapshotForPersistence(RunStatus.FAILED, startedAt, model, input, null, snapshot, null, error.message ?: "Local transcription failed."))
+                persistSttRun(snapshotForPersistence(runId, RunStatus.FAILED, startedAt, model, input, null, snapshot, null, error.message ?: "Local transcription failed."))
             }
         }.also(::registerForegroundCancellation)
     }
@@ -329,6 +363,7 @@ class SpeechToTextViewModel(
     }
 
     private fun snapshotForPersistence(
+        runId: String,
         status: RunStatus,
         startedAt: Long,
         model: SpeechModelOption?,
@@ -338,6 +373,7 @@ class SpeechToTextViewModel(
         metrics: SpeechTranscriptionMetrics?,
         error: String?,
     ) = SttRunSnapshot(
+        runId = runId,
         status = status,
         startedAtEpochMs = startedAt,
         model = model?.let { RunModelSnapshot(it.id.value, it.displayName, it.engineId.value) },

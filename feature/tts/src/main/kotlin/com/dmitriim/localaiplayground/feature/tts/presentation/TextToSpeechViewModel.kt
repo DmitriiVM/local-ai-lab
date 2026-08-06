@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoiceStore
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
+import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
 import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
 import com.dmitriim.localaiplayground.core.di.AppScope
@@ -20,6 +21,8 @@ import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
 import com.dmitriim.localaiplayground.core.voice.tts.PreviewSpeech
 import com.dmitriim.localaiplayground.core.voice.tts.SynthesizeSpeech
 import com.dmitriim.localaiplayground.feature.tts.domain.PersistTtsRun
+import com.dmitriim.localaiplayground.core.performance.BenchmarkWorkload
+import com.dmitriim.localaiplayground.core.performance.ProfileLaunchCoordinator
 import com.dmitriim.localaiplayground.source.runs.RunReplayStore
 import com.dmitriim.localaiplayground.source.settings.AppSettingsRepository
 import dev.zacsweers.metro.ContributesIntoMap
@@ -51,6 +54,7 @@ class TextToSpeechViewModel(
     private val settingsRepository: AppSettingsRepository,
     private val referenceVoiceStore: ReferenceVoiceStore,
     private val systemTextToSpeechSupport: SystemTextToSpeechSupport,
+    private val profileLaunchCoordinator: ProfileLaunchCoordinator,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(TextToSpeechUiState())
     val state: StateFlow<TextToSpeechUiState> = mutableState.asStateFlow()
@@ -233,6 +237,49 @@ class TextToSpeechViewModel(
     fun previewVoice(voiceId: String) = operationController.previewVoice(voiceId)
 
     fun synthesize() = operationController.synthesize()
+
+    fun prepareProfile(): Boolean {
+        val snapshot = mutableState.value
+        val playbackActive = snapshot.playback.status in setOf(
+            SpeechPlaybackStatus.READY,
+            SpeechPlaybackStatus.PLAYING,
+            SpeechPlaybackStatus.PAUSED,
+        )
+        if (operationController.isActive() || snapshot.operation != TtsOperation.IDLE || playbackActive) return false
+        val model = snapshot.selectedModel
+        val voice = snapshot.selectedVoice
+        val threads = snapshot.threadCount.toIntOrNull()
+        val error = when {
+            model?.installed != true -> "Select an installed text-to-speech model."
+            voice == null -> "Select a compatible voice."
+            snapshot.text.isBlank() -> "Enter text before profiling."
+            threads !in 0..64 -> "Thread count must be between 0 and 64."
+            else -> null
+        }
+        if (error != null) {
+            mutableState.update { it.copy(errorMessage = error) }
+            return false
+        }
+        val settings = runCatching {
+            TtsSpeechSettingsFactory.create(snapshot, requireNotNull(voice), requireNotNull(threads))
+        }.getOrElse { cause ->
+            mutableState.update { it.copy(errorMessage = cause.message ?: "Text-to-speech settings are invalid.") }
+            return false
+        }
+        profileLaunchCoordinator.open(
+            BenchmarkWorkload.TextToSpeech(
+                modelId = requireNotNull(model).id,
+                modelDisplayName = model.displayName,
+                text = snapshot.text,
+                languageCode = snapshot.language.code,
+                voice = settings.voiceCondition,
+                speed = snapshot.speed,
+                sentenceSilenceScale = snapshot.sentenceSilenceScale,
+                threadCount = requireNotNull(threads),
+            ),
+        )
+        return true
+    }
 
     fun pausePlayback() = operationController.pausePlayback()
 

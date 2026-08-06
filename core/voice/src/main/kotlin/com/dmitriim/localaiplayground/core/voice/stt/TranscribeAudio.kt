@@ -7,6 +7,10 @@ import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextLoadRequest
 import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextRequest
 import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
+import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.performance.InferencePhase
+import com.dmitriim.localaiplayground.core.performance.InferenceProfiler
+import com.dmitriim.localaiplayground.core.performance.NoOpInferenceProfiler
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +23,7 @@ class TranscribeAudio(
     private val modelResolver: LocalModelResolver,
     private val speechEngine: SpeechToTextEngine,
     private val audioInputStore: AudioInputStore,
+    private val profiler: InferenceProfiler = NoOpInferenceProfiler,
 ) {
     fun execute(request: SpeechTranscriptionRequest): Flow<SpeechTranscriptionEvent> = flow {
         val effectiveSettings = request.settings.toEffective()
@@ -29,19 +34,28 @@ class TranscribeAudio(
                 "requestedThreads=${effectiveSettings.threadCount}, source=${request.input.sourceDescription}",
         )
         val startedAt = SystemClock.elapsedRealtime()
+        val profile = profiler.start(
+            request.runId,
+            AiCapability.SPEECH_TO_TEXT,
+            extendedTelemetry = request.extendedProfiling,
+        )
         try {
-            val model = modelResolver.resolveSpeechToTextModel(request.modelId).getOrThrow()
+            val model = profile.trace(InferencePhase.MODEL_RESOLUTION) {
+                modelResolver.resolveSpeechToTextModel(request.modelId).getOrThrow()
+            }
             Log.i(TAG, "STT model resolved: name=${model.displayName}, directory=${model.modelDirectory}")
-            val load = speechEngine.load(
-                SpeechToTextLoadRequest(
-                    engineId = model.engineId,
-                    profileType = model.profileType,
-                    modelDirectory = model.modelDirectory,
-                    files = model.files,
-                    languageCode = effectiveSettings.languageCode,
-                    threadCount = effectiveSettings.threadCount,
-                ),
-            )
+            val load = profile.trace(InferencePhase.MODEL_LOAD) {
+                speechEngine.load(
+                    SpeechToTextLoadRequest(
+                        engineId = model.engineId,
+                        profileType = model.profileType,
+                        modelDirectory = model.modelDirectory,
+                        files = model.files,
+                        languageCode = effectiveSettings.languageCode,
+                        threadCount = effectiveSettings.threadCount,
+                    ),
+                )
+            }
             Log.i(
                 TAG,
                 "STT model loaded: coldStart=${load.coldStart}, loadMs=${load.loadDurationMs}, " +
@@ -52,17 +66,19 @@ class TranscribeAudio(
             val transcript = StringBuilder()
             var segmentCount = 0
             var processingDurationMs = 0L
-            audioInputStore.forEachSegment(request.input) { samples ->
-                val segmentNumber = segmentCount + 1
-                Log.i(TAG, "STT segment started: number=$segmentNumber, samples=${samples.size}, durationMs=${samples.size * 1_000L / request.input.sampleRateHz}")
-                val result = speechEngine.transcribe(SpeechToTextRequest(samples, request.input.sampleRateHz))
-                if (result.text.isNotBlank()) {
-                    if (transcript.isNotEmpty()) transcript.append(' ')
-                    transcript.append(result.text)
+            profile.trace(InferencePhase.TRANSCRIPTION) {
+                audioInputStore.forEachSegment(request.input) { samples ->
+                    val segmentNumber = segmentCount + 1
+                    Log.i(TAG, "STT segment started: number=$segmentNumber, samples=${samples.size}, durationMs=${samples.size * 1_000L / request.input.sampleRateHz}")
+                    val result = speechEngine.transcribe(SpeechToTextRequest(samples, request.input.sampleRateHz))
+                    if (result.text.isNotBlank()) {
+                        if (transcript.isNotEmpty()) transcript.append(' ')
+                        transcript.append(result.text)
+                    }
+                    segmentCount++
+                    processingDurationMs += result.processingDurationMs
+                    Log.i(TAG, "STT segment completed: number=$segmentNumber, processingMs=${result.processingDurationMs}, transcriptLength=${result.text.length}")
                 }
-                segmentCount++
-                processingDurationMs += result.processingDurationMs
-                Log.i(TAG, "STT segment completed: number=$segmentNumber, processingMs=${result.processingDurationMs}, transcriptLength=${result.text.length}")
             }
             val totalDurationMs = SystemClock.elapsedRealtime() - startedAt
             Log.i(
@@ -70,6 +86,7 @@ class TranscribeAudio(
                 "STT transcription completed: segments=$segmentCount, transcriptLength=${transcript.length}, " +
                     "processingMs=$processingDurationMs, totalMs=$totalDurationMs",
             )
+            val telemetry = profile.finish()
             emit(
                 SpeechTranscriptionEvent.Completed(
                     transcript = transcript.toString(),
@@ -81,6 +98,7 @@ class TranscribeAudio(
                         segmentCount = segmentCount,
                         loadDurationMs = load.loadDurationMs,
                         effectiveThreadCount = load.effectiveThreadCount,
+                        telemetry = telemetry,
                     ),
                 ),
             )
@@ -88,8 +106,11 @@ class TranscribeAudio(
             Log.e(TAG, "STT transcription flow failed: ${error.message}", error)
             throw error
         } finally {
-            runCatching { speechEngine.unload() }
-            Log.i(TAG, "STT engine unloaded after transcription flow.")
+            profile.finish()
+            if (!request.keepLoaded) {
+                runCatching { speechEngine.unload() }
+                Log.i(TAG, "STT engine unloaded after transcription flow.")
+            }
         }
     }.flowOn(Dispatchers.Default)
 
@@ -97,6 +118,8 @@ class TranscribeAudio(
         Log.i(TAG, "STT cancellation requested.")
         speechEngine.cancel()
     }
+
+    fun unload() = speechEngine.unload()
 
     private companion object {
         const val TAG = "AiP123Stt"

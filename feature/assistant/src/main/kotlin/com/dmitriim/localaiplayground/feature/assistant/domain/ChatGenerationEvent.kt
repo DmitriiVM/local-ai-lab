@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.feature.assistant.domain
 
 import com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationResult
 import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadResult
+import com.dmitriim.localaiplayground.core.performance.InferenceTelemetry
 
 internal sealed interface ChatGenerationEvent {
     data class Prepared(val contextUsage: ChatContextUsage) : ChatGenerationEvent
@@ -10,5 +11,6 @@ internal sealed interface ChatGenerationEvent {
         val modelName: String,
         val load: LlmLoadResult,
         val generation: LlmGenerationResult,
+        val telemetry: InferenceTelemetry,
     ) : ChatGenerationEvent
 }

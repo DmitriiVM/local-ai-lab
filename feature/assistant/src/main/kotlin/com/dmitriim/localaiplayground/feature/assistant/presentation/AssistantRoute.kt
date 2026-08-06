@@ -29,6 +29,9 @@ fun AssistantRoute(
         onStartRecording = { microphonePermission.launch(Manifest.permission.RECORD_AUDIO) },
         onStopRecording = viewModel::stopRecording,
         onSend = viewModel::send,
+        onProfile = {
+            if (viewModel.prepareProfile()) navigator.navigate(NavigationTarget.BENCHMARK)
+        },
         onCancel = viewModel::cancel,
         onRegenerate = viewModel::regenerate,
         onSpeakMessage = viewModel::speakMessage,

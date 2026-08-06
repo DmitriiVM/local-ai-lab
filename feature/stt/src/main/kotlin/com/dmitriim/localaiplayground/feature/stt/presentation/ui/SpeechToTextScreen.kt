@@ -48,6 +48,7 @@ fun SpeechToTextScreen(
     onStopRecording: () -> Unit,
     onImportAudio: () -> Unit,
     onRepeat: () -> Unit,
+    onProfile: () -> Unit,
     onCancel: () -> Unit,
     onClear: () -> Unit,
 ) {
@@ -97,6 +98,13 @@ fun SpeechToTextScreen(
             onCancel = onCancel,
             onClear = onClear,
         )
+        OutlinedButton(
+            onClick = onProfile,
+            enabled = !busy && state.input != null && state.selectedModel?.installed == true,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Profile current audio")
+        }
         state.level?.let { level ->
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

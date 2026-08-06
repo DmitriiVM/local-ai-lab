@@ -15,12 +15,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dmitriim.localaiplayground.core.navigation.AppNavigator
+import com.dmitriim.localaiplayground.core.navigation.NavigationTarget
 import com.dmitriim.localaiplayground.feature.tts.presentation.ui.TextToSpeechScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import java.io.File
 
 @Composable
-fun TextToSpeechRoute(viewModel: TextToSpeechViewModel = metroViewModel()) {
+fun TextToSpeechRoute(
+    navigator: AppNavigator,
+    viewModel: TextToSpeechViewModel = metroViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val exporter = rememberLauncherForActivityResult(
@@ -64,6 +69,9 @@ fun TextToSpeechRoute(viewModel: TextToSpeechViewModel = metroViewModel()) {
         onSaturationChange = viewModel::updateSaturation,
         onResetAudioEffects = viewModel::resetAudioEffects,
         onSynthesize = viewModel::synthesize,
+        onProfile = {
+            if (viewModel.prepareProfile()) navigator.navigate(NavigationTarget.BENCHMARK)
+        },
         onPause = viewModel::pausePlayback,
         onResume = viewModel::resumePlayback,
         onStop = viewModel::stop,

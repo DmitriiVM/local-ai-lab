@@ -10,6 +10,7 @@ import com.dmitriim.localaiplayground.feature.assistant.domain.ChatRunSettings
 
 internal object AssistantChatPersistenceSnapshotFactory {
     fun create(
+        runId: String,
         conversationId: String,
         status: RunStatus,
         startedAt: Long,
@@ -22,6 +23,7 @@ internal object AssistantChatPersistenceSnapshotFactory {
         messages: List<ChatMessage>,
         incompleteAssistant: Boolean = false,
     ) = ChatPersistenceSnapshot(
+        runId = runId,
         conversationId = conversationId,
         status = status,
         startedAtEpochMs = startedAt,
@@ -49,6 +51,7 @@ internal object AssistantChatPersistenceSnapshotFactory {
                 it.totalDurationMs,
                 it.finishReason.name,
                 it.effectiveThreadCount,
+                it.telemetry,
             )
         },
         errorMessage = error,

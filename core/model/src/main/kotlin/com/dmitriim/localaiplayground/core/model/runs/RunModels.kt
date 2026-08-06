@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 enum class RunStatus { SUCCEEDED, CANCELLED, FAILED }
 
 @Serializable
+enum class RunKind { INFERENCE, BENCHMARK_SESSION }
+
+@Serializable
 data class RunModelSnapshot(
     val modelId: String,
     val displayName: String,
@@ -18,6 +21,8 @@ data class RunModelSnapshot(
 @Serializable
 data class RunRecord(
     val id: String,
+    val kind: RunKind = RunKind.INFERENCE,
+    val benchmarkSessionId: String? = null,
     val capability: AiCapability,
     val status: RunStatus,
     val startedAtEpochMs: Long,

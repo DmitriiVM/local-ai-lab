@@ -286,6 +286,7 @@ internal class AssistantOperationController(
         val settings = snapshot.chatSettings.toEffective()
         val visibleMessages = if (appendUser) base + ChatMessage.user(userText) else base
         val startedAt = System.currentTimeMillis()
+        val runId = UUID.randomUUID().toString()
         val model = snapshot.chatModels.firstOrNull { it.id == selectedId }
         var assistantId: String? = null
         try {
@@ -301,7 +302,7 @@ internal class AssistantOperationController(
             }
             var completedText = ""
             generateResponse.execute(
-                ChatGenerationRequest(selectedId, visibleMessages.map(ChatMessage::toDomain), settings.toDomain()),
+                ChatGenerationRequest(selectedId, visibleMessages.map(ChatMessage::toDomain), settings.toDomain(), runId),
             ).collect { event ->
                 when (event) {
                     is ChatGenerationEvent.Prepared -> {
@@ -333,6 +334,7 @@ internal class AssistantOperationController(
                             result.finishReason,
                             settings,
                             event.load.diagnostics.effectiveThreadCount,
+                            event.telemetry,
                         )
                         state.update { current ->
                             current.replaceAssistantText(id, result.text, append = false).copy(
@@ -343,7 +345,7 @@ internal class AssistantOperationController(
                         }
                         activeLinkedRunIds += persistAssistantTurn(
                             AssistantChatPersistenceSnapshotFactory.create(
-                                conversationId(), RunStatus.SUCCEEDED, startedAt, model, userText, result.text, settings, metrics,
+                                runId, conversationId(), RunStatus.SUCCEEDED, startedAt, model, userText, result.text, settings, metrics,
                                 null, state.value.messages,
                             ),
                         )
@@ -365,7 +367,7 @@ internal class AssistantOperationController(
             withContext(NonCancellable) {
                 activeLinkedRunIds += persistAssistantTurn(
                     AssistantChatPersistenceSnapshotFactory.create(
-                        conversationId(), RunStatus.CANCELLED, startedAt, model, userText, partial, settings, null,
+                        runId, conversationId(), RunStatus.CANCELLED, startedAt, model, userText, partial, settings, null,
                         "Generation cancelled.", state.value.messages, incompleteAssistant = true,
                     ),
                 )
@@ -384,7 +386,7 @@ internal class AssistantOperationController(
             withContext(NonCancellable) {
                 activeLinkedRunIds += persistAssistantTurn(
                     AssistantChatPersistenceSnapshotFactory.create(
-                        conversationId(), RunStatus.FAILED, startedAt, model, userText, null, settings, null,
+                        runId, conversationId(), RunStatus.FAILED, startedAt, model, userText, null, settings, null,
                         message, state.value.messages, incompleteAssistant = true,
                     ),
                 )

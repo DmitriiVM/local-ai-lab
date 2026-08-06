@@ -18,16 +18,17 @@ class RunExporter(private val application: Application) {
         encodeDefaults = true
     }
 
-    fun export(record: RunRecord): String {
+    fun export(record: RunRecord, linkedRuns: List<RunRecord> = emptyList()): String {
         val directory = File(application.cacheDir, "run-exports").also(File::mkdirs)
         val target = File(directory, "run-${record.id}.json")
-        target.writeText(json.encodeToString(VersionedRunExport(run = record)))
+        target.writeText(json.encodeToString(VersionedRunExport(run = record, linkedRuns = linkedRuns)))
         return FileProvider.getUriForFile(application, "${application.packageName}.files", target).toString()
     }
 }
 
 @Serializable
 private data class VersionedRunExport(
-    val schemaVersion: Int = 1,
+    val schemaVersion: Int = 2,
     val run: RunRecord,
+    val linkedRuns: List<RunRecord> = emptyList(),
 )

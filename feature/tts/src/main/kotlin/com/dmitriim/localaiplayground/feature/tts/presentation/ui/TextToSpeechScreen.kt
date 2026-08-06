@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +48,7 @@ fun TextToSpeechScreen(
     onSaturationChange: (Float) -> Unit,
     onResetAudioEffects: () -> Unit,
     onSynthesize: () -> Unit,
+    onProfile: () -> Unit,
     onPause: () -> Unit,
     onResume: () -> Unit,
     onStop: () -> Unit,
@@ -129,6 +131,13 @@ fun TextToSpeechScreen(
             enabled = !busy && state.selectedVoice != null && state.text.isNotBlank(),
         ) {
             Text("Synthesize & play")
+        }
+        OutlinedButton(
+            onClick = onProfile,
+            enabled = !busy && state.selectedVoice != null && state.text.isNotBlank(),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Profile current synthesis")
         }
 
         TextToSpeechLanguageControls(

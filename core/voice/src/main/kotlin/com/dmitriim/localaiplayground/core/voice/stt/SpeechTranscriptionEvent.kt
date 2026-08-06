@@ -1,5 +1,7 @@
 package com.dmitriim.localaiplayground.core.voice.stt
 
+import com.dmitriim.localaiplayground.core.performance.InferenceTelemetry
+
 sealed interface SpeechTranscriptionEvent {
     data class Prepared(
         val modelName: String,
@@ -21,4 +23,5 @@ data class SpeechTranscriptionMetrics(
     val segmentCount: Int,
     val loadDurationMs: Long,
     val effectiveThreadCount: Int,
+    val telemetry: InferenceTelemetry? = null,
 )

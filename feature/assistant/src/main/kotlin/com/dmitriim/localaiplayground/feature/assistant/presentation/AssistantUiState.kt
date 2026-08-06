@@ -3,6 +3,7 @@ package com.dmitriim.localaiplayground.feature.assistant.presentation
 import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.ai.api.llm.LlmEngineCapabilities
 import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
+import com.dmitriim.localaiplayground.core.performance.InferenceTelemetry
 import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoice
 import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
@@ -253,6 +254,7 @@ data class ChatMetrics(
     val finishReason: LlmFinishReason,
     val effectiveSettings: EffectiveChatSettings,
     val effectiveThreadCount: Int?,
+    val telemetry: InferenceTelemetry? = null,
 )
 
 internal fun AssistantUiState.replaceAssistantText(

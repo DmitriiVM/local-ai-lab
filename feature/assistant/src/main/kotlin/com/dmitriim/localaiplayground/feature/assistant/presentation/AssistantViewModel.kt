@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.llm.ChatEngine
+import com.dmitriim.localaiplayground.ai.api.llm.LlmChatMessage
+import com.dmitriim.localaiplayground.ai.api.llm.LlmChatRole
 import com.dmitriim.localaiplayground.ai.api.system.SystemSpeechToTextSupport
 import com.dmitriim.localaiplayground.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoiceStore
@@ -21,6 +23,8 @@ import com.dmitriim.localaiplayground.feature.assistant.domain.AssistantSpeechOu
 import com.dmitriim.localaiplayground.feature.assistant.domain.AssistantTranscriber
 import com.dmitriim.localaiplayground.feature.assistant.domain.GenerateAssistantResponse
 import com.dmitriim.localaiplayground.feature.assistant.domain.PersistAssistantTurn
+import com.dmitriim.localaiplayground.core.performance.BenchmarkWorkload
+import com.dmitriim.localaiplayground.core.performance.ProfileLaunchCoordinator
 import com.dmitriim.localaiplayground.source.runs.RunReplayStore
 import com.dmitriim.localaiplayground.source.settings.AssistantPreferencesRepository
 import dev.zacsweers.metro.ContributesIntoMap
@@ -56,6 +60,7 @@ class AssistantViewModel(
     operationCoordinator: ForegroundOperationCoordinator,
     private val runRepository: RunRepository,
     private val replayStore: RunReplayStore,
+    private val profileLaunchCoordinator: ProfileLaunchCoordinator,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(AssistantUiState())
     val state: StateFlow<AssistantUiState> = mutableState.asStateFlow()
@@ -161,6 +166,49 @@ class AssistantViewModel(
     fun unloadChatModel() = operationController.unloadChatRuntime()
 
     fun send() = operationController.send()
+
+    fun prepareProfile(): Boolean {
+        val snapshot = mutableState.value
+        if (!snapshot.canSend) return false
+        val model = snapshot.selectedChatModel ?: return false
+        val settings = runCatching(snapshot.chatSettings::toEffective).getOrElse { error ->
+            mutableState.update { it.copy(errorMessage = error.message ?: "Chat settings are invalid.") }
+            return false
+        }
+        val messages = buildList {
+            if (settings.systemPrompt.isNotBlank()) {
+                add(LlmChatMessage(LlmChatRole.SYSTEM, settings.systemPrompt))
+            }
+            snapshot.messages
+                .filterNot { it.streaming || it.failed }
+                .mapTo(this) { message ->
+                    LlmChatMessage(
+                        role = when (message.role) {
+                            ChatMessageRole.USER -> LlmChatRole.USER
+                            ChatMessageRole.ASSISTANT -> LlmChatRole.ASSISTANT
+                        },
+                        content = message.content,
+                    )
+                }
+            add(LlmChatMessage(LlmChatRole.USER, snapshot.input.trim()))
+        }
+        profileLaunchCoordinator.open(
+            BenchmarkWorkload.Chat(
+                modelId = model.id,
+                modelDisplayName = model.displayName,
+                computePreference = settings.computePreference,
+                messages = messages,
+                maxTokens = settings.maxOutputTokens,
+                temperature = settings.temperature,
+                topK = settings.topK,
+                topP = settings.topP,
+                seed = settings.seed,
+                contextSize = settings.contextSize,
+                threadCount = settings.threadCount,
+            ),
+        )
+        return true
+    }
 
     fun startRecording() = operationController.startRecording()
 
