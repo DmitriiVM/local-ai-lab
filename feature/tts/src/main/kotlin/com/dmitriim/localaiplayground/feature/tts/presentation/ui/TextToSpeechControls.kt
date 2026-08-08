@@ -341,25 +341,33 @@ internal fun TextToSpeechSettings(
     onVolumeChange: (Float) -> Unit,
     onThreadCountChange: (String) -> Unit,
 ) {
+    var expanded by remember { mutableStateOf(false) }
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Supported controls", style = MaterialTheme.typography.titleMedium)
-            if (state.supportsSpeechRate) {
-                TextToSpeechParameterSlider("Speech rate", state.speed, "%.2f×".format(state.speed), 0.5f..2f, enabled, onSpeedChange)
-            }
-            if (state.supportsSentenceSilence) {
-                TextToSpeechParameterSlider("Sentence silence", state.sentenceSilenceScale, "%.2f×".format(state.sentenceSilenceScale), 0f..2f, enabled, onSentenceSilenceChange)
-            }
-            TextToSpeechParameterSlider("Playback volume", state.volume, "${(state.volume * 100).toInt()}%", 0f..1f, enabled, onVolumeChange)
-            if (!state.usesPlatformVoice) {
-                OutlinedTextField(
-                    value = state.threadCount,
-                    onValueChange = onThreadCountChange,
-                    enabled = enabled,
-                    label = { Text("CPU threads (0 = safe default)") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+            CollapsibleTtsSettingsHeader(
+                title = "Supported controls",
+                summary = supportedControlsSummary(state),
+                expanded = expanded,
+                onToggle = { expanded = !expanded },
+            )
+            if (expanded) {
+                if (state.supportsSpeechRate) {
+                    TextToSpeechParameterSlider("Speech rate", state.speed, "%.2f×".format(state.speed), 0.5f..2f, enabled, onSpeedChange)
+                }
+                if (state.supportsSentenceSilence) {
+                    TextToSpeechParameterSlider("Sentence silence", state.sentenceSilenceScale, "%.2f×".format(state.sentenceSilenceScale), 0f..2f, enabled, onSentenceSilenceChange)
+                }
+                TextToSpeechParameterSlider("Playback volume", state.volume, "${(state.volume * 100).toInt()}%", 0f..1f, enabled, onVolumeChange)
+                if (!state.usesPlatformVoice) {
+                    OutlinedTextField(
+                        value = state.threadCount,
+                        onValueChange = onThreadCountChange,
+                        enabled = enabled,
+                        label = { Text("CPU threads (0 = safe default)") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
         }
     }
@@ -378,74 +386,110 @@ internal fun TextToSpeechAudioEffectsSettings(
     onReset: () -> Unit,
 ) {
     val effects = state.audioEffects
+    var expanded by remember { mutableStateOf(false) }
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text("Post-processing", style = MaterialTheme.typography.titleMedium)
-                TextButton(onClick = onReset, enabled = enabled && !effects.isNeutral) {
-                    Text("Reset")
+            CollapsibleTtsSettingsHeader(
+                title = "Post-processing",
+                summary = if (effects.isNeutral) "No effects applied" else "Custom effects applied",
+                expanded = expanded,
+                onToggle = { expanded = !expanded },
+            )
+            if (expanded) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onReset, enabled = enabled && !effects.isNeutral) {
+                        Text("Reset")
+                    }
                 }
+                Text(
+                    "These effects are applied to the generated PCM before playback, replay, sharing, and WAV export.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                TextToSpeechParameterSlider(
+                    "Pitch",
+                    effects.pitchSemitones,
+                    effects.pitchSemitones.signed("st"),
+                    SpeechAudioEffects.PITCH_RANGE,
+                    enabled,
+                    onPitchChange,
+                )
+                TextToSpeechParameterSlider(
+                    "Formant",
+                    effects.formantSemitones,
+                    effects.formantSemitones.signed("st"),
+                    SpeechAudioEffects.FORMANT_RANGE,
+                    enabled,
+                    onFormantChange,
+                )
+                Text("Equalizer", style = MaterialTheme.typography.labelLarge)
+                TextToSpeechParameterSlider(
+                    "Low · 160 Hz",
+                    effects.lowEqDb,
+                    effects.lowEqDb.signed("dB"),
+                    SpeechAudioEffects.EQ_RANGE,
+                    enabled,
+                    onLowEqChange,
+                )
+                TextToSpeechParameterSlider(
+                    "Presence · 1.5 kHz",
+                    effects.midEqDb,
+                    effects.midEqDb.signed("dB"),
+                    SpeechAudioEffects.EQ_RANGE,
+                    enabled,
+                    onMidEqChange,
+                )
+                TextToSpeechParameterSlider(
+                    "High · 5 kHz",
+                    effects.highEqDb,
+                    effects.highEqDb.signed("dB"),
+                    SpeechAudioEffects.EQ_RANGE,
+                    enabled,
+                    onHighEqChange,
+                )
+                TextToSpeechParameterSlider(
+                    "Saturation drive",
+                    effects.saturationDriveDb,
+                    "%.1f dB".format(effects.saturationDriveDb),
+                    SpeechAudioEffects.SATURATION_RANGE,
+                    enabled,
+                    onSaturationChange,
+                )
             }
-            Text(
-                "These effects are applied to the generated PCM before playback, replay, sharing, and WAV export.",
-                style = MaterialTheme.typography.bodySmall,
-            )
-            TextToSpeechParameterSlider(
-                "Pitch",
-                effects.pitchSemitones,
-                effects.pitchSemitones.signed("st"),
-                SpeechAudioEffects.PITCH_RANGE,
-                enabled,
-                onPitchChange,
-            )
-            TextToSpeechParameterSlider(
-                "Formant",
-                effects.formantSemitones,
-                effects.formantSemitones.signed("st"),
-                SpeechAudioEffects.FORMANT_RANGE,
-                enabled,
-                onFormantChange,
-            )
-            Text("Equalizer", style = MaterialTheme.typography.labelLarge)
-            TextToSpeechParameterSlider(
-                "Low · 160 Hz",
-                effects.lowEqDb,
-                effects.lowEqDb.signed("dB"),
-                SpeechAudioEffects.EQ_RANGE,
-                enabled,
-                onLowEqChange,
-            )
-            TextToSpeechParameterSlider(
-                "Presence · 1.5 kHz",
-                effects.midEqDb,
-                effects.midEqDb.signed("dB"),
-                SpeechAudioEffects.EQ_RANGE,
-                enabled,
-                onMidEqChange,
-            )
-            TextToSpeechParameterSlider(
-                "High · 5 kHz",
-                effects.highEqDb,
-                effects.highEqDb.signed("dB"),
-                SpeechAudioEffects.EQ_RANGE,
-                enabled,
-                onHighEqChange,
-            )
-            TextToSpeechParameterSlider(
-                "Saturation drive",
-                effects.saturationDriveDb,
-                "%.1f dB".format(effects.saturationDriveDb),
-                SpeechAudioEffects.SATURATION_RANGE,
-                enabled,
-                onSaturationChange,
-            )
         }
     }
 }
+
+@Composable
+private fun CollapsibleTtsSettingsHeader(
+    title: String,
+    summary: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        TextButton(onClick = onToggle) {
+            Text(if (expanded) "Hide" else "Show")
+        }
+    }
+}
+
+private fun supportedControlsSummary(state: TextToSpeechUiState): String = buildList {
+    state.supportsSpeechRate.let { if (it) add("Rate ${"%.2f×".format(state.speed)}") }
+    state.supportsSentenceSilence.let { if (it) add("Silence ${"%.2f×".format(state.sentenceSilenceScale)}") }
+    add("Volume ${(state.volume * 100).toInt()}%")
+    if (!state.usesPlatformVoice) add("${state.threadCount} threads")
+}.joinToString(" · ")
 
 @Composable
 internal fun TextToSpeechPlaybackControls(

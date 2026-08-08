@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -22,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
@@ -93,37 +91,9 @@ fun AssistantScreen(
                 canSpeak = uiState.isIdle && uiState.selectedVoice != null,
                 canRegenerate = uiState.isIdle,
                 header = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        uiState.errorMessage?.let { message -> StatusMessage("Assistant needs attention", message) }
-                        uiState.contextUsage?.let { usage ->
-                            val omitted = if (usage.omittedMessageCount > 0) {
-                                " ${usage.omittedMessageCount} earlier message(s) omitted."
-                            } else {
-                                ""
-                            }
-                            Text(
-                                buildString {
-                                    append("Context: ")
-                                    val details = buildList {
-                                        if (usage.contextManagement == LlmContextManagement.RUNTIME_MANAGED) {
-                                            add("runtime-managed")
-                                        }
-                                        usage.promptTokens?.let { tokens ->
-                                            add(if (usage.promptTokensEstimated) "~$tokens estimated input" else "$tokens input")
-                                        }
-                                        usage.reservedOutputTokens?.let { add("$it max output") }
-                                        usage.contextSize?.let { add("$it total") }
-                                    }
-                                    append(details.joinToString(" · "))
-                                    append(".$omitted")
-                                },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
+                    uiState.errorMessage?.let { message -> StatusMessage("Assistant needs attention", message) }
                 },
-                footer = { uiState.metrics?.let { metrics -> ChatMetricsCard(metrics) } },
+                footer = { uiState.metrics?.let { metrics -> ChatMetricsCard(metrics, uiState.contextUsage) } },
             )
             AssistantComposer(
                 state = uiState,

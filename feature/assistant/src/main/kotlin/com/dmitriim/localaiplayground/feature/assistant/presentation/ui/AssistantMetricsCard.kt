@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -17,16 +18,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
+import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatMetrics
+import com.dmitriim.localaiplayground.feature.assistant.presentation.ContextUsage
 import kotlin.math.roundToInt
 
 @Composable
-internal fun ChatMetricsCard(metrics: ChatMetrics) {
+internal fun ChatMetricsCard(
+    metrics: ChatMetrics,
+    contextUsage: ContextUsage?,
+) {
     var expanded by remember(metrics) { mutableStateOf(false) }
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -34,14 +40,8 @@ internal fun ChatMetricsCard(metrics: ChatMetrics) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Run details", fontWeight = FontWeight.Bold)
                     Text(
-                        buildString {
-                            metrics.generatedTokens?.let { append("$it\u00A0tokens") }
-                                ?: append("Token count unavailable")
-                            metrics.generatedTokensPerSecond?.let {
-                                append(" · ${formatRate(it)}\u00A0tok/s")
-                            }
-                            append(" · ${formatDuration(metrics.totalDurationMs)} total")
-                        },
+                        contextUsage?.let { formatContextSummary(it, metrics) }
+                            ?: formatPerformanceSummary(metrics),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -51,42 +51,86 @@ internal fun ChatMetricsCard(metrics: ChatMetrics) {
                 }
             }
             if (expanded) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    MetricRow("Model", metrics.modelName)
-                    MetricRow(
-                        "Startup",
-                        buildString {
-                            append(if (metrics.coldStart) "Cold" else "Warm")
-                            metrics.effectiveThreadCount?.let { append(" · $it threads") }
+                Column(
+                    modifier = Modifier.padding(top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    HorizontalDivider()
+
+                    RunDetailsSection("Performance")
+                    RunDetailsMetric(
+                        label = "Time to first token",
+                        value = metrics.timeToFirstTokenMs?.let(::formatDuration) ?: "Not reached",
+                        description = "Time from starting the run until the first response token arrives. Lower feels more responsive.",
+                    )
+                    RunDetailsMetric(
+                        label = "Output",
+                        value = metrics.generatedTokens?.let { tokens ->
+                            buildMetricValue(tokens, metrics.generatedTokensPerSecond)
+                        } ?: "Token count unavailable",
+                        description = if (metrics.generatedTokens == null) {
+                            "This runtime did not report generated tokens or output speed."
+                        } else {
+                            "Response tokens produced by the model. Tokens per second measures generation speed; higher is faster."
                         },
                     )
-                    MetricRow("Load", "${metrics.loadDurationMs}\u00A0ms")
-                    metrics.promptTokens?.let { tokens ->
-                        MetricRow("Prompt", buildMetricValue(tokens, metrics.promptTokensPerSecond))
-                    }
-                    MetricRow(
-                        "First token",
-                        metrics.timeToFirstTokenMs?.let { "$it\u00A0ms" } ?: "Not reached",
+                    RunDetailsMetric(
+                        label = "Total run time",
+                        value = formatDuration(metrics.totalDurationMs),
+                        description = "End-to-end time for this run, including model loading, prompt processing, and generation.",
                     )
-                    metrics.generatedTokens?.let { tokens ->
-                        MetricRow("Output", buildMetricValue(tokens, metrics.generatedTokensPerSecond))
+
+                    RunDetailsSection("Context and request")
+                    contextUsage?.let { usage ->
+                        RunDetailsMetric(
+                            label = "Context window",
+                            value = formatContextDetails(usage),
+                            description = "The conversation input and reserved response space available to this run. Older messages may be omitted when the limit is reached.",
+                        )
+                        if (usage.omittedMessageCount > 0) {
+                            RunDetailsMetric(
+                                label = "Earlier messages omitted",
+                                value = "${usage.omittedMessageCount}",
+                                description = "Earlier conversation messages left out to keep the prompt within the context window.",
+                            )
+                        }
                     }
-                    MetricRow("Total", formatDuration(metrics.totalDurationMs))
-                    MetricRow(
-                        "Finish",
-                        metrics.finishReason.name
-                            .lowercase()
-                            .replace('_', ' ')
-                            .replaceFirstChar(Char::uppercase),
+                    RunDetailsMetric(
+                        label = "Prompt processing",
+                        value = metrics.promptTokens?.let { tokens ->
+                            buildMetricValue(tokens, metrics.promptTokensPerSecond)
+                        } ?: "Token count unavailable",
+                        description = "Input tokens read before the response. Tokens per second measures prompt processing speed; higher is faster.",
                     )
-                    Text(
-                        "Generation: temperature ${metrics.effectiveSettings.temperature} · " +
-                            "top-K ${metrics.effectiveSettings.topK} · top-P ${metrics.effectiveSettings.topP}\n" +
-                            "Limits: ${metrics.effectiveSettings.maxOutputTokens} output · " +
-                            "${metrics.effectiveSettings.contextSize} context · seed " +
-                            (metrics.effectiveSettings.seed?.toString() ?: "engine-selected"),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    RunDetailsMetric(
+                        label = "Generation settings",
+                        value = "Temperature ${metrics.effectiveSettings.temperature} · top-K ${metrics.effectiveSettings.topK} · top-P ${metrics.effectiveSettings.topP}",
+                        description = "Sampling controls that shape how varied the response can be. These settings affect output quality, not just speed.",
+                    )
+
+                    RunDetailsSection("Runtime")
+                    RunDetailsMetric(
+                        label = "Model",
+                        value = metrics.modelName,
+                        description = "The local model used to produce this response.",
+                    )
+                    RunDetailsMetric(
+                        label = "Startup",
+                        value = buildString {
+                            append(if (metrics.coldStart) "Cold start" else "Warm start")
+                            metrics.effectiveThreadCount?.let { append(" · $it threads") }
+                        },
+                        description = "Cold starts load a model into memory. Warm starts reuse one that is already loaded; thread count is the effective CPU parallelism.",
+                    )
+                    RunDetailsMetric(
+                        label = "Model load",
+                        value = formatDuration(metrics.loadDurationMs),
+                        description = "Time spent preparing the selected model before prompt processing begins.",
+                    )
+                    RunDetailsMetric(
+                        label = "Finish reason",
+                        value = metrics.finishReason.displayName(),
+                        description = "Why generation stopped for this response.",
                     )
                 }
             }
@@ -94,20 +138,64 @@ internal fun ChatMetricsCard(metrics: ChatMetrics) {
     }
 }
 
+private fun formatContextSummary(
+    usage: ContextUsage,
+    metrics: ChatMetrics,
+): String = buildString {
+    append("Context: ")
+    usage.promptTokens?.let { tokens ->
+        append(if (usage.promptTokensEstimated) "~$tokens" else tokens)
+        usage.contextSize?.let { append(" / $it") }
+    } ?: usage.contextSize?.let { append(it) } ?: append("unavailable")
+    usage.reservedOutputTokens?.let { append(" · Output cap: $it") }
+    append(" · ${formatDuration(metrics.totalDurationMs)} total")
+}
+
+private fun formatContextDetails(usage: ContextUsage): String = buildString {
+    val details = buildList {
+        if (usage.contextManagement == LlmContextManagement.RUNTIME_MANAGED) {
+            add("Runtime managed")
+        }
+        usage.promptTokens?.let { tokens ->
+            add(if (usage.promptTokensEstimated) "~$tokens estimated input" else "$tokens input")
+        }
+        usage.reservedOutputTokens?.let { add("$it max output") }
+        usage.contextSize?.let { add("$it total") }
+    }
+    append(details.joinToString(" · ").ifEmpty { "Unavailable" })
+}
+
+private fun formatPerformanceSummary(metrics: ChatMetrics): String = buildString {
+    metrics.generatedTokens?.let { append("$it\u00A0tokens") }
+        ?: append("Token count unavailable")
+    metrics.generatedTokensPerSecond?.let {
+        append(" · ${formatRate(it)}\u00A0tok/s")
+    }
+    append(" · ${formatDuration(metrics.totalDurationMs)} total")
+}
+
 @Composable
-private fun MetricRow(label: String, value: String) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            modifier = Modifier.weight(0.38f),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+private fun RunDetailsSection(title: String) {
+    Text(title, style = MaterialTheme.typography.titleSmall)
+}
+
+@Composable
+private fun RunDetailsMetric(
+    label: String,
+    value: String,
+    description: String,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(label, style = MaterialTheme.typography.titleSmall)
         Text(
             text = value,
-            modifier = Modifier.weight(0.62f),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            text = description,
             style = MaterialTheme.typography.bodySmall,
-            textAlign = TextAlign.End,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -124,3 +212,8 @@ private fun formatDuration(milliseconds: Long): String = if (milliseconds < 1_00
 }
 
 private fun formatRate(value: Double): String = "${(value * 10).roundToInt() / 10.0}"
+
+private fun LlmFinishReason.displayName(): String = name
+    .lowercase()
+    .replace('_', ' ')
+    .replaceFirstChar(Char::uppercase)

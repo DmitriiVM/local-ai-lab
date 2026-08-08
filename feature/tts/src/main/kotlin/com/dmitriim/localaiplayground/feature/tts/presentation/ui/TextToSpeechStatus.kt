@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackState
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
-import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisMetrics
 
 @Composable
 internal fun TextToSpeechPlaybackStatus(playback: SpeechPlaybackState) {
@@ -49,54 +48,8 @@ internal fun GeneratedAudioCard(output: GeneratedAudioFile) {
     }
 }
 
-@Composable
-internal fun TextToSpeechMetricsCard(metrics: SpeechSynthesisMetrics) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Run metrics", style = MaterialTheme.typography.titleMedium)
-            Text(
-                "First PCM chunk: ${formatOptionalDuration(metrics.timeToFirstChunkMs)} · " +
-                    "first AudioTrack write: ${formatOptionalDuration(metrics.timeToFirstWriteMs)}",
-            )
-            Text("First Android presentation: ${formatOptionalDuration(metrics.timeToFirstPresentationMs)}")
-            Text(
-                "Synthesis: ${formatDuration(metrics.synthesisDurationMs)} · " +
-                    "audio: ${formatDuration(metrics.generatedAudioDurationMs)} · " +
-                    "RTF: ${metrics.realTimeFactor?.let { "%.3f".format(it) } ?: "—"}",
-            )
-            Text(
-                "${metrics.sampleRateHz} Hz · underruns: ${metrics.playbackUnderrunCount} · " +
-                    "load: ${formatDuration(metrics.loadDurationMs)} · threads: ${metrics.effectiveThreadCount}",
-            )
-            metrics.conditioningDurationMs?.let { conditioningDurationMs ->
-                Text(
-                    "Chatterbox conditioning: ${formatDuration(conditioningDurationMs)} " +
-                        "(${if (metrics.conditioningCacheHit == true) "cache hit" else "encoded"}) · " +
-                        "tokens: ${formatOptionalDuration(metrics.tokenGenerationDurationMs)} · " +
-                        "decoder: ${formatOptionalDuration(metrics.decoderDurationMs)}",
-                )
-                Text("Generated speech tokens: ${metrics.generatedTokenCount ?: "—"}")
-                Text(
-                    "Peak process PSS: ${metrics.peakProcessPssBytes?.toMebibytes() ?: "—"} · " +
-                        "device available: ${metrics.availableDeviceMemoryBytes?.toMebibytes() ?: "—"}",
-                )
-            }
-            if (metrics.timeToFirstPresentationMs == null) {
-                Text(
-                    "This audio route did not expose a reliable presentation timestamp; callback time is not substituted.",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        }
-    }
-}
-
-private fun formatOptionalDuration(durationMs: Long?): String = durationMs?.let { "$it ms" } ?: "unavailable"
-
 private fun formatDuration(durationMs: Long): String {
     val seconds = durationMs / 1_000
     val millis = durationMs % 1_000
     return "%d:%02d.%03d".format(seconds / 60, seconds % 60, millis)
 }
-
-private fun Long.toMebibytes(): String = "%.1f MiB".format(toDouble() / 1_048_576)

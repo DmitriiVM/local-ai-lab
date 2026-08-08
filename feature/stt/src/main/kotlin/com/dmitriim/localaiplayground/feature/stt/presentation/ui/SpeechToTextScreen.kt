@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -57,9 +58,15 @@ fun SpeechToTextScreen(
     val context = LocalContext.current
     val scroll = rememberScrollState()
     val busy = state.operation != SttOperation.IDLE
+    val systemNavigationPadding = if (dimensions.bottomNavigationOverlayClearance == 0.dp) {
+        Modifier.navigationBarsPadding()
+    } else {
+        Modifier
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .then(systemNavigationPadding)
             .verticalScroll(scroll)
             .padding(start = 16.dp, top = dimensions.topBarOverlayClearance + 12.dp, end = 16.dp, bottom = 24.dp + dimensions.bottomNavigationOverlayClearance),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -152,23 +159,11 @@ fun SpeechToTextScreen(
             }
         }
         state.metrics?.let { metrics ->
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Run metrics", style = MaterialTheme.typography.titleMedium)
-                    Text("Audio: ${formatDuration(metrics.audioDurationMs)} · processing: ${formatDuration(metrics.processingDurationMs)}")
-                    Text("First partial: — · final result: ${formatDuration(metrics.timeToFinalMs)}")
-                    Text("RTF: ${metrics.realTimeFactor?.let { "%.2f".format(it) } ?: "—"}")
-                    Text("Segments: ${metrics.segmentCount} · model load: ${formatDuration(metrics.loadDurationMs)} · threads: ${metrics.effectiveThreadCount}")
-                    Text(
-                        if (state.selectedModel?.recognitionMode == com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode.STREAMING) {
-                            "This model supports streaming; the current screen finalizes each captured segment after recording stops."
-                        } else {
-                            "This model uses offline segment decoding."
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            }
+            SttRunMetricsCard(
+                metrics = metrics,
+                streamingModel = state.selectedModel?.recognitionMode ==
+                    com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode.STREAMING,
+            )
         }
     }
 }
