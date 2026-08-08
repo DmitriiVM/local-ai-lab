@@ -22,7 +22,6 @@ fun ModelsRoute(
         onDownload = viewModel::download,
         onPauseTransfer = viewModel::pauseTransfer,
         onResumeOnWifi = viewModel::resumeOnWifi,
-        onResumeOnAnyNetwork = viewModel::resumeOnAnyNetwork,
         onCancelTransfer = viewModel::cancelTransfer,
         onDelete = viewModel::requestDelete,
         onConfirmDelete = viewModel::confirmDelete,

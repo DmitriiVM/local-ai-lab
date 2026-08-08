@@ -519,9 +519,6 @@ private fun ModelActionBar(
                         Text("${transfer.completedBytes.toDetailsReadableBytes()} / ${transfer.totalBytes.toDetailsReadableBytes()}")
                         transfer.reason?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                         Button(onClick = onResumeOnWifi, modifier = Modifier.fillMaxWidth()) { Text("Resume on Wi-Fi") }
-                        OutlinedButton(onClick = { confirmAnyNetwork = true }, modifier = Modifier.fillMaxWidth()) {
-                            Text("Use mobile data")
-                        }
                         OutlinedButton(onClick = { confirmCancel = true }, modifier = Modifier.fillMaxWidth()) { Text("Cancel") }
                     }
                     ModelTransferState.Installing,
@@ -634,7 +631,7 @@ private fun ModelValidationState.detailsStatusLabel(): String = when (this) {
 
 private fun ModelTransferState?.detailsStatusLabel(): String = when (this) {
     is ModelTransferState.Queued -> "Queued"
-    is ModelTransferState.Running -> "Downloading"
+    is ModelTransferState.Running -> if (completedBytes >= totalBytes) "Verifying" else "Downloading"
     is ModelTransferState.Paused -> "Paused"
     ModelTransferState.Installing -> "Installing"
     is ModelTransferState.Failed -> "Download failed"
