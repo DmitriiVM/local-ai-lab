@@ -4,6 +4,27 @@
 # For more details, see
 #   https://d.android.com/r/tools/r8/keep-rules
 
+# LiteRT-LM's native bridge resolves parts of its Kotlin/Java API by JNI method
+# lookup when it creates a conversation. R8 must not rename or remove those
+# members in the optimized release/profile variants.
+-keep class com.google.ai.edge.litertlm.** { *; }
+
+# sherpa-onnx JNI reads fields from its Java configuration objects when it
+# creates STT and TTS runtimes.
+-keep class com.k2fsa.sherpa.onnx.** { *; }
+-keep class com.dmitriim.localaiplayground.ai.sherpa.SherpaTextToSpeechEngine$AudioChunkCallback { *; }
+
+# ONNX Runtime's native session bridge resolves Java tensor and value classes
+# dynamically while converting inference outputs.
+-keep class ai.onnxruntime.** { *; }
+
+# llama.cpp exposes NativeBridge by its compiled JNI name and dynamically calls
+# NativeTokenCallback.onToken while streaming generated text.
+-keep class com.dmitriim.localaiplayground.ai.llamacpp.NativeLlama$NativeBridge { *; }
+-keepclassmembers class com.dmitriim.localaiplayground.ai.llamacpp.NativeTokenCallback {
+    void onToken(java.lang.String);
+}
+
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:

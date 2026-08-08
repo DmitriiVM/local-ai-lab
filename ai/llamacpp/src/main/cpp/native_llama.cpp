@@ -213,7 +213,14 @@ Java_com_dmitriim_localaiplayground_ai_llamacpp_NativeLlama_00024NativeBridge_na
     llama_sampler_chain_add(sampler, llama_sampler_init_dist(seed < 0 ? LLAMA_DEFAULT_SEED : static_cast<uint32_t>(seed)));
 
     jclass callback_class = env->GetObjectClass(callback);
+    if (callback_class == nullptr) {
+        return array_result(env, {"ERROR", "Could not resolve the streaming callback class"});
+    }
     jmethodID on_token = env->GetMethodID(callback_class, "onToken", "(Ljava/lang/String;)V");
+    if (on_token == nullptr) {
+        env->ExceptionClear();
+        return array_result(env, {"ERROR", "The streaming callback is unavailable"});
+    }
     std::string output;
     int generated_count = 0;
     long first_token_latency = -1;

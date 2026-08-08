@@ -118,6 +118,7 @@ class LiteRtLmRuntime(context: Context) :
 
         val coldStart = !isLoaded
         closeEngine()
+        LiteRtLmNativeLibrary.load()
         val newEngine = Engine(
             EngineConfig(
                 modelPath = model.absolutePath,

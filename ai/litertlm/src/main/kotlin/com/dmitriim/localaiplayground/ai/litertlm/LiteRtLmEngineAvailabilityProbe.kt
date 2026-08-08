@@ -24,7 +24,10 @@ class LiteRtLmEngineAvailabilityProbe : EngineAvailabilityProbe {
                 reason = "The packaged LiteRT-LM Android runtime requires an arm64-v8a device.",
             )
         }
-        runCatching { Class.forName("com.google.ai.edge.litertlm.Engine") }.fold(
+        runCatching {
+            LiteRtLmNativeLibrary.load()
+            Class.forName("com.google.ai.edge.litertlm.Engine")
+        }.fold(
             onSuccess = {
                 EngineAvailability.Available(
                     descriptor = descriptor,
