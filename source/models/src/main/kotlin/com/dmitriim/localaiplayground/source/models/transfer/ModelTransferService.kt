@@ -3,12 +3,14 @@ package com.dmitriim.localaiplayground.source.models.transfer
 import android.app.Application
 import android.util.Log
 import com.dmitriim.localaiplayground.core.di.AppScope
+import com.dmitriim.localaiplayground.core.di.ApplicationCoroutineScope
 import com.dmitriim.localaiplayground.core.model.library.CatalogArchiveFormat
 import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadArchive
 import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadFile
 import com.dmitriim.localaiplayground.core.model.library.CatalogModel
 import com.dmitriim.localaiplayground.core.model.library.ModelCompatibilityState
+import com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy
 import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.manifest.ModelFileSpec
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
@@ -17,6 +19,7 @@ import com.dmitriim.localaiplayground.source.models.catalog.ModelCatalog
 import com.dmitriim.localaiplayground.source.models.credentials.HuggingFaceTokenStore
 import com.dmitriim.localaiplayground.source.models.diagnostics.ModelDiagnosticsService
 import com.dmitriim.localaiplayground.source.models.library.InstalledModelService
+import com.dmitriim.localaiplayground.source.models.library.ModelImportPolicy
 import com.dmitriim.localaiplayground.source.models.validation.sha256
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -26,17 +29,19 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URI
-import java.util.UUID
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Owns scheduling, network transfer progress, and transactional catalog installation. */
+/** Owns persisted model download state, resumable transfer, and transactional installation. */
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class, binding = binding<ModelTransfers>())
@@ -46,6 +51,7 @@ class ModelTransferService(
     private val diagnostics: ModelDiagnosticsService,
     private val transferState: ModelTransferStateStore,
     private val huggingFaceTokens: HuggingFaceTokenStore,
+    @param:ApplicationCoroutineScope private val applicationScope: CoroutineScope,
 ) : ModelTransfers,
     ModelDownloadExecutor {
     override val catalog: Flow<List<CatalogModel>> = MutableStateFlow(ModelCatalog.entries).asStateFlow()
@@ -53,275 +59,515 @@ class ModelTransferService(
 
     init {
         ModelDownloadRuntime.executor = this
+        applicationScope.launch(Dispatchers.IO) { reconcilePersistedTransfers() }
     }
 
-    override suspend fun download(modelId: ModelId): Result<Unit> = runCatching {
+    override suspend fun download(
+        modelId: ModelId,
+        networkPolicy: ModelTransferNetworkPolicy,
+    ): Result<Unit> = runCatching {
         val entry = catalogEntry(modelId)
-        Log.i(TAG, "Catalog model download requested: modelId=${modelId.value}, files=${entry.download.files.size}, expectedBytes=${entry.download.expectedBytes}")
         if (installedModels.registerInstalledDirectory(modelId)) {
-            Log.i(TAG, "Catalog model already installed; marking transfer completed: modelId=${modelId.value}")
-            transferState.update { it + (modelId to ModelTransferState.Completed) }
+            transferState.delete(modelId)
             return@runCatching
         }
-        when (transferState.stateFor(modelId)) {
-            ModelTransferState.Queued,
-            is ModelTransferState.Running,
-            ModelTransferState.Installing,
-            -> {
-                Log.i(TAG, "Catalog model transfer already active: modelId=${modelId.value}")
-                return@runCatching
-            }
-            else -> Unit
-        }
         val compatibility = diagnostics.compatibility(entry.manifest)
-        Log.i(TAG, "Catalog model compatibility checked: modelId=${modelId.value}, state=${compatibility.state}, reasons=${compatibility.reasons.size}")
         require(compatibility.state != ModelCompatibilityState.INCOMPATIBLE) { compatibility.reasons.joinToString() }
-        transferState.update { it + (modelId to ModelTransferState.Queued) }
-        try {
-            ModelTransferScheduler(application).schedule(entry)
-            Log.i(TAG, "Catalog model download scheduled: modelId=${modelId.value}")
-        } catch (error: Throwable) {
-            Log.e(TAG, "Catalog model download scheduling failed: modelId=${modelId.value}, message=${error.message}", error)
-            transferState.update { it + (modelId to ModelTransferState.Failed(error.message ?: "Download could not be scheduled.")) }
-            throw error
+        val existing = transferState.find(modelId)
+        when (existing?.status) {
+            PersistedModelTransferStatus.QUEUED,
+            PersistedModelTransferStatus.RUNNING,
+            PersistedModelTransferStatus.INSTALLING,
+            -> return@runCatching
+            PersistedModelTransferStatus.FAILED -> {
+                stagingDirectory(modelId).deleteRecursively()
+                transferState.delete(modelId)
+            }
+            null,
+            PersistedModelTransferStatus.PAUSED,
+            -> Unit
         }
+        queue(entry, networkPolicy)
+    }
+
+    override suspend fun pauseTransfer(modelId: ModelId) {
+        val transfer = transferState.find(modelId) ?: return
+        if (transfer.status == PersistedModelTransferStatus.INSTALLING) return
+        transferState.update(
+            transfer,
+            status = PersistedModelTransferStatus.PAUSED,
+            message = "Paused by user.",
+        )
+        ModelTransferScheduler(application).cancel(modelId)
+    }
+
+    override suspend fun resumeTransfer(
+        modelId: ModelId,
+        networkPolicy: ModelTransferNetworkPolicy,
+    ): Result<Unit> = runCatching {
+        val entry = catalogEntry(modelId)
+        val transfer = requireNotNull(transferState.find(modelId)) { "This download is no longer available." }
+        require(transfer.status != PersistedModelTransferStatus.INSTALLING) { "The model is being installed." }
+        require(transfer.catalogVersion == requireNotNull(entry.manifest.catalogVersion) && transfer.revision == entry.manifest.revision) {
+            "The bundled catalog changed. Restart this download."
+        }
+        queue(entry, networkPolicy)
     }
 
     override suspend fun cancelTransfer(modelId: ModelId) {
-        if (transferState.stateFor(modelId) == ModelTransferState.Installing) {
-            Log.w(TAG, "Ignoring cancellation during model installation: modelId=${modelId.value}")
-            return
-        }
-        Log.i(TAG, "Catalog model transfer cancellation requested: modelId=${modelId.value}")
+        val transfer = transferState.find(modelId) ?: return
+        if (transfer.status == PersistedModelTransferStatus.INSTALLING) return
+        transferState.delete(modelId)
         ModelTransferScheduler(application).cancel(modelId)
-        transferState.update { it + (modelId to ModelTransferState.Cancelled) }
+        stagingDirectory(modelId).deleteRecursively()
     }
 
-    override suspend fun executeScheduledDownload(modelId: ModelId): Result<Unit> = runCatching {
-        val entry = catalogEntry(modelId)
-        Log.i(TAG, "Scheduled catalog model download started: modelId=${modelId.value}")
-        if (installedModels.registerInstalledDirectory(modelId)) {
-            transferState.update { it + (modelId to ModelTransferState.Completed) }
-            return@runCatching
-        }
-        withContext(Dispatchers.IO) { downloadAndInstall(entry) }
-    }
-
-    private suspend fun downloadAndInstall(entry: CatalogModel) {
-        val modelId = entry.manifest.modelId
-        val authorizationToken = credentialFor(entry)
-        val temporary = temporaryDirectory(modelId)
-        Log.i(TAG, "Catalog model transfer started: modelId=${modelId.value}, stagingDirectory=${temporary.name}")
-        transferState.update { it + (modelId to ModelTransferState.Running(0, entry.download.expectedBytes)) }
+    override suspend fun executeScheduledDownload(modelId: ModelId, executionGeneration: Long) {
+        val transfer = transferState.find(modelId) ?: return
+        if (!transferState.claimQueued(modelId, executionGeneration)) return
+        val claimed = requireNotNull(transferState.find(modelId))
         try {
-            entry.download.archive?.let { archive ->
-                downloadAndExtractArchive(entry, archive, temporary, authorizationToken)
-                transferState.update { it + (modelId to ModelTransferState.Installing) }
-                installedModels.installDirectory(entry.manifest.copy(installedAtEpochMs = System.currentTimeMillis()), temporary)
-                transferState.update { it + (modelId to ModelTransferState.Completed) }
-                Log.i(TAG, "Catalog archive model transfer completed: modelId=${modelId.value}")
-                return
+            val entry = catalogEntry(modelId)
+            require(claimed.catalogVersion == requireNotNull(entry.manifest.catalogVersion) && claimed.revision == entry.manifest.revision) {
+                "The bundled catalog changed. Restart this download."
             }
-            val downloads = entry.download.files.ifEmpty {
-                val file = entry.manifest.files.single()
-                listOf(CatalogDownloadFile(file.relativePath, requireNotNull(entry.download.url) { "The catalog download URL is missing." }))
-            }
-            val specifications = entry.manifest.files.associateBy(ModelFileSpec::relativePath)
-            val expectedTotal = downloads.sumOf { download ->
-                requireNotNull(specifications[download.relativePath]?.expectedBytes) {
-                    "The catalog size for ${download.relativePath} is missing."
-                }
-            }
-            require(expectedTotal == entry.download.expectedBytes) { "The catalog's total download size does not match its files." }
-            var completedBeforeFile = 0L
-            downloads.forEach { download ->
-                coroutineContext.ensureActive()
-                val specification = requireNotNull(specifications[download.relativePath]) {
-                    "The catalog download ${download.relativePath} is not declared by the model."
-                }
-                val expectedBytes = requireNotNull(specification.expectedBytes) {
-                    "The catalog size for ${download.relativePath} is missing."
-                }
-                val expectedSha256 = requireNotNull(specification.sha256) {
-                    "The catalog checksum for ${download.relativePath} is missing."
-                }
-                val destination = File(temporary, download.relativePath)
-                Log.i(TAG, "Catalog model file download started: modelId=${modelId.value}, file=${download.relativePath}, expectedBytes=$expectedBytes")
-                require(destination.canonicalPath.startsWith(temporary.canonicalPath + File.separator)) {
-                    "The model manifest contains an unsafe path."
-                }
-                val parent = requireNotNull(destination.parentFile)
-                require(parent.isDirectory || parent.mkdirs()) { "Could not prepare the model installation directory." }
-                downloadTo(
-                    url = download.url,
-                    destination = destination,
-                    expectedBytes = expectedBytes,
-                    modelId = modelId,
-                    completedBeforeFile = completedBeforeFile,
-                    totalBytes = entry.download.expectedBytes,
-                    authorizationToken = authorizationToken,
-                )
-                require(destination.length() == expectedBytes) {
-                    "Downloaded size for ${download.relativePath} does not match the catalog."
-                }
-                require(destination.sha256().equals(expectedSha256, ignoreCase = true)) {
-                    "Downloaded checksum for ${download.relativePath} does not match the catalog."
-                }
-                Log.i(TAG, "Catalog model file verified: modelId=${modelId.value}, file=${download.relativePath}, bytes=${destination.length()}")
-                completedBeforeFile += expectedBytes
-            }
-            transferState.update { it + (modelId to ModelTransferState.Installing) }
-            Log.i(TAG, "Catalog model installation started: modelId=${modelId.value}")
-            installedModels.installDirectory(entry.manifest.copy(installedAtEpochMs = System.currentTimeMillis()), temporary, verifyChecksums = false)
-            transferState.update { it + (modelId to ModelTransferState.Completed) }
-            Log.i(TAG, "Catalog model transfer completed: modelId=${modelId.value}")
+            withContext(Dispatchers.IO) { downloadAndInstall(entry, claimed) }
         } catch (cancelled: CancellationException) {
-            Log.i(TAG, "Catalog model transfer cancelled: modelId=${modelId.value}")
-            temporary.deleteRecursively()
-            transferState.update { it + (modelId to ModelTransferState.Cancelled) }
+            val latest = transferState.find(modelId)
+            if (latest?.status == PersistedModelTransferStatus.RUNNING && latest.executionGeneration == executionGeneration) {
+                transferState.update(
+                    latest,
+                    status = PersistedModelTransferStatus.PAUSED,
+                    message = "Download interrupted. Tap Resume to continue.",
+                )
+            }
             throw cancelled
         } catch (error: Throwable) {
-            Log.e(TAG, "Catalog model transfer failed: modelId=${modelId.value}, message=${error.message}", error)
-            temporary.deleteRecursively()
-            transferState.update { it + (modelId to ModelTransferState.Failed(error.message ?: "Download failed.")) }
+            val latest = transferState.find(modelId) ?: return
+            val retryable = error.isRetryableDownloadFailure()
+            transferState.update(
+                latest,
+                status = if (retryable) PersistedModelTransferStatus.PAUSED else PersistedModelTransferStatus.FAILED,
+                message = error.message ?: if (retryable) "Download interrupted. Tap Resume to continue." else "Download failed.",
+            )
+            Log.e(TAG, "Catalog model transfer failed: modelId=${modelId.value}", error)
+        }
+    }
+
+    private suspend fun queue(entry: CatalogModel, networkPolicy: ModelTransferNetworkPolicy) {
+        val modelId = entry.manifest.modelId
+        require(stagingDirectory(modelId).mkdirs() || stagingDirectory(modelId).isDirectory) {
+            "Could not prepare the download directory."
+        }
+        val queued = transferState.queueNew(
+            modelId = modelId,
+            catalogVersion = requireNotNull(entry.manifest.catalogVersion),
+            revision = entry.manifest.revision,
+            totalBytes = entry.download.expectedBytes,
+            networkPolicy = networkPolicy,
+        )
+        try {
+            ModelTransferScheduler(application).schedule(entry, queued.executionGeneration, networkPolicy)
+        } catch (error: Throwable) {
+            transferState.update(
+                queued,
+                status = PersistedModelTransferStatus.FAILED,
+                message = error.message ?: "Download could not be scheduled.",
+            )
             throw error
         }
+    }
+
+    private suspend fun downloadAndInstall(entry: CatalogModel, initialTransfer: StoredModelTransfer) {
+        var transfer = initialTransfer
+        val modelId = entry.manifest.modelId
+        val temporary = stagingDirectory(modelId)
+        val authorizationToken = credentialFor(entry)
+        val archive = entry.download.archive
+        if (archive != null) {
+            transfer = downloadAndExtractArchive(entry, archive, temporary, transfer, authorizationToken)
+        } else {
+            val downloads = entry.download.files.ifEmpty {
+                val file = entry.manifest.files.single()
+                listOf(CatalogDownloadFile(file.relativePath, requireNotNull(entry.download.url)))
+            }
+            val specifications = entry.manifest.files.associateBy(ModelFileSpec::relativePath)
+            require(downloads.sumOf { requireNotNull(specifications[it.relativePath]?.expectedBytes) } == entry.download.expectedBytes)
+            var completed = 0L
+            val validators = transferState.fileValidators(modelId)
+            downloads.forEach { download ->
+                ensureRunning(modelId, transfer.executionGeneration)
+                val specification = requireNotNull(specifications[download.relativePath]) { "The catalog download is undeclared." }
+                val expectedBytes = requireNotNull(specification.expectedBytes) { "The catalog size is missing." }
+                val expectedSha256 = requireNotNull(specification.sha256) { "The catalog checksum is missing." }
+                val destination = destinationFor(temporary, download.relativePath)
+                val fileValidator = validators[download.relativePath]
+                if (fileValidator?.verified == true && destination.length() == expectedBytes) {
+                    completed += expectedBytes
+                    transfer = transferState.updateWhileRunning(
+                        transfer,
+                        completedBytes = completed,
+                        currentRelativePath = download.relativePath,
+                    ) ?: throw CancellationException("The download was paused.")
+                    return@forEach
+                }
+                transfer = downloadFileWithRetries(
+                    transfer = transfer,
+                    url = download.url,
+                    destination = destination,
+                    relativePath = download.relativePath,
+                    expectedBytes = expectedBytes,
+                    expectedSha256 = expectedSha256,
+                    completedBeforeFile = completed,
+                    authorizationToken = authorizationToken,
+                    existingValidator = fileValidator,
+                )
+                completed += expectedBytes
+            }
+        }
+        ensureRunning(modelId, transfer.executionGeneration)
+        transfer = transferState.updateWhileRunning(
+            transfer,
+            status = PersistedModelTransferStatus.INSTALLING,
+            message = null,
+        ) ?: throw CancellationException("The download was paused before installation.")
+        installedModels.installDirectory(
+            entry.manifest.copy(installedAtEpochMs = System.currentTimeMillis()),
+            temporary,
+            verifyChecksums = archive != null,
+        )
+        transferState.delete(modelId)
     }
 
     private suspend fun downloadAndExtractArchive(
         entry: CatalogModel,
         archive: CatalogDownloadArchive,
         temporary: File,
+        transfer: StoredModelTransfer,
         authorizationToken: String?,
-    ) {
-        require(archive.expectedBytes == entry.download.expectedBytes) {
-            "The catalog archive size does not match the download total."
+    ): StoredModelTransfer {
+        require(archive.expectedBytes == entry.download.expectedBytes) { "The catalog archive size does not match." }
+        val relativePath = if (archive.format == CatalogArchiveFormat.ZIP) ARCHIVE_ZIP else ARCHIVE_TAR_BZIP2
+        val archiveFile = destinationFor(temporary, relativePath)
+        val existing = transferState.fileValidators(entry.manifest.modelId)[relativePath]
+        val downloaded = if (existing?.verified == true && archiveFile.length() == archive.expectedBytes) {
+            transferState.updateWhileRunning(
+                transfer,
+                completedBytes = archive.expectedBytes,
+                currentRelativePath = relativePath,
+            ) ?: throw CancellationException("The download was paused.")
+        } else {
+            downloadFileWithRetries(
+                transfer = transfer,
+                url = archive.url,
+                destination = archiveFile,
+                relativePath = relativePath,
+                expectedBytes = archive.expectedBytes,
+                expectedSha256 = archive.sha256,
+                completedBeforeFile = 0L,
+                authorizationToken = authorizationToken,
+                existingValidator = existing,
+            )
         }
-        val archiveFile = File(
-            temporary,
-            if (archive.format == CatalogArchiveFormat.ZIP) "download.zip" else "download.tar.bz2",
-        )
-        Log.i(TAG, "Catalog archive download started: modelId=${entry.manifest.modelId.value}, bytes=${archive.expectedBytes}")
-        downloadTo(
-            url = archive.url,
-            destination = archiveFile,
-            expectedBytes = archive.expectedBytes,
-            modelId = entry.manifest.modelId,
-            completedBeforeFile = 0,
-            totalBytes = entry.download.expectedBytes,
-            authorizationToken = authorizationToken,
-        )
-        require(archiveFile.length() == archive.expectedBytes) { "Downloaded archive size does not match the catalog." }
-        require(archiveFile.sha256().equals(archive.sha256, ignoreCase = true)) { "Downloaded archive checksum does not match the catalog." }
+        ensureRunning(entry.manifest.modelId, downloaded.executionGeneration)
         ModelArchiveExtractor.extract(archiveFile, temporary, archive.rootDirectory, archive.format)
         require(archiveFile.delete()) { "Could not remove the verified model archive." }
-        Log.i(TAG, "Catalog archive extracted: modelId=${entry.manifest.modelId.value}, root=${archive.rootDirectory}")
+        return downloaded
     }
 
-    private suspend fun downloadTo(
+    private suspend fun downloadFileWithRetries(
+        transfer: StoredModelTransfer,
         url: String,
         destination: File,
+        relativePath: String,
         expectedBytes: Long,
-        modelId: ModelId,
+        expectedSha256: String,
         completedBeforeFile: Long,
-        totalBytes: Long,
         authorizationToken: String?,
-    ) {
-        var currentUrl = url
-        repeat(5) {
-            coroutineContext.ensureActive()
-            val currentUri = URI(currentUrl)
-            require(currentUri.scheme == HTTPS_SCHEME) { "Model downloads must use HTTPS." }
-            val connection = (currentUri.toURL().openConnection() as HttpURLConnection).apply {
-                instanceFollowRedirects = false
-                connectTimeout = 15_000
-                readTimeout = 30_000
-                if (currentUri.host == HUGGING_FACE_HOST && authorizationToken != null) {
-                    setRequestProperty("Authorization", "Bearer $authorizationToken")
-                }
+        existingValidator: com.dmitriim.localaiplayground.source.database.ModelTransferFileEntity?,
+    ): StoredModelTransfer {
+        var current = transfer
+        var failure: Throwable? = null
+        for (attempt in RETRY_DELAYS_MS.indices) {
+            if (attempt > 0) {
+                val retryDelay = maxOf(RETRY_DELAYS_MS[attempt], (failure as? ModelDownloadFailure)?.retryAfterMillis ?: 0L)
+                delay(retryDelay)
             }
             try {
+                current = downloadFile(
+                    transfer = current,
+                    url = url,
+                    destination = destination,
+                    relativePath = relativePath,
+                    expectedBytes = expectedBytes,
+                    completedBeforeFile = completedBeforeFile,
+                    authorizationToken = authorizationToken,
+                    existingValidator = existingValidator,
+                )
+                require(destination.length() == expectedBytes) { "Downloaded size for $relativePath does not match the catalog." }
+                require(destination.sha256().equals(expectedSha256, ignoreCase = true)) {
+                    "Downloaded checksum for $relativePath does not match the catalog."
+                }
+                transferState.markFileVerified(current.modelIdAsModelId(), relativePath)
+                return current
+            } catch (error: Throwable) {
+                if (error is CancellationException) throw error
+                failure = error
+                if (!error.isRetryableDownloadFailure() || attempt == RETRY_DELAYS_MS.lastIndex) break
+            }
+        }
+        throw requireNotNull(failure)
+    }
+
+    private suspend fun downloadFile(
+        transfer: StoredModelTransfer,
+        url: String,
+        destination: File,
+        relativePath: String,
+        expectedBytes: Long,
+        completedBeforeFile: Long,
+        authorizationToken: String?,
+        existingValidator: com.dmitriim.localaiplayground.source.database.ModelTransferFileEntity?,
+    ): StoredModelTransfer {
+        destination.parentFile?.let { require(it.isDirectory || it.mkdirs()) }
+        var offset = destination.length().coerceAtMost(expectedBytes)
+        if (destination.length() > expectedBytes) destination.delete()
+        offset = destination.length()
+        var resetUsed = false
+        while (true) {
+            ensureRunning(transfer.modelIdAsModelId(), transfer.executionGeneration)
+            val validator = transferState.fileValidators(transfer.modelIdAsModelId())[relativePath] ?: existingValidator
+            val response = openResponse(url, offset, validator, authorizationToken, transfer.modelIdAsModelId())
+            response.connection.useResponse { connection ->
                 val status = connection.responseCode
-                if (status in 300..399) {
-                    val location = requireNotNull(connection.getHeaderField("Location")) { "Redirect without a target." }
-                    val redirectUri = currentUri.resolve(location)
-                    require(redirectUri.scheme == HTTPS_SCHEME) { "Model downloads must use HTTPS." }
-                    currentUrl = redirectUri.toString()
-                    Log.i(TAG, "Catalog model download redirected: modelId=${modelId.value}, redirect=${it + 1}")
-                    return@repeat
+                if (status == HTTP_RANGE_NOT_SATISFIABLE) {
+                    if (offset == expectedBytes) return transfer
+                    if (resetUsed) throw ModelDownloadFailure("Server rejected the download range.", retryable = false)
+                    destination.delete()
+                    offset = 0L
+                    resetUsed = true
+                    return@useResponse
                 }
-                when (status) {
-                    HTTP_UNAUTHORIZED -> throw ModelDownloadFailure(
-                        "Hugging Face token is invalid or expired.",
-                        retryable = false,
-                    )
-                    HTTP_FORBIDDEN -> throw ModelDownloadFailure(
-                        "Access denied. Open the model source, accept its license, and verify repository access.",
-                        retryable = false,
-                    )
+                if (status !in 200..299) throw httpFailure(status, connection)
+                val append = when (status) {
+                    HttpURLConnection.HTTP_OK -> {
+                        if (offset > 0) {
+                            if (resetUsed) throw ModelDownloadFailure("Server does not support resuming this file.", retryable = false)
+                            destination.delete()
+                            offset = 0L
+                            resetUsed = true
+                        }
+                        false
+                    }
+                    HttpURLConnection.HTTP_PARTIAL -> {
+                        validateContentRange(connection.getHeaderField("Content-Range"), offset, expectedBytes)
+                        true
+                    }
+                    else -> throw ModelDownloadFailure("Unexpected HTTP $status response.", retryable = false)
                 }
-                if (status !in 200..299) {
-                    throw ModelDownloadFailure(
-                        "Download failed with HTTP $status.",
-                        retryable = status == HTTP_REQUEST_TIMEOUT || status == HTTP_TOO_MANY_REQUESTS || status >= 500,
-                    )
+                val announced = connection.getHeaderFieldLong("Content-Length", -1)
+                val expectedResponseBytes = if (append) expectedBytes - offset else expectedBytes
+                if (announced >= 0 && announced != expectedResponseBytes) {
+                    throw ModelDownloadFailure("Server response length does not match the catalog.", retryable = false)
                 }
-                Log.i(TAG, "Catalog model HTTP response accepted: modelId=${modelId.value}, status=$status")
-                connection.getHeaderFieldLong("Content-Length", -1).takeIf { it >= 0 }?.let { announced ->
-                    require(announced == expectedBytes) { "Server response length does not match the catalog." }
+                val eTag = connection.getHeaderField("ETag")
+                val lastModified = connection.getHeaderField("Last-Modified")
+                if (append && validator?.eTag != null && eTag != null && validator.eTag != eTag) {
+                    if (resetUsed) throw ModelDownloadFailure("Server changed the download while it was paused.", retryable = false)
+                    destination.delete()
+                    offset = 0L
+                    resetUsed = true
+                    return@useResponse
                 }
+                transferState.updateFileValidator(transfer.modelIdAsModelId(), relativePath, eTag, lastModified, verified = false)
+                var current = transfer
+                var written = offset
+                var lastReportedBytes = written
+                var lastReportedAt = System.currentTimeMillis()
                 connection.inputStream.use { input ->
-                    FileOutputStream(destination).use { output ->
-                        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                        var completed = 0L
+                    FileOutputStream(destination, append).buffered(FILE_BUFFER_BYTES).use { output ->
+                        val buffer = ByteArray(FILE_BUFFER_BYTES)
                         while (true) {
-                            coroutineContext.ensureActive()
+                            ensureRunning(transfer.modelIdAsModelId(), transfer.executionGeneration)
                             val read = input.read(buffer)
                             if (read < 0) break
                             output.write(buffer, 0, read)
-                            completed += read
-                            transferState.update { states ->
-                                states + (modelId to ModelTransferState.Running(completedBeforeFile + completed, totalBytes))
+                            written += read
+                            val now = System.currentTimeMillis()
+                            if (written - lastReportedBytes >= PROGRESS_BYTES || now - lastReportedAt >= PROGRESS_INTERVAL_MS) {
+                                current = transferState.updateWhileRunning(
+                                    current,
+                                    completedBytes = completedBeforeFile + written,
+                                    currentRelativePath = relativePath,
+                                    message = null,
+                                ) ?: throw CancellationException("The download was paused.")
+                                lastReportedBytes = written
+                                lastReportedAt = now
                             }
                         }
                     }
                 }
-                return
-            } finally {
-                connection.disconnect()
+                if (written != expectedBytes) throw ModelDownloadFailure("Download ended before the expected size.", retryable = true)
+                return transferState.updateWhileRunning(
+                    current,
+                    completedBytes = completedBeforeFile + written,
+                    currentRelativePath = relativePath,
+                    message = null,
+                ) ?: throw CancellationException("The download was paused.")
             }
         }
-        error("The download redirected too many times.")
+    }
+
+    private suspend fun ensureRunning(modelId: ModelId, generation: Long) {
+        coroutineContext.ensureActive()
+        val transfer = transferState.find(modelId)
+        if (transfer?.status != PersistedModelTransferStatus.RUNNING || transfer.executionGeneration != generation) {
+            throw CancellationException("The download is no longer active.")
+        }
+    }
+
+    private fun openResponse(
+        url: String,
+        offset: Long,
+        validator: com.dmitriim.localaiplayground.source.database.ModelTransferFileEntity?,
+        authorizationToken: String?,
+        modelId: ModelId,
+    ): DownloadResponse {
+        var currentUrl = url
+        repeat(MAX_REDIRECTS) { redirect ->
+            val uri = URI(currentUrl)
+            require(uri.scheme == HTTPS_SCHEME) { "Model downloads must use HTTPS." }
+            val connection = (uri.toURL().openConnection() as HttpURLConnection).apply {
+                instanceFollowRedirects = false
+                connectTimeout = CONNECT_TIMEOUT_MS
+                readTimeout = READ_TIMEOUT_MS
+                setRequestProperty("Accept-Encoding", "identity")
+                if (offset > 0) {
+                    setRequestProperty("Range", "bytes=$offset-")
+                    validator?.eTag?.takeIf { it.startsWith('"') && !it.startsWith("W/", ignoreCase = true) }
+                        ?.let { setRequestProperty("If-Range", it) }
+                        ?: validator?.lastModified?.let { setRequestProperty("If-Range", it) }
+                }
+                if (uri.host == HUGGING_FACE_HOST && authorizationToken != null) {
+                    setRequestProperty("Authorization", "Bearer $authorizationToken")
+                }
+            }
+            val status = connection.responseCode
+            if (status !in 300..399) return DownloadResponse(connection)
+            val location = connection.getHeaderField("Location")
+            connection.disconnect()
+            val redirectUri = requireNotNull(location) { "Redirect without a target." }.let(uri::resolve)
+            require(redirectUri.scheme == HTTPS_SCHEME) { "Model downloads must use HTTPS." }
+            currentUrl = redirectUri.toString()
+            Log.i(TAG, "Catalog model redirected: modelId=${modelId.value}, redirect=${redirect + 1}")
+        }
+        throw ModelDownloadFailure("The download redirected too many times.", retryable = false)
+    }
+
+    private suspend fun reconcilePersistedTransfers() {
+        val activeIds = mutableSetOf<String>()
+        transferState.all().forEach { transfer ->
+            val modelId = transfer.modelIdAsModelId()
+            val entry = ModelCatalog.entries.firstOrNull { it.manifest.modelId == modelId }
+            if (entry == null || entry.manifest.catalogVersion != transfer.catalogVersion || entry.manifest.revision != transfer.revision) {
+                stagingDirectory(modelId).deleteRecursively()
+                transferState.delete(modelId)
+                return@forEach
+            }
+            if (installedModels.registerInstalledDirectory(modelId)) {
+                transferState.delete(modelId)
+                return@forEach
+            }
+            activeIds += ModelImportPolicy.directoryName(modelId)
+            if (transfer.status == PersistedModelTransferStatus.RUNNING || transfer.status == PersistedModelTransferStatus.INSTALLING) {
+                transferState.update(
+                    transfer,
+                    status = PersistedModelTransferStatus.PAUSED,
+                    message = "Download interrupted. Tap Resume to continue.",
+                )
+                ModelTransferScheduler(application).cancel(modelId)
+            }
+        }
+        stagingRoot().listFiles { file -> file.isDirectory && file.name !in activeIds }
+            ?.forEach(File::deleteRecursively)
+    }
+
+    private fun stagingRoot(): File = File(application.filesDir, STAGING_DIRECTORY_NAME)
+
+    private fun stagingDirectory(modelId: ModelId): File = File(stagingRoot(), ModelImportPolicy.directoryName(modelId))
+
+    private fun destinationFor(root: File, relativePath: String): File = File(root, relativePath).also { destination ->
+        require(destination.canonicalPath.startsWith(root.canonicalPath + File.separator)) { "The model manifest contains an unsafe path." }
     }
 
     private fun credentialFor(entry: CatalogModel): String? = when (entry.download.authentication) {
         CatalogDownloadAuthentication.NONE -> null
         CatalogDownloadAuthentication.HUGGING_FACE_USER_TOKEN -> huggingFaceTokens.tokenOrNull()
-            ?: throw ModelDownloadFailure(
-                "A Hugging Face access token is required for this model.",
-                retryable = false,
-            )
+            ?: throw ModelDownloadFailure("A Hugging Face access token is required for this model.", retryable = false)
     }
 
     private fun catalogEntry(modelId: ModelId) = ModelCatalog.entries.firstOrNull { it.manifest.modelId == modelId }
         ?: error("This catalog model is no longer available in the bundled catalog.")
 
-    private fun temporaryDirectory(modelId: ModelId): File = File(
-        installedModels.rootDirectory.parentFile,
-        "model-installing-${modelId.value}-${UUID.randomUUID()}",
-    ).also { require(it.mkdirs()) { "Could not create the installation staging directory." } }
+    private fun StoredModelTransfer.modelIdAsModelId() = ModelId(modelId)
+
+    private fun Throwable.isRetryableDownloadFailure(): Boolean = when (this) {
+        is ModelDownloadFailure -> retryable
+        is java.io.IOException -> true
+        else -> false
+    }
+
+    private fun httpFailure(status: Int, connection: HttpURLConnection): ModelDownloadFailure = when (status) {
+        HTTP_UNAUTHORIZED -> ModelDownloadFailure("Hugging Face token is invalid or expired.", retryable = false)
+        HTTP_FORBIDDEN -> ModelDownloadFailure("Access denied. Accept the model license and verify repository access.", retryable = false)
+        else -> ModelDownloadFailure(
+            message = "Download failed with HTTP $status.",
+            retryable = status == 408 || status == 429 || status >= 500,
+            retryAfterMillis = connection.getHeaderField("Retry-After")
+                ?.toLongOrNull()
+                ?.times(1_000L)
+                ?.coerceAtMost(MAX_RETRY_AFTER_MS),
+        )
+    }
+
+    private fun validateContentRange(value: String?, offset: Long, expectedBytes: Long) {
+        val match = CONTENT_RANGE.matchEntire(requireNotNull(value) { "Missing Content-Range for resumed download." })
+            ?: throw ModelDownloadFailure("Invalid Content-Range for resumed download.", retryable = false)
+        require(match.groupValues[1].toLong() == offset && match.groupValues[3].toLong() == expectedBytes) {
+            "Server resumed a different byte range."
+        }
+    }
+
+    private class DownloadResponse(val connection: HttpURLConnection)
+
+    private inline fun <T> HttpURLConnection.useResponse(block: (HttpURLConnection) -> T): T = try {
+        block(this)
+    } finally {
+        disconnect()
+    }
 
     private companion object {
         const val TAG = "AiP123Models"
+        const val STAGING_DIRECTORY_NAME = "model-downloads"
+        const val ARCHIVE_ZIP = ".download.zip"
+        const val ARCHIVE_TAR_BZIP2 = ".download.tar.bz2"
         const val HUGGING_FACE_HOST = "huggingface.co"
         const val HTTPS_SCHEME = "https"
-        const val HTTP_REQUEST_TIMEOUT = 408
         const val HTTP_UNAUTHORIZED = 401
         const val HTTP_FORBIDDEN = 403
-        const val HTTP_TOO_MANY_REQUESTS = 429
+        const val HTTP_RANGE_NOT_SATISFIABLE = 416
+        const val MAX_REDIRECTS = 5
+        const val CONNECT_TIMEOUT_MS = 15_000
+        const val READ_TIMEOUT_MS = 30_000
+        const val FILE_BUFFER_BYTES = 256 * 1024
+        const val PROGRESS_BYTES = 1L * 1024 * 1024
+        const val PROGRESS_INTERVAL_MS = 500L
+        const val MAX_RETRY_AFTER_MS = 60_000L
+        val RETRY_DELAYS_MS = longArrayOf(0L, 2_000L, 5_000L, 15_000L)
+        val CONTENT_RANGE = Regex("bytes (\\d+)-(\\d+)/(\\d+)")
     }
 }
 
 internal interface ModelDownloadExecutor {
-    suspend fun executeScheduledDownload(modelId: ModelId): Result<Unit>
+    suspend fun executeScheduledDownload(modelId: ModelId, executionGeneration: Long)
 }

@@ -9,22 +9,29 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.PersistableBundle
+import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.dmitriim.localaiplayground.core.model.library.CatalogModel
+import com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 
 /** Selects one persisted scheduling mechanism; both invoke the same transactional installer. */
 internal class ModelTransferScheduler(
     private val application: Application,
 ) {
-    fun schedule(entry: CatalogModel) {
+    fun schedule(
+        entry: CatalogModel,
+        executionGeneration: Long,
+        networkPolicy: ModelTransferNetworkPolicy,
+    ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            scheduleUserInitiatedTransfer(entry)
+            scheduleUserInitiatedTransfer(entry, executionGeneration, networkPolicy)
         } else {
-            scheduleForegroundWorker(entry.manifest.modelId)
+            scheduleForegroundWorker(entry.manifest.modelId, executionGeneration, networkPolicy)
         }
     }
 
@@ -36,13 +43,17 @@ internal class ModelTransferScheduler(
     }
 
     @TargetApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    private fun scheduleUserInitiatedTransfer(entry: CatalogModel) {
-        val extras = PersistableBundle().apply { putString(MODEL_ID_KEY, entry.manifest.modelId.value) }
-        val network = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .build()
+    private fun scheduleUserInitiatedTransfer(
+        entry: CatalogModel,
+        executionGeneration: Long,
+        networkPolicy: ModelTransferNetworkPolicy,
+    ) {
+        val extras = PersistableBundle().apply {
+            putString(MODEL_ID_KEY, entry.manifest.modelId.value)
+            putLong(MODEL_TRANSFER_GENERATION_KEY, executionGeneration)
+        }
         val job = JobInfo.Builder(jobId(entry.manifest.modelId), ComponentName(application, ModelDownloadJobService::class.java))
-            .setRequiredNetwork(network)
+            .setRequiredNetwork(networkRequest(networkPolicy))
             .setEstimatedNetworkBytes(entry.download.expectedBytes, 0)
             .setUserInitiated(true)
             .setExtras(extras)
@@ -52,9 +63,19 @@ internal class ModelTransferScheduler(
         }
     }
 
-    private fun scheduleForegroundWorker(modelId: ModelId) {
+    private fun scheduleForegroundWorker(
+        modelId: ModelId,
+        executionGeneration: Long,
+        networkPolicy: ModelTransferNetworkPolicy,
+    ) {
         val request = OneTimeWorkRequestBuilder<ModelDownloadWorker>()
-            .setInputData(workDataOf(MODEL_ID_KEY to modelId.value))
+            .setConstraints(workConstraints(networkPolicy))
+            .setInputData(
+                workDataOf(
+                    MODEL_ID_KEY to modelId.value,
+                    MODEL_TRANSFER_GENERATION_KEY to executionGeneration,
+                ),
+            )
             .build()
         WorkManager.getInstance(application).enqueueUniqueWork(
             workName(modelId),
@@ -68,8 +89,30 @@ internal class ModelTransferScheduler(
         ((modelId.value.hashCode() and Int.MAX_VALUE) % UIDT_JOB_ID_RANGE)
 
     private fun workName(modelId: ModelId): String = "curated-model-${modelId.value}"
+
+    private fun networkRequest(policy: ModelTransferNetworkPolicy): NetworkRequest = NetworkRequest.Builder()
+        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        .apply {
+            if (policy == ModelTransferNetworkPolicy.WIFI_ONLY) {
+                addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            }
+        }
+        .build()
+
+    private fun workConstraints(policy: ModelTransferNetworkPolicy): Constraints = Constraints.Builder().apply {
+        val fallbackType = when (policy) {
+            ModelTransferNetworkPolicy.WIFI_ONLY -> NetworkType.UNMETERED
+            ModelTransferNetworkPolicy.ANY_NETWORK -> NetworkType.CONNECTED
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            setRequiredNetworkRequest(networkRequest(policy), fallbackType)
+        } else {
+            setRequiredNetworkType(fallbackType)
+        }
+    }.build()
 }
 
 internal const val MODEL_ID_KEY = "model_id"
+internal const val MODEL_TRANSFER_GENERATION_KEY = "model_transfer_generation"
 private const val UIDT_JOB_ID_START = 20_000
 private const val UIDT_JOB_ID_RANGE = 1_000

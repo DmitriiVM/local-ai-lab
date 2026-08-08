@@ -12,7 +12,6 @@ import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.di.ApplicationCoroutineScope
 import com.dmitriim.localaiplayground.core.model.library.InstalledModel
 import com.dmitriim.localaiplayground.core.model.library.ModelImportRequest
-import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
@@ -132,7 +131,7 @@ class InstalledModelService(
         require(directory.canonicalFile.parentFile == rootDirectory.canonicalFile) { "Invalid model directory." }
         if (directory.exists()) require(directory.deleteRecursively()) { "Could not delete model files." }
         dao.delete(modelId.value)
-        transferState.update { it + (modelId to ModelTransferState.Idle) }
+        transferState.delete(modelId)
         Log.i(TAG, "Installed model deletion completed: modelId=${modelId.value}")
     }
 

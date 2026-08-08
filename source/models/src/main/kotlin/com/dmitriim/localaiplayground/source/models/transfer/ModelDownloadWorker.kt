@@ -14,6 +14,8 @@ class ModelDownloadWorker(
 ) : CoroutineWorker(appContext, parameters) {
     override suspend fun doWork(): Result {
         val modelId = inputData.getString(MODEL_ID_KEY) ?: return Result.failure()
+        val executionGeneration = inputData.getLong(MODEL_TRANSFER_GENERATION_KEY, -1L)
+        if (executionGeneration < 0) return Result.failure()
         val foregroundServiceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         } else {
@@ -26,15 +28,7 @@ class ModelDownloadWorker(
                 foregroundServiceType,
             ),
         )
-        return ModelDownloadRuntime.executor
-            ?.executeScheduledDownload(ModelId(modelId))
-            ?.let { result ->
-                when {
-                    result.isSuccess -> Result.success()
-                    result.shouldRetryDownload() -> Result.retry()
-                    else -> Result.failure()
-                }
-            }
-            ?: Result.retry()
+        ModelDownloadRuntime.executor?.executeScheduledDownload(ModelId(modelId), executionGeneration)
+        return Result.success()
     }
 }

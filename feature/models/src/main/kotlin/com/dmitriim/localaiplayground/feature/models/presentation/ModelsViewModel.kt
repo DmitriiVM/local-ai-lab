@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.engine.EngineId
 import com.dmitriim.localaiplayground.core.model.library.ModelImportRequest
+import com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy
 import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
@@ -149,9 +150,29 @@ class ModelsViewModel(
         }
         launchOperation("download") {
         Log.i(TAG, "Models UI download requested: modelId=${modelId.value}")
-        modelTransfers.download(modelId).getOrThrow()
+        modelTransfers.download(modelId, ModelTransferNetworkPolicy.WIFI_ONLY).getOrThrow()
         Log.i(TAG, "Models UI download scheduled: modelId=${modelId.value}")
         "Download scheduled."
+        }
+    }
+
+    fun pauseTransfer(modelId: ModelId) {
+        viewModelScope.launch {
+            modelTransfers.pauseTransfer(modelId)
+            mutableUiState.update { it.copy(message = "Download paused.") }
+        }
+    }
+
+    fun resumeOnWifi(modelId: ModelId) = resumeTransfer(modelId, ModelTransferNetworkPolicy.WIFI_ONLY)
+
+    fun resumeOnAnyNetwork(modelId: ModelId) = resumeTransfer(modelId, ModelTransferNetworkPolicy.ANY_NETWORK)
+
+    private fun resumeTransfer(modelId: ModelId, networkPolicy: ModelTransferNetworkPolicy) = launchOperation("resume download") {
+        modelTransfers.resumeTransfer(modelId, networkPolicy).getOrThrow()
+        if (networkPolicy == ModelTransferNetworkPolicy.ANY_NETWORK) {
+            "Download scheduled using any network."
+        } else {
+            "Download scheduled on Wi-Fi."
         }
     }
 
@@ -180,7 +201,7 @@ class ModelsViewModel(
             mutableUiState.update { it.copy(isSavingHuggingFaceToken = true, huggingFaceTokenError = null) }
             val result = downloadCredentials.saveHuggingFaceToken(token)
                 .mapCatching {
-                    modelTransfers.download(modelId).getOrThrow()
+                    modelTransfers.download(modelId, ModelTransferNetworkPolicy.WIFI_ONLY).getOrThrow()
                 }
             result.fold(
                 onSuccess = {

@@ -64,6 +64,9 @@ fun ModelDetailsScreen(
     uiState: ModelsUiState,
     onNavigateBack: () -> Unit,
     onDownload: (ModelId) -> Unit,
+    onPauseTransfer: (ModelId) -> Unit,
+    onResumeOnWifi: (ModelId) -> Unit,
+    onResumeOnAnyNetwork: (ModelId) -> Unit,
     onCancelTransfer: (ModelId) -> Unit,
     onValidate: (ModelId) -> Unit,
     onDelete: (ModelId) -> Unit,
@@ -85,6 +88,9 @@ fun ModelDetailsScreen(
             transfer = uiState.transfers[modelId],
             uiState = uiState,
             onDownload = { onDownload(modelId) },
+            onPauseTransfer = { onPauseTransfer(modelId) },
+            onResumeOnWifi = { onResumeOnWifi(modelId) },
+            onResumeOnAnyNetwork = { onResumeOnAnyNetwork(modelId) },
             onCancelTransfer = { onCancelTransfer(modelId) },
             onValidate = { onValidate(modelId) },
             onDelete = { onDelete(modelId) },
@@ -127,6 +133,9 @@ private fun ModelDetailsContent(
     transfer: ModelTransferState?,
     uiState: ModelsUiState,
     onDownload: () -> Unit,
+    onPauseTransfer: () -> Unit,
+    onResumeOnWifi: () -> Unit,
+    onResumeOnAnyNetwork: () -> Unit,
     onCancelTransfer: () -> Unit,
     onValidate: () -> Unit,
     onDelete: () -> Unit,
@@ -146,6 +155,9 @@ private fun ModelDetailsContent(
                 transfer = transfer,
                 validating = manifest.modelId in uiState.validatingModelIds,
                 onDownload = onDownload,
+                onPauseTransfer = onPauseTransfer,
+                onResumeOnWifi = onResumeOnWifi,
+                onResumeOnAnyNetwork = onResumeOnAnyNetwork,
                 onCancelTransfer = onCancelTransfer,
                 onValidate = onValidate,
                 onDelete = onDelete,
@@ -445,10 +457,15 @@ private fun ModelActionBar(
     transfer: ModelTransferState?,
     validating: Boolean,
     onDownload: () -> Unit,
+    onPauseTransfer: () -> Unit,
+    onResumeOnWifi: () -> Unit,
+    onResumeOnAnyNetwork: () -> Unit,
     onCancelTransfer: () -> Unit,
     onValidate: () -> Unit,
     onDelete: () -> Unit,
 ) {
+    var confirmCancel by rememberSaveable { mutableStateOf(false) }
+    var confirmAnyNetwork by rememberSaveable { mutableStateOf(false) }
     Surface(shadowElevation = 8.dp) {
         Column(
             modifier = Modifier
@@ -478,18 +495,34 @@ private fun ModelActionBar(
                 }
             } else {
                 when (transfer) {
-                    ModelTransferState.Queued -> {
-                        Text("Waiting to download")
-                        OutlinedButton(onClick = onCancelTransfer, modifier = Modifier.fillMaxWidth()) {
-                            Text("Cancel")
+                    is ModelTransferState.Queued -> {
+                        Text("Waiting to download · ${transfer.networkPolicy.detailsNetworkLabel()}")
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            OutlinedButton(onClick = onPauseTransfer, modifier = Modifier.weight(1f)) { Text("Pause") }
+                            OutlinedButton(onClick = { confirmCancel = true }, modifier = Modifier.weight(1f)) { Text("Cancel") }
+                        }
+                        if (transfer.networkPolicy == com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.WIFI_ONLY) {
+                            OutlinedButton(onClick = { confirmAnyNetwork = true }, modifier = Modifier.fillMaxWidth()) {
+                                Text("Use mobile data")
+                            }
                         }
                     }
                     is ModelTransferState.Running -> {
-                        val total = transfer.totalBytes?.toDetailsReadableBytes() ?: "unknown size"
+                        val total = transfer.totalBytes.toDetailsReadableBytes()
                         Text("${transfer.completedBytes.toDetailsReadableBytes()} / $total")
-                        OutlinedButton(onClick = onCancelTransfer, modifier = Modifier.fillMaxWidth()) {
-                            Text("Cancel")
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            OutlinedButton(onClick = onPauseTransfer, modifier = Modifier.weight(1f)) { Text("Pause") }
+                            OutlinedButton(onClick = { confirmCancel = true }, modifier = Modifier.weight(1f)) { Text("Cancel") }
                         }
+                    }
+                    is ModelTransferState.Paused -> {
+                        Text("${transfer.completedBytes.toDetailsReadableBytes()} / ${transfer.totalBytes.toDetailsReadableBytes()}")
+                        transfer.reason?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                        Button(onClick = onResumeOnWifi, modifier = Modifier.fillMaxWidth()) { Text("Resume on Wi-Fi") }
+                        OutlinedButton(onClick = { confirmAnyNetwork = true }, modifier = Modifier.fillMaxWidth()) {
+                            Text("Use mobile data")
+                        }
+                        OutlinedButton(onClick = { confirmCancel = true }, modifier = Modifier.fillMaxWidth()) { Text("Cancel") }
                     }
                     ModelTransferState.Installing,
                     ModelTransferState.Completed,
@@ -504,7 +537,6 @@ private fun ModelActionBar(
                             Text("Retry download")
                         }
                     }
-                    ModelTransferState.Cancelled,
                     ModelTransferState.Idle,
                     null,
                     -> {
@@ -515,6 +547,24 @@ private fun ModelActionBar(
                 }
             }
         }
+    }
+    if (confirmAnyNetwork) {
+        AlertDialog(
+            onDismissRequest = { confirmAnyNetwork = false },
+            title = { Text("Use mobile data?") },
+            text = { Text("This transfer may use a large amount of mobile data.") },
+            confirmButton = { Button(onClick = { confirmAnyNetwork = false; onResumeOnAnyNetwork() }) { Text("Use mobile data") } },
+            dismissButton = { OutlinedButton(onClick = { confirmAnyNetwork = false }) { Text("Keep Wi-Fi only") } },
+        )
+    }
+    if (confirmCancel) {
+        AlertDialog(
+            onDismissRequest = { confirmCancel = false },
+            title = { Text("Cancel download?") },
+            text = { Text("The partial model download will be permanently deleted.") },
+            confirmButton = { Button(onClick = { confirmCancel = false; onCancelTransfer() }) { Text("Cancel download") } },
+            dismissButton = { OutlinedButton(onClick = { confirmCancel = false }) { Text("Keep download") } },
+        )
     }
 }
 
@@ -583,15 +633,20 @@ private fun ModelValidationState.detailsStatusLabel(): String = when (this) {
 }
 
 private fun ModelTransferState?.detailsStatusLabel(): String = when (this) {
-    ModelTransferState.Queued -> "Queued"
+    is ModelTransferState.Queued -> "Queued"
     is ModelTransferState.Running -> "Downloading"
+    is ModelTransferState.Paused -> "Paused"
     ModelTransferState.Installing -> "Installing"
     is ModelTransferState.Failed -> "Download failed"
-    ModelTransferState.Cancelled -> "Cancelled"
     ModelTransferState.Completed -> "Installing"
     ModelTransferState.Idle,
     null,
     -> "Not installed"
+}
+
+private fun com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.detailsNetworkLabel(): String = when (this) {
+    com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.WIFI_ONLY -> "Wi-Fi only"
+    com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.ANY_NETWORK -> "Any network"
 }
 
 private fun ModelCompatibilityState.displayLabel(): String = when (this) {

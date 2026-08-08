@@ -1,25 +1,179 @@
 package com.dmitriim.localaiplayground.source.models.transfer
 
 import com.dmitriim.localaiplayground.core.di.AppScope
+import com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy
 import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.source.database.ModelDatabaseProvider
+import com.dmitriim.localaiplayground.source.database.ModelTransferEntity
+import com.dmitriim.localaiplayground.source.database.ModelTransferFileEntity
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.map
 
-/** Shared in-process transfer state used by the library and transfer workflows. */
+/** Room-backed transfer state that survives process death and scheduler recreation. */
 @Inject
 @SingleIn(AppScope::class)
-class ModelTransferStateStore {
-    private val mutableTransfers = MutableStateFlow<Map<ModelId, ModelTransferState>>(emptyMap())
-    val transfers: Flow<Map<ModelId, ModelTransferState>> = mutableTransfers.asStateFlow()
+class ModelTransferStateStore(
+    databaseProvider: ModelDatabaseProvider,
+) {
+    private val dao = databaseProvider.database.modelTransferDao()
 
-    fun update(transform: (Map<ModelId, ModelTransferState>) -> Map<ModelId, ModelTransferState>) {
-        mutableTransfers.update(transform)
+    val transfers: Flow<Map<ModelId, ModelTransferState>> = dao.observeAll().map { transfers ->
+        transfers.associate { transfer -> ModelId(transfer.modelId) to transfer.toState() }
     }
 
-    fun stateFor(modelId: ModelId): ModelTransferState? = mutableTransfers.value[modelId]
+    internal suspend fun find(modelId: ModelId): StoredModelTransfer? = dao.find(modelId.value)?.toStored()
+
+    internal suspend fun all(): List<StoredModelTransfer> = dao.all().map { it.toStored() }
+
+    internal suspend fun queueNew(
+        modelId: ModelId,
+        catalogVersion: Int,
+        revision: String?,
+        totalBytes: Long,
+        networkPolicy: ModelTransferNetworkPolicy,
+    ): StoredModelTransfer {
+        val existing = dao.find(modelId.value)
+        val transfer = ModelTransferEntity(
+            modelId = modelId.value,
+            catalogVersion = catalogVersion,
+            revision = revision,
+            status = PersistedModelTransferStatus.QUEUED.name,
+            networkPolicy = networkPolicy.name,
+            executionGeneration = (existing?.executionGeneration ?: 0L) + 1L,
+            completedBytes = existing?.completedBytes ?: 0L,
+            totalBytes = totalBytes,
+            currentRelativePath = existing?.currentRelativePath,
+            message = null,
+            updatedAtEpochMs = System.currentTimeMillis(),
+        )
+        dao.upsert(transfer)
+        return transfer.toStored()
+    }
+
+    internal suspend fun claimQueued(modelId: ModelId, executionGeneration: Long): Boolean = dao.claimQueued(
+        modelId = modelId.value,
+        executionGeneration = executionGeneration,
+        queuedStatus = PersistedModelTransferStatus.QUEUED.name,
+        runningStatus = PersistedModelTransferStatus.RUNNING.name,
+        updatedAtEpochMs = System.currentTimeMillis(),
+    ) == 1
+
+    internal suspend fun update(
+        transfer: StoredModelTransfer,
+        status: PersistedModelTransferStatus = transfer.status,
+        completedBytes: Long = transfer.completedBytes,
+        currentRelativePath: String? = transfer.currentRelativePath,
+        message: String? = transfer.message,
+    ): StoredModelTransfer {
+        val updated = ModelTransferEntity(
+            modelId = transfer.modelId,
+            catalogVersion = transfer.catalogVersion,
+            revision = transfer.revision,
+            status = status.name,
+            networkPolicy = transfer.networkPolicy.name,
+            executionGeneration = transfer.executionGeneration,
+            completedBytes = completedBytes,
+            totalBytes = transfer.totalBytes,
+            currentRelativePath = currentRelativePath,
+            message = message,
+            updatedAtEpochMs = System.currentTimeMillis(),
+        )
+        dao.upsert(updated)
+        return updated.toStored()
+    }
+
+    internal suspend fun updateWhileRunning(
+        transfer: StoredModelTransfer,
+        status: PersistedModelTransferStatus = PersistedModelTransferStatus.RUNNING,
+        completedBytes: Long = transfer.completedBytes,
+        currentRelativePath: String? = transfer.currentRelativePath,
+        message: String? = transfer.message,
+    ): StoredModelTransfer? {
+        val updated = dao.updateWhileRunning(
+            modelId = transfer.modelId,
+            executionGeneration = transfer.executionGeneration,
+            runningStatus = PersistedModelTransferStatus.RUNNING.name,
+            status = status.name,
+            completedBytes = completedBytes,
+            currentRelativePath = currentRelativePath,
+            message = message,
+            updatedAtEpochMs = System.currentTimeMillis(),
+        ) == 1
+        return if (updated) {
+            transfer.copy(
+                status = status,
+                completedBytes = completedBytes,
+                currentRelativePath = currentRelativePath,
+                message = message,
+            )
+        } else {
+            null
+        }
+    }
+
+    internal suspend fun updateFileValidator(
+        modelId: ModelId,
+        relativePath: String,
+        eTag: String?,
+        lastModified: String?,
+        verified: Boolean,
+    ) {
+        dao.upsertFile(
+            ModelTransferFileEntity(
+                modelId = modelId.value,
+                relativePath = relativePath,
+                eTag = eTag,
+                lastModified = lastModified,
+                verified = verified,
+            ),
+        )
+    }
+
+    internal suspend fun markFileVerified(modelId: ModelId, relativePath: String) {
+        val current = dao.filesFor(modelId.value).firstOrNull { it.relativePath == relativePath }
+            ?: ModelTransferFileEntity(modelId.value, relativePath, null, null, verified = false)
+        dao.upsertFile(current.copy(verified = true))
+    }
+
+    internal suspend fun fileValidators(modelId: ModelId): Map<String, ModelTransferFileEntity> =
+        dao.filesFor(modelId.value).associateBy(ModelTransferFileEntity::relativePath)
+
+    suspend fun delete(modelId: ModelId) = dao.deleteTransfer(modelId.value)
+
+    private fun ModelTransferEntity.toStored() = StoredModelTransfer(
+        modelId = modelId,
+        catalogVersion = catalogVersion,
+        revision = revision,
+        status = PersistedModelTransferStatus.valueOf(status),
+        networkPolicy = ModelTransferNetworkPolicy.valueOf(networkPolicy),
+        executionGeneration = executionGeneration,
+        completedBytes = completedBytes,
+        totalBytes = totalBytes,
+        currentRelativePath = currentRelativePath,
+        message = message,
+    )
+
+    private fun ModelTransferEntity.toState(): ModelTransferState = when (PersistedModelTransferStatus.valueOf(status)) {
+        PersistedModelTransferStatus.QUEUED -> ModelTransferState.Queued(
+            completedBytes = completedBytes,
+            totalBytes = totalBytes,
+            networkPolicy = ModelTransferNetworkPolicy.valueOf(networkPolicy),
+        )
+        PersistedModelTransferStatus.RUNNING -> ModelTransferState.Running(
+            completedBytes = completedBytes,
+            totalBytes = totalBytes,
+            networkPolicy = ModelTransferNetworkPolicy.valueOf(networkPolicy),
+        )
+        PersistedModelTransferStatus.PAUSED -> ModelTransferState.Paused(
+            completedBytes = completedBytes,
+            totalBytes = totalBytes,
+            networkPolicy = ModelTransferNetworkPolicy.valueOf(networkPolicy),
+            reason = message,
+        )
+        PersistedModelTransferStatus.INSTALLING -> ModelTransferState.Installing
+        PersistedModelTransferStatus.FAILED -> ModelTransferState.Failed(message ?: "Download failed.")
+    }
 }

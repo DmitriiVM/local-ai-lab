@@ -44,6 +44,9 @@ fun ModelsScreen(
     uiState: ModelsUiState,
     onOpenDetails: (ModelId) -> Unit,
     onDownload: (ModelId) -> Unit,
+    onPauseTransfer: (ModelId) -> Unit,
+    onResumeOnWifi: (ModelId) -> Unit,
+    onResumeOnAnyNetwork: (ModelId) -> Unit,
     onCancelTransfer: (ModelId) -> Unit,
     onDelete: (ModelId) -> Unit,
     onConfirmDelete: () -> Unit,
@@ -111,6 +114,9 @@ fun ModelsScreen(
                         huggingFaceCredentialStatus = uiState.huggingFaceCredentialStatus,
                         onOpenDetails = onOpenDetails,
                         onDownload = onDownload,
+                        onPause = onPauseTransfer,
+                        onResumeOnWifi = onResumeOnWifi,
+                        onResumeOnAnyNetwork = onResumeOnAnyNetwork,
                         onCancel = onCancelTransfer,
                     )
                 }
@@ -279,11 +285,16 @@ private fun CatalogModelCard(
     huggingFaceCredentialStatus: com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus,
     onOpenDetails: (ModelId) -> Unit,
     onDownload: (ModelId) -> Unit,
+    onPause: (ModelId) -> Unit,
+    onResumeOnWifi: (ModelId) -> Unit,
+    onResumeOnAnyNetwork: (ModelId) -> Unit,
     onCancel: (ModelId) -> Unit,
 ) {
     val manifest = model.manifest
     val accessRequired = model.download.authentication == CatalogDownloadAuthentication.HUGGING_FACE_USER_TOKEN &&
         huggingFaceCredentialStatus == com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus.MISSING
+    var confirmCancel by rememberSaveable(manifest.modelId.value) { mutableStateOf(false) }
+    var confirmAnyNetwork by rememberSaveable(manifest.modelId.value) { mutableStateOf(false) }
     Card(onClick = { onOpenDetails(manifest.modelId) }) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             ModelCardHeader(name = manifest.displayName, status = transfer.statusLabel())
@@ -292,25 +303,37 @@ private fun CatalogModelCard(
                 Text("Hugging Face access required", style = MaterialTheme.typography.bodySmall)
             }
             when {
-                transfer == ModelTransferState.Queued -> {
-                    ModelCardAction { OutlinedButton(onClick = { onCancel(manifest.modelId) }) { Text("Cancel") } }
+                transfer is ModelTransferState.Queued -> {
+                    Text("${transfer.networkPolicy.networkLabel()}", style = MaterialTheme.typography.bodySmall)
+                    ModelCardAction {
+                        OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text("Pause") }
+                        if (transfer.networkPolicy == com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.WIFI_ONLY) {
+                            OutlinedButton(onClick = { confirmAnyNetwork = true }) { Text("Use mobile data") }
+                        }
+                        OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
+                    }
                 }
                 transfer is ModelTransferState.Running -> {
-                    val total = transfer.totalBytes?.toReadableBytes() ?: "unknown size"
+                    val total = transfer.totalBytes.toReadableBytes()
                     Text("${transfer.completedBytes.toReadableBytes()} / $total", style = MaterialTheme.typography.bodySmall)
-                    ModelCardAction { OutlinedButton(onClick = { onCancel(manifest.modelId) }) { Text("Cancel") } }
+                    ModelCardAction {
+                        OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text("Pause") }
+                        OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
+                    }
+                }
+                transfer is ModelTransferState.Paused -> {
+                    Text("${transfer.completedBytes.toReadableBytes()} / ${transfer.totalBytes.toReadableBytes()}", style = MaterialTheme.typography.bodySmall)
+                    transfer.reason?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                    ModelCardAction {
+                        Button(onClick = { onResumeOnWifi(manifest.modelId) }) { Text("Resume") }
+                        OutlinedButton(onClick = { confirmAnyNetwork = true }) { Text("Use mobile data") }
+                        OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
+                    }
                 }
                 transfer is ModelTransferState.Failed -> {
                     ModelCardAction {
                         Button(onClick = { if (accessRequired) onOpenDetails(manifest.modelId) else onDownload(manifest.modelId) }) {
                             Text(if (accessRequired) "Set up access" else "Retry")
-                        }
-                    }
-                }
-                transfer == ModelTransferState.Cancelled -> {
-                    ModelCardAction {
-                        Button(onClick = { if (accessRequired) onOpenDetails(manifest.modelId) else onDownload(manifest.modelId) }) {
-                            Text(if (accessRequired) "Set up access" else "Download")
                         }
                     }
                 }
@@ -322,6 +345,34 @@ private fun CatalogModelCard(
                     }
             }
         }
+    }
+    if (confirmAnyNetwork) {
+        AlertDialog(
+            onDismissRequest = { confirmAnyNetwork = false },
+            title = { Text("Use mobile data?") },
+            text = { Text("This model can be large. This transfer may use your mobile-data allowance.") },
+            confirmButton = {
+                Button(onClick = {
+                    confirmAnyNetwork = false
+                    onResumeOnAnyNetwork(manifest.modelId)
+                }) { Text("Use mobile data") }
+            },
+            dismissButton = { OutlinedButton(onClick = { confirmAnyNetwork = false }) { Text("Keep Wi-Fi only") } },
+        )
+    }
+    if (confirmCancel) {
+        AlertDialog(
+            onDismissRequest = { confirmCancel = false },
+            title = { Text("Cancel download?") },
+            text = { Text("The partial model download will be permanently deleted.") },
+            confirmButton = {
+                Button(onClick = {
+                    confirmCancel = false
+                    onCancel(manifest.modelId)
+                }) { Text("Cancel download") }
+            },
+            dismissButton = { OutlinedButton(onClick = { confirmCancel = false }) { Text("Keep download") } },
+        )
     }
 }
 
@@ -418,15 +469,20 @@ private fun ModelValidationState.statusLabel(): String = when (this) {
 }
 
 private fun ModelTransferState?.statusLabel(): String = when (this) {
-    ModelTransferState.Queued -> "Queued"
+    is ModelTransferState.Queued -> "Queued"
     is ModelTransferState.Running -> "Downloading"
+    is ModelTransferState.Paused -> "Paused"
     ModelTransferState.Installing -> "Installing"
     is ModelTransferState.Failed -> "Download failed"
-    ModelTransferState.Cancelled -> "Cancelled"
     ModelTransferState.Completed -> "Installed"
     ModelTransferState.Idle,
     null,
     -> "Not installed"
+}
+
+private fun com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.networkLabel(): String = when (this) {
+    com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.WIFI_ONLY -> "Wi-Fi only"
+    com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.ANY_NETWORK -> "Any network"
 }
 
 private fun Long.toReadableBytes(): String = when {

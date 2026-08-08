@@ -7,12 +7,14 @@
     <cloud-backup>
         <exclude domain="database" path="." />
         <exclude domain="file" path="models/" />
+        <exclude domain="file" path="model-downloads/" />
         <exclude domain="file" path="generated-audio/" />
         <exclude domain="file" path="datastore/" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="database" path="." />
         <exclude domain="file" path="models/" />
+        <exclude domain="file" path="model-downloads/" />
         <exclude domain="file" path="generated-audio/" />
         <exclude domain="file" path="datastore/" />
     </device-transfer>
