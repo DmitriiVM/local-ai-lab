@@ -15,7 +15,5 @@ fun BenchmarkRoute(viewModel: BenchmarkLabViewModel = metroViewModel()) {
         onToggleStartupMode = viewModel::toggleStartupMode,
         onStart = viewModel::start,
         onCancel = viewModel::cancel,
-        onToggleComparison = viewModel::toggleComparison,
-        onCompare = viewModel::compareSavedSessions,
     )
 }

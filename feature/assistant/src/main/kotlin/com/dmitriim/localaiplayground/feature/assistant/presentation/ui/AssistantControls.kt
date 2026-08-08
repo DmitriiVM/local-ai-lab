@@ -133,6 +133,7 @@ internal fun AssistantComposer(
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit,
     onSend: () -> Unit,
+    onProfile: () -> Unit,
     onCancel: () -> Unit,
 ) {
     val active = !state.isIdle
@@ -163,11 +164,20 @@ internal fun AssistantComposer(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                AssistantOperationStatus(
-                    operation = state.operation,
-                    level = state.level,
-                    modifier = Modifier.weight(1f),
-                )
+                if (state.isIdle && state.canSend) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        TextButton(onClick = onProfile) { Text("Profile") }
+                    }
+                } else {
+                    AssistantOperationStatus(
+                        operation = state.operation,
+                        level = state.level,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
                 when (state.operation) {
                     AssistantOperation.Idle -> {
                         IconButton(onClick = onStartRecording, enabled = state.canDictate) {

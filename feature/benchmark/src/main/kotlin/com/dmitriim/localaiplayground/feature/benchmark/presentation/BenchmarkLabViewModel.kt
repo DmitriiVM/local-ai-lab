@@ -50,13 +50,6 @@ class BenchmarkLabViewModel(
                 mutableState.update { it.copy(workload = workload, completedIterations = emptyList(), summary = null, message = null) }
             }
         }
-        viewModelScope.launch {
-            runRepository.runs.collectLatest { runs ->
-                mutableState.update { current ->
-                    current.copy(savedSessions = runs.filter { it.kind == RunKind.BENCHMARK_SESSION }.take(20))
-                }
-            }
-        }
     }
 
     fun setWarmupIterations(value: Int) = mutableState.update { it.copy(warmupIterations = value.coerceIn(0, 5)) }
@@ -136,26 +129,6 @@ class BenchmarkLabViewModel(
 
     fun cancel() = benchmarkJob?.cancel()
 
-    fun toggleComparison(sessionId: String) = mutableState.update { current ->
-        val selected = current.compareSessionIds
-        val updated = when {
-            sessionId in selected -> selected - sessionId
-            selected.size < 2 -> selected + sessionId
-            else -> listOf(selected.last(), sessionId)
-        }
-        current.copy(compareSessionIds = updated, comparison = null)
-    }
-
-    fun compareSavedSessions() {
-        val selected = state.value.savedSessions.filter { it.id in state.value.compareSessionIds }
-        if (selected.size != 2) return showMessage("Select two saved profile sessions.")
-        if (selected[0].capability != selected[1].capability) return showMessage("Only profiles of the same capability can be compared.")
-        val summaries = selected.map { runCatching { Json.decodeFromString(BenchmarkSessionSummary.serializer(), it.metricsJson) }.getOrNull() }
-        mutableState.update {
-            it.copy(comparison = selected.comparisonText(summaries))
-        }
-    }
-
     private fun showMessage(message: String) = mutableState.update { it.copy(message = message) }
 }
 
@@ -205,34 +178,3 @@ private fun List<BenchmarkWorkloadResult>.summary(warning: String?): BenchmarkSe
         warning = warning,
     )
 }
-
-private fun List<RunRecord>.comparisonText(summaries: List<BenchmarkSessionSummary?>): String {
-    val first = first()
-    val second = last()
-    val differences = first.configurationDifferences(second)
-    val comparison = "${first.model?.displayName ?: "A"}: ${summaries.firstOrNull()?.medianLatencyMs ?: "—"} ms; " +
-        "${second.model?.displayName ?: "B"}: ${summaries.getOrNull(1)?.medianLatencyMs ?: "—"} ms."
-    return if (differences.isEmpty()) {
-        "$comparison Same workload and profile settings."
-    } else {
-        "$comparison Not directly comparable: ${differences.joinToString()} differ."
-    }
-}
-
-private fun RunRecord.configurationDifferences(other: RunRecord): List<String> {
-    val firstPlan = runCatching { Json.decodeFromString(BenchmarkPlan.serializer(), parametersJson) }.getOrNull()
-    val secondPlan = runCatching { Json.decodeFromString(BenchmarkPlan.serializer(), other.parametersJson) }.getOrNull()
-        ?: return listOf("saved configuration details")
-    firstPlan ?: return listOf("saved configuration details")
-    return buildList {
-        if (firstPlan.workloadFingerprint.workloadSignature() != secondPlan.workloadFingerprint.workloadSignature()) {
-            add("input workload")
-        }
-        if (firstPlan.startupMode != secondPlan.startupMode) add("startup mode")
-        if (firstPlan.warmupIterations != secondPlan.warmupIterations) add("warm-up count")
-        if (firstPlan.measuredIterations != secondPlan.measuredIterations) add("measured iteration count")
-        if (firstPlan.parametersJson != secondPlan.parametersJson && isEmpty()) add("inference settings")
-    }
-}
-
-private fun String.workloadSignature(): String = substringAfterLast(':', missingDelimiterValue = this)
