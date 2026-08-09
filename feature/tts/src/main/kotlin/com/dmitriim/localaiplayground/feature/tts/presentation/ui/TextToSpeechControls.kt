@@ -12,8 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -36,49 +34,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
-import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechUiState
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsLanguage
-import com.dmitriim.localaiplayground.feature.tts.presentation.TtsModelOption
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsOperation
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsVoiceOption
-
-@Composable
-internal fun TextToSpeechModelPicker(
-    models: List<TtsModelOption>,
-    selectedId: ModelId?,
-    enabled: Boolean,
-    onSelect: (ModelId) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val selected = models.firstOrNull { it.id == selectedId }
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Speech engine / model", style = MaterialTheme.typography.labelLarge)
-        OutlinedButton(onClick = { expanded = true }, enabled = enabled && models.isNotEmpty()) {
-            Text(selected?.displayName ?: "Install a TTS model in Models")
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            models.forEach { model ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            if (model.installed) {
-                                "${model.displayName} (${model.languages.joinToString()})"
-                            } else {
-                                "${model.displayName} · Download in Models"
-                            },
-                        )
-                    },
-                    onClick = {
-                        onSelect(model.id)
-                        expanded = false
-                    },
-                    enabled = model.installed,
-                )
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,31 +1,34 @@
 package com.dmitriim.localaiplayground.feature.stt.presentation.ui
 
 import android.content.Intent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
@@ -34,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
+import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
 import com.dmitriim.localaiplayground.feature.stt.presentation.SpeechModelOption
 import com.dmitriim.localaiplayground.feature.stt.presentation.SpeechToTextUiState
 import com.dmitriim.localaiplayground.feature.stt.presentation.SttLanguage
@@ -68,7 +72,7 @@ fun SpeechToTextScreen(
             .fillMaxSize()
             .then(systemNavigationPadding)
             .verticalScroll(scroll)
-            .padding(start = 16.dp, top = dimensions.topBarOverlayClearance + 12.dp, end = 16.dp, bottom = 24.dp + dimensions.bottomNavigationOverlayClearance),
+            .padding(start = 16.dp, top = dimensions.topBarOverlayClearance + 44.dp, end = 16.dp, bottom = 24.dp + dimensions.bottomNavigationOverlayClearance),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("Local speech to text", style = MaterialTheme.typography.headlineSmall)
@@ -76,52 +80,64 @@ fun SpeechToTextScreen(
             "Choose the Android on-device recognizer or an installed speech model. Recording shows live levels, then final text appears after you stop.",
             style = MaterialTheme.typography.bodyMedium,
         )
-        SpeechModelPicker(state.models, state.selectedModelId, enabled = !busy, onSelectModel)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            state.availableLanguages.forEach { language ->
-                FilterChip(
-                    selected = state.language == language,
-                    onClick = { onSelectLanguage(language) },
-                    enabled = !busy,
-                    label = { Text(language.label) },
-                )
-            }
-        }
-        OutlinedTextField(
-            value = state.threadCount,
-            onValueChange = onThreadCountChange,
-            enabled = !busy,
-            label = { Text("CPU threads (0 = safe default)") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        RecordingControls(
-            operation = state.operation,
-            hasInput = state.input != null,
-            onStart = onStartRecording,
-            onStop = onStopRecording,
-            onImport = onImportAudio,
-            onRepeat = onRepeat,
-            onCancel = onCancel,
-            onClear = onClear,
-        )
-        OutlinedButton(
-            onClick = onProfile,
-            enabled = !busy && state.input != null && state.selectedModel?.installed == true,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Profile current audio")
-        }
-        state.level?.let { level ->
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Recording ${formatDuration(level.elapsedMs)}", style = MaterialTheme.typography.titleSmall)
-                    Text("Live input level: ${(level.rms * 100).toInt()}% RMS · ${(level.peak * 100).toInt()}% peak")
+        SttSectionCard("Setup") {
+            SpeechModelPicker(state.models, state.selectedModelId, enabled = !busy, onSelectModel)
+            Text("Language", style = MaterialTheme.typography.titleSmall)
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(state.availableLanguages.size) { index ->
+                    val language = state.availableLanguages[index]
+                    FilterChip(
+                        selected = state.language == language,
+                        onClick = { onSelectLanguage(language) },
+                        enabled = !busy,
+                        label = { Text(language.label) },
+                        colors = sttFilterChipColors(),
+                    )
                 }
             }
+            OutlinedTextField(
+                value = state.threadCount,
+                onValueChange = onThreadCountChange,
+                enabled = !busy,
+                label = { Text("CPU threads (0 = safe default)") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp, max = 64.dp),
+            )
         }
-        state.input?.let { input ->
-            Text("Input: ${input.displayName} · ${formatDuration(input.durationMs)} · ${input.sourceDescription}", style = MaterialTheme.typography.bodySmall)
+        SttSectionCard("Audio input") {
+            RecordingControls(
+                operation = state.operation,
+                hasInput = state.input != null,
+                onStart = onStartRecording,
+                onStop = onStopRecording,
+                onImport = onImportAudio,
+                onRepeat = onRepeat,
+                onCancel = onCancel,
+                onClear = onClear,
+            )
+            state.level?.let { level ->
+                Text("Recording ${formatDuration(level.elapsedMs)}", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    "Live input level: ${(level.rms * 100).toInt()}% RMS · ${(level.peak * 100).toInt()}% peak",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            state.input?.let { input ->
+                Text(
+                    "Input: ${input.displayName} · ${formatDuration(input.durationMs)} · ${input.sourceDescription}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            OutlinedButton(
+                onClick = onProfile,
+                enabled = !busy && state.input != null && state.selectedModel?.installed == true,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Profile current audio")
+            }
         }
         state.errorMessage?.let { StatusMessage(title = "Speech to text needs attention", explanation = it) }
         if (state.operation == SttOperation.TRANSCRIBING) {
@@ -136,11 +152,16 @@ fun SpeechToTextScreen(
             )
         }
         if (state.transcript.isNotBlank()) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Final transcript", style = MaterialTheme.typography.titleMedium)
-                    Text(state.transcript, fontFamily = FontFamily.SansSerif)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            SttSectionCard("Final transcript") {
+                    Text(
+                        state.transcript,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontFamily = FontFamily.SansSerif,
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, androidx.compose.ui.Alignment.End),
+                    ) {
                         TextButton(onClick = { clipboard.setText(AnnotatedString(state.transcript)) }) { Text("Copy") }
                         TextButton(onClick = {
                             context.startActivity(
@@ -153,9 +174,11 @@ fun SpeechToTextScreen(
                                 ),
                             )
                         }) { Text("Share") }
-                        TextButton(onClick = onClear) { Text("Clear") }
+                        TextButton(
+                            onClick = onClear,
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                        ) { Text("Clear") }
                     }
-                }
             }
         }
         state.metrics?.let { metrics ->
@@ -164,43 +187,6 @@ fun SpeechToTextScreen(
                 streamingModel = state.selectedModel?.recognitionMode ==
                     com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode.STREAMING,
             )
-        }
-    }
-}
-
-@Composable
-private fun SpeechModelPicker(
-    models: List<SpeechModelOption>,
-    selectedId: ModelId?,
-    enabled: Boolean,
-    onSelect: (ModelId) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val selected = models.firstOrNull { it.id == selectedId }
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Speech model", style = MaterialTheme.typography.labelLarge)
-        OutlinedButton(onClick = { expanded = true }, enabled = enabled && models.isNotEmpty()) {
-            Text(selected?.displayName ?: "Install a speech model in Models")
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            models.forEach { model ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            if (model.installed) {
-                                "${model.displayName} (${model.languages.joinToString()})"
-                            } else {
-                                "${model.displayName} · Download in Models"
-                            },
-                        )
-                    },
-                    onClick = {
-                        onSelect(model.id)
-                        expanded = false
-                    },
-                    enabled = model.installed,
-                )
-            }
         }
     }
 }
@@ -216,28 +202,92 @@ private fun RecordingControls(
     onCancel: () -> Unit,
     onClear: () -> Unit,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        when (operation) {
-            SttOperation.RECORDING -> Button(onClick = onStop) { Text("Stop recording") }
-            SttOperation.STOPPING -> OutlinedButton(onClick = {}, enabled = false) { Text("Stopping…") }
-            SttOperation.IMPORTING -> {
-                OutlinedButton(onClick = {}, enabled = false) { Text("Importing…") }
-                TextButton(onClick = onCancel) { Text("Cancel import") }
+    when (operation) {
+        SttOperation.RECORDING -> Button(onClick = onStop) { Text("Stop recording") }
+        SttOperation.STOPPING -> OutlinedButton(onClick = {}, enabled = false) { Text("Stopping…") }
+        SttOperation.IMPORTING -> {
+            OutlinedButton(onClick = {}, enabled = false) { Text("Importing…") }
+            TextButton(onClick = onCancel) { Text("Cancel import") }
+        }
+        SttOperation.TRANSCRIBING -> {
+            OutlinedButton(onClick = {}, enabled = false) { Text("Transcribing…") }
+            TextButton(onClick = onCancel) { Text("Cancel transcription") }
+        }
+        SttOperation.CANCELLING -> OutlinedButton(onClick = {}, enabled = false) { Text("Cancelling…") }
+        SttOperation.IDLE -> {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = onStart,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                    ),
+                ) { Text("Record", maxLines = 1, softWrap = false) }
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = onImport,
+                ) { Text("Import audio", maxLines = 1, softWrap = false) }
             }
-            SttOperation.TRANSCRIBING -> {
-                OutlinedButton(onClick = {}, enabled = false) { Text("Transcribing…") }
-                TextButton(onClick = onCancel) { Text("Cancel transcription") }
-            }
-            SttOperation.CANCELLING -> OutlinedButton(onClick = {}, enabled = false) { Text("Cancelling…") }
-            SttOperation.IDLE -> {
-                Button(onClick = onStart) { Text("Record") }
-                OutlinedButton(onClick = onImport) { Text("Import audio") }
-                if (hasInput) OutlinedButton(onClick = onRepeat) { Text("Repeat") }
-                if (hasInput) TextButton(onClick = onClear) { Text("Clear") }
+            if (hasInput) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    OutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onRepeat,
+                    ) { Text("Repeat", maxLines = 1, softWrap = false) }
+                    OutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onClear,
+                    ) { Text("Clear", maxLines = 1, softWrap = false) }
+                }
             }
         }
     }
 }
+
+@Composable
+private fun SttSectionCard(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                brush = AppSurfaceStyle.cardBorderBrush(colors),
+                shape = AppSurfaceStyle.CardShape,
+            ),
+        shape = AppSurfaceStyle.CardShape,
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(AppSurfaceStyle.cardBackgroundBrush(colors))
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            content()
+        }
+    }
+}
+
+@Composable
+private fun sttFilterChipColors() = FilterChipDefaults.filterChipColors(
+    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.78f),
+    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
+    containerColor = Color.Transparent,
+)
 
 private fun formatDuration(durationMs: Long): String {
     val seconds = durationMs / 1_000

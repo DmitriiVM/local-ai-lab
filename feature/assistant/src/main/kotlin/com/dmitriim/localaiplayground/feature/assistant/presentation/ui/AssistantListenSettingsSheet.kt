@@ -39,13 +39,48 @@ internal fun AssistantListenSettingsSheet(
     var draftModelId by remember(selectedModelId) { mutableStateOf(selectedModelId) }
     var draft by remember(settings) { mutableStateOf(settings) }
     var error by remember { mutableStateOf<String?>(null) }
+    var selectingRecognitionModel by remember { mutableStateOf(false) }
     val commit = { modelId: ModelId?, candidate: SpeechInputSettings ->
         error = if (modelId == null) "Select an installed recognition model." else onApply(modelId, candidate)
+    }
+    val selectRecognitionModel: (ModelId) -> Unit = { modelId ->
+        val model = models.firstOrNull { it.id == modelId }
+        val candidate = if (model != null && !model.supports(draft.languageCode)) {
+            draft.copy(
+                languageCode = model.languages.firstOrNull()?.let(::normalizeLanguageCode) ?: "en",
+            )
+        } else {
+            draft
+        }
+        draftModelId = modelId
+        draft = candidate
+        commit(modelId, candidate)
     }
     val selectedModel = models.firstOrNull { it.id == draftModelId }
     val languages = assistantSttLanguages.filter { selectedModel?.supports(it.code) != false }
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(
+        if (selectingRecognitionModel) {
+            AssistantInSheetModelSelection(
+                title = "Recognition model",
+                description = "Choose an installed model for on-device speech recognition.",
+                items = models.map {
+                    AssistantModelSelectionItem(
+                        id = it.id.value,
+                        name = it.displayName,
+                        detail = it.languages.joinToString(),
+                        installed = it.installed,
+                    )
+                },
+                selectedId = draftModelId?.value,
+                enabled = enabled,
+                onSelect = {
+                    selectRecognitionModel(ModelId(it))
+                    selectingRecognitionModel = false
+                },
+                onOpenModels = onOpenModels,
+                onBack = { selectingRecognitionModel = false },
+            )
+        } else Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .imePadding()
@@ -54,26 +89,19 @@ internal fun AssistantListenSettingsSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text("Speech-to-text settings", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall)
-            AssistantSettingsModelPicker(
+            AssistantInSheetModelPicker(
                 label = "Recognition model",
-                items = models.map { SettingsModelItem(it.id.value, it.displayName, it.installed) },
-                selectedId = draftModelId?.value,
-                onSelect = { value ->
-                    val modelId = ModelId(value)
-                    val model = models.firstOrNull { it.id == modelId }
-                    val candidate = if (model != null && !model.supports(draft.languageCode)) {
-                        draft.copy(
-                            languageCode = model.languages.firstOrNull()?.let(::normalizeLanguageCode) ?: "en",
-                        )
-                    } else {
-                        draft
-                    }
-                    draftModelId = modelId
-                    draft = candidate
-                    commit(modelId, candidate)
+                items = models.map {
+                    AssistantModelSelectionItem(
+                        id = it.id.value,
+                        name = it.displayName,
+                        detail = it.languages.joinToString(),
+                        installed = it.installed,
+                    )
                 },
-                onOpenModels = onOpenModels,
+                selectedId = draftModelId?.value,
                 enabled = enabled,
+                onClick = { selectingRecognitionModel = true },
             )
             Text("Recognition language", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

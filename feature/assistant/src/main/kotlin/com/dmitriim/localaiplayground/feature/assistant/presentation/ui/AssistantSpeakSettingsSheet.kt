@@ -46,6 +46,7 @@ internal fun AssistantSpeakSettingsSheet(
     var draftVoiceId by remember(selectedVoiceId) { mutableStateOf(selectedVoiceId) }
     var draft by remember(settings) { mutableStateOf(settings) }
     var error by remember { mutableStateOf<String?>(null) }
+    var selectingSpeechModel by remember { mutableStateOf(false) }
     val commit = { modelId: ModelId?, voiceId: String?, candidate: SpeechOutputSettings ->
         error = when {
             modelId == null -> "Select an installed speech model."
@@ -53,10 +54,46 @@ internal fun AssistantSpeakSettingsSheet(
             else -> onApply(modelId, voiceId, candidate)
         }
     }
+    val selectSpeechModel: (ModelId) -> Unit = { modelId ->
+        val model = models.firstOrNull { it.id == modelId }
+        val language = assistantTtsLanguages.firstOrNull { candidate ->
+            model?.languages?.isEmpty() == true ||
+                model?.languages?.any {
+                    com.dmitriim.localaiplayground.feature.assistant.presentation.normalizeLanguageCode(it) == candidate.code
+                } == true
+        }?.code ?: "en"
+        val candidate = draft.copy(languageCode = language)
+        val voiceId = model?.compatibleVoices(language)?.firstOrNull()?.id
+        draftModelId = modelId
+        draft = candidate
+        draftVoiceId = voiceId
+        commit(modelId, voiceId, candidate)
+    }
     val selectedModel = models.firstOrNull { it.id == draftModelId }
     val voices = selectedModel?.compatibleVoices(draft.languageCode).orEmpty()
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(
+        if (selectingSpeechModel) {
+            AssistantInSheetModelSelection(
+                title = "Speech model",
+                description = "Choose an installed engine or local model for speech synthesis.",
+                items = models.map {
+                    AssistantModelSelectionItem(
+                        id = it.id.value,
+                        name = it.displayName,
+                        detail = it.languages.joinToString(),
+                        installed = it.installed,
+                    )
+                },
+                selectedId = draftModelId?.value,
+                enabled = enabled,
+                onSelect = {
+                    selectSpeechModel(ModelId(it))
+                    selectingSpeechModel = false
+                },
+                onOpenModels = onOpenModels,
+                onBack = { selectingSpeechModel = false },
+            )
+        } else Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
@@ -66,28 +103,19 @@ internal fun AssistantSpeakSettingsSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text("Text-to-speech settings", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall)
-            AssistantSettingsModelPicker(
+            AssistantInSheetModelPicker(
                 label = "Speech model",
-                items = models.map { SettingsModelItem(it.id.value, it.displayName, it.installed) },
-                selectedId = draftModelId?.value,
-                onSelect = { value ->
-                    val modelId = ModelId(value)
-                    val model = models.firstOrNull { it.id == modelId }
-                    val language = assistantTtsLanguages.firstOrNull { candidate ->
-                        model?.languages?.isEmpty() == true ||
-                            model?.languages?.any {
-                                com.dmitriim.localaiplayground.feature.assistant.presentation.normalizeLanguageCode(it) == candidate.code
-                            } == true
-                    }?.code ?: "en"
-                    val candidate = draft.copy(languageCode = language)
-                    val voiceId = model?.compatibleVoices(language)?.firstOrNull()?.id
-                    draftModelId = modelId
-                    draft = candidate
-                    draftVoiceId = voiceId
-                    commit(modelId, voiceId, candidate)
+                items = models.map {
+                    AssistantModelSelectionItem(
+                        id = it.id.value,
+                        name = it.displayName,
+                        detail = it.languages.joinToString(),
+                        installed = it.installed,
+                    )
                 },
-                onOpenModels = onOpenModels,
+                selectedId = draftModelId?.value,
                 enabled = enabled,
+                onClick = { selectingSpeechModel = true },
             )
             Text("Speech language", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

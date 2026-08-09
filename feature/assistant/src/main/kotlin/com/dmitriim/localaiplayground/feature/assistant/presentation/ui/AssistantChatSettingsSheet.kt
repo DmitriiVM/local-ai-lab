@@ -42,13 +42,37 @@ internal fun AssistantChatSettingsSheet(
     var draftModelId by remember(selectedModelId) { mutableStateOf(selectedModelId) }
     var draft by remember(settings) { mutableStateOf(settings) }
     var error by remember { mutableStateOf<String?>(null) }
+    var selectingChatModel by remember { mutableStateOf(false) }
     val commit = { modelId: ModelId?, candidate: ChatSettings ->
         error = if (modelId == null) "Select an installed chat model." else onApply(modelId, candidate)
+    }
+    val selectChatModel: (ModelId) -> Unit = { modelId ->
+        val model = models.firstOrNull { it.id == modelId }
+        val candidate = draft.copy(
+            computePreference = model?.supportedComputePreference(draft.computePreference)
+                ?: draft.computePreference,
+            contextSize = model?.defaultContextSize?.toString() ?: draft.contextSize,
+        )
+        draftModelId = modelId
+        draft = candidate
+        commit(modelId, candidate)
     }
     val selectedModel = models.firstOrNull { it.id == draftModelId }
     val capabilities = selectedModel?.capabilities
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(
+        if (selectingChatModel) {
+            AssistantChatModelSelection(
+                models = models,
+                selectedId = draftModelId,
+                enabled = enabled,
+                onSelect = {
+                    selectChatModel(it)
+                    selectingChatModel = false
+                },
+                onOpenModels = onOpenModels,
+                onBack = { selectingChatModel = false },
+            )
+        } else Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
@@ -58,24 +82,11 @@ internal fun AssistantChatSettingsSheet(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text("Chat settings", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall)
-            AssistantSettingsModelPicker(
-                label = "Chat model",
-                items = models.map { SettingsModelItem(it.id.value, it.displayName, it.installed) },
+            AssistantChatModelPicker(
+                models = models,
                 selectedId = draftModelId?.value,
-                onSelect = { value ->
-                    val modelId = ModelId(value)
-                    val model = models.firstOrNull { it.id == modelId }
-                    val candidate = draft.copy(
-                        computePreference = model?.supportedComputePreference(draft.computePreference)
-                            ?: draft.computePreference,
-                        contextSize = model?.defaultContextSize?.toString() ?: draft.contextSize,
-                    )
-                    draftModelId = modelId
-                    draft = candidate
-                    commit(modelId, candidate)
-                },
-                onOpenModels = onOpenModels,
                 enabled = enabled,
+                onClick = { selectingChatModel = true },
             )
             capabilities?.computePreferences?.takeIf { it.size > 1 }?.let { computePreferences ->
                 AssistantSettingsModelPicker(
