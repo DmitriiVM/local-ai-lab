@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.engine.EngineAvailability
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.device.presentation.DeviceUiState
 
 @Composable
@@ -32,12 +32,12 @@ fun DeviceScreen(
         modifier = Modifier
             .fillMaxSize()
             .then(systemNavigationPadding)
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = dimensions.screenPadding),
         contentPadding = PaddingValues(
             top = dimensions.topBarOverlayClearance,
             bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
         ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
         item {
             Text(

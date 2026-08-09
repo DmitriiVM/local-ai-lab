@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.OperationState
 import com.dmitriim.localaiplayground.feature.playground.R
 import com.dmitriim.localaiplayground.feature.playground.presentation.PlaygroundUiState
@@ -42,12 +42,12 @@ fun PlaygroundScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = dimensions.screenPadding),
         contentPadding = PaddingValues(
             top = dimensions.topBarOverlayClearance,
             bottom = 44.dp + dimensions.bottomNavigationOverlayClearance,
         ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
         item {
             Column(

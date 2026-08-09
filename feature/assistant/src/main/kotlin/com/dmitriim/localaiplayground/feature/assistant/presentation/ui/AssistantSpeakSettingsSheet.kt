@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.ui.component.OptionPickerItem
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechOutputSettings
 import com.dmitriim.localaiplayground.feature.assistant.presentation.TtsModelOption
 
@@ -77,10 +78,10 @@ internal fun AssistantSpeakSettingsSheet(
                 title = "Speech model",
                 description = "Choose an installed engine or local model for speech synthesis.",
                 items = models.map {
-                    AssistantModelSelectionItem(
+                    OptionPickerItem(
                         id = it.id.value,
-                        name = it.displayName,
-                        detail = it.languages.joinToString(),
+                        label = it.displayName,
+                        supportingText = it.languages.joinToString(),
                         installed = it.installed,
                     )
                 },
@@ -110,10 +111,10 @@ internal fun AssistantSpeakSettingsSheet(
             AssistantInSheetModelPicker(
                 label = "Speech model",
                 items = models.map {
-                    AssistantModelSelectionItem(
+                    OptionPickerItem(
                         id = it.id.value,
-                        name = it.displayName,
-                        detail = it.languages.joinToString(),
+                        label = it.displayName,
+                        supportingText = it.languages.joinToString(),
                         installed = it.installed,
                     )
                 },

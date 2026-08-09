@@ -51,7 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dmitriim.localaiplayground.core.navigation.TopLevelDestination
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
 
 @Composable

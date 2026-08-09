@@ -1,7 +1,6 @@
 package com.dmitriim.localaiplayground.feature.models.presentation.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -18,10 +17,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -48,9 +44,11 @@ import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
-import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
+import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceCard
+import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceTone
+import com.dmitriim.localaiplayground.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
 
 @Composable
@@ -81,9 +79,9 @@ fun ModelsScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = dimensions.screenPadding),
         contentPadding = PaddingValues(bottom = dimensions.bottomNavigationOverlayClearance + 64.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
         item {
             Text(
@@ -159,67 +157,46 @@ private fun ModelFilters(
     onRuntimeFilterChange: (String?) -> Unit,
     onInstallationFilterChange: (ModelInstallationFilter) -> Unit,
 ) {
-    val shape = AppSurfaceStyle.CardShape
-    val colors = MaterialTheme.colorScheme
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                brush = AppSurfaceStyle.cardBorderBrush(colors),
-                shape = shape,
-            ),
-        shape = shape,
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(AppSurfaceStyle.cardBackgroundBrush(colors))
-                .padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(ModelTypeFilter.entries.size) { index ->
-                    val filter = ModelTypeFilter.entries[index]
-                    FilterChip(
-                        selected = typeFilter == filter,
-                        onClick = { onTypeFilterChange(filter) },
-                        label = { Text(filter.label) },
-                        colors = modelFilterChipColors(),
-                    )
-                }
+    AppSurfaceCard(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(ModelTypeFilter.entries.size) { index ->
+                val filter = ModelTypeFilter.entries[index]
+                FilterChip(
+                    selected = typeFilter == filter,
+                    onClick = { onTypeFilterChange(filter) },
+                    label = { Text(filter.label) },
+                    colors = AppFilterChipDefaults.colors(),
+                )
             }
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                item {
-                    FilterChip(
-                        selected = runtimeFilter == null,
-                        onClick = { onRuntimeFilterChange(null) },
-                        label = { Text("All") },
-                        colors = modelFilterChipColors(),
-                    )
-                }
-                items(runtimeIds.size) { index ->
-                    val runtime = runtimeIds[index]
-                    FilterChip(
-                        selected = runtimeFilter == runtime.value,
-                        onClick = { onRuntimeFilterChange(runtime.value) },
-                        label = { Text(runtime.displayLabel) },
-                        colors = modelFilterChipColors(),
-                    )
-                }
+        }
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            item {
+                FilterChip(
+                    selected = runtimeFilter == null,
+                    onClick = { onRuntimeFilterChange(null) },
+                    label = { Text("All") },
+                    colors = AppFilterChipDefaults.colors(),
+                )
             }
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(ModelInstallationFilter.entries.size) { index ->
-                    val filter = ModelInstallationFilter.entries[index]
-                    FilterChip(
-                        selected = installationFilter == filter,
-                        onClick = { onInstallationFilterChange(filter) },
-                        label = { Text(filter.label) },
-                        colors = modelFilterChipColors(),
-                    )
-                }
+            items(runtimeIds.size) { index ->
+                val runtime = runtimeIds[index]
+                FilterChip(
+                    selected = runtimeFilter == runtime.value,
+                    onClick = { onRuntimeFilterChange(runtime.value) },
+                    label = { Text(runtime.displayLabel) },
+                    colors = AppFilterChipDefaults.colors(),
+                )
+            }
+        }
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(ModelInstallationFilter.entries.size) { index ->
+                val filter = ModelInstallationFilter.entries[index]
+                FilterChip(
+                    selected = installationFilter == filter,
+                    onClick = { onInstallationFilterChange(filter) },
+                    label = { Text(filter.label) },
+                    colors = AppFilterChipDefaults.colors(),
+                )
             }
         }
     }
@@ -490,39 +467,14 @@ private fun ModelCard(
     onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    val shape = AppSurfaceStyle.CardShape
-    val colors = MaterialTheme.colorScheme
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                brush = AppSurfaceStyle.purpleTonalCardBorderBrush(colors),
-                shape = shape,
-            ),
-        onClick = onClick,
-        shape = shape,
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    AppSurfaceCard(
+        modifier = Modifier.clickable(onClick = onClick),
+        tone = AppSurfaceTone.TONAL,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(AppSurfaceStyle.purpleTonalCardColor(colors))
-                .padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            content()
-        }
+        content()
     }
 }
-
-@Composable
-private fun modelFilterChipColors() = FilterChipDefaults.filterChipColors(
-    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.78f),
-    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-    containerColor = Color.Transparent,
-)
 
 private val ModelManifest.typeLabel: String
     get() = when {

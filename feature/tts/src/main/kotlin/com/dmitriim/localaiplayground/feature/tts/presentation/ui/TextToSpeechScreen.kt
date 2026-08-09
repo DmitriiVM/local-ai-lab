@@ -18,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
+import com.dmitriim.localaiplayground.core.ui.component.AppSectionCard
+import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceTone
 import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechUiState
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsLanguage
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsOperation
@@ -70,12 +72,12 @@ fun TextToSpeechScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(
-                start = 16.dp,
+                start = dimensions.screenPadding,
                 top = dimensions.topBarOverlayClearance + 44.dp,
-                end = 16.dp,
+                end = dimensions.screenPadding,
                 bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
             ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
         Text("On-device text to speech", style = MaterialTheme.typography.headlineSmall)
         Text(
@@ -83,7 +85,7 @@ fun TextToSpeechScreen(
             style = MaterialTheme.typography.bodyMedium,
         )
 
-        TtsSectionCard("Setup", solidPurpleTint = true) {
+        AppSectionCard("Setup", tone = AppSurfaceTone.TONAL) {
             TextToSpeechModelPicker(state.models, state.selectedModelId, !busy, onSelectModel)
             if (state.usesReferenceVoice) {
                 ChatterboxReferenceVoiceSelector(
@@ -128,7 +130,7 @@ fun TextToSpeechScreen(
             )
         }
 
-        TtsSectionCard("Compose", solidPurpleTint = true) {
+        AppSectionCard("Compose", tone = AppSurfaceTone.TONAL) {
             OutlinedTextField(
                 value = state.text,
                 onValueChange = onTextChange,

@@ -1,7 +1,5 @@
 package com.dmitriim.localaiplayground.feature.runs.presentation.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,11 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,15 +29,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import com.dmitriim.localaiplayground.core.model.runs.RunKind
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
-import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
+import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceCard
+import com.dmitriim.localaiplayground.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localaiplayground.feature.runs.presentation.RunsUiState
 import java.text.DateFormat
 import java.util.Date
@@ -74,7 +70,7 @@ fun RunsScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = dimensions.screenPadding),
         contentPadding = PaddingValues(
             top = dimensions.topBarOverlayClearance + 20.dp,
             bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
@@ -175,33 +171,14 @@ private fun FilterRow(
     onCapability: (AiCapability?) -> Unit,
     onStatus: (RunStatus?) -> Unit,
 ) {
-    val colors = MaterialTheme.colorScheme
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                brush = AppSurfaceStyle.cardBorderBrush(colors),
-                shape = AppSurfaceStyle.CardShape,
-            ),
-        shape = AppSurfaceStyle.CardShape,
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(AppSurfaceStyle.cardBackgroundBrush(colors))
-                .padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
+    AppSurfaceCard(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             item {
                 FilterChip(
                     selected = state.capability == null,
                     onClick = { onCapability(null) },
                     label = { Text("All") },
-                    colors = runFilterChipColors(),
+                    colors = AppFilterChipDefaults.colors(),
                 )
             }
             items(runFilterCapabilities.size) { index ->
@@ -210,7 +187,7 @@ private fun FilterRow(
                     selected = state.capability == value,
                     onClick = { onCapability(value) },
                     label = { Text(value.filterLabel) },
-                    colors = runFilterChipColors(),
+                    colors = AppFilterChipDefaults.colors(),
                 )
             }
         }
@@ -220,7 +197,7 @@ private fun FilterRow(
                     selected = state.status == null,
                     onClick = { onStatus(null) },
                     label = { Text("All") },
-                    colors = runFilterChipColors(),
+                    colors = AppFilterChipDefaults.colors(),
                 )
             }
             items(RunStatus.entries.size) { index ->
@@ -229,20 +206,12 @@ private fun FilterRow(
                     selected = state.status == value,
                     onClick = { onStatus(value) },
                     label = { Text(value.label) },
-                    colors = runFilterChipColors(),
+                    colors = AppFilterChipDefaults.colors(),
                 )
             }
         }
-        }
     }
 }
-
-@Composable
-private fun runFilterChipColors() = FilterChipDefaults.filterChipColors(
-    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.78f),
-    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-    containerColor = Color.Transparent,
-)
 
 private val runFilterCapabilities = listOf(
     AiCapability.SPEECH_TO_TEXT,
@@ -286,12 +255,12 @@ private fun RunDetails(
 ) {
     val dimensions = LocalAppDimensions.current
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        modifier = Modifier.fillMaxSize().padding(horizontal = dimensions.screenPadding),
         contentPadding = PaddingValues(
             top = dimensions.topBarOverlayClearance + 20.dp,
             bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
         ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -29,7 +29,7 @@ import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.performance.BenchmarkSessionSummary
 import com.dmitriim.localaiplayground.core.performance.BenchmarkWorkload
 import com.dmitriim.localaiplayground.core.performance.InferenceResourceMetrics
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.benchmark.presentation.BenchmarkLabUiState
 
 @Composable
@@ -51,12 +51,12 @@ fun BenchmarkScreen(
     }
     Column(
         modifier = Modifier.fillMaxSize().then(systemNavigationPadding).verticalScroll(rememberScrollState()).padding(
-            start = 20.dp,
+            start = dimensions.screenPadding,
             top = dimensions.topBarOverlayClearance + 20.dp,
-            end = 20.dp,
+            end = dimensions.screenPadding,
             bottom = 44.dp + dimensions.bottomNavigationOverlayClearance,
         ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
         Text("Profile", style = MaterialTheme.typography.headlineMedium)
         Text(

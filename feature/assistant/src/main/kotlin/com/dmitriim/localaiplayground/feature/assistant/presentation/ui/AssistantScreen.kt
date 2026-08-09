@@ -22,7 +22,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantInputMode
 import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantUiState
@@ -68,9 +68,9 @@ fun AssistantScreen(
                 .then(systemNavigationPadding)
                 .imePadding()
                 .padding(
-                    start = 16.dp,
+                    start = dimensions.screenPadding,
                     top = dimensions.topBarOverlayClearance + 44.dp,
-                    end = 16.dp,
+                    end = dimensions.screenPadding,
                     bottom = dimensions.bottomNavigationOverlayClearance + 8.dp,
                 ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -112,7 +112,7 @@ fun AssistantScreen(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .statusBarsPadding()
-                .padding(top = 8.dp, end = 16.dp),
+                .padding(top = 8.dp, end = dimensions.screenPadding),
         )
     }
 

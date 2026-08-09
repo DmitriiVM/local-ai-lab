@@ -1,7 +1,5 @@
 package com.dmitriim.localaiplayground.feature.settings.presentation.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +13,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
@@ -30,8 +27,10 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
-import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.component.AppSectionCard
+import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceCard
+import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceTone
 import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
 import com.dmitriim.localaiplayground.feature.settings.presentation.SettingsUiState
 import com.dmitriim.localaiplayground.source.settings.AppSettings
@@ -78,12 +77,12 @@ fun SettingsScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(
-                start = 20.dp,
+                start = dimensions.screenPadding,
                 top = dimensions.topBarOverlayClearance + 20.dp,
-                end = 20.dp,
+                end = dimensions.screenPadding,
                 bottom = 44.dp + dimensions.bottomNavigationOverlayClearance,
             ),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensions.sectionSpacing),
     ) {
         Text("Settings", style = MaterialTheme.typography.headlineMedium)
         SettingsSurfaceCard(onClick = onOpenDeviceAndRuntimes) {
@@ -170,10 +169,22 @@ private fun SettingsCard(
     purpleTonal: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    SettingsSurfaceCard(styled = styled, purpleTonal = purpleTonal) {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
+    if (styled) {
+        AppSectionCard(
+            title = title,
+            tone = if (purpleTonal) AppSurfaceTone.TONAL else AppSurfaceTone.GLASS,
+        ) {
             content()
+        }
+    } else {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                content()
+            }
         }
     }
 }
@@ -181,57 +192,12 @@ private fun SettingsCard(
 @Composable
 private fun SettingsSurfaceCard(
     onClick: (() -> Unit)? = null,
-    styled: Boolean = true,
-    purpleTonal: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val colors = MaterialTheme.colorScheme
-    val backgroundModifier = if (styled) {
-        if (purpleTonal) {
-            Modifier.background(AppSurfaceStyle.purpleTonalCardColor(colors))
-        } else {
-            Modifier.background(AppSurfaceStyle.cardBackgroundBrush(colors))
-        }
-    } else {
-        Modifier
-    }
-    Card(
-        modifier = (if (styled) {
-            Modifier
-                .fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    brush = if (purpleTonal) {
-                        AppSurfaceStyle.purpleTonalCardBorderBrush(colors)
-                    } else {
-                        AppSurfaceStyle.cardBorderBrush(colors)
-                    },
-                    shape = AppSurfaceStyle.CardShape,
-                )
-        } else {
-            Modifier.fillMaxWidth()
-        })
-            .then(onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier),
-        shape = if (styled) AppSurfaceStyle.CardShape else MaterialTheme.shapes.medium,
-        colors = if (styled) {
-            CardDefaults.cardColors(containerColor = Color.Transparent)
-        } else {
-            CardDefaults.cardColors()
-        },
-        elevation = if (styled) {
-            CardDefaults.cardElevation(defaultElevation = 0.dp)
-        } else {
-            CardDefaults.cardElevation()
-        },
+    AppSurfaceCard(
+        modifier = onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(backgroundModifier)
-                .padding(if (styled) 18.dp else 16.dp),
-        ) {
-            content()
-        }
+        content()
     }
 }
 

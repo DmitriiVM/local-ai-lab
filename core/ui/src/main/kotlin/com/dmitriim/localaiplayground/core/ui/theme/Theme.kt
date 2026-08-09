@@ -7,8 +7,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
-import com.dmitriim.localaiplayground.core.result.AppDimensions
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.AppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 
 private val BlackColorScheme = darkColorScheme(
     primary = Color.White,

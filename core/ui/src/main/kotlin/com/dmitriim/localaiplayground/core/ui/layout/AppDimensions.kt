@@ -1,4 +1,4 @@
-package com.dmitriim.localaiplayground.core.result
+package com.dmitriim.localaiplayground.core.ui.layout
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp

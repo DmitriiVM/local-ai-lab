@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.ui.component.OptionPickerItem
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechInputSettings
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechModelOption
 import com.dmitriim.localaiplayground.feature.assistant.presentation.normalizeLanguageCode
@@ -66,10 +67,10 @@ internal fun AssistantListenSettingsSheet(
                 title = "Recognition model",
                 description = "Choose an installed model for on-device speech recognition.",
                 items = models.map {
-                    AssistantModelSelectionItem(
+                    OptionPickerItem(
                         id = it.id.value,
-                        name = it.displayName,
-                        detail = it.languages.joinToString(),
+                        label = it.displayName,
+                        supportingText = it.languages.joinToString(),
                         installed = it.installed,
                     )
                 },
@@ -99,10 +100,10 @@ internal fun AssistantListenSettingsSheet(
             AssistantInSheetModelPicker(
                 label = "Recognition model",
                 items = models.map {
-                    AssistantModelSelectionItem(
+                    OptionPickerItem(
                         id = it.id.value,
-                        name = it.displayName,
-                        detail = it.languages.joinToString(),
+                        label = it.displayName,
+                        supportingText = it.languages.joinToString(),
                         installed = it.installed,
                     )
                 },

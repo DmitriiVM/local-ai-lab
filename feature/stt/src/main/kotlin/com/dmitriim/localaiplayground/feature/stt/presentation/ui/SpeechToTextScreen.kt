@@ -1,11 +1,8 @@
 package com.dmitriim.localaiplayground.feature.stt.presentation.ui
 
 import android.content.Intent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,10 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -28,16 +22,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
-import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
+import com.dmitriim.localaiplayground.core.ui.component.AppSectionCard
+import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceTone
+import com.dmitriim.localaiplayground.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localaiplayground.feature.stt.presentation.SpeechModelOption
 import com.dmitriim.localaiplayground.feature.stt.presentation.SpeechToTextUiState
 import com.dmitriim.localaiplayground.feature.stt.presentation.SttLanguage
@@ -72,15 +67,15 @@ fun SpeechToTextScreen(
             .fillMaxSize()
             .then(systemNavigationPadding)
             .verticalScroll(scroll)
-            .padding(start = 16.dp, top = dimensions.topBarOverlayClearance + 44.dp, end = 16.dp, bottom = 24.dp + dimensions.bottomNavigationOverlayClearance),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(start = dimensions.screenPadding, top = dimensions.topBarOverlayClearance + 44.dp, end = dimensions.screenPadding, bottom = 24.dp + dimensions.bottomNavigationOverlayClearance),
+        verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
         Text("Local speech to text", style = MaterialTheme.typography.headlineSmall)
         Text(
             "Choose the Android on-device recognizer or an installed speech model. Recording shows live levels, then final text appears after you stop.",
             style = MaterialTheme.typography.bodyMedium,
         )
-        SttSectionCard("Setup") {
+        AppSectionCard("Setup", tone = AppSurfaceTone.TONAL) {
             SpeechModelPicker(state.models, state.selectedModelId, enabled = !busy, onSelectModel)
             Text("Language", style = MaterialTheme.typography.titleSmall)
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -91,7 +86,7 @@ fun SpeechToTextScreen(
                         onClick = { onSelectLanguage(language) },
                         enabled = !busy,
                         label = { Text(language.label) },
-                        colors = sttFilterChipColors(),
+                        colors = AppFilterChipDefaults.colors(),
                     )
                 }
             }
@@ -106,7 +101,7 @@ fun SpeechToTextScreen(
                     .heightIn(min = 56.dp, max = 64.dp),
             )
         }
-        SttSectionCard("Audio input") {
+        AppSectionCard("Audio input", tone = AppSurfaceTone.TONAL) {
             RecordingControls(
                 operation = state.operation,
                 hasInput = state.input != null,
@@ -152,7 +147,7 @@ fun SpeechToTextScreen(
             )
         }
         if (state.transcript.isNotBlank()) {
-            SttSectionCard("Final transcript") {
+            AppSectionCard("Final transcript", tone = AppSurfaceTone.TONAL) {
                     Text(
                         state.transcript,
                         style = MaterialTheme.typography.bodyLarge,
@@ -250,44 +245,6 @@ private fun RecordingControls(
         }
     }
 }
-
-@Composable
-private fun SttSectionCard(
-    title: String,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    val colors = MaterialTheme.colorScheme
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                brush = AppSurfaceStyle.purpleTonalCardBorderBrush(colors),
-                shape = AppSurfaceStyle.CardShape,
-            ),
-        shape = AppSurfaceStyle.CardShape,
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(AppSurfaceStyle.purpleTonalCardColor(colors))
-                .padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            content()
-        }
-    }
-}
-
-@Composable
-private fun sttFilterChipColors() = FilterChipDefaults.filterChipColors(
-    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.78f),
-    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-    containerColor = Color.Transparent,
-)
 
 private fun formatDuration(durationMs: Long): String {
     val seconds = durationMs / 1_000

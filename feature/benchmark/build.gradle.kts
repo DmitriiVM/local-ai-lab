@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:performance"))
     implementation(project(":core:result"))
+    implementation(project(":core:ui"))
     implementation(project(":source:runs"))
     implementation(project(":source:models"))
     implementation(project(":ai:api"))

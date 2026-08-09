@@ -21,7 +21,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -48,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
+import com.dmitriim.localaiplayground.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechUiState
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsLanguage
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsOperation
@@ -366,10 +366,7 @@ internal fun TextToSpeechLanguageControls(
                 // Chatterbox Turbo Q4 is English-only.
                 enabled = enabled && (!englishOnly || language == TtsLanguage.ENGLISH),
                 label = { Text(language.label) },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.78f),
-                    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                ),
+                colors = AppFilterChipDefaults.colors(),
             )
         }
     }

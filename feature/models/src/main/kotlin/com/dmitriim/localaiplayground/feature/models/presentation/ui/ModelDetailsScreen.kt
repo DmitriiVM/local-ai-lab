@@ -54,7 +54,7 @@ import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
 import com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode
 import com.dmitriim.localaiplayground.core.model.manifest.TtsControl
 import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
-import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
 import java.text.DateFormat
@@ -172,12 +172,12 @@ private fun ModelDetailsContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(scaffoldPadding)
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = dimensions.screenPadding),
             contentPadding = PaddingValues(
                 top = dimensions.topBarOverlayClearance + 40.dp,
                 bottom = 24.dp,
             ),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
         ) {
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -605,9 +605,9 @@ private fun ModelUnavailable(message: String?, onNavigateBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = dimensions.screenPadding)
             .padding(top = dimensions.topBarOverlayClearance + 20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
         Text("Model unavailable", style = MaterialTheme.typography.headlineMedium)
         Text(message ?: "This model is no longer present in the catalog or installed library.")

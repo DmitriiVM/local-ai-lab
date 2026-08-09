@@ -133,7 +133,7 @@ private fun ChatMessageCard(
         shape = cardShape,
         colors = CardDefaults.cardColors(
             containerColor = if (isUserMessage) {
-                AppSurfaceStyle.purpleTonalCardColor(colors)
+                AppSurfaceStyle.tonalCardColor(colors)
             } else {
                 colors.surfaceContainer.copy(alpha = 0.96f)
             },
