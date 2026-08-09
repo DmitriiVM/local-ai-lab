@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dmitriim.localaiplayground.core.navigation.TopLevelDestination
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
 
 @Composable
 fun AdaptiveNavigationScaffold(
@@ -62,7 +63,12 @@ fun AdaptiveNavigationScaffold(
     content: @Composable (Modifier) -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .background(AppSurfaceStyle.pageBackgroundBrush(MaterialTheme.colorScheme)),
+    ) {
         if (maxWidth >= dimensions.navigationRailBreakpoint) {
             Row(modifier = Modifier.fillMaxSize()) {
                 if (showTopLevelNavigation) {
@@ -80,6 +86,8 @@ fun AdaptiveNavigationScaffold(
                 Box(modifier = Modifier.weight(1f)) {
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
                         contentWindowInsets = WindowInsets.safeDrawing.only(
                             WindowInsetsSides.Horizontal,
                         ),
@@ -100,6 +108,8 @@ fun AdaptiveNavigationScaffold(
                     ),
                 ) {
                     Scaffold(
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
                         contentWindowInsets = WindowInsets.safeDrawing.only(
                             WindowInsetsSides.Horizontal,
                         ),

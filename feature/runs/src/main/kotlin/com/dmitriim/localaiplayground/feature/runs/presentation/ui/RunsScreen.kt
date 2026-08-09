@@ -74,7 +74,6 @@ fun RunsScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppSurfaceStyle.pageBackgroundBrush(MaterialTheme.colorScheme))
             .padding(horizontal = 20.dp),
         contentPadding = PaddingValues(
             top = dimensions.topBarOverlayClearance + 20.dp,

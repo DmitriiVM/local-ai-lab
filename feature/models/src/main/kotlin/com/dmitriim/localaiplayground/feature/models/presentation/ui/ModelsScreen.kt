@@ -81,9 +81,6 @@ fun ModelsScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                brush = AppSurfaceStyle.pageBackgroundBrush(MaterialTheme.colorScheme),
-            )
             .padding(horizontal = 20.dp),
         contentPadding = PaddingValues(bottom = dimensions.bottomNavigationOverlayClearance + 64.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),

@@ -76,7 +76,6 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppSurfaceStyle.pageBackgroundBrush(MaterialTheme.colorScheme))
             .verticalScroll(rememberScrollState())
             .padding(
                 start = 20.dp,
