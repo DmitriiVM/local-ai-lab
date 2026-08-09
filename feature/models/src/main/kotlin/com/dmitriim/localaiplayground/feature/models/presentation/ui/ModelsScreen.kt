@@ -33,8 +33,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -52,6 +50,7 @@ import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
+import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
 
 @Composable
@@ -83,13 +82,7 @@ fun ModelsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                brush = Brush.verticalGradient(
-                    colorStops = arrayOf(
-                        0f to MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.52f),
-                        0.45f to MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.20f),
-                        0.82f to MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0f),
-                    ),
-                ),
+                brush = AppSurfaceStyle.pageBackgroundBrush(MaterialTheme.colorScheme),
             )
             .padding(horizontal = 20.dp),
         contentPadding = PaddingValues(bottom = dimensions.bottomNavigationOverlayClearance + 64.dp),
@@ -169,14 +162,14 @@ private fun ModelFilters(
     onRuntimeFilterChange: (String?) -> Unit,
     onInstallationFilterChange: (ModelInstallationFilter) -> Unit,
 ) {
-    val shape = RoundedCornerShape(24.dp)
+    val shape = AppSurfaceStyle.CardShape
     val colors = MaterialTheme.colorScheme
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                brush = modelCardBorderBrush(colors),
+                brush = AppSurfaceStyle.cardBorderBrush(colors),
                 shape = shape,
             ),
         shape = shape,
@@ -186,7 +179,7 @@ private fun ModelFilters(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(modelCardBackgroundBrush(colors))
+                .background(AppSurfaceStyle.cardBackgroundBrush(colors))
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -500,14 +493,14 @@ private fun ModelCard(
     onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    val shape = RoundedCornerShape(24.dp)
+    val shape = AppSurfaceStyle.CardShape
     val colors = MaterialTheme.colorScheme
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                brush = modelCardBorderBrush(colors),
+                brush = AppSurfaceStyle.cardBorderBrush(colors),
                 shape = shape,
             ),
         onClick = onClick,
@@ -518,7 +511,7 @@ private fun ModelCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(modelCardBackgroundBrush(colors))
+                .background(AppSurfaceStyle.cardBackgroundBrush(colors))
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -533,29 +526,6 @@ private fun modelFilterChipColors() = FilterChipDefaults.filterChipColors(
     selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
     containerColor = Color.Transparent,
 )
-
-private fun modelCardBackgroundBrush(colors: androidx.compose.material3.ColorScheme) =
-    Brush.linearGradient(
-        colors = listOf(
-            colors.tertiaryContainer.copy(alpha = 0.32f),
-            colors.tertiaryContainer.copy(alpha = 0.52f),
-            colors.surfaceContainerHigh.copy(alpha = 0.96f),
-            colors.surfaceContainer.copy(alpha = 0.98f),
-        ),
-        start = Offset.Zero,
-        end = Offset(0f, 500f),
-    )
-
-private fun modelCardBorderBrush(colors: androidx.compose.material3.ColorScheme) =
-    Brush.linearGradient(
-        colors = listOf(
-            colors.onTertiaryContainer.copy(alpha = 0.38f),
-            colors.onTertiaryContainer.copy(alpha = 0.52f),
-            colors.outlineVariant.copy(alpha = 0.26f),
-        ),
-        start = Offset.Zero,
-        end = Offset(0f, 500f),
-    )
 
 private val ModelManifest.typeLabel: String
     get() = when {

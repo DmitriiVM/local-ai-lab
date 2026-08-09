@@ -1,5 +1,7 @@
 package com.dmitriim.localaiplayground.feature.settings.presentation.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,20 +11,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
 import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
 import com.dmitriim.localaiplayground.feature.settings.presentation.SettingsUiState
 import com.dmitriim.localaiplayground.source.settings.AppSettings
@@ -65,16 +74,22 @@ fun SettingsScreen(
         )
     }
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, top = dimensions.topBarOverlayClearance + 20.dp, end = 20.dp, bottom = 44.dp + dimensions.bottomNavigationOverlayClearance),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppSurfaceStyle.pageBackgroundBrush(MaterialTheme.colorScheme))
+            .verticalScroll(rememberScrollState())
+            .padding(
+                start = 20.dp,
+                top = dimensions.topBarOverlayClearance + 20.dp,
+                end = 20.dp,
+                bottom = 44.dp + dimensions.bottomNavigationOverlayClearance,
+            ),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text("Settings", style = MaterialTheme.typography.headlineMedium)
-        Card(
-            onClick = onOpenDeviceAndRuntimes,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+        SettingsSurfaceCard(onClick = onOpenDeviceAndRuntimes) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column(
@@ -91,14 +106,14 @@ fun SettingsScreen(
             }
         }
         if (settings.showAdvancedControls) {
-            SettingsCard("Performance defaults") {
+            SettingsCard("Performance defaults", styled = false) {
                 EnumRadioGroup("Thread policy", settings.threadCountPolicy, ThreadCountPolicy.entries, ThreadCountPolicy::label) { value -> onUpdate { it.copy(threadCountPolicy = value) } }
                 EnumRadioGroup("Unload models", settings.modelUnloadPolicy, ModelUnloadPolicy.entries, ModelUnloadPolicy::label) { value -> onUpdate { it.copy(modelUnloadPolicy = value) } }
                 Toggle("Warm up selected model", settings.warmUpSelectedModel) { value -> onUpdate { it.copy(warmUpSelectedModel = value) } }
                 EnumSelector("Metric detail", settings.metricDetail, MetricDetail.entries, MetricDetail::label) { value -> onUpdate { it.copy(metricDetail = value) } }
             }
         }
-        SettingsCard("Appearance") {
+        SettingsCard("Appearance", styled = false) {
             EnumRadioGroup("Theme", settings.theme, ThemePreference.entries, ThemePreference::name) { value -> onUpdate { it.copy(theme = value) } }
             Toggle("Keep screen awake during active inference", settings.keepScreenAwake) { value -> onUpdate { it.copy(keepScreenAwake = value) } }
             Toggle("Confirm before deleting history", settings.confirmDestructiveActions) { value -> onUpdate { it.copy(confirmDestructiveActions = value) } }
@@ -150,10 +165,65 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsCard(title: String, content: @Composable () -> Unit) = Card(Modifier.fillMaxWidth()) {
-    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(title, style = MaterialTheme.typography.titleMedium)
-        content()
+private fun SettingsCard(
+    title: String,
+    styled: Boolean = true,
+    content: @Composable () -> Unit,
+) {
+    SettingsSurfaceCard(styled = styled) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            content()
+        }
+    }
+}
+
+@Composable
+private fun SettingsSurfaceCard(
+    onClick: (() -> Unit)? = null,
+    styled: Boolean = true,
+    content: @Composable () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    Card(
+        modifier = (if (styled) {
+            Modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    brush = AppSurfaceStyle.cardBorderBrush(colors),
+                    shape = AppSurfaceStyle.CardShape,
+                )
+        } else {
+            Modifier.fillMaxWidth()
+        })
+            .then(onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier),
+        shape = if (styled) AppSurfaceStyle.CardShape else MaterialTheme.shapes.medium,
+        colors = if (styled) {
+            CardDefaults.cardColors(containerColor = Color.Transparent)
+        } else {
+            CardDefaults.cardColors()
+        },
+        elevation = if (styled) {
+            CardDefaults.cardElevation(defaultElevation = 0.dp)
+        } else {
+            CardDefaults.cardElevation()
+        },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(
+                    if (styled) {
+                        Modifier.background(AppSurfaceStyle.cardBackgroundBrush(colors))
+                    } else {
+                        Modifier
+                    },
+                )
+                .padding(if (styled) 18.dp else 16.dp),
+        ) {
+            content()
+        }
     }
 }
 
@@ -167,19 +237,57 @@ private fun Toggle(
     horizontalArrangement = Arrangement.SpaceBetween,
     verticalAlignment = Alignment.CenterVertically,
 ) {
-    Text(label, Modifier.weight(1f))
+    Text(
+        text = label,
+        modifier = Modifier.weight(1f),
+        style = MaterialTheme.typography.bodyMedium,
+    )
     Switch(
         checked = checked,
         onCheckedChange = onChanged,
         modifier = Modifier.scale(0.82f),
+        colors = SwitchDefaults.colors(
+            checkedThumbColor = MaterialTheme.colorScheme.onTertiary,
+            checkedTrackColor = MaterialTheme.colorScheme.tertiary,
+            checkedBorderColor = MaterialTheme.colorScheme.tertiary,
+        ),
     )
 }
 
 @Composable
 private fun <T> EnumSelector(label: String, selected: T, values: Iterable<T>, text: (T) -> String, onSelected: (T) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(label)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { values.forEach { value -> OutlinedButton(onClick = { onSelected(value) }) { Text(text(value) + if (value == selected) " ✓" else "") } } }
+        Text(label, style = MaterialTheme.typography.titleSmall)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            values.forEach { value ->
+                val isSelected = value == selected
+                OutlinedButton(
+                    onClick = { onSelected(value) },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (isSelected) {
+                            MaterialTheme.colorScheme.tertiaryContainer
+                        } else {
+                            Color.Transparent
+                        },
+                        contentColor = if (isSelected) {
+                            MaterialTheme.colorScheme.onTertiaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
+                    ),
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.tertiary
+                        } else {
+                            MaterialTheme.colorScheme.outline
+                        },
+                    ),
+                ) {
+                    Text(text(value))
+                }
+            }
+        }
     }
 }
 
@@ -192,7 +300,7 @@ private fun <T> EnumRadioGroup(
     onSelected: (T) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(label)
+        Text(label, style = MaterialTheme.typography.titleSmall)
         values.forEach { value ->
             val isSelected = value == selected
             Row(
@@ -203,8 +311,23 @@ private fun <T> EnumRadioGroup(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                RadioButton(selected = isSelected, onClick = null)
-                Text(text(value))
+                RadioButton(
+                    selected = isSelected,
+                    onClick = null,
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = MaterialTheme.colorScheme.tertiary,
+                        unselectedColor = MaterialTheme.colorScheme.outline,
+                    ),
+                )
+                Text(
+                    text(value),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isSelected) {
+                        MaterialTheme.colorScheme.tertiary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                )
             }
         }
     }

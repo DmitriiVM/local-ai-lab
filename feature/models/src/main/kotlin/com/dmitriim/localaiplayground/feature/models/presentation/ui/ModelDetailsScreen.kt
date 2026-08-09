@@ -170,7 +170,7 @@ private fun ModelDetailsContent(
                 .padding(scaffoldPadding)
                 .padding(horizontal = 20.dp),
             contentPadding = PaddingValues(
-                top = dimensions.topBarOverlayClearance + 20.dp,
+                top = dimensions.topBarOverlayClearance + 40.dp,
                 bottom = 24.dp,
             ),
             verticalArrangement = Arrangement.spacedBy(12.dp),

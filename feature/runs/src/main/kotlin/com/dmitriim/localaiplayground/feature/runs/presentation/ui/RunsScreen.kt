@@ -1,25 +1,27 @@
 package com.dmitriim.localaiplayground.feature.runs.presentation.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
@@ -38,6 +41,7 @@ import com.dmitriim.localaiplayground.core.model.runs.RunKind
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
+import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
 import com.dmitriim.localaiplayground.feature.runs.presentation.RunsUiState
 import java.text.DateFormat
 import java.util.Date
@@ -68,7 +72,10 @@ fun RunsScreen(
         return
     }
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppSurfaceStyle.pageBackgroundBrush(MaterialTheme.colorScheme))
+            .padding(horizontal = 20.dp),
         contentPadding = PaddingValues(
             top = dimensions.topBarOverlayClearance + 20.dp,
             bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
@@ -163,49 +170,80 @@ private fun RunsOverflowMenu(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FilterRow(
     state: RunsUiState,
     onCapability: (AiCapability?) -> Unit,
     onStatus: (RunStatus?) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+    val colors = MaterialTheme.colorScheme
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                brush = AppSurfaceStyle.cardBorderBrush(colors),
+                shape = AppSurfaceStyle.CardShape,
+            ),
+        shape = AppSurfaceStyle.CardShape,
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(AppSurfaceStyle.cardBackgroundBrush(colors))
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            AssistChip(
-                onClick = { onCapability(null) },
-                label = { Text(if (state.capability == null) "All ✓" else "All") },
-            )
-            runFilterCapabilities.forEach { value ->
-                AssistChip(
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            item {
+                FilterChip(
+                    selected = state.capability == null,
+                    onClick = { onCapability(null) },
+                    label = { Text("All") },
+                    colors = runFilterChipColors(),
+                )
+            }
+            items(runFilterCapabilities.size) { index ->
+                val value = runFilterCapabilities[index]
+                FilterChip(
+                    selected = state.capability == value,
                     onClick = { onCapability(value) },
-                    label = {
-                        Text(value.filterLabel + if (state.capability == value) " ✓" else "")
-                    },
+                    label = { Text(value.filterLabel) },
+                    colors = runFilterChipColors(),
                 )
             }
         }
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            AssistChip(
-                onClick = { onStatus(null) },
-                label = { Text(if (state.status == null) "All ✓" else "All") },
-            )
-            RunStatus.entries.forEach { value ->
-                AssistChip(
-                    onClick = { onStatus(value) },
-                    label = { Text(value.label + if (state.status == value) " ✓" else "") },
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            item {
+                FilterChip(
+                    selected = state.status == null,
+                    onClick = { onStatus(null) },
+                    label = { Text("All") },
+                    colors = runFilterChipColors(),
                 )
             }
+            items(RunStatus.entries.size) { index ->
+                val value = RunStatus.entries[index]
+                FilterChip(
+                    selected = state.status == value,
+                    onClick = { onStatus(value) },
+                    label = { Text(value.label) },
+                    colors = runFilterChipColors(),
+                )
+            }
+        }
         }
     }
 }
+
+@Composable
+private fun runFilterChipColors() = FilterChipDefaults.filterChipColors(
+    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.78f),
+    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
+    containerColor = Color.Transparent,
+)
 
 private val runFilterCapabilities = listOf(
     AiCapability.SPEECH_TO_TEXT,
