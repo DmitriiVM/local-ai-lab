@@ -69,7 +69,7 @@ fun AssistantScreen(
                 .imePadding()
                 .padding(
                     start = 16.dp,
-                    top = dimensions.topBarOverlayClearance + 12.dp,
+                    top = dimensions.topBarOverlayClearance + 44.dp,
                     end = 16.dp,
                     bottom = dimensions.bottomNavigationOverlayClearance + 8.dp,
                 ),

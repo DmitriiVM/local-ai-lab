@@ -1,8 +1,10 @@
 package com.dmitriim.localaiplayground.feature.assistant.presentation.ui
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -11,10 +13,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Replay
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.VolumeUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -23,12 +29,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -103,31 +112,54 @@ private fun ChatMessageCard(
     onRegenerate: (() -> Unit)?,
     onSpeak: (() -> Unit)?,
 ) {
+    val isUserMessage = message.role == ChatMessageRole.USER
+    val colors = MaterialTheme.colorScheme
+    val cardShape = RoundedCornerShape(20.dp)
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(
+                if (isUserMessage) {
+                    Modifier
+                } else {
+                    Modifier.border(
+                        width = 1.dp,
+                        color = colors.tertiary.copy(alpha = 0.20f),
+                        shape = cardShape,
+                    )
+                },
+            ),
+        shape = cardShape,
         colors = CardDefaults.cardColors(
-            containerColor = if (message.role == ChatMessageRole.USER) {
-                MaterialTheme.colorScheme.secondaryContainer
+            containerColor = if (isUserMessage) {
+                colors.tertiaryContainer.copy(alpha = 0.56f)
             } else {
-                MaterialTheme.colorScheme.surfaceContainer
+                colors.surfaceContainer.copy(alpha = 0.96f)
             },
         ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    if (message.role == ChatMessageRole.USER) "You" else "Assistant",
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                )
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                MessageRoleLabel(isUserMessage)
+                Spacer(modifier = Modifier.weight(1f))
                 if (message.streaming) CircularProgressIndicator(modifier = Modifier.height(16.dp).width(16.dp), strokeWidth = 2.dp)
                 if (message.failed) Text("Incomplete", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
             }
-            Text(if (message.content.isBlank() && message.streaming) "Generating…" else message.content)
+            Text(
+                text = if (message.content.isBlank() && message.streaming) "Generating…" else message.content,
+                style = MaterialTheme.typography.bodyLarge,
+            )
             CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 32.dp) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
                 ) {
                     MessageActionButton(
                         icon = Icons.Outlined.ContentCopy,
@@ -163,17 +195,61 @@ private fun ChatMessageCard(
 }
 
 @Composable
+private fun MessageRoleLabel(isUserMessage: Boolean) {
+    val colors = MaterialTheme.colorScheme
+    val containerColor = if (isUserMessage) {
+        colors.tertiaryContainer.copy(alpha = 0.82f)
+    } else {
+        colors.tertiary.copy(alpha = 0.16f)
+    }
+    val contentColor = if (isUserMessage) colors.onTertiaryContainer else colors.tertiary
+    Surface(
+        color = containerColor,
+        contentColor = contentColor,
+        shape = RoundedCornerShape(50),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = if (isUserMessage) {
+                    Icons.Outlined.Person
+                } else {
+                    Icons.AutoMirrored.Outlined.Chat
+                },
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+            )
+            Text(
+                text = if (isUserMessage) "You" else "Assistant",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+    }
+}
+
+@Composable
 private fun MessageActionButton(
     icon: ImageVector,
     contentDescription: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
 ) {
-    IconButton(onClick = onClick, enabled = enabled, modifier = Modifier.size(32.dp)) {
+    IconButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(36.dp)
+            .clip(CircleShape),
+    ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
             modifier = Modifier.size(20.dp),
+            tint = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else Color.Unspecified,
         )
     }
 }

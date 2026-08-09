@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.feature.assistant.presentation.ui
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.outlined.Chat
@@ -19,10 +21,13 @@ import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material.icons.outlined.VolumeUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -137,20 +142,28 @@ internal fun AssistantComposer(
     onCancel: () -> Unit,
 ) {
     val active = !state.isIdle
+    val composerShape = RoundedCornerShape(24.dp)
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.28f),
+                shape = composerShape,
+            ),
+        shape = composerShape,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 2.dp,
+        tonalElevation = 0.dp,
     ) {
         Column(
-            modifier = Modifier.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             OutlinedTextField(
                 value = state.input,
                 onValueChange = onInput,
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
                 label = { Text("Message") },
                 placeholder = { Text("Ask the assistant…") },
                 minLines = 1,
@@ -159,17 +172,18 @@ internal fun AssistantComposer(
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = ImeAction.Send),
                 keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSend = { onSend() }),
             )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.26f))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (state.isIdle && state.canSend) {
+                if (state.isIdle) {
                     Box(
                         modifier = Modifier.weight(1f),
                         contentAlignment = Alignment.CenterStart,
                     ) {
-                        TextButton(onClick = onProfile) { Text("Profile") }
+                        TextButton(onClick = onProfile, enabled = state.canSend) { Text("Profile") }
                     }
                 } else {
                     AssistantOperationStatus(
@@ -180,27 +194,27 @@ internal fun AssistantComposer(
                 }
                 when (state.operation) {
                     AssistantOperation.Idle -> {
-                        IconButton(onClick = onStartRecording, enabled = state.canDictate) {
+                        OutlinedIconButton(onClick = onStartRecording, enabled = state.canDictate) {
                             Icon(Icons.Outlined.Mic, contentDescription = "Record voice")
                         }
-                        FilledIconButton(onClick = onSend, enabled = state.canSend) {
+                        AssistantPrimaryActionButton(onClick = onSend, enabled = state.canSend) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = "Send message",
                             )
                         }
                     }
-                    AssistantOperation.Recording -> FilledIconButton(onClick = onStopRecording) {
+                    AssistantOperation.Recording -> AssistantPrimaryActionButton(onClick = onStopRecording) {
                         Icon(Icons.Outlined.Stop, contentDescription = "Stop recording")
                     }
-                    AssistantOperation.Cancelling -> FilledIconButton(onClick = {}, enabled = false) {
+                    AssistantOperation.Cancelling -> AssistantPrimaryActionButton(onClick = {}, enabled = false) {
                         Icon(Icons.Outlined.Stop, contentDescription = "Stopping")
                     }
                     else -> {
                         val llmOperation = state.operation == AssistantOperation.Loading ||
                             state.operation == AssistantOperation.Generating
                         if (!llmOperation || state.selectedChatModel?.capabilities?.cancellation == true) {
-                            IconButton(onClick = onCancel) {
+                            AssistantPrimaryActionButton(onClick = onCancel) {
                                 Icon(Icons.Outlined.Close, contentDescription = "Cancel operation")
                             }
                         }
@@ -209,6 +223,23 @@ internal fun AssistantComposer(
             }
         }
     }
+}
+
+@Composable
+private fun AssistantPrimaryActionButton(
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    content: @Composable () -> Unit,
+) {
+    FilledIconButton(
+        onClick = onClick,
+        enabled = enabled,
+        colors = IconButtonDefaults.filledIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary,
+        ),
+        content = content,
+    )
 }
 
 @Composable
