@@ -1,12 +1,15 @@
 package com.dmitriim.localaiplayground.feature.playground.presentation.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -15,10 +18,15 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.result.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.OperationState
+import com.dmitriim.localaiplayground.feature.playground.R
 import com.dmitriim.localaiplayground.feature.playground.presentation.PlaygroundUiState
 
 @Composable
@@ -28,13 +36,25 @@ fun PlaygroundScreen(
     onOpenCapability: (AiCapability) -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
+    val backgroundPurple = MaterialTheme.colorScheme.tertiaryContainer
     val visibleCapabilities = state.capabilities.filterNot {
         it.capability == AiCapability.VOICE_ACTIVITY_DETECTION ||
             it.capability == AiCapability.VOICE_ASSISTANT
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0f to backgroundPurple.copy(alpha = 0.52f),
+                        0.45f to backgroundPurple.copy(alpha = 0.20f),
+                        0.82f to backgroundPurple.copy(alpha = 0f),
+                    ),
+                ),
+            )
+            .padding(horizontal = 20.dp),
         contentPadding = PaddingValues(
             top = dimensions.topBarOverlayClearance,
             bottom = 44.dp + dimensions.bottomNavigationOverlayClearance,
@@ -43,15 +63,24 @@ fun PlaygroundScreen(
     ) {
         item {
             Column(
-                modifier = Modifier.padding(top = 20.dp, bottom = 4.dp),
+                modifier = Modifier.padding(top = 0.dp, bottom = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_playground_brand_mark),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(68.dp)
+                        .padding(bottom = 12.dp),
+                    colorFilter = ColorFilter.tint(AssistantPurple),
+                )
                 Text("Local playgrounds", style = MaterialTheme.typography.headlineMedium)
                 Text(
                     "Prompts, recordings, and generated content stay on this device. " +
                         "Network access is used only for model downloads you explicitly start.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
                 )
             }
         }
@@ -88,9 +117,11 @@ fun PlaygroundScreen(
         ) { index ->
             val capability = visibleCapabilities[index]
             CapabilityCard(
-                readiness = capability,
+                capability = capability.capability,
                 onClick = { onOpenCapability(capability.capability) },
             )
         }
     }
 }
+
+private val AssistantPurple = Color(0xFF3A236B)

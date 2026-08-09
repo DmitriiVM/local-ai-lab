@@ -190,7 +190,7 @@ private fun LiquidGlassNavigationItem(
     val colors = MaterialTheme.colorScheme
     val contentColor by animateColorAsState(
         targetValue = if (selected) {
-            colors.onSecondaryContainer
+            colors.onTertiaryContainer
         } else {
             colors.onSurfaceVariant
         },
@@ -218,9 +218,9 @@ private fun LiquidGlassNavigationItem(
                         .background(
                             Brush.verticalGradient(
                                 listOf(
-                                    colors.secondaryContainer.copy(alpha = 0.82f),
-                                    colors.secondaryContainer.copy(alpha = 0.58f),
-                                    colors.secondaryContainer.copy(alpha = 0.36f),
+                                    colors.tertiaryContainer.copy(alpha = 0.72f),
+                                    colors.tertiaryContainer.copy(alpha = 0.50f),
+                                    colors.tertiaryContainer.copy(alpha = 0.28f),
                                 ),
                             ),
                         )
@@ -228,8 +228,8 @@ private fun LiquidGlassNavigationItem(
                             width = 1.dp,
                             brush = Brush.verticalGradient(
                                 listOf(
-                                    colors.outlineVariant.copy(alpha = 0.72f),
-                                    colors.outline.copy(alpha = 0.18f),
+                                    colors.tertiary.copy(alpha = 0.38f),
+                                    colors.tertiary.copy(alpha = 0.24f),
                                 ),
                             ),
                             shape = itemShape,

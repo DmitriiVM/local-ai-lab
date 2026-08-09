@@ -37,14 +37,19 @@ class MainActivity : ComponentActivity() {
                 ThemePreference.DARK -> true
             }
             SideEffect {
-                val systemBarStyle = if (darkTheme) {
+                val statusBarStyle = if (darkTheme) {
+                    SystemBarStyle.dark(Color.TRANSPARENT)
+                } else {
+                    SystemBarStyle.light(Color.TRANSPARENT, Color.BLACK)
+                }
+                val navigationBarStyle = if (darkTheme) {
                     SystemBarStyle.dark(Color.BLACK)
                 } else {
                     SystemBarStyle.light(Color.WHITE, Color.BLACK)
                 }
                 enableEdgeToEdge(
-                    statusBarStyle = systemBarStyle,
-                    navigationBarStyle = systemBarStyle,
+                    statusBarStyle = statusBarStyle,
+                    navigationBarStyle = navigationBarStyle,
                 )
                 if (settings.keepScreenAwake) {
                     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
