@@ -537,9 +537,10 @@ private fun ModelActionBar(
                     ModelTransferState.Idle,
                     null,
                     -> {
-                        Button(onClick = onDownload, modifier = Modifier.fillMaxWidth()) {
-                            Text("Download")
-                        }
+                        ModelDownloadButton(
+                            onClick = onDownload,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                 }
             }

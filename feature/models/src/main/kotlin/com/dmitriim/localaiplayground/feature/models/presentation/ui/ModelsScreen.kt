@@ -1,5 +1,7 @@
 package com.dmitriim.localaiplayground.feature.models.presentation.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -17,7 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -29,6 +33,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -73,7 +80,18 @@ fun ModelsScreen(
         .filter { runtimeFilter == null || it.manifest.engineId.value == runtimeFilter }
         .filter { installationFilter.matches(it) }
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0f to MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.52f),
+                        0.45f to MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.20f),
+                        0.82f to MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0f),
+                    ),
+                ),
+            )
+            .padding(horizontal = 20.dp),
         contentPadding = PaddingValues(bottom = dimensions.bottomNavigationOverlayClearance + 64.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -151,9 +169,25 @@ private fun ModelFilters(
     onRuntimeFilterChange: (String?) -> Unit,
     onInstallationFilterChange: (ModelInstallationFilter) -> Unit,
 ) {
-    Card {
+    val shape = RoundedCornerShape(24.dp)
+    val colors = MaterialTheme.colorScheme
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                brush = modelCardBorderBrush(colors),
+                shape = shape,
+            ),
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(modelCardBackgroundBrush(colors))
+                .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -163,6 +197,7 @@ private fun ModelFilters(
                         selected = typeFilter == filter,
                         onClick = { onTypeFilterChange(filter) },
                         label = { Text(filter.label) },
+                        colors = modelFilterChipColors(),
                     )
                 }
             }
@@ -172,6 +207,7 @@ private fun ModelFilters(
                         selected = runtimeFilter == null,
                         onClick = { onRuntimeFilterChange(null) },
                         label = { Text("All") },
+                        colors = modelFilterChipColors(),
                     )
                 }
                 items(runtimeIds.size) { index ->
@@ -180,6 +216,7 @@ private fun ModelFilters(
                         selected = runtimeFilter == runtime.value,
                         onClick = { onRuntimeFilterChange(runtime.value) },
                         label = { Text(runtime.displayLabel) },
+                        colors = modelFilterChipColors(),
                     )
                 }
             }
@@ -190,6 +227,7 @@ private fun ModelFilters(
                         selected = installationFilter == filter,
                         onClick = { onInstallationFilterChange(filter) },
                         label = { Text(filter.label) },
+                        colors = modelFilterChipColors(),
                     )
                 }
             }
@@ -268,21 +306,19 @@ private fun InstalledModelCard(
     onOpenDetails: (ModelId) -> Unit,
     onDelete: (ModelId) -> Unit,
 ) {
-    Card(onClick = { onOpenDetails(model.manifest.modelId) }) {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            ModelCardIdentity(
-                manifest = displayManifest,
-                status = model.validationState.statusLabel(),
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            ModelCardHeader(name = displayManifest.displayName)
-            ModelCardMetadata(
-                manifest = displayManifest,
-                size = model.totalBytes.toReadableBytes(),
-            )
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                OutlinedButton(onClick = { onDelete(model.manifest.modelId) }) { Text("Delete") }
-            }
+    ModelCard(onClick = { onOpenDetails(model.manifest.modelId) }) {
+        ModelCardIdentity(
+            manifest = displayManifest,
+            status = model.validationState.statusLabel(),
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        ModelCardHeader(name = displayManifest.displayName)
+        ModelCardMetadata(
+            manifest = displayManifest,
+            size = model.totalBytes.toReadableBytes(),
+        )
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            OutlinedButton(onClick = { onDelete(model.manifest.modelId) }) { Text("Delete") }
         }
     }
 }
@@ -302,56 +338,57 @@ private fun CatalogModelCard(
     val accessRequired = model.download.authentication == CatalogDownloadAuthentication.HUGGING_FACE_USER_TOKEN &&
         huggingFaceCredentialStatus == com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus.MISSING
     var confirmCancel by rememberSaveable(manifest.modelId.value) { mutableStateOf(false) }
-    Card(onClick = { onOpenDetails(manifest.modelId) }) {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            ModelCardIdentity(manifest = manifest, status = transfer.statusLabel())
-            Spacer(modifier = Modifier.height(4.dp))
-            ModelCardHeader(name = manifest.displayName)
-            ModelCardMetadata(
-                manifest = manifest,
-                size = model.download.expectedBytes.toReadableBytes(),
-                downloadedBytes = transfer.downloadedBytesOrNull(),
-            )
-            if (accessRequired) {
-                Text("Hugging Face access required", style = MaterialTheme.typography.bodySmall)
+    ModelCard(onClick = { onOpenDetails(manifest.modelId) }) {
+        ModelCardIdentity(manifest = manifest, status = transfer.statusLabel())
+        Spacer(modifier = Modifier.height(4.dp))
+        ModelCardHeader(name = manifest.displayName)
+        ModelCardMetadata(
+            manifest = manifest,
+            size = model.download.expectedBytes.toReadableBytes(),
+            downloadedBytes = transfer.downloadedBytesOrNull(),
+        )
+        if (accessRequired) {
+            Text("Hugging Face access required", style = MaterialTheme.typography.bodySmall)
+        }
+        when {
+            transfer is ModelTransferState.Queued -> {
+                ModelCardAction {
+                    OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text("Pause") }
+                    OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
+                }
             }
-            when {
-                transfer is ModelTransferState.Queued -> {
-                    ModelCardAction {
-                        OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text("Pause") }
-                        OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
+            transfer is ModelTransferState.Running -> {
+                ModelCardAction {
+                    OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text("Pause") }
+                    OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
+                }
+            }
+            transfer is ModelTransferState.Paused -> {
+                ModelCardAction {
+                    Button(onClick = { onResumeOnWifi(manifest.modelId) }) { Text("Resume") }
+                    OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
+                }
+            }
+            transfer == ModelTransferState.Installing -> {
+                ModelCardAction {
+                    OutlinedButton(onClick = {}, enabled = false) { Text("Installing…") }
+                }
+            }
+            transfer is ModelTransferState.Failed -> {
+                ModelCardAction {
+                    Button(onClick = { if (accessRequired) onOpenDetails(manifest.modelId) else onDownload(manifest.modelId) }) {
+                        Text(if (accessRequired) "Set up access" else "Retry")
                     }
                 }
-                transfer is ModelTransferState.Running -> {
-                    ModelCardAction {
-                        OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text("Pause") }
-                        OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
+            }
+            transfer == ModelTransferState.Idle || transfer == null -> ModelCardAction {
+                if (accessRequired) {
+                    Button(onClick = { onOpenDetails(manifest.modelId) }) {
+                        Text("Set up access")
                     }
+                } else {
+                    ModelDownloadButton(onClick = { onDownload(manifest.modelId) })
                 }
-                transfer is ModelTransferState.Paused -> {
-                    ModelCardAction {
-                        Button(onClick = { onResumeOnWifi(manifest.modelId) }) { Text("Resume") }
-                        OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
-                    }
-                }
-                transfer == ModelTransferState.Installing -> {
-                    ModelCardAction {
-                        OutlinedButton(onClick = {}, enabled = false) { Text("Installing…") }
-                    }
-                }
-                transfer is ModelTransferState.Failed -> {
-                    ModelCardAction {
-                        Button(onClick = { if (accessRequired) onOpenDetails(manifest.modelId) else onDownload(manifest.modelId) }) {
-                            Text(if (accessRequired) "Set up access" else "Retry")
-                        }
-                    }
-                }
-                transfer == ModelTransferState.Idle || transfer == null ->
-                    ModelCardAction {
-                        Button(onClick = { if (accessRequired) onOpenDetails(manifest.modelId) else onDownload(manifest.modelId) }) {
-                            Text(if (accessRequired) "Set up access" else "Download")
-                        }
-                    }
             }
         }
     }
@@ -457,6 +494,68 @@ private fun StatusBadge(status: String) {
         )
     }
 }
+
+@Composable
+private fun ModelCard(
+    onClick: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val shape = RoundedCornerShape(24.dp)
+    val colors = MaterialTheme.colorScheme
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                brush = modelCardBorderBrush(colors),
+                shape = shape,
+            ),
+        onClick = onClick,
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(modelCardBackgroundBrush(colors))
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun modelFilterChipColors() = FilterChipDefaults.filterChipColors(
+    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.78f),
+    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
+    containerColor = Color.Transparent,
+)
+
+private fun modelCardBackgroundBrush(colors: androidx.compose.material3.ColorScheme) =
+    Brush.linearGradient(
+        colors = listOf(
+            colors.tertiaryContainer.copy(alpha = 0.32f),
+            colors.tertiaryContainer.copy(alpha = 0.52f),
+            colors.surfaceContainerHigh.copy(alpha = 0.96f),
+            colors.surfaceContainer.copy(alpha = 0.98f),
+        ),
+        start = Offset.Zero,
+        end = Offset(0f, 500f),
+    )
+
+private fun modelCardBorderBrush(colors: androidx.compose.material3.ColorScheme) =
+    Brush.linearGradient(
+        colors = listOf(
+            colors.onTertiaryContainer.copy(alpha = 0.38f),
+            colors.onTertiaryContainer.copy(alpha = 0.52f),
+            colors.outlineVariant.copy(alpha = 0.26f),
+        ),
+        start = Offset.Zero,
+        end = Offset(0f, 500f),
+    )
 
 private val ModelManifest.typeLabel: String
     get() = when {
