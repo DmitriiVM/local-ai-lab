@@ -497,7 +497,7 @@ private fun ModelCard(
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                brush = AppSurfaceStyle.cardBorderBrush(colors),
+                brush = AppSurfaceStyle.purpleTonalCardBorderBrush(colors),
                 shape = shape,
             ),
         onClick = onClick,
@@ -508,7 +508,7 @@ private fun ModelCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(AppSurfaceStyle.cardBackgroundBrush(colors))
+                .background(AppSurfaceStyle.purpleTonalCardColor(colors))
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {

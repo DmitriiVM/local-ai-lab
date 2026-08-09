@@ -262,7 +262,7 @@ private fun SttSectionCard(
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                brush = AppSurfaceStyle.cardBorderBrush(colors),
+                brush = AppSurfaceStyle.purpleTonalCardBorderBrush(colors),
                 shape = AppSurfaceStyle.CardShape,
             ),
         shape = AppSurfaceStyle.CardShape,
@@ -272,7 +272,7 @@ private fun SttSectionCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(AppSurfaceStyle.cardBackgroundBrush(colors))
+                .background(AppSurfaceStyle.purpleTonalCardColor(colors))
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {

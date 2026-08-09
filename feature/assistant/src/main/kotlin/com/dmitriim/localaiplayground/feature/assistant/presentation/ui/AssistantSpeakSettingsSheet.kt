@@ -102,7 +102,11 @@ internal fun AssistantSpeakSettingsSheet(
                 .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Text-to-speech settings", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall)
+            AssistantSettingsSheetHeader(
+                title = "Text-to-speech settings",
+                description = "Choose the voice and tune playback for spoken responses.",
+            )
+            AssistantSettingsSection("Model")
             AssistantInSheetModelPicker(
                 label = "Speech model",
                 items = models.map {
@@ -117,6 +121,7 @@ internal fun AssistantSpeakSettingsSheet(
                 enabled = enabled,
                 onClick = { selectingSpeechModel = true },
             )
+            AssistantSettingsSection("Voice & language")
             Text("Speech language", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 assistantTtsLanguages.forEach { language ->
@@ -147,6 +152,7 @@ internal fun AssistantSpeakSettingsSheet(
                 },
                 enabled = enabled,
             )
+            AssistantSettingsSection("Playback")
             OutputField("Speech rate (0.5–2)", draft.speed, enabled) {
                 draft = draft.copy(speed = it).also { candidate -> commit(draftModelId, draftVoiceId, candidate) }
             }
@@ -156,6 +162,7 @@ internal fun AssistantSpeakSettingsSheet(
             OutputField("Sentence silence (0–2)", draft.sentenceSilenceScale, enabled) {
                 draft = draft.copy(sentenceSilenceScale = it).also { candidate -> commit(draftModelId, draftVoiceId, candidate) }
             }
+            AssistantSettingsSection("Performance")
             OutputField("Thread count (0 = default)", draft.threadCount, enabled) {
                 draft = draft.copy(threadCount = it.filter(Char::isDigit)).also { candidate -> commit(draftModelId, draftVoiceId, candidate) }
             }

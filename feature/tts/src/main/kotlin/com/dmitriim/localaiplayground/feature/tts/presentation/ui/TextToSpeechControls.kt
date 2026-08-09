@@ -1,6 +1,7 @@
 package com.dmitriim.localaiplayground.feature.tts.presentation.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,18 +12,28 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
@@ -86,13 +98,19 @@ internal fun TextToSpeechVoiceSelector(
             ) {
                 Text(
                     text = "Choose a voice",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 24.dp),
                 )
                 Text(
                     text = "Play previews the current text without changing the selected voice.",
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 24.dp, top = 4.dp, end = 24.dp, bottom = 12.dp),
+                    modifier = Modifier.padding(start = 24.dp, top = 4.dp, end = 24.dp),
+                )
+                Text(
+                    text = "Available voices",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 24.dp, top = 20.dp, end = 24.dp, bottom = 8.dp),
                 )
                 LazyColumn(
                     modifier = Modifier
@@ -103,62 +121,110 @@ internal fun TextToSpeechVoiceSelector(
                         val previewingThisVoice =
                             previewVoiceId == voice.id &&
                                 operation in setOf(TtsOperation.PREVIEWING, TtsOperation.CANCELLING)
-                        Row(
+                        val selected = selectedId == voice.id
+                        val colors = MaterialTheme.colorScheme
+                        Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
                                 .clickable(enabled = enabled) {
                                     onSelect(voice.id)
                                     sheetVisible = false
-                                }
-                                .padding(horizontal = 12.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            RadioButton(
-                                selected = selectedId == voice.id,
-                                onClick = null,
-                                enabled = enabled,
-                            )
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(2.dp),
-                            ) {
-                                Text(
-                                    text = voice.displayName,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                                voice.description?.takeIf(String::isNotBlank)?.let { description ->
-                                    Text(
-                                        text = description,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                            TextButton(
-                                onClick = {
-                                    if (previewingThisVoice) {
-                                        onStopPreview()
-                                    } else {
-                                        onPreview(voice.id)
-                                    }
                                 },
-                                enabled = hasPreviewText &&
+                            shape = RoundedCornerShape(16.dp),
+                            color = if (selected) {
+                                colors.tertiaryContainer.copy(alpha = 0.38f)
+                            } else {
+                                colors.surfaceContainerHigh.copy(alpha = 0.44f)
+                            },
+                            border = BorderStroke(
+                                width = 1.dp,
+                                color = if (selected) {
+                                    colors.tertiary.copy(alpha = 0.58f)
+                                } else {
+                                    colors.outlineVariant.copy(alpha = 0.30f)
+                                },
+                            ),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(
+                                    selected = selected,
+                                    onClick = null,
+                                    enabled = enabled,
+                                    colors = RadioButtonDefaults.colors(
+                                        selectedColor = colors.tertiary,
+                                        unselectedColor = colors.outline,
+                                    ),
+                                )
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(start = 8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                                ) {
+                                    Text(
+                                        text = voice.displayName,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = if (selected) colors.tertiary else colors.onSurface,
+                                    )
+                                    voice.description?.takeIf(String::isNotBlank)?.let { description ->
+                                        Text(
+                                            text = description,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = if (selected) {
+                                                colors.onTertiaryContainer.copy(alpha = 0.82f)
+                                            } else {
+                                                colors.onSurfaceVariant
+                                            },
+                                        )
+                                    }
+                                }
+                                val previewEnabled = hasPreviewText &&
                                     operation !in setOf(
                                         TtsOperation.SYNTHESIZING,
                                         TtsOperation.CANCELLING,
-                                    ),
-                            ) {
-                                Text(
-                                    when {
-                                        previewingThisVoice &&
-                                            operation == TtsOperation.CANCELLING -> "Stopping…"
-                                        previewingThisVoice -> "Stop"
-                                        else -> "Play"
+                                    )
+                                OutlinedIconButton(
+                                    onClick = {
+                                        if (previewingThisVoice) {
+                                            onStopPreview()
+                                        } else {
+                                            onPreview(voice.id)
+                                        }
                                     },
-                                )
+                                    enabled = previewEnabled,
+                                    border = BorderStroke(
+                                        1.dp,
+                                        if (previewEnabled) {
+                                            colors.tertiary.copy(alpha = 0.64f)
+                                        } else {
+                                            colors.outlineVariant.copy(alpha = 0.32f)
+                                        },
+                                    ),
+                                    colors = IconButtonDefaults.outlinedIconButtonColors(
+                                        contentColor = colors.tertiary,
+                                        disabledContentColor = colors.onSurface.copy(alpha = 0.38f),
+                                    ),
+                                ) {
+                                    Icon(
+                                        imageVector = if (previewingThisVoice) {
+                                            Icons.Outlined.Stop
+                                        } else {
+                                            Icons.Outlined.PlayArrow
+                                        },
+                                        contentDescription = if (previewingThisVoice) {
+                                            "Stop preview for ${voice.displayName}"
+                                        } else {
+                                            "Play preview for ${voice.displayName}"
+                                        },
+                                    )
+                                }
                             }
                         }
-                        HorizontalDivider()
                     }
                 }
             }
@@ -179,34 +245,56 @@ internal fun ChatterboxReferenceVoiceSelector(
 ) {
     var sheetVisible by remember { mutableStateOf(false) }
     val selected = state.selectedVoice
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Reference voice", style = MaterialTheme.typography.titleMedium)
-            Text(
-                "Use only a voice you own or have permission to clone. References are stored as app-private mono 24 kHz PCM.",
-                style = MaterialTheme.typography.bodySmall,
-            )
-            if (state.operation in setOf(TtsOperation.RECORDING_REFERENCE, TtsOperation.STOPPING_REFERENCE)) {
-                val elapsed = state.referenceLevel?.elapsedMs ?: 0L
-                Text("Recording… %.1f / 10.0 s".format(elapsed / 1_000.0))
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.30f))
+        Text("Reference voice", style = MaterialTheme.typography.titleSmall)
+        Text(
+            "Use only a voice you own or have permission to clone. References are stored as app-private mono 24 kHz PCM.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (state.operation in setOf(TtsOperation.RECORDING_REFERENCE, TtsOperation.STOPPING_REFERENCE)) {
+            val elapsed = state.referenceLevel?.elapsedMs ?: 0L
+            Text("Recording… %.1f / 10.0 s".format(elapsed / 1_000.0))
+            Button(
+                onClick = onStopRecording,
+                enabled = state.operation == TtsOperation.RECORDING_REFERENCE &&
+                    elapsed >= 5_000,
+            ) {
+                Text(if (elapsed < 5_000) "Keep recording" else "Save reference")
+            }
+        } else {
+            OutlinedButton(
+                onClick = { sheetVisible = true },
+                enabled = enabled,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(selected?.displayName ?: "Choose a saved reference")
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Button(
-                    onClick = onStopRecording,
-                    enabled = state.operation == TtsOperation.RECORDING_REFERENCE &&
-                        elapsed >= 5_000,
-                ) {
-                    Text(if (elapsed < 5_000) "Keep recording" else "Save reference")
-                }
-            } else {
-                OutlinedButton(
-                    onClick = { sheetVisible = true },
+                    onClick = onRecord,
                     enabled = enabled,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                    ),
                 ) {
-                    Text(selected?.displayName ?: "Choose a saved reference")
+                    Text("Record voice")
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = onRecord, enabled = enabled) { Text("Record voice") }
-                    OutlinedButton(onClick = onImport, enabled = enabled) { Text("Import audio") }
+                OutlinedButton(
+                    onClick = onImport,
+                    enabled = enabled,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text("Import audio")
                 }
             }
         }

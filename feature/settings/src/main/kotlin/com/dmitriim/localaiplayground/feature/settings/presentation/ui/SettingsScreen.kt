@@ -118,13 +118,13 @@ fun SettingsScreen(
             Toggle("Confirm before deleting history", settings.confirmDestructiveActions) { value -> onUpdate { it.copy(confirmDestructiveActions = value) } }
             Toggle("Show advanced controls", settings.showAdvancedControls) { value -> onUpdate { it.copy(showAdvancedControls = value) } }
         }
-        SettingsCard("Retention") {
+        SettingsCard("Retention", purpleTonal = true) {
             Text("Microphone recordings: session only", style = MaterialTheme.typography.titleSmall)
             Text("Recordings are temporary and are cleared when you clear media.", style = MaterialTheme.typography.bodySmall)
             Text("Generated audio: latest successful WAV", style = MaterialTheme.typography.titleSmall)
             Text("The app retains one successful WAV until the next successful synthesis, as documented in the Stage 5 policy.", style = MaterialTheme.typography.bodySmall)
         }
-        SettingsCard("Model downloads") {
+        SettingsCard("Model downloads", purpleTonal = true) {
             Text("Hugging Face token", style = MaterialTheme.typography.titleSmall)
             when (state.huggingFaceCredentialStatus) {
                 HuggingFaceCredentialStatus.MISSING -> {
@@ -142,7 +142,7 @@ fun SettingsScreen(
                 }
             }
         }
-        SettingsCard("Storage & privacy") {
+        SettingsCard("Storage & privacy", purpleTonal = true) {
             StorageLine("Models", state.storage.modelsBytes)
             StorageLine("Temporary recordings", state.storage.recordingsBytes)
             StorageLine("Generated audio", state.storage.generatedAudioBytes)
@@ -167,9 +167,10 @@ fun SettingsScreen(
 private fun SettingsCard(
     title: String,
     styled: Boolean = true,
+    purpleTonal: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    SettingsSurfaceCard(styled = styled) {
+    SettingsSurfaceCard(styled = styled, purpleTonal = purpleTonal) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             content()
@@ -181,16 +182,30 @@ private fun SettingsCard(
 private fun SettingsSurfaceCard(
     onClick: (() -> Unit)? = null,
     styled: Boolean = true,
+    purpleTonal: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
+    val backgroundModifier = if (styled) {
+        if (purpleTonal) {
+            Modifier.background(AppSurfaceStyle.purpleTonalCardColor(colors))
+        } else {
+            Modifier.background(AppSurfaceStyle.cardBackgroundBrush(colors))
+        }
+    } else {
+        Modifier
+    }
     Card(
         modifier = (if (styled) {
             Modifier
                 .fillMaxWidth()
                 .border(
                     width = 1.dp,
-                    brush = AppSurfaceStyle.cardBorderBrush(colors),
+                    brush = if (purpleTonal) {
+                        AppSurfaceStyle.purpleTonalCardBorderBrush(colors)
+                    } else {
+                        AppSurfaceStyle.cardBorderBrush(colors)
+                    },
                     shape = AppSurfaceStyle.CardShape,
                 )
         } else {
@@ -212,13 +227,7 @@ private fun SettingsSurfaceCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .then(
-                    if (styled) {
-                        Modifier.background(AppSurfaceStyle.cardBackgroundBrush(colors))
-                    } else {
-                        Modifier
-                    },
-                )
+                .then(backgroundModifier)
                 .padding(if (styled) 18.dp else 16.dp),
         ) {
             content()

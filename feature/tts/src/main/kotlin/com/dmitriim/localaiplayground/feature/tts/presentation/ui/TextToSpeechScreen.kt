@@ -83,7 +83,7 @@ fun TextToSpeechScreen(
             style = MaterialTheme.typography.bodyMedium,
         )
 
-        TtsSectionCard("Setup") {
+        TtsSectionCard("Setup", solidPurpleTint = true) {
             TextToSpeechModelPicker(state.models, state.selectedModelId, !busy, onSelectModel)
             if (state.usesReferenceVoice) {
                 ChatterboxReferenceVoiceSelector(
@@ -128,7 +128,7 @@ fun TextToSpeechScreen(
             )
         }
 
-        TtsSectionCard("Compose") {
+        TtsSectionCard("Compose", solidPurpleTint = true) {
             OutlinedTextField(
                 value = state.text,
                 onValueChange = onTextChange,

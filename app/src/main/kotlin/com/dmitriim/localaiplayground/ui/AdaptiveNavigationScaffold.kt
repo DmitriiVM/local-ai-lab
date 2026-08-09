@@ -298,6 +298,7 @@ private fun LiquidGlassToolbarButton(
     contentDescription: String,
     onClick: () -> Unit,
 ) {
+    val colors = MaterialTheme.colorScheme
     IconButton(
         onClick = onClick,
         modifier = Modifier
@@ -312,9 +313,9 @@ private fun LiquidGlassToolbarButton(
             .background(
                 brush = Brush.verticalGradient(
                     listOf(
-                        Color.White.copy(alpha = 0.24f),
-                        Color.White.copy(alpha = 0.11f),
-                        Color.White.copy(alpha = 0.07f),
+                        colors.tertiaryContainer.copy(alpha = 0.72f),
+                        colors.tertiaryContainer.copy(alpha = 0.48f),
+                        colors.surfaceContainer.copy(alpha = 0.62f),
                     ),
                 ),
             )
@@ -322,8 +323,8 @@ private fun LiquidGlassToolbarButton(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
                     listOf(
-                        Color.White.copy(alpha = 0.48f),
-                        Color.White.copy(alpha = 0.10f),
+                        colors.onTertiaryContainer.copy(alpha = 0.42f),
+                        colors.outlineVariant.copy(alpha = 0.24f),
                     ),
                 ),
                 shape = CircleShape,
@@ -332,7 +333,7 @@ private fun LiquidGlassToolbarButton(
         Icon(
             imageVector = imageVector,
             contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurface,
+            tint = colors.onTertiaryContainer,
             modifier = Modifier.size(24.dp),
         )
     }

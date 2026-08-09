@@ -2,6 +2,7 @@ package com.dmitriim.localaiplayground.feature.assistant.presentation.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -43,6 +44,7 @@ internal fun AssistantChatSettingsSheet(
     var draft by remember(settings) { mutableStateOf(settings) }
     var error by remember { mutableStateOf<String?>(null) }
     var selectingChatModel by remember { mutableStateOf(false) }
+    var advancedSettingsVisible by remember { mutableStateOf(false) }
     val commit = { modelId: ModelId?, candidate: ChatSettings ->
         error = if (modelId == null) "Select an installed chat model." else onApply(modelId, candidate)
     }
@@ -81,7 +83,11 @@ internal fun AssistantChatSettingsSheet(
                 .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text("Chat settings", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall)
+            AssistantSettingsSheetHeader(
+                title = "Chat settings",
+                description = "Configure the selected model’s instructions, generation, and runtime behavior.",
+            )
+            AssistantSettingsSection("Model")
             AssistantChatModelPicker(
                 models = models,
                 selectedId = draftModelId?.value,
@@ -104,10 +110,20 @@ internal fun AssistantChatSettingsSheet(
                 )
             }
             if (capabilities?.systemInstructions == true) {
+                AssistantSettingsSection("Instructions")
                 SettingField("System prompt", draft.systemPrompt, enabled) {
                     draft = draft.copy(systemPrompt = it).also { candidate -> commit(draftModelId, candidate) }
                 }
             }
+            val supportsGenerationSettings = capabilities?.generationOptions?.any {
+                it in setOf(
+                    LlmGenerationOption.TEMPERATURE,
+                    LlmGenerationOption.MAX_OUTPUT_TOKENS,
+                    LlmGenerationOption.TOP_K,
+                    LlmGenerationOption.TOP_P,
+                )
+            } == true
+            if (supportsGenerationSettings) AssistantSettingsSection("Generation")
             if (capabilities?.generationOptions?.contains(LlmGenerationOption.TEMPERATURE) == true) {
                 SettingField("Temperature (0–2)", draft.temperature, enabled) {
                     draft = draft.copy(temperature = it).also { candidate -> commit(draftModelId, candidate) }
@@ -133,30 +149,45 @@ internal fun AssistantChatSettingsSheet(
                     draft = draft.copy(contextSize = it).also { candidate -> commit(draftModelId, candidate) }
                 }
             }
-            if (capabilities?.generationOptions?.contains(LlmGenerationOption.SEED) == true) {
-                SettingField("Seed (blank = engine-selected)", draft.seed, enabled) {
-                    draft = draft.copy(seed = it).also { candidate -> commit(draftModelId, candidate) }
+            val hasAdvancedSettings = capabilities?.generationOptions?.contains(LlmGenerationOption.SEED) == true ||
+                capabilities?.loadOptions?.contains(LlmLoadOption.THREAD_COUNT) == true
+            if (hasAdvancedSettings) {
+                TextButton(
+                    onClick = { advancedSettingsVisible = !advancedSettingsVisible },
+                    enabled = enabled,
+                ) {
+                    Text(if (advancedSettingsVisible) "Hide advanced settings" else "Show advanced settings")
                 }
-            }
-            if (capabilities?.loadOptions?.contains(LlmLoadOption.THREAD_COUNT) == true) {
-                SettingField("Thread count (0 = default)", draft.threadCount, enabled) {
-                    draft = draft.copy(threadCount = it).also { candidate -> commit(draftModelId, candidate) }
+                if (advancedSettingsVisible) {
+                    AssistantSettingsSection("Advanced")
+                    if (capabilities.generationOptions.contains(LlmGenerationOption.SEED)) {
+                        SettingField("Seed (blank = engine-selected)", draft.seed, enabled) {
+                            draft = draft.copy(seed = it).also { candidate -> commit(draftModelId, candidate) }
+                        }
+                    }
+                    if (capabilities.loadOptions.contains(LlmLoadOption.THREAD_COUNT)) {
+                        SettingField("Thread count (0 = default)", draft.threadCount, enabled) {
+                            draft = draft.copy(threadCount = it).also { candidate -> commit(draftModelId, candidate) }
+                        }
+                    }
                 }
             }
             error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
-            TextButton(onClick = onUnload, enabled = enabled) { Text("Unload model now") }
-            TextButton(
-                onClick = {
-                    val model = models.firstOrNull { it.id == draftModelId }
-                    val context = model?.defaultContextSize ?: 512
-                    draft = ChatSettings(
-                        computePreference = model?.supportedComputePreference(ComputePreference.CPU)
-                            ?: ComputePreference.CPU,
-                        contextSize = context.toString(),
-                    ).also { candidate -> commit(draftModelId, candidate) }
-                },
-                enabled = enabled,
-            ) { Text("Reset") }
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButton(onClick = onUnload, enabled = enabled) { Text("Unload model") }
+                TextButton(
+                    onClick = {
+                        val model = models.firstOrNull { it.id == draftModelId }
+                        val context = model?.defaultContextSize ?: 512
+                        draft = ChatSettings(
+                            computePreference = model?.supportedComputePreference(ComputePreference.CPU)
+                                ?: ComputePreference.CPU,
+                            contextSize = context.toString(),
+                        ).also { candidate -> commit(draftModelId, candidate) }
+                    },
+                    enabled = enabled,
+                ) { Text("Reset") }
+            }
         }
     }
 }

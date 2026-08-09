@@ -197,7 +197,11 @@ internal fun AssistantComposer(
                         OutlinedIconButton(onClick = onStartRecording, enabled = state.canDictate) {
                             Icon(Icons.Outlined.Mic, contentDescription = "Record voice")
                         }
-                        AssistantPrimaryActionButton(onClick = onSend, enabled = state.canSend) {
+                        AssistantPrimaryActionButton(
+                            onClick = onSend,
+                            enabled = state.canSend,
+                            purpleTonal = true,
+                        ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = "Send message",
@@ -229,14 +233,26 @@ internal fun AssistantComposer(
 private fun AssistantPrimaryActionButton(
     onClick: () -> Unit,
     enabled: Boolean = true,
+    purpleTonal: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    val colors = MaterialTheme.colorScheme
     FilledIconButton(
         onClick = onClick,
         enabled = enabled,
         colors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
+            containerColor = if (purpleTonal) colors.tertiaryContainer.copy(alpha = 0.78f) else colors.tertiary,
+            contentColor = if (purpleTonal) colors.onTertiaryContainer else colors.onTertiary,
+            disabledContainerColor = if (purpleTonal) {
+                colors.tertiaryContainer.copy(alpha = 0.28f)
+            } else {
+                colors.onSurface.copy(alpha = 0.12f)
+            },
+            disabledContentColor = if (purpleTonal) {
+                colors.onTertiaryContainer.copy(alpha = 0.38f)
+            } else {
+                colors.onSurface.copy(alpha = 0.38f)
+            },
         ),
         content = content,
     )

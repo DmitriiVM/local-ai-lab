@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ModalBottomSheet
@@ -83,12 +85,17 @@ internal fun AssistantListenSettingsSheet(
         } else Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .imePadding()
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Speech-to-text settings", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall)
+            AssistantSettingsSheetHeader(
+                title = "Speech-to-text settings",
+                description = "Choose a recognizer and language for voice input.",
+            )
+            AssistantSettingsSection("Model")
             AssistantInSheetModelPicker(
                 label = "Recognition model",
                 items = models.map {
@@ -103,6 +110,7 @@ internal fun AssistantListenSettingsSheet(
                 enabled = enabled,
                 onClick = { selectingRecognitionModel = true },
             )
+            AssistantSettingsSection("Recognition")
             Text("Recognition language", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 languages.take(3).forEach { language ->
@@ -130,6 +138,7 @@ internal fun AssistantListenSettingsSheet(
                     }
                 }
             }
+            AssistantSettingsSection("Performance")
             OutlinedTextField(
                 value = draft.threadCount,
                 onValueChange = {
@@ -141,10 +150,12 @@ internal fun AssistantListenSettingsSheet(
                 enabled = enabled,
             )
             error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
-            TextButton(
-                onClick = { draft = SpeechInputSettings().also { candidate -> commit(draftModelId, candidate) } },
-                enabled = enabled,
-            ) { Text("Reset") }
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                TextButton(
+                    onClick = { draft = SpeechInputSettings().also { candidate -> commit(draftModelId, candidate) } },
+                    enabled = enabled,
+                ) { Text("Reset") }
+            }
         }
     }
 }

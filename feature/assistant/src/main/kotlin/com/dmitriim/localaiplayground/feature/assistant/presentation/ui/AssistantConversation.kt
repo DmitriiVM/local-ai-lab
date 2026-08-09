@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatMessage
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatMessageRole
 
@@ -132,7 +133,7 @@ private fun ChatMessageCard(
         shape = cardShape,
         colors = CardDefaults.cardColors(
             containerColor = if (isUserMessage) {
-                colors.tertiaryContainer.copy(alpha = 0.56f)
+                AppSurfaceStyle.purpleTonalCardColor(colors)
             } else {
                 colors.surfaceContainer.copy(alpha = 0.96f)
             },

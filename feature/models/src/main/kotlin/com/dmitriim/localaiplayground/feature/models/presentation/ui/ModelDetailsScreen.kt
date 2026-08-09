@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.feature.models.presentation.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -479,10 +480,17 @@ private fun ModelActionBar(
         ) {
             if (installedModel != null) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Button(
+                    OutlinedButton(
                         onClick = onValidate,
                         enabled = !validating,
                         modifier = Modifier.weight(1f),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.58f),
+                        ),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.tertiary,
+                        ),
                     ) {
                         Text(if (validating) "Validating…" else "Validate")
                     }

@@ -20,15 +20,21 @@ import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
 @Composable
 internal fun TtsSectionCard(
     title: String,
+    solidPurpleTint: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
+    val backgroundModifier = if (solidPurpleTint) {
+        Modifier.background(AppSurfaceStyle.purpleTonalCardColor(colors))
+    } else {
+        Modifier.background(AppSurfaceStyle.purpleTonalCardBackgroundBrush(colors))
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                brush = AppSurfaceStyle.cardBorderBrush(colors),
+                brush = AppSurfaceStyle.purpleTonalCardBorderBrush(colors),
                 shape = AppSurfaceStyle.CardShape,
             ),
         shape = AppSurfaceStyle.CardShape,
@@ -38,7 +44,7 @@ internal fun TtsSectionCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(AppSurfaceStyle.cardBackgroundBrush(colors))
+                .then(backgroundModifier)
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
