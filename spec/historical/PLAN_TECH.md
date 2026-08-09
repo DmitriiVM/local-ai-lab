@@ -1,5 +1,14 @@
 # Local AI Playground — Technical Plan
 
+> [!WARNING]
+> **Historical planning document — not current project documentation.**
+>
+> This technical plan was created during the initial AI-assisted development phase
+> and is preserved to show the project's evolution. Its architecture, module layout,
+> and technology assumptions may no longer match the application. Refer to the
+> repository [README](../../README.md) and current source code for authoritative
+> information.
+
 ## 1. Current project baseline
 
 - Android application.
@@ -48,8 +57,8 @@ deferred until a required model or measured capability justifies their additiona
 packaging and lifecycle surface.
 
 The provisional starter catalog and model-governance rules are defined in
-[PLAN_MODELS.md](./PLAN_MODELS.md). Exact revisions, files, licenses, checksums, and
-download approval remain governed by [PLAN_DECISIONS.md](./PLAN_DECISIONS.md) and
+[PLAN_MODELS.md](PLAN_MODELS.md). Exact revisions, files, licenses, checksums, and
+download approval remain governed by [PLAN_DECISIONS.md](PLAN_DECISIONS.md) and
 Stage 0 measurements.
 
 ## 4. Supported device baseline

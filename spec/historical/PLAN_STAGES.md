@@ -1,5 +1,13 @@
 # Local AI Playground — Implementation Stages
 
+> [!WARNING]
+> **Historical planning document — not current project documentation.**
+>
+> This staged delivery plan was created during the initial AI-assisted development
+> phase and is preserved to show the project's evolution. Its stage status and exit
+> criteria may no longer apply. Refer to the repository [README](../../README.md) and
+> current source code for authoritative information.
+
 ## 1. Delivery rules
 
 - Build one usable vertical slice at a time.
@@ -41,7 +49,7 @@ Remove the highest-risk unknowns before building significant UI or persistence.
 - Select one small legally distributable or user-imported model bundle for each
   capability.
 - Begin with the provisional candidates in
-  [PLAN_MODELS.md](./PLAN_MODELS.md): Qwen3 1.7B Q4_K_M, Whisper Base multilingual
+  [PLAN_MODELS.md](PLAN_MODELS.md): Qwen3 1.7B Q4_K_M, Whisper Base multilingual
   INT8, Silero VAD, and Supertonic 3 INT8.
 - Prove one local STT, LLM, TTS, and VAD inference on the reference device. English
   and Russian quality validation is deferred to the project owner under D-025; do
@@ -69,7 +77,7 @@ Remove the highest-risk unknowns before building significant UI or persistence.
 - Decide whether curated download is enabled for the MVP or import-only initially.
 - Confirm each candidate public source works without credentials, pin immutable
   revisions/files, and record sizes, SHA-256 hashes, licenses, and mirrors.
-- Update [PLAN_DECISIONS.md](./PLAN_DECISIONS.md) with exact results.
+- Update [PLAN_DECISIONS.md](PLAN_DECISIONS.md) with exact results.
 
 ### Deliverables
 
@@ -77,7 +85,7 @@ Remove the highest-risk unknowns before building significant UI or persistence.
   adjacent developer documentation.
 - Pinned runtime revisions.
 - Known-good model bundle definitions.
-- Updated catalog states in [PLAN_MODELS.md](./PLAN_MODELS.md), including why each
+- Updated catalog states in [PLAN_MODELS.md](PLAN_MODELS.md), including why each
   provisional candidate was accepted, replaced, or left research-only.
 - Initial compatibility and performance observations.
 - Initial STT-only, TTS-only, LLM-only, and voice-pipeline profile definitions where
@@ -391,9 +399,9 @@ the supported MVP matrix.
 
 - Resolve every open decision marked “Before MVP release.”
 - Verify all P0 and P1 requirements in
-  [PLAN_FEATURES.md](./PLAN_FEATURES.md).
+  [PLAN_FEATURES.md](PLAN_FEATURES.md).
 - Run the physical-device and lifecycle matrix from
-  [PLAN_TECH.md](./PLAN_TECH.md).
+  [PLAN_TECH.md](PLAN_TECH.md).
 - Verify fresh install, update, backup policy, and data cleanup.
 - Verify low-storage, corrupted-model, probable low-memory, audio interruption,
   cancellation, and engine recreation scenarios.
@@ -415,7 +423,7 @@ the supported MVP matrix.
 
 ### Exit gate
 
-- All MVP success criteria in [PLAN.md](./PLAN.md) pass.
+- All MVP success criteria in [PLAN.md](PLAN.md) pass.
 - No known issue can corrupt an installed model or leave microphone/audio/native
   resources stuck across normal recovery.
 - Offline claims match observed network behavior.

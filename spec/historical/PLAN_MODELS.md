@@ -1,5 +1,13 @@
 # Local AI Playground — Runtime and Model Catalog Plan
 
+> [!WARNING]
+> **Historical planning document — not current project documentation.**
+>
+> This runtime and model catalog plan captures early AI-assisted development work.
+> Model availability, runtime support, and technical assumptions may have changed.
+> Refer to the repository [README](../../README.md) and current source code for
+> authoritative information.
+
 ## 1. Purpose
 
 This document is the authoritative plan for inference runtimes, starter model
@@ -142,7 +150,7 @@ Model sources:
 ### 4.3 Text to speech
 
 The required initial languages are English and Russian under D-020 in
-[PLAN_DECISIONS.md](./PLAN_DECISIONS.md).
+[PLAN_DECISIONS.md](PLAN_DECISIONS.md).
 
 | Profile | Candidate | Languages | State |
 | --- | --- | --- | --- |

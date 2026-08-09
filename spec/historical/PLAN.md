@@ -1,5 +1,13 @@
 # Local AI Playground — Product Plan
 
+> [!WARNING]
+> **Historical planning document — not current project documentation.**
+>
+> This plan was created during the initial AI-assisted development phase and is
+> preserved to show the project's evolution. Its scope and assumptions may no longer
+> match the application. Refer to the repository [README](../../README.md) and current
+> source code for authoritative information.
+
 ## 1. Purpose
 
 Local AI Playground is an Android application for running, inspecting, and comparing
@@ -166,7 +174,7 @@ Settings are opened from a top-level action rather than occupying a primary
 navigation destination.
 
 Detailed screen and behavior requirements are in
-[PLAN_FEATURES.md](./PLAN_FEATURES.md).
+[PLAN_FEATURES.md](PLAN_FEATURES.md).
 
 ## 8. MVP success criteria
 
@@ -206,14 +214,14 @@ The MVP is successful when:
 
 ## 10. Documentation map
 
-- [PLAN_FEATURES.md](./PLAN_FEATURES.md) — screens, behavior, states, and product
+- [PLAN_FEATURES.md](PLAN_FEATURES.md) — screens, behavior, states, and product
   requirements.
-- [PLAN_TECH.md](./PLAN_TECH.md) — architecture, data, runtimes, and technical
+- [PLAN_TECH.md](PLAN_TECH.md) — architecture, data, runtimes, and technical
   constraints.
-- [PLAN_MODELS.md](./PLAN_MODELS.md) — runtime strategy, starter model candidates,
+- [PLAN_MODELS.md](PLAN_MODELS.md) — runtime strategy, starter model candidates,
   compatibility profiles, and catalog governance.
-- [PLAN_STAGES.md](./PLAN_STAGES.md) — implementation order and exit gates.
-- [PLAN_DECISIONS.md](./PLAN_DECISIONS.md) — accepted decisions and unresolved
+- [PLAN_STAGES.md](PLAN_STAGES.md) — implementation order and exit gates.
+- [PLAN_DECISIONS.md](PLAN_DECISIONS.md) — accepted decisions and unresolved
   questions.
 - [PLAN_REFERENCES.md](./PLAN_REFERENCES.md) — inspected reference implementations,
   pinned snapshots, adopted techniques, and explicitly rejected patterns.

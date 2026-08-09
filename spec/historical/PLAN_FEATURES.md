@@ -1,5 +1,13 @@
 # Local AI Playground — Features and Screens
 
+> [!WARNING]
+> **Historical planning document — not current project documentation.**
+>
+> This feature plan was created during the initial AI-assisted development phase and
+> is preserved to show the project's evolution. Its requirements and priorities may
+> no longer match the application. Refer to the repository [README](../../README.md)
+> and current source code for authoritative information.
+
 ## 1. Requirement conventions
 
 Requirements use stable identifiers:
@@ -141,7 +149,7 @@ Selecting an item opens Run Details.
 
 The planned runtime/model shortlist and the distinction between provisional,
 approved, optional, and research-only entries are defined in
-[PLAN_MODELS.md](./PLAN_MODELS.md).
+[PLAN_MODELS.md](PLAN_MODELS.md).
 
 ### MOD-001 — Model list (P0)
 
@@ -174,7 +182,7 @@ required files and explain missing files.
 ### MOD-003 — Curated download (P2)
 
 - Show only catalog versions that have passed the approval gate in
-  [PLAN_MODELS.md](./PLAN_MODELS.md).
+  [PLAN_MODELS.md](PLAN_MODELS.md).
 - Curated sources are public and do not prompt for or require a shared model-host
   token.
 - Show source, license, total size, expected files, checksum, languages, and a

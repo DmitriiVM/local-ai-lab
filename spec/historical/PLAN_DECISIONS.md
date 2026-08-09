@@ -1,5 +1,13 @@
 # Local AI Playground — Decisions and Open Questions
 
+> [!WARNING]
+> **Historical planning document — not current project documentation.**
+>
+> This decision log captures early AI-assisted development work and is retained as a
+> record of the project's evolution. Decisions may have been superseded in code or
+> later work. Refer to the repository [README](../../README.md) and current source code
+> for authoritative information.
+
 ## 1. Purpose
 
 This document is the authoritative log for choices that affect more than one plan
@@ -352,7 +360,7 @@ replacement, and update the affected plan files.
 
 - **State:** Provisional
 - **Current direction:** Maintain the runtime/model shortlist and catalog governance
-  in [PLAN_MODELS.md](./PLAN_MODELS.md). Start Stage 0 with Qwen3 1.7B Q4_K_M for
+  in [PLAN_MODELS.md](PLAN_MODELS.md). Start Stage 0 with Qwen3 1.7B Q4_K_M for
   chat, Whisper Base multilingual INT8 plus Silero VAD for English/Russian STT, and
   Supertonic 3 INT8 for English/Russian TTS.
 - **Optional profiles:** Evaluate Qwen3.5 0.8B as the tiny LLM, Qwen3 4B as the
