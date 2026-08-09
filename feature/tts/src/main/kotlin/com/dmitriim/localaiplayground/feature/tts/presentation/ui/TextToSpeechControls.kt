@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -268,24 +270,28 @@ internal fun TextToSpeechLanguageControls(
     onApplySample: (TtsLanguage) -> Unit,
     englishOnly: Boolean = false,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        TtsLanguage.entries.forEach { language ->
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        items(TtsLanguage.entries) { language ->
             FilterChip(
                 selected = selectedLanguage == language,
                 onClick = { onSelectLanguage(language) },
                 // Chatterbox Turbo Q4 is English-only.
                 enabled = enabled && (!englishOnly || language == TtsLanguage.ENGLISH),
                 label = { Text(language.label) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.78f),
+                    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                ),
             )
         }
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        TtsLanguage.entries.forEach { language ->
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        items(TtsLanguage.entries) { language ->
             TextButton(
                 onClick = { onApplySample(language) },
                 enabled = enabled && (!englishOnly || language == TtsLanguage.ENGLISH),
             ) {
-                Text("${language.label} sample")
+                Text("${language.label} sample", maxLines = 1, softWrap = false)
             }
         }
     }

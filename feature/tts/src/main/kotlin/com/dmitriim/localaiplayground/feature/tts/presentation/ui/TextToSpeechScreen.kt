@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -70,7 +71,7 @@ fun TextToSpeechScreen(
             .verticalScroll(rememberScrollState())
             .padding(
                 start = 16.dp,
-                top = dimensions.topBarOverlayClearance + 12.dp,
+                top = dimensions.topBarOverlayClearance + 44.dp,
                 end = 16.dp,
                 bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
             ),
@@ -82,71 +83,80 @@ fun TextToSpeechScreen(
             style = MaterialTheme.typography.bodyMedium,
         )
 
-        TextToSpeechModelPicker(state.models, state.selectedModelId, !busy, onSelectModel)
-        if (state.usesReferenceVoice) {
-            ChatterboxReferenceVoiceSelector(
-                state = state,
-                enabled = !busy,
-                onSelect = onSelectVoice,
-                onRecord = onRecordReference,
-                onStopRecording = onStopReferenceRecording,
-                onImport = onImportReference,
-                onDelete = onDeleteReference,
-            )
-            Text(
-                "Expressive tags: [laugh], [chuckle], [cough], [sigh], [whispering], [happy], [angry], [dramatic], and more.",
-                style = MaterialTheme.typography.bodySmall,
-            )
-            Text(
-                "Generated output: Not watermarked",
-                style = MaterialTheme.typography.labelLarge,
-            )
-        } else {
-            TextToSpeechVoiceSelector(
-                visible = state.selectedModel?.voices?.size?.let { it > 1 } == true,
-                voices = state.compatibleVoices,
-                selectedId = state.selectedVoiceId,
-                language = state.language,
-                enabled = !busy,
-                operation = state.operation,
-                previewVoiceId = state.previewVoiceId,
-                hasPreviewText = state.text.isNotBlank(),
-                onSelect = onSelectVoice,
-                onPreview = onPreviewVoice,
-                onStopPreview = onStop,
+        TtsSectionCard("Setup") {
+            TextToSpeechModelPicker(state.models, state.selectedModelId, !busy, onSelectModel)
+            if (state.usesReferenceVoice) {
+                ChatterboxReferenceVoiceSelector(
+                    state = state,
+                    enabled = !busy,
+                    onSelect = onSelectVoice,
+                    onRecord = onRecordReference,
+                    onStopRecording = onStopReferenceRecording,
+                    onImport = onImportReference,
+                    onDelete = onDeleteReference,
+                )
+                Text(
+                    "Expressive tags: [laugh], [chuckle], [cough], [sigh], [whispering], [happy], [angry], [dramatic], and more.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    "Generated output: Not watermarked",
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            } else {
+                TextToSpeechVoiceSelector(
+                    visible = state.selectedModel?.voices?.size?.let { it > 1 } == true,
+                    voices = state.compatibleVoices,
+                    selectedId = state.selectedVoiceId,
+                    language = state.language,
+                    enabled = !busy,
+                    operation = state.operation,
+                    previewVoiceId = state.previewVoiceId,
+                    hasPreviewText = state.text.isNotBlank(),
+                    onSelect = onSelectVoice,
+                    onPreview = onPreviewVoice,
+                    onStopPreview = onStop,
+                )
+            }
+            Text("Language", style = MaterialTheme.typography.titleSmall)
+            TextToSpeechLanguageControls(
+                state.language,
+                !busy,
+                onSelectLanguage,
+                onApplySample,
+                englishOnly = state.usesReferenceVoice,
             )
         }
 
-        OutlinedTextField(
-            value = state.text,
-            onValueChange = onTextChange,
-            enabled = !busy,
-            label = { Text("Text to synthesize") },
-            supportingText = { Text("${state.text.length} / ${state.characterLimit} characters") },
-            minLines = 4,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Button(
-            onClick = onSynthesize,
-            enabled = !busy && state.selectedVoice != null && state.text.isNotBlank(),
-        ) {
-            Text("Synthesize & play")
+        TtsSectionCard("Compose") {
+            OutlinedTextField(
+                value = state.text,
+                onValueChange = onTextChange,
+                enabled = !busy,
+                label = { Text("Text to synthesize") },
+                supportingText = { Text("${state.text.length} / ${state.characterLimit} characters") },
+                minLines = 4,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Button(
+                onClick = onSynthesize,
+                enabled = !busy && state.selectedVoice != null && state.text.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                ),
+            ) {
+                Text("Synthesize & play")
+            }
+            OutlinedButton(
+                onClick = onProfile,
+                enabled = !busy && state.selectedVoice != null && state.text.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Profile this synthesis")
+            }
         }
-        OutlinedButton(
-            onClick = onProfile,
-            enabled = !busy && state.selectedVoice != null && state.text.isNotBlank(),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Profile current synthesis")
-        }
-
-        TextToSpeechLanguageControls(
-            state.language,
-            !busy,
-            onSelectLanguage,
-            onApplySample,
-            englishOnly = state.usesReferenceVoice,
-        )
         TextToSpeechSettings(
             state = state,
             enabled = !busy,
