@@ -39,6 +39,7 @@ class SynthesizeSpeech(
 ) {
     private val cancelled = AtomicBoolean(false)
 
+    @Suppress("LongMethod") // A synthesis flow owns the full engine and output lifecycle.
     fun execute(request: SpeechSynthesisRequest): Flow<SpeechSynthesisEvent> = flow {
         Log.i(
             TAG,

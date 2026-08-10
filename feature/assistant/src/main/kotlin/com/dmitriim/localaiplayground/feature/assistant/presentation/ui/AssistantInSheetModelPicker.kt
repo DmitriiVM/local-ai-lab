@@ -13,12 +13,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.component.InstalledOptionList
 import com.dmitriim.localaiplayground.core.ui.component.OptionPickerItem
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun AssistantInSheetModelPicker(

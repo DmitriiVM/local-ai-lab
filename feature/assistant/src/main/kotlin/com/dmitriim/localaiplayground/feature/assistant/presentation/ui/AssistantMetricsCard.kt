@@ -18,15 +18,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatMetrics
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ContextUsage
 import kotlin.math.roundToInt
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun ChatMetricsCard(
@@ -63,87 +63,59 @@ internal fun ChatMetricsCard(
                     modifier = Modifier.padding(top = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    HorizontalDivider()
-
-                    RunDetailsSection("Performance")
-                    RunDetailsMetric(
-                        label = stringResource(CoreUiR.string.ui_copy_24),
-                        value = metrics.timeToFirstTokenMs?.let(::formatDuration) ?: "Not reached",
-                        description = stringResource(CoreUiR.string.ui_description_5),
-                    )
-                    RunDetailsMetric(
-                        label = stringResource(CoreUiR.string.ui_copy_25),
-                        value = metrics.generatedTokens?.let { tokens ->
-                            buildMetricValue(tokens, metrics.generatedTokensPerSecond)
-                        } ?: "Token count unavailable",
-                        description = if (metrics.generatedTokens == null) {
-                            "This runtime did not report generated tokens or output speed."
-                        } else {
-                            "Response tokens produced by the model. Tokens per second measures generation speed; higher is faster."
-                        },
-                    )
-                    RunDetailsMetric(
-                        label = stringResource(CoreUiR.string.ui_copy_26),
-                        value = formatDuration(metrics.totalDurationMs),
-                        description = stringResource(CoreUiR.string.ui_description_6),
-                    )
-
-                    RunDetailsSection("Context and request")
-                    contextUsage?.let { usage ->
-                        RunDetailsMetric(
-                            label = stringResource(CoreUiR.string.ui_copy_27),
-                            value = formatContextDetails(usage),
-                            description = stringResource(CoreUiR.string.ui_description_7),
-                        )
-                        if (usage.omittedMessageCount > 0) {
-                            RunDetailsMetric(
-                                label = stringResource(CoreUiR.string.ui_copy_28),
-                                value = "${usage.omittedMessageCount}",
-                                description = stringResource(CoreUiR.string.ui_description_8),
-                            )
-                        }
-                    }
-                    RunDetailsMetric(
-                        label = stringResource(CoreUiR.string.ui_copy_29),
-                        value = metrics.promptTokens?.let { tokens ->
-                            buildMetricValue(tokens, metrics.promptTokensPerSecond)
-                        } ?: "Token count unavailable",
-                        description = stringResource(CoreUiR.string.ui_description_9),
-                    )
-                    RunDetailsMetric(
-                        label = stringResource(CoreUiR.string.ui_copy_30),
-                        value = "Temperature ${metrics.effectiveSettings.temperature} · top-K ${metrics.effectiveSettings.topK} · top-P ${metrics.effectiveSettings.topP}",
-                        description = stringResource(CoreUiR.string.ui_description_10),
-                    )
-
-                    RunDetailsSection("Runtime")
-                    RunDetailsMetric(
-                        label = stringResource(CoreUiR.string.ui_copy_31),
-                        value = metrics.modelName,
-                        description = stringResource(CoreUiR.string.ui_description_11),
-                    )
-                    RunDetailsMetric(
-                        label = stringResource(CoreUiR.string.ui_copy_32),
-                        value = buildString {
-                            append(if (metrics.coldStart) "Cold start" else "Warm start")
-                            metrics.effectiveThreadCount?.let { append(" · $it threads") }
-                        },
-                        description = stringResource(CoreUiR.string.ui_description_12),
-                    )
-                    RunDetailsMetric(
-                        label = stringResource(CoreUiR.string.ui_copy_33),
-                        value = formatDuration(metrics.loadDurationMs),
-                        description = stringResource(CoreUiR.string.ui_description_13),
-                    )
-                    RunDetailsMetric(
-                        label = stringResource(CoreUiR.string.ui_copy_34),
-                        value = metrics.finishReason.displayName(),
-                        description = stringResource(CoreUiR.string.ui_description_14),
-                    )
+                    ChatMetricsDetails(metrics, contextUsage)
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ChatMetricsDetails(metrics: ChatMetrics, contextUsage: ContextUsage?) {
+    HorizontalDivider()
+    PerformanceMetrics(metrics)
+    ContextMetrics(metrics, contextUsage)
+    RuntimeMetrics(metrics)
+}
+
+@Composable
+private fun PerformanceMetrics(metrics: ChatMetrics) {
+    RunDetailsSection("Performance")
+    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_24), metrics.timeToFirstTokenMs?.let(::formatDuration) ?: "Not reached", stringResource(CoreUiR.string.ui_description_5))
+    RunDetailsMetric(
+        stringResource(CoreUiR.string.ui_copy_25),
+        metrics.generatedTokens?.let { buildMetricValue(it, metrics.generatedTokensPerSecond) } ?: "Token count unavailable",
+        if (metrics.generatedTokens == null) "This runtime did not report generated tokens or output speed." else "Response tokens produced by the model. Tokens per second measures generation speed; higher is faster.",
+    )
+    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_26), formatDuration(metrics.totalDurationMs), stringResource(CoreUiR.string.ui_description_6))
+}
+
+@Composable
+private fun ContextMetrics(metrics: ChatMetrics, usage: ContextUsage?) {
+    RunDetailsSection("Context and request")
+    usage?.let {
+        RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_27), formatContextDetails(it), stringResource(CoreUiR.string.ui_description_7))
+        if (it.omittedMessageCount > 0) RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_28), "${it.omittedMessageCount}", stringResource(CoreUiR.string.ui_description_8))
+    }
+    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_29), metrics.promptTokens?.let { count -> buildMetricValue(count, metrics.promptTokensPerSecond) } ?: "Token count unavailable", stringResource(CoreUiR.string.ui_description_9))
+    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_30), "Temperature ${metrics.effectiveSettings.temperature} · top-K ${metrics.effectiveSettings.topK} · top-P ${metrics.effectiveSettings.topP}", stringResource(CoreUiR.string.ui_description_10))
+}
+
+@Composable
+private fun RuntimeMetrics(metrics: ChatMetrics) {
+    RunDetailsSection("Runtime")
+    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_31), metrics.modelName, stringResource(CoreUiR.string.ui_description_11))
+    val startupLabel = buildString {
+        append(if (metrics.coldStart) "Cold start" else "Warm start")
+        metrics.effectiveThreadCount?.let { append(" · $it threads") }
+    }
+    RunDetailsMetric(
+        stringResource(CoreUiR.string.ui_copy_32),
+        startupLabel,
+        stringResource(CoreUiR.string.ui_description_12),
+    )
+    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_33), formatDuration(metrics.loadDurationMs), stringResource(CoreUiR.string.ui_description_13))
+    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_34), metrics.finishReason.displayName(), stringResource(CoreUiR.string.ui_description_14))
 }
 
 private fun formatContextSummary(

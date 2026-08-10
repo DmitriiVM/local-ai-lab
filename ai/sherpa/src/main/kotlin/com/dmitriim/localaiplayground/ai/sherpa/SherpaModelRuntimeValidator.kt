@@ -58,184 +58,97 @@ class SherpaModelRuntimeValidator : ModelAdapter {
     }
 
     override fun importDefinition(profileType: ModelProfileId) = when (profileType) {
-        ModelProfileIds.WHISPER_STT -> ModelImportDefinition(
-            displayName = "Whisper STT bundle",
-            format = ModelFormat.ONNX,
-            files = listOf(
-                ModelImportFileDefinition(
-                    ModelFileRoles.ENCODER,
-                    relativePath = "base-encoder.int8.onnx",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.DECODER,
-                    relativePath = "base-decoder.int8.onnx",
-                ),
-                ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "base-tokens.txt"),
-            ),
-        )
+        ModelProfileIds.WHISPER_STT -> whisperDefinition()
         ModelProfileIds.PARAKEET_CTC_STT,
         ModelProfileIds.GIGAAM_CTC_STT,
         ModelProfileIds.SENSE_VOICE_STT,
         ModelProfileIds.PARAFORMER_STT,
-        -> ModelImportDefinition(
-            displayName = "Single-model STT bundle",
-            format = ModelFormat.ONNX,
-            files = listOf(
-                ModelImportFileDefinition(
-                    ModelFileRoles.PRIMARY_MODEL,
-                    relativePath = "model.int8.onnx",
-                ),
-                ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
-            ),
-        )
-        ModelProfileIds.ZIPFORMER_STT -> ModelImportDefinition(
-            displayName = "Streaming Zipformer bundle",
-            format = ModelFormat.ONNX,
-            files = listOf(
-                ModelImportFileDefinition(
-                    ModelFileRoles.ENCODER,
-                    relativePath = "encoder-epoch-99-avg-1.int8.onnx",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.DECODER,
-                    relativePath = "decoder-epoch-99-avg-1.int8.onnx",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.JOINER,
-                    relativePath = "joiner-epoch-99-avg-1.int8.onnx",
-                ),
-                ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
-            ),
-        )
-        ModelProfileIds.MOONSHINE_STT -> ModelImportDefinition(
-            displayName = "Moonshine STT bundle",
-            format = ModelFormat.ONNX,
-            files = listOf(
-                ModelImportFileDefinition(
-                    ModelFileRoles.ENCODER,
-                    relativePath = "encoder_model.ort",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.MERGED_DECODER,
-                    relativePath = "decoder_model_merged.ort",
-                ),
-                ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
-            ),
-        )
-        ModelProfileIds.SUPERTONIC_TTS -> ModelImportDefinition(
-            displayName = "Supertonic TTS bundle",
-            format = ModelFormat.ONNX,
-            files = listOf(
-                ModelImportFileDefinition(
-                    ModelFileRoles.DURATION_PREDICTOR,
-                    relativePath = "duration_predictor.int8.onnx",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.TEXT_ENCODER,
-                    relativePath = "text_encoder.int8.onnx",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.VECTOR_ESTIMATOR,
-                    relativePath = "vector_estimator.int8.onnx",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.VOCODER,
-                    relativePath = "vocoder.int8.onnx",
-                ),
-                ModelImportFileDefinition(ModelFileRoles.CONFIG, relativePath = "tts.json"),
-                ModelImportFileDefinition(
-                    ModelFileRoles.UNICODE_INDEXER,
-                    relativePath = "unicode_indexer.bin",
-                ),
-                ModelImportFileDefinition(ModelFileRoles.VOICE_STYLE, relativePath = "voice.bin"),
-            ),
-        )
-        ModelProfileIds.PIPER_VITS_TTS -> ModelImportDefinition(
-            displayName = "Piper Lessac Medium (English)",
-            format = ModelFormat.ONNX,
-            files = listOf(
-                ModelImportFileDefinition(
-                    ModelFileRoles.VITS_MODEL,
-                    relativePath = "en_US-lessac-medium.onnx",
-                ),
-                ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
-                ModelImportFileDefinition(
-                    ModelFileRoles.FRONTEND_DATA,
-                    relativePath = "espeak-ng-data",
-                    directory = true,
-                ),
-            ),
-        )
-        ModelProfileIds.KOKORO_TTS -> ModelImportDefinition(
-            displayName = "Kokoro Multi-Lang v1.0",
-            format = ModelFormat.ONNX,
-            files = listOf(
-                ModelImportFileDefinition(ModelFileRoles.KOKORO_MODEL, relativePath = "model.onnx"),
-                ModelImportFileDefinition(
-                    ModelFileRoles.VOICE_EMBEDDINGS,
-                    relativePath = "voices.bin",
-                ),
-                ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
-                ModelImportFileDefinition(
-                    ModelFileRoles.LEXICON,
-                    relativePath = "lexicon-us-en.txt",
-                ),
-                ModelImportFileDefinition(ModelFileRoles.LEXICON, relativePath = "lexicon-zh.txt"),
-                ModelImportFileDefinition(ModelFileRoles.TEXT_RULES, relativePath = "date-zh.fst"),
-                ModelImportFileDefinition(
-                    ModelFileRoles.TEXT_RULES,
-                    relativePath = "number-zh.fst",
-                ),
-                ModelImportFileDefinition(ModelFileRoles.TEXT_RULES, relativePath = "phone-zh.fst"),
-                ModelImportFileDefinition(
-                    ModelFileRoles.FRONTEND_DATA,
-                    relativePath = "espeak-ng-data",
-                    directory = true,
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.DICTIONARY_DATA,
-                    relativePath = "dict",
-                    directory = true,
-                ),
-            ),
-        )
-        ModelProfileIds.POCKET_TTS -> ModelImportDefinition(
-            displayName = "Pocket TTS INT8 (English)",
-            format = ModelFormat.ONNX,
-            files = listOf(
-                ModelImportFileDefinition(
-                    ModelFileRoles.LM_FLOW,
-                    relativePath = "lm_flow.int8.onnx",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.LM_MAIN,
-                    relativePath = "lm_main.int8.onnx",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.POCKET_ENCODER,
-                    relativePath = "encoder.onnx",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.POCKET_DECODER,
-                    relativePath = "decoder.int8.onnx",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.TEXT_CONDITIONER,
-                    relativePath = "text_conditioner.onnx",
-                ),
-                ModelImportFileDefinition(ModelFileRoles.VOCABULARY, relativePath = "vocab.json"),
-                ModelImportFileDefinition(
-                    ModelFileRoles.TOKEN_SCORES,
-                    relativePath = "token_scores.json",
-                ),
-                ModelImportFileDefinition(
-                    ModelFileRoles.REFERENCE_AUDIO,
-                    relativePath = "test_wavs/bria.wav",
-                ),
-            ),
-        )
+        -> singleModelSttDefinition()
+        ModelProfileIds.ZIPFORMER_STT -> zipformerDefinition()
+        ModelProfileIds.MOONSHINE_STT -> moonshineDefinition()
+        ModelProfileIds.SUPERTONIC_TTS -> supertonicDefinition()
+        ModelProfileIds.PIPER_VITS_TTS -> piperDefinition()
+        ModelProfileIds.KOKORO_TTS -> kokoroDefinition()
+        ModelProfileIds.POCKET_TTS -> pocketDefinition()
         else -> null
     }
+
+    private fun whisperDefinition() = importDefinition(
+        "Whisper STT bundle",
+        ModelImportFileDefinition(ModelFileRoles.ENCODER, relativePath = "base-encoder.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.DECODER, relativePath = "base-decoder.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "base-tokens.txt"),
+    )
+
+    private fun singleModelSttDefinition() = importDefinition(
+        "Single-model STT bundle",
+        ModelImportFileDefinition(ModelFileRoles.PRIMARY_MODEL, relativePath = "model.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
+    )
+
+    private fun zipformerDefinition() = importDefinition(
+        "Streaming Zipformer bundle",
+        ModelImportFileDefinition(ModelFileRoles.ENCODER, relativePath = "encoder-epoch-99-avg-1.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.DECODER, relativePath = "decoder-epoch-99-avg-1.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.JOINER, relativePath = "joiner-epoch-99-avg-1.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
+    )
+
+    private fun moonshineDefinition() = importDefinition(
+        "Moonshine STT bundle",
+        ModelImportFileDefinition(ModelFileRoles.ENCODER, relativePath = "encoder_model.ort"),
+        ModelImportFileDefinition(ModelFileRoles.MERGED_DECODER, relativePath = "decoder_model_merged.ort"),
+        ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
+    )
+
+    private fun supertonicDefinition() = importDefinition(
+        "Supertonic TTS bundle",
+        ModelImportFileDefinition(ModelFileRoles.DURATION_PREDICTOR, relativePath = "duration_predictor.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.TEXT_ENCODER, relativePath = "text_encoder.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.VECTOR_ESTIMATOR, relativePath = "vector_estimator.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.VOCODER, relativePath = "vocoder.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.CONFIG, relativePath = "tts.json"),
+        ModelImportFileDefinition(ModelFileRoles.UNICODE_INDEXER, relativePath = "unicode_indexer.bin"),
+        ModelImportFileDefinition(ModelFileRoles.VOICE_STYLE, relativePath = "voice.bin"),
+    )
+
+    private fun piperDefinition() = importDefinition(
+        "Piper Lessac Medium (English)",
+        ModelImportFileDefinition(ModelFileRoles.VITS_MODEL, relativePath = "en_US-lessac-medium.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
+        ModelImportFileDefinition(ModelFileRoles.FRONTEND_DATA, relativePath = "espeak-ng-data", directory = true),
+    )
+
+    private fun kokoroDefinition() = importDefinition(
+        "Kokoro Multi-Lang v1.0",
+        ModelImportFileDefinition(ModelFileRoles.KOKORO_MODEL, relativePath = "model.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.VOICE_EMBEDDINGS, relativePath = "voices.bin"),
+        ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
+        ModelImportFileDefinition(ModelFileRoles.LEXICON, relativePath = "lexicon-us-en.txt"),
+        ModelImportFileDefinition(ModelFileRoles.LEXICON, relativePath = "lexicon-zh.txt"),
+        ModelImportFileDefinition(ModelFileRoles.TEXT_RULES, relativePath = "date-zh.fst"),
+        ModelImportFileDefinition(ModelFileRoles.TEXT_RULES, relativePath = "number-zh.fst"),
+        ModelImportFileDefinition(ModelFileRoles.TEXT_RULES, relativePath = "phone-zh.fst"),
+        ModelImportFileDefinition(ModelFileRoles.FRONTEND_DATA, relativePath = "espeak-ng-data", directory = true),
+        ModelImportFileDefinition(ModelFileRoles.DICTIONARY_DATA, relativePath = "dict", directory = true),
+    )
+
+    private fun pocketDefinition() = importDefinition(
+        "Pocket TTS INT8 (English)",
+        ModelImportFileDefinition(ModelFileRoles.LM_FLOW, relativePath = "lm_flow.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.LM_MAIN, relativePath = "lm_main.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.POCKET_ENCODER, relativePath = "encoder.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.POCKET_DECODER, relativePath = "decoder.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.TEXT_CONDITIONER, relativePath = "text_conditioner.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.VOCABULARY, relativePath = "vocab.json"),
+        ModelImportFileDefinition(ModelFileRoles.TOKEN_SCORES, relativePath = "token_scores.json"),
+        ModelImportFileDefinition(ModelFileRoles.REFERENCE_AUDIO, relativePath = "test_wavs/bria.wav"),
+    )
+
+    private fun importDefinition(
+        displayName: String,
+        vararg files: ModelImportFileDefinition,
+    ) = ModelImportDefinition(displayName = displayName, format = ModelFormat.ONNX, files = files.toList())
 
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
         val missing = manifest.files.filter { it.required }

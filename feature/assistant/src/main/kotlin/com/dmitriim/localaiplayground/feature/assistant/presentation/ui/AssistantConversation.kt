@@ -39,13 +39,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatMessage
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatMessageRole
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun AssistantConversation(
@@ -146,15 +146,7 @@ private fun ChatMessageCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                MessageRoleLabel(isUserMessage)
-                Spacer(modifier = Modifier.weight(1f))
-                if (message.streaming) CircularProgressIndicator(modifier = Modifier.height(16.dp).width(16.dp), strokeWidth = 2.dp)
-                if (message.failed) Text(stringResource(CoreUiR.string.assistant_assistant_conversation_8), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
-            }
+            MessageCardHeader(message, isUserMessage)
             Text(
                 text = if (message.content.isBlank() && message.streaming) {
                     stringResource(CoreUiR.string.assistant_generating)
@@ -163,41 +155,34 @@ private fun ChatMessageCard(
                 },
                 style = MaterialTheme.typography.bodyLarge,
             )
-            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 32.dp) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
-                ) {
-                    MessageActionButton(
-                        icon = Icons.Outlined.ContentCopy,
-                        contentDescription = stringResource(CoreUiR.string.ui_copy_17),
-                        enabled = message.content.isNotBlank(),
-                        onClick = { onCopy(message.content) },
-                    )
-                    onRegenerate?.let { regenerate ->
-                        MessageActionButton(
-                            icon = Icons.Outlined.Replay,
-                            contentDescription = stringResource(CoreUiR.string.ui_copy_18),
-                            onClick = regenerate,
-                        )
-                    }
-                    onSpeak?.let { speak ->
-                        MessageActionButton(
-                            icon = Icons.Outlined.VolumeUp,
-                            contentDescription = stringResource(CoreUiR.string.ui_copy_19),
-                            onClick = speak,
-                        )
-                    }
-                    if (message.role == ChatMessageRole.USER) {
-                        MessageActionButton(
-                            icon = Icons.Outlined.Edit,
-                            contentDescription = stringResource(CoreUiR.string.ui_copy_20),
-                            onClick = { onEdit(message.id) },
-                        )
-                    }
-                }
-            }
+            MessageActions(message, onCopy, onEdit, onRegenerate, onSpeak)
         }
+    }
+}
+
+@Composable
+private fun MessageCardHeader(message: ChatMessage, isUserMessage: Boolean) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        MessageRoleLabel(isUserMessage)
+        Spacer(modifier = Modifier.weight(1f))
+        if (message.streaming) CircularProgressIndicator(modifier = Modifier.height(16.dp).width(16.dp), strokeWidth = 2.dp)
+        if (message.failed) Text(stringResource(CoreUiR.string.assistant_assistant_conversation_8), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+    }
+}
+
+@Composable
+private fun MessageActions(
+    message: ChatMessage,
+    onCopy: (String) -> Unit,
+    onEdit: (String) -> Unit,
+    onRegenerate: (() -> Unit)?,
+    onSpeak: (() -> Unit)?,
+) = CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 32.dp) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End)) {
+        MessageActionButton(Icons.Outlined.ContentCopy, stringResource(CoreUiR.string.ui_copy_17), { onCopy(message.content) }, message.content.isNotBlank())
+        onRegenerate?.let { MessageActionButton(Icons.Outlined.Replay, stringResource(CoreUiR.string.ui_copy_18), onClick = it) }
+        onSpeak?.let { MessageActionButton(Icons.Outlined.VolumeUp, stringResource(CoreUiR.string.ui_copy_19), onClick = it) }
+        if (message.role == ChatMessageRole.USER) MessageActionButton(Icons.Outlined.Edit, stringResource(CoreUiR.string.ui_copy_20), { onEdit(message.id) })
     }
 }
 

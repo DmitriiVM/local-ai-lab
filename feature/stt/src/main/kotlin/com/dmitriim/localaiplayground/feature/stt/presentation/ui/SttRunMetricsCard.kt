@@ -10,10 +10,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionMetrics
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionMetrics
 
 @Composable
 internal fun SttRunMetricsCard(

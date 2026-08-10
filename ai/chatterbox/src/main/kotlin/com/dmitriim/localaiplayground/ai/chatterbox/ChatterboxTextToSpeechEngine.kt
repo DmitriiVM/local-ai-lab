@@ -106,6 +106,7 @@ class ChatterboxTextToSpeechEngine(private val application: Application) : TextT
         TextToSpeechLoadResult(threads, loadMs, true, SAMPLE_RATE_HZ, null)
     }
 
+    @Suppress("LongMethod") // Coordinates the ONNX inference lifecycle and resource ownership.
     override fun synthesize(
         request: TextToSpeechRequest,
         onAudioChunk: (FloatArray) -> Boolean,
@@ -116,15 +117,8 @@ class ChatterboxTextToSpeechEngine(private val application: Application) : TextT
             ?: error("Select a saved reference voice for Chatterbox.")
         cancelled.set(false)
         val inputIds = active.tokenizer.encode(request.text)
-        var peakPssBytes = 0L
-        var availableDeviceMemoryBytes = 0L
-        fun sampleMemory() {
-            peakPssBytes = max(peakPssBytes, Debug.getPss().toLong() * 1_024)
-            val info = ActivityManager.MemoryInfo()
-            application.getSystemService(ActivityManager::class.java).getMemoryInfo(info)
-            availableDeviceMemoryBytes = info.availMem
-        }
-        sampleMemory()
+        val memory = ChatterboxMemorySampler(application)
+        memory.sample()
 
         val cacheHit = active.conditioning?.referenceId == reference.referenceId
         var conditioningMs = 0L
@@ -143,7 +137,7 @@ class ChatterboxTextToSpeechEngine(private val application: Application) : TextT
             active.conditioning?.close()
             active.conditioning = Conditioning(reference.referenceId, checkNotNull(encoded))
         }
-        sampleMemory()
+        memory.sample()
         checkNotCancelled()
         val conditioning = checkNotNull(active.conditioning)
 
@@ -253,7 +247,6 @@ class ChatterboxTextToSpeechEngine(private val application: Application) : TextT
                 }
             }
             checkNotCancelled()
-            sampleMemory()
 
             val prompt = conditioning.result.tensor(1).longValues()
             val bodyEnd = max(1, generated.size - 1)
@@ -280,10 +273,11 @@ class ChatterboxTextToSpeechEngine(private val application: Application) : TextT
                         ),
                     ).use { decoded ->
                         samples = decoded.tensor(0).floatValues()
-                        sampleMemory()
+                        memory.sample()
                     }
                 }
             }
+            memory.sample()
             checkNotCancelled()
             require(samples.isNotEmpty()) { "Chatterbox returned no audio." }
             if (!onAudioChunk(samples)) {
@@ -299,8 +293,8 @@ class ChatterboxTextToSpeechEngine(private val application: Application) : TextT
                     decoderDurationMs = decoderMs,
                     generatedTokenCount = generated.size - 1,
                     conditioningCacheHit = cacheHit,
-                    peakProcessPssBytes = peakPssBytes,
-                    availableDeviceMemoryBytes = availableDeviceMemoryBytes,
+                    peakProcessPssBytes = memory.peakPssBytes,
+                    availableDeviceMemoryBytes = memory.availableDeviceMemoryBytes,
                 ),
             )
         } finally {
@@ -449,5 +443,21 @@ class ChatterboxTextToSpeechEngine(private val application: Application) : TextT
         const val EMBED_TOKENS = "embed_tokens_q4.onnx"
         const val LANGUAGE_MODEL = "language_model_q4.onnx"
         const val SPEECH_ENCODER = "speech_encoder_q4.onnx"
+    }
+}
+
+private class ChatterboxMemorySampler(
+    private val application: Application,
+) {
+    var peakPssBytes: Long = 0
+        private set
+    var availableDeviceMemoryBytes: Long = 0
+        private set
+
+    fun sample() {
+        peakPssBytes = max(peakPssBytes, Debug.getPss().toLong() * 1_024)
+        val info = ActivityManager.MemoryInfo()
+        application.getSystemService(ActivityManager::class.java).getMemoryInfo(info)
+        availableDeviceMemoryBytes = info.availMem
     }
 }

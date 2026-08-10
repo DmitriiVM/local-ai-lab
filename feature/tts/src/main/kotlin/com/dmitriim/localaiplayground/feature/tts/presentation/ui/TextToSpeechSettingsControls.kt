@@ -18,17 +18,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffects
-import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechUiState
 import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechUiState
 
 @Composable
 internal fun TextToSpeechSettings(
-    state: TextToSpeechUiState, enabled: Boolean, onSpeedChange: (Float) -> Unit,
-    onSentenceSilenceChange: (Float) -> Unit, onVolumeChange: (Float) -> Unit,
+    state: TextToSpeechUiState,
+    enabled: Boolean,
+    onSpeedChange: (Float) -> Unit,
+    onSentenceSilenceChange: (Float) -> Unit,
+    onVolumeChange: (Float) -> Unit,
     onThreadCountChange: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -47,9 +50,15 @@ internal fun TextToSpeechSettings(
 
 @Composable
 internal fun TextToSpeechAudioEffectsSettings(
-    state: TextToSpeechUiState, enabled: Boolean, onPitchChange: (Float) -> Unit,
-    onFormantChange: (Float) -> Unit, onLowEqChange: (Float) -> Unit, onMidEqChange: (Float) -> Unit,
-    onHighEqChange: (Float) -> Unit, onSaturationChange: (Float) -> Unit, onReset: () -> Unit,
+    state: TextToSpeechUiState,
+    enabled: Boolean,
+    onPitchChange: (Float) -> Unit,
+    onFormantChange: (Float) -> Unit,
+    onLowEqChange: (Float) -> Unit,
+    onMidEqChange: (Float) -> Unit,
+    onHighEqChange: (Float) -> Unit,
+    onSaturationChange: (Float) -> Unit,
+    onReset: () -> Unit,
 ) {
     val effects = state.audioEffects
     var expanded by remember { mutableStateOf(false) }

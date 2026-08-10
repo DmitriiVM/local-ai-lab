@@ -19,18 +19,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.result.StatusMessage
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantInputMode
 import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantUiState
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatSettings
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechInputSettings
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechOutputSettings
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun AssistantScreen(
@@ -122,60 +122,91 @@ fun AssistantScreen(
         )
     }
 
+    AssistantSettingsSheets(
+        activeSheet, uiState, onSelectMode, onApplyChatSettings, onApplySpeechInputSettings,
+        onApplySpeechOutputSettings, onPreviewVoice, onUnloadChatModel, onOpenModels,
+    ) { activeSheet = null }
+    ClearConversationDialog(showClearConfirmation, { showClearConfirmation = false }) {
+        onClearConversation()
+        showClearConfirmation = false
+    }
+}
+
+@Composable
+private fun AssistantSettingsSheets(
+    activeSheet: AssistantSettingsSheet?,
+    uiState: AssistantUiState,
+    onSelectMode: (AssistantInputMode) -> Unit,
+    onApplyChatSettings: (ModelId, ChatSettings) -> String?,
+    onApplySpeechInputSettings: (ModelId, SpeechInputSettings) -> String?,
+    onApplySpeechOutputSettings: (ModelId, String, SpeechOutputSettings) -> String?,
+    onPreviewVoice: (ModelId, String, SpeechOutputSettings) -> String?,
+    onUnloadChatModel: () -> Unit,
+    onOpenModels: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     when (activeSheet) {
-        AssistantSettingsSheet.CHAT -> AssistantChatSettingsSheet(
-            models = uiState.chatModels,
-            selectedModelId = uiState.selectedChatModelId,
-            settings = uiState.chatSettings,
-            enabled = uiState.isIdle,
-            onApply = onApplyChatSettings,
-            onUnload = onUnloadChatModel,
-            onOpenModels = onOpenModels,
-            onDismiss = { activeSheet = null },
-        )
-        AssistantSettingsSheet.LISTEN -> AssistantListenSettingsSheet(
-            models = uiState.speechModels,
-            selectedModelId = uiState.selectedSpeechModelId,
-            settings = uiState.speechInputSettings,
-            enabled = uiState.isIdle,
-            onApply = onApplySpeechInputSettings,
-            onOpenModels = onOpenModels,
-            onDismiss = { activeSheet = null },
-        )
-        AssistantSettingsSheet.SPEAK -> AssistantSpeakSettingsSheet(
-            models = uiState.voiceModels,
-            selectedModelId = uiState.selectedVoiceModelId,
-            selectedVoiceId = uiState.selectedVoiceId,
-            settings = uiState.speechOutputSettings,
-            enabled = uiState.isIdle,
-            onApply = onApplySpeechOutputSettings,
-            onPreview = onPreviewVoice,
-            onOpenModels = onOpenModels,
-            onDismiss = { activeSheet = null },
-        )
-        AssistantSettingsSheet.INPUT_MODE -> AssistantInputModeSettingsSheet(
-            selectedMode = uiState.inputMode,
-            enabled = uiState.isIdle,
-            onSelectMode = onSelectMode,
-            onDismiss = { activeSheet = null },
-        )
+        AssistantSettingsSheet.CHAT -> {
+            AssistantChatSettingsSheet(
+                models = uiState.chatModels,
+                selectedModelId = uiState.selectedChatModelId,
+                settings = uiState.chatSettings,
+                enabled = uiState.isIdle,
+                onApply = onApplyChatSettings,
+                onUnload = onUnloadChatModel,
+                onOpenModels = onOpenModels,
+                onDismiss = onDismiss,
+            )
+        }
+        AssistantSettingsSheet.LISTEN -> {
+            AssistantListenSettingsSheet(
+                models = uiState.speechModels,
+                selectedModelId = uiState.selectedSpeechModelId,
+                settings = uiState.speechInputSettings,
+                enabled = uiState.isIdle,
+                onApply = onApplySpeechInputSettings,
+                onOpenModels = onOpenModels,
+                onDismiss = onDismiss,
+            )
+        }
+        AssistantSettingsSheet.SPEAK -> {
+            AssistantSpeakSettingsSheet(
+                models = uiState.voiceModels,
+                selectedModelId = uiState.selectedVoiceModelId,
+                selectedVoiceId = uiState.selectedVoiceId,
+                settings = uiState.speechOutputSettings,
+                enabled = uiState.isIdle,
+                onApply = onApplySpeechOutputSettings,
+                onPreview = onPreviewVoice,
+                onOpenModels = onOpenModels,
+                onDismiss = onDismiss,
+            )
+        }
+        AssistantSettingsSheet.INPUT_MODE -> {
+            AssistantInputModeSettingsSheet(
+                selectedMode = uiState.inputMode,
+                enabled = uiState.isIdle,
+                onSelectMode = onSelectMode,
+                onDismiss = onDismiss,
+            )
+        }
         null -> Unit
     }
+}
 
-    if (showClearConfirmation) {
+@Composable
+private fun ClearConversationDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    if (show) {
         AlertDialog(
-            onDismissRequest = { showClearConfirmation = false },
+            onDismissRequest = onDismiss,
             title = { Text(stringResource(CoreUiR.string.assistant_assistant_screen_16)) },
             text = { Text(stringResource(CoreUiR.string.assistant_assistant_screen_17)) },
             confirmButton = {
                 TextButton(
-                    onClick = {
-                        onClearConversation()
-                        showClearConfirmation = false
-                    },
+                    onClick = onConfirm,
                 ) { Text(stringResource(CoreUiR.string.assistant_assistant_screen_18)) }
             },
-            dismissButton = { TextButton(onClick = { showClearConfirmation = false }) { Text(stringResource(CoreUiR.string.assistant_assistant_screen_19)) } },
+            dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.assistant_assistant_screen_19)) } },
         )
     }
 }

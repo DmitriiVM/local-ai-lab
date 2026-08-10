@@ -38,20 +38,7 @@ class MicrophoneCapture(private val application: Application) {
         onLevel: (AudioLevel) -> Unit,
     ): PcmAudioInput =
         withContext(Dispatchers.IO) {
-            check(
-                application.checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
-                    PackageManager.PERMISSION_GRANTED,
-            ) {
-                "Microphone permission is required before recording."
-            }
-            val minBufferBytes = AudioRecord.getMinBufferSize(
-                sampleRateHz,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-            )
-            require(minBufferBytes > 0) {
-                "This device cannot capture mono PCM audio at $sampleRateHz Hz."
-            }
+            val minBufferBytes = requiredBufferSize(sampleRateHz)
             Log.i(
                 TAG,
                 "Microphone capture preparing: sampleRateHz=$sampleRateHz, minBufferBytes=$minBufferBytes",
@@ -128,6 +115,19 @@ class MicrophoneCapture(private val application: Application) {
         Log.i(TAG, "Microphone capture stop requested.")
         capturing = false
         activeRecord?.let { record -> runCatching { record.stop() } }
+    }
+
+    private fun requiredBufferSize(sampleRateHz: Int): Int {
+        check(application.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            "Microphone permission is required before recording."
+        }
+        return AudioRecord.getMinBufferSize(
+            sampleRateHz,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
+        ).also { size ->
+            require(size > 0) { "This device cannot capture mono PCM audio at $sampleRateHz Hz." }
+        }
     }
 }
 

@@ -15,11 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantInputMode
-import androidx.compose.ui.res.stringResource
 import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantInputMode
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +37,8 @@ internal fun AssistantInputModeSettingsSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(stringResource(CoreUiR.string.assistant_assistant_input_mode_settings_sheet_10), style = MaterialTheme.typography.headlineSmall)
-            Text(stringResource(CoreUiR.string.assistant_assistant_input_mode_settings_sheet_11),
+            Text(
+                stringResource(CoreUiR.string.assistant_assistant_input_mode_settings_sheet_11),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

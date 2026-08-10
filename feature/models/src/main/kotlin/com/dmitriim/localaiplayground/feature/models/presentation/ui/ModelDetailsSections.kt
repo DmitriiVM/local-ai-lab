@@ -22,8 +22,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.model.library.ModelCompatibilityState
 import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
@@ -35,11 +35,11 @@ import com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode
 import com.dmitriim.localaiplayground.core.model.manifest.TtsControl
 import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localaiplayground.core.result.StatusMessage
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelValidationFeedback
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
 import java.text.DateFormat
 import java.util.Date
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun CapabilityDetails(manifest: ModelManifest) {

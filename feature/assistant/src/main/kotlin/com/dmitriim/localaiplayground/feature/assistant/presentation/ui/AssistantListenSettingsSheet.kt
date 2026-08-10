@@ -21,14 +21,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.component.OptionPickerItem
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechInputSettings
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechModelOption
 import com.dmitriim.localaiplayground.feature.assistant.presentation.normalizeLanguageCode
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,82 +86,97 @@ internal fun AssistantListenSettingsSheet(
                 onBack = { selectingRecognitionModel = false },
             )
         } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .imePadding()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 20.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                AssistantSettingsSheetHeader(
-                    title = stringResource(CoreUiR.string.ui_copy_22),
-                    description = stringResource(CoreUiR.string.ui_description_4),
+            ListenSettingsContent(
+                models = models,
+                draftModelId = draftModelId,
+                draft = draft,
+                languages = languages,
+                enabled = enabled,
+                error = error,
+                onChooseModel = { selectingRecognitionModel = true },
+                onDraftChange = { candidate ->
+                    draft = candidate
+                    commit(draftModelId, candidate)
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ListenSettingsContent(
+    models: List<SpeechModelOption>,
+    draftModelId: ModelId?,
+    draft: SpeechInputSettings,
+    languages: List<AssistantLanguage>,
+    enabled: Boolean,
+    error: String?,
+    onChooseModel: () -> Unit,
+    onDraftChange: (SpeechInputSettings) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .imePadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        AssistantSettingsSheetHeader(
+            title = stringResource(CoreUiR.string.ui_copy_22),
+            description = stringResource(CoreUiR.string.ui_description_4),
+        )
+        AssistantSettingsSection("Model")
+        AssistantInSheetModelPicker(
+            label = stringResource(CoreUiR.string.ui_copy_23),
+            items = models.map {
+                OptionPickerItem(
+                    id = it.id.value,
+                    label = it.displayName,
+                    supportingText = it.languages.joinToString(),
+                    installed = it.installed,
                 )
-                AssistantSettingsSection("Model")
-                AssistantInSheetModelPicker(
-                    label = stringResource(CoreUiR.string.ui_copy_23),
-                    items = models.map {
-                        OptionPickerItem(
-                            id = it.id.value,
-                            label = it.displayName,
-                            supportingText = it.languages.joinToString(),
-                            installed = it.installed,
-                        )
-                    },
-                    selectedId = draftModelId?.value,
+            },
+            selectedId = draftModelId?.value,
+            enabled = enabled,
+            onClick = onChooseModel,
+        )
+        ListenLanguageSettings(languages, draft, enabled, onDraftChange)
+        ListenPerformanceSettings(draft, enabled, error, onDraftChange)
+    }
+}
+
+@Composable
+private fun ListenLanguageSettings(
+    languages: List<AssistantLanguage>,
+    draft: SpeechInputSettings,
+    enabled: Boolean,
+    onDraftChange: (SpeechInputSettings) -> Unit,
+) {
+    AssistantSettingsSection("Recognition")
+    Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_12), style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
+    languages.chunked(3).forEach { row ->
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            row.forEach { language ->
+                FilterChip(
+                    selected = draft.languageCode == language.code,
+                    onClick = { onDraftChange(draft.copy(languageCode = language.code)) },
                     enabled = enabled,
-                    onClick = { selectingRecognitionModel = true },
+                    label = { Text(stringResource(language.labelRes)) },
                 )
-                AssistantSettingsSection("Recognition")
-                Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_12), style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    languages.take(3).forEach { language ->
-                        FilterChip(
-                            selected = draft.languageCode == language.code,
-                            onClick = {
-                                draft = draft.copy(languageCode = language.code).also { candidate -> commit(draftModelId, candidate) }
-                            },
-                            enabled = enabled,
-                            label = { Text(stringResource(language.labelRes)) },
-                        )
-                    }
-                }
-                if (languages.size > 3) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        languages.drop(3).forEach { language ->
-                            FilterChip(
-                                selected = draft.languageCode == language.code,
-                                onClick = {
-                                    draft = draft.copy(languageCode = language.code).also { candidate -> commit(draftModelId, candidate) }
-                                },
-                                enabled = enabled,
-                                label = { Text(stringResource(language.labelRes)) },
-                            )
-                        }
-                    }
-                }
-                AssistantSettingsSection("Performance")
-                OutlinedTextField(
-                    value = draft.threadCount,
-                    onValueChange = {
-                        draft = draft.copy(threadCount = it.filter(Char::isDigit)).also { candidate -> commit(draftModelId, candidate) }
-                    },
-                    label = { Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_13)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    enabled = enabled,
-                )
-                error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(
-                        onClick = { draft = SpeechInputSettings().also { candidate -> commit(draftModelId, candidate) } },
-                        enabled = enabled,
-                    ) { Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_14)) }
-                }
             }
         }
+    }
+}
+
+@Composable
+private fun ListenPerformanceSettings(draft: SpeechInputSettings, enabled: Boolean, error: String?, onDraftChange: (SpeechInputSettings) -> Unit) {
+    AssistantSettingsSection("Performance")
+    OutlinedTextField(draft.threadCount, { onDraftChange(draft.copy(threadCount = it.filter(Char::isDigit))) }, label = { Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_13)) }, modifier = Modifier.fillMaxWidth(), singleLine = true, enabled = enabled)
+    error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextButton(onClick = { onDraftChange(SpeechInputSettings()) }, enabled = enabled) { Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_14)) }
     }
 }
 

@@ -277,6 +277,7 @@ internal class AssistantOperationController(
         }
     }
 
+    @Suppress("LongMethod") // This serializes the state transitions of a single assistant operation.
     private suspend fun generateInternal(base: List<ChatMessage>, userText: String, appendUser: Boolean, speakAfter: Boolean): GenerationOutcome {
         val snapshot = state.value
         val selectedId = snapshot.selectedChatModelId ?: error("Select an installed chat model first.")

@@ -51,64 +51,10 @@ class PlatformAudioDecoder(private val application: Application) {
                     it.configure(format, null, null, 0)
                     it.start()
                 }
-            var inputEnded = false
-            var outputEnded = false
-            val info = MediaCodec.BufferInfo()
-            var writer: PcmResamplingWriter? = null
             BufferedOutputStream(FileOutputStream(output)).use { stream ->
-                while (!outputEnded) {
-                    if (!inputEnded) {
-                        val index = codec.dequeueInputBuffer(CODEC_TIMEOUT_US)
-                        if (index >= 0) {
-                            val buffer = requireNotNull(codec.getInputBuffer(index))
-                            val size = extractor.readSampleData(buffer, 0)
-                            if (size < 0) {
-                                codec.queueInputBuffer(
-                                    index,
-                                    0,
-                                    0,
-                                    0,
-                                    MediaCodec.BUFFER_FLAG_END_OF_STREAM,
-                                )
-                                inputEnded = true
-                            } else {
-                                codec.queueInputBuffer(index, 0, size, extractor.sampleTime, 0)
-                                extractor.advance()
-                            }
-                        }
-                    }
-                    when (val index = codec.dequeueOutputBuffer(info, CODEC_TIMEOUT_US)) {
-                        MediaCodec.INFO_OUTPUT_FORMAT_CHANGED ->
-                            writer =
-                                PcmResamplingWriter(stream, codec.outputFormat, targetRateHz)
-                        MediaCodec.INFO_TRY_AGAIN_LATER -> Unit
-                        else -> if (index >= 0) {
-                            if (info.size > 0) {
-                                val activeWriter =
-                                    requireNotNull(writer) {
-                                        "Audio decoder produced samples before its output format."
-                                    }
-                                val buffer = requireNotNull(
-                                    codec.getOutputBuffer(index),
-                                ).duplicate().apply {
-                                    position(info.offset)
-                                    limit(info.offset + info.size)
-                                }
-                                activeWriter.write(buffer)
-                            }
-                            codec.releaseOutputBuffer(index, false)
-                            if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM !=
-                                0
-                            ) {
-                                outputEnded = true
-                            }
-                        }
-                    }
-                }
+                val frames = decodeStream(extractor, codec, stream, targetRateHz)
                 return DecodedAudio(
-                    requireNotNull(writer) {
-                        "No decoded PCM was produced."
-                    }.writtenFrames,
+                    frames,
                     mime,
                 ).also {
                     Log.i(
@@ -125,6 +71,53 @@ class PlatformAudioDecoder(private val application: Application) {
             codec?.release()
             extractor.release()
         }
+    }
+
+    private fun decodeStream(
+        extractor: MediaExtractor,
+        codec: MediaCodec,
+        stream: BufferedOutputStream,
+        targetRateHz: Int,
+    ): Long {
+        var inputEnded = false
+        var outputEnded = false
+        val info = MediaCodec.BufferInfo()
+        var writer: PcmResamplingWriter? = null
+        while (!outputEnded) {
+            inputEnded = inputEnded || queueDecoderInput(extractor, codec)
+            when (val index = codec.dequeueOutputBuffer(info, CODEC_TIMEOUT_US)) {
+                MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> writer = PcmResamplingWriter(stream, codec.outputFormat, targetRateHz)
+                MediaCodec.INFO_TRY_AGAIN_LATER -> Unit
+                else -> if (index >= 0) {
+                    if (info.size > 0) writeDecodedBuffer(codec, index, info, requireNotNull(writer) { "Audio decoder produced samples before its output format." })
+                    codec.releaseOutputBuffer(index, false)
+                    outputEnded = info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0
+                }
+            }
+        }
+        return requireNotNull(writer) { "No decoded PCM was produced." }.writtenFrames
+    }
+
+    private fun queueDecoderInput(extractor: MediaExtractor, codec: MediaCodec): Boolean {
+        val index = codec.dequeueInputBuffer(CODEC_TIMEOUT_US)
+        if (index < 0) return false
+        val buffer = requireNotNull(codec.getInputBuffer(index))
+        val size = extractor.readSampleData(buffer, 0)
+        if (size < 0) {
+            codec.queueInputBuffer(index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+            return true
+        }
+        codec.queueInputBuffer(index, 0, size, extractor.sampleTime, 0)
+        extractor.advance()
+        return false
+    }
+
+    private fun writeDecodedBuffer(codec: MediaCodec, index: Int, info: MediaCodec.BufferInfo, writer: PcmResamplingWriter) {
+        val buffer = requireNotNull(codec.getOutputBuffer(index)).duplicate().apply {
+            position(info.offset)
+            limit(info.offset + info.size)
+        }
+        writer.write(buffer)
     }
 
     private companion object {

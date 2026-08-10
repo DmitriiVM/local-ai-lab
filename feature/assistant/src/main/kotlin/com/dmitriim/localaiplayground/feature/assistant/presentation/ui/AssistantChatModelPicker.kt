@@ -1,11 +1,11 @@
 package com.dmitriim.localaiplayground.feature.assistant.presentation.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.component.OptionPickerItem
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatModelOption
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun AssistantChatModelPicker(

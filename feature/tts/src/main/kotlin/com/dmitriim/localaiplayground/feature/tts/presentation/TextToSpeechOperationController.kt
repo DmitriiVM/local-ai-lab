@@ -2,12 +2,12 @@ package com.dmitriim.localaiplayground.feature.tts.presentation
 
 import android.net.Uri
 import android.util.Log
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
-import com.dmitriim.localaiplayground.core.ui.text.UiText
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoiceStore
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.core.ui.text.UiText
 import com.dmitriim.localaiplayground.core.voice.tts.PreviewSpeech
 import com.dmitriim.localaiplayground.core.voice.tts.SpeechPreviewRequest
 import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisEvent
@@ -232,19 +232,7 @@ internal class TextToSpeechOperationController(
         val runId = UUID.randomUUID().toString()
         val model = snapshot.selectedModel
         Log.i(TAG, "TTS UI synthesis started: model=${model?.displayName}, textLength=${snapshot.text.length}, language=${snapshot.language.code}, voice=${voice.id}, speaker=${voice.speakerId}, speed=${snapshot.speed}, silenceScale=${snapshot.sentenceSilenceScale}, volume=${snapshot.volume}, threads=$threads, audioEffects=${snapshot.audioEffects}")
-        state.update {
-            it.copy(
-                operation = TtsOperation.SYNTHESIZING,
-                previewVoiceId = null,
-                metrics = null,
-                errorMessage = null,
-                statusMessage = when {
-                    snapshot.usesReferenceVoice -> UiText.Resource(CoreUiR.string.tts_status_generating_chatterbox)
-                    snapshot.usesPlatformVoice -> UiText.Resource(CoreUiR.string.tts_status_synthesizing_platform)
-                    else -> UiText.Resource(CoreUiR.string.tts_status_synthesizing_pcm)
-                },
-            )
-        }
+        beginSynthesis(snapshot)
         operationJob = scope.launch(Dispatchers.Default) {
             try {
                 synthesizeSpeech.execute(
@@ -302,6 +290,22 @@ internal class TextToSpeechOperationController(
     fun pausePlayback() {
         Log.i(TAG, "TTS UI pause requested.")
         synthesizeSpeech.pausePlayback()
+    }
+
+    private fun beginSynthesis(snapshot: TextToSpeechUiState) {
+        state.update {
+            it.copy(
+                operation = TtsOperation.SYNTHESIZING,
+                previewVoiceId = null,
+                metrics = null,
+                errorMessage = null,
+                statusMessage = when {
+                    snapshot.usesReferenceVoice -> UiText.Resource(CoreUiR.string.tts_status_generating_chatterbox)
+                    snapshot.usesPlatformVoice -> UiText.Resource(CoreUiR.string.tts_status_synthesizing_platform)
+                    else -> UiText.Resource(CoreUiR.string.tts_status_synthesizing_pcm)
+                },
+            )
+        }
     }
 
     fun resumePlayback() {

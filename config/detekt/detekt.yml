@@ -7,9 +7,9 @@ complexity:
   CyclomaticComplexMethod:
     allowedComplexity: 35
   LargeClass:
-    allowedLines: 1200
+    allowedLines: 450
   LongMethod:
-    allowedLines: 220
+    allowedLines: 80
   NestedBlockDepth:
     allowedDepth: 8
   TooManyFunctions:

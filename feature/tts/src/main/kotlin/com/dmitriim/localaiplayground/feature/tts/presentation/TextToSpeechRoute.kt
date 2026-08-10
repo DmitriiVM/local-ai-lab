@@ -13,15 +13,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localaiplayground.core.navigation.AppNavigator
 import com.dmitriim.localaiplayground.core.navigation.NavigationTarget
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.feature.tts.presentation.ui.TextToSpeechScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import java.io.File
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun TextToSpeechRoute(
@@ -47,14 +47,42 @@ fun TextToSpeechRoute(
     }
     var consentAction by remember { mutableStateOf<ReferenceConsentAction?>(null) }
 
+    TextToSpeechRouteContent(
+        state = state,
+        viewModel = viewModel,
+        context = context,
+        onRecordReference = { consentAction = ReferenceConsentAction.RECORD },
+        onImportReference = { consentAction = ReferenceConsentAction.IMPORT },
+        onExport = { exporter.launch(state.output?.displayName ?: "local-ai-speech.wav") },
+        onProfile = { if (viewModel.prepareProfile()) navigator.navigate(NavigationTarget.BENCHMARK) },
+    )
+    ReferenceConsentDialog(consentAction, onDismiss = { consentAction = null }) { action ->
+        consentAction = null
+        when (action) {
+            ReferenceConsentAction.RECORD -> microphonePermission.launch(Manifest.permission.RECORD_AUDIO)
+            ReferenceConsentAction.IMPORT -> referencePicker.launch(arrayOf("audio/*"))
+        }
+    }
+}
+
+@Composable
+private fun TextToSpeechRouteContent(
+    state: TextToSpeechUiState,
+    viewModel: TextToSpeechViewModel,
+    context: android.content.Context,
+    onRecordReference: () -> Unit,
+    onImportReference: () -> Unit,
+    onExport: () -> Unit,
+    onProfile: () -> Unit,
+) {
     TextToSpeechScreen(
         state = state,
         onSelectModel = viewModel::selectModel,
         onSelectVoice = viewModel::selectVoice,
         onPreviewVoice = viewModel::previewVoice,
-        onRecordReference = { consentAction = ReferenceConsentAction.RECORD },
+        onRecordReference = onRecordReference,
         onStopReferenceRecording = viewModel::stopReferenceRecording,
-        onImportReference = { consentAction = ReferenceConsentAction.IMPORT },
+        onImportReference = onImportReference,
         onDeleteReference = viewModel::deleteReferenceVoice,
         onTextChange = viewModel::updateText,
         onSelectLanguage = viewModel::selectLanguage,
@@ -71,14 +99,12 @@ fun TextToSpeechRoute(
         onSaturationChange = viewModel::updateSaturation,
         onResetAudioEffects = viewModel::resetAudioEffects,
         onSynthesize = viewModel::synthesize,
-        onProfile = {
-            if (viewModel.prepareProfile()) navigator.navigate(NavigationTarget.BENCHMARK)
-        },
+        onProfile = onProfile,
         onPause = viewModel::pausePlayback,
         onResume = viewModel::resumePlayback,
         onStop = viewModel::stop,
         onReplay = viewModel::replay,
-        onExport = { exporter.launch(state.output?.displayName ?: "local-ai-speech.wav") },
+        onExport = onExport,
         onShare = {
             val output = state.output ?: return@TextToSpeechScreen
             runCatching {
@@ -102,29 +128,30 @@ fun TextToSpeechRoute(
             }
         },
     )
-    consentAction?.let { action ->
+}
+
+@Composable
+private fun ReferenceConsentDialog(
+    action: ReferenceConsentAction?,
+    onDismiss: () -> Unit,
+    onConfirm: (ReferenceConsentAction) -> Unit,
+) {
+    action?.let {
         AlertDialog(
-            onDismissRequest = { consentAction = null },
+            onDismissRequest = onDismiss,
             title = { Text(stringResource(CoreUiR.string.tts_text_to_speech_route_151)) },
             text = {
-                Text(stringResource(CoreUiR.string.tts_text_to_speech_route_152),
+                Text(
+                    stringResource(CoreUiR.string.tts_text_to_speech_route_152),
                 )
             },
             confirmButton = {
                 TextButton(
-                    onClick = {
-                        consentAction = null
-                        when (action) {
-                            ReferenceConsentAction.RECORD ->
-                                microphonePermission.launch(Manifest.permission.RECORD_AUDIO)
-                            ReferenceConsentAction.IMPORT ->
-                                referencePicker.launch(arrayOf("audio/*"))
-                        }
-                    },
+                    onClick = { onConfirm(it) },
                 ) { Text(stringResource(CoreUiR.string.tts_text_to_speech_route_153)) }
             },
             dismissButton = {
-                TextButton(onClick = { consentAction = null }) { Text(stringResource(CoreUiR.string.tts_text_to_speech_route_154)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.tts_text_to_speech_route_154)) }
             },
         )
     }

@@ -45,6 +45,7 @@ import kotlinx.coroutines.withContext
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class, binding = binding<ModelTransfers>())
+@Suppress("LargeClass") // This service owns the cohesive model-transfer lifecycle.
 class ModelTransferService(
     private val application: Application,
     private val installedModels: InstalledModelService,
@@ -321,6 +322,7 @@ class ModelTransferService(
         throw requireNotNull(failure)
     }
 
+    @Suppress("LongMethod") // Resume negotiation and streaming progress are being separated incrementally.
     private suspend fun downloadFile(
         transfer: StoredModelTransfer,
         url: String,
@@ -375,8 +377,7 @@ class ModelTransferService(
                     else -> failDownload(ModelDownloadFailure("Unexpected HTTP $status response.", retryable = false))
                 }
                 val announced = connection.getHeaderFieldLong("Content-Length", -1)
-                val expectedResponseBytes = if (append) expectedBytes - offset else expectedBytes
-                if (announced >= 0 && announced != expectedResponseBytes) {
+                if (announced >= 0 && announced != expectedBytes - if (append) offset else 0L) {
                     failDownload(ModelDownloadFailure("Server response length does not match the catalog.", retryable = false))
                 }
                 val eTag = connection.getHeaderField("ETag")
@@ -396,45 +397,68 @@ class ModelTransferService(
                     return@useResponse
                 }
                 transferState.updateFileValidator(transfer.modelIdAsModelId(), relativePath, eTag, lastModified, verified = false)
-                var current = transfer
-                var written = offset
-                var lastReportedBytes = written
-                var lastReportedAt = System.currentTimeMillis()
-                connection.inputStream.use { input ->
-                    FileOutputStream(destination, append).buffered(FILE_BUFFER_BYTES).use { output ->
-                        val buffer = ByteArray(FILE_BUFFER_BYTES)
-                        while (true) {
-                            ensureRunning(transfer.modelIdAsModelId(), transfer.executionGeneration)
-                            val read = input.read(buffer)
-                            if (read < 0) break
-                            output.write(buffer, 0, read)
-                            written += read
-                            val now = System.currentTimeMillis()
-                            if (written - lastReportedBytes >= PROGRESS_BYTES || now - lastReportedAt >= PROGRESS_INTERVAL_MS) {
-                                current = transferState.updateWhileRunning(
-                                    current,
-                                    completedBytes = completedBeforeFile + written,
-                                    currentRelativePath = relativePath,
-                                    message = null,
-                                ) ?: failDownload(CancellationException("The download was paused."))
-                                lastReportedBytes = written
-                                lastReportedAt = now
-                            }
-                        }
-                    }
-                }
-                if (written != expectedBytes) {
+                val progress = copyDownloadResponse(
+                    transfer,
+                    connection,
+                    destination,
+                    append,
+                    offset,
+                    relativePath,
+                    completedBeforeFile,
+                )
+                if (progress.written != expectedBytes) {
                     failDownload(ModelDownloadFailure("Download ended before the expected size.", retryable = true))
                 }
                 return transferState.updateWhileRunning(
-                    current,
-                    completedBytes = completedBeforeFile + written,
+                    progress.transfer,
+                    completedBytes = completedBeforeFile + progress.written,
                     currentRelativePath = relativePath,
                     message = null,
                 ) ?: failDownload(CancellationException("The download was paused."))
             }
         }
     }
+
+    private suspend fun copyDownloadResponse(
+        initialTransfer: StoredModelTransfer,
+        connection: HttpURLConnection,
+        destination: File,
+        append: Boolean,
+        initialOffset: Long,
+        relativePath: String,
+        completedBeforeFile: Long,
+    ): DownloadProgress {
+        var transfer = initialTransfer
+        var written = initialOffset
+        var lastReportedBytes = written
+        var lastReportedAt = System.currentTimeMillis()
+        connection.inputStream.use { input ->
+            FileOutputStream(destination, append).buffered(FILE_BUFFER_BYTES).use { output ->
+                val buffer = ByteArray(FILE_BUFFER_BYTES)
+                while (true) {
+                    ensureRunning(transfer.modelIdAsModelId(), transfer.executionGeneration)
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    output.write(buffer, 0, read)
+                    written += read
+                    val now = System.currentTimeMillis()
+                    if (written - lastReportedBytes >= PROGRESS_BYTES || now - lastReportedAt >= PROGRESS_INTERVAL_MS) {
+                        transfer = transferState.updateWhileRunning(
+                            transfer,
+                            completedBytes = completedBeforeFile + written,
+                            currentRelativePath = relativePath,
+                            message = null,
+                        ) ?: failDownload(CancellationException("The download was paused."))
+                        lastReportedBytes = written
+                        lastReportedAt = now
+                    }
+                }
+            }
+        }
+        return DownloadProgress(transfer, written)
+    }
+
+    private data class DownloadProgress(val transfer: StoredModelTransfer, val written: Long)
 
     private suspend fun ensureRunning(modelId: ModelId, generation: Long) {
         coroutineContext.ensureActive()

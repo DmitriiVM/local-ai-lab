@@ -37,16 +37,7 @@ class PreviewSpeech(
                     threadCount = request.settings.threadCount,
                 ),
             )
-            val fixedSpeaker = request.settings.voiceCondition as?
-                com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition.FixedSpeaker
-            if (fixedSpeaker != null) {
-                require(
-                    request.settings.expectedSpeakerCount?.let { it == load.speakerCount } != false &&
-                        load.speakerCount?.let { fixedSpeaker.speakerId < it } == true,
-                ) {
-                    "${request.voiceName} is unavailable in the installed ${model.displayName} bundle."
-                }
-            }
+            validateSpeaker(request, model.displayName, load.speakerCount)
             checkNotCancelled()
             val effectsEnabled = !request.settings.audioEffects.isNeutral
             val canStreamImmediately = !effectsEnabled && load.sampleRateHz > 0
@@ -114,6 +105,21 @@ class PreviewSpeech(
         cancelled.set(true)
         textToSpeechEngine.cancel()
         player.stop()
+    }
+
+    private fun validateSpeaker(
+        request: SpeechPreviewRequest,
+        modelName: String,
+        speakerCount: Int?,
+    ) {
+        val speaker = request.settings.voiceCondition as?
+            com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechVoiceCondition.FixedSpeaker ?: return
+        require(
+            request.settings.expectedSpeakerCount?.let { it == speakerCount } != false &&
+                speakerCount?.let { speaker.speakerId < it } == true,
+        ) {
+            "${request.voiceName} is unavailable in the installed $modelName bundle."
+        }
     }
 
     private fun checkNotCancelled() {

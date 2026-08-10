@@ -2,8 +2,6 @@ package com.dmitriim.localaiplayground.feature.tts.presentation
 
 import android.net.Uri
 import android.util.Log
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
-import com.dmitriim.localaiplayground.core.ui.text.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.system.SystemTextToSpeechSupport
@@ -22,6 +20,8 @@ import com.dmitriim.localaiplayground.core.model.service.ModelTransfers
 import com.dmitriim.localaiplayground.core.performance.BenchmarkWorkload
 import com.dmitriim.localaiplayground.core.performance.ProfileLaunchCoordinator
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.core.ui.text.UiText
 import com.dmitriim.localaiplayground.core.voice.tts.PreviewSpeech
 import com.dmitriim.localaiplayground.core.voice.tts.SynthesizeSpeech
 import com.dmitriim.localaiplayground.feature.tts.domain.PersistTtsRun

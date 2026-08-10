@@ -20,15 +20,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationOption
 import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadOption
 import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatModelOption
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatSettings
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +62,6 @@ internal fun AssistantChatSettingsSheet(
         commit(modelId, candidate)
     }
     val selectedModel = models.firstOrNull { it.id == draftModelId }
-    val capabilities = selectedModel?.capabilities
     ModalBottomSheet(onDismissRequest = onDismiss) {
         if (selectingChatModel) {
             AssistantChatModelSelection(
@@ -77,132 +76,138 @@ internal fun AssistantChatSettingsSheet(
                 onBack = { selectingChatModel = false },
             )
         } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .imePadding()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 20.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                AssistantSettingsSheetHeader(
-                    title = stringResource(CoreUiR.string.ui_copy_6),
-                    description = stringResource(CoreUiR.string.ui_description_2),
-                )
-                AssistantSettingsSection("Model")
-                AssistantChatModelPicker(
-                    models = models,
-                    selectedId = draftModelId?.value,
-                    enabled = enabled,
-                    onClick = { selectingChatModel = true },
-                )
-                capabilities?.computePreferences?.takeIf { it.size > 1 }?.let { computePreferences ->
-                    AssistantSettingsModelPicker(
-                        label = stringResource(CoreUiR.string.ui_copy_7),
-                        items = computePreferences.map { preference ->
-                            SettingsModelItem(preference.name, preference.displayName(), installed = true)
-                        },
-                        selectedId = draft.computePreference.name,
-                        onSelect = { value ->
-                            draft = draft.copy(computePreference = ComputePreference.valueOf(value))
-                                .also { candidate -> commit(draftModelId, candidate) }
-                        },
-                        onOpenModels = {},
-                        enabled = enabled,
+            ChatSettingsEditor(
+                models, selectedModel, draftModelId, draft, error, advancedSettingsVisible, enabled,
+                onSelectModel = { selectingChatModel = true },
+                onDraftChange = { candidate ->
+                    draft = candidate
+                    commit(draftModelId, candidate)
+                },
+                onAdvancedVisibilityChange = { advancedSettingsVisible = it },
+                onUnload = onUnload,
+                onReset = {
+                    val context = selectedModel?.defaultContextSize ?: 512
+                    ChatSettings(
+                        computePreference = selectedModel?.supportedComputePreference(ComputePreference.CPU)
+                            ?: ComputePreference.CPU,
+                        contextSize = context.toString(),
                     )
-                }
-                if (capabilities?.systemInstructions == true) {
-                    AssistantSettingsSection("Instructions")
-                    SettingField("System prompt", draft.systemPrompt, enabled) {
-                        draft = draft.copy(systemPrompt = it).also { candidate -> commit(draftModelId, candidate) }
-                    }
-                }
-                val supportsGenerationSettings = capabilities?.generationOptions?.any {
-                    it in setOf(
-                        LlmGenerationOption.TEMPERATURE,
-                        LlmGenerationOption.MAX_OUTPUT_TOKENS,
-                        LlmGenerationOption.TOP_K,
-                        LlmGenerationOption.TOP_P,
-                    )
-                } == true
-                if (supportsGenerationSettings) AssistantSettingsSection("Generation")
-                if (capabilities?.generationOptions?.contains(LlmGenerationOption.TEMPERATURE) == true) {
-                    SettingField("Temperature (0–2)", draft.temperature, enabled) {
-                        draft = draft.copy(temperature = it).also { candidate -> commit(draftModelId, candidate) }
-                    }
-                }
-                if (capabilities?.generationOptions?.contains(LlmGenerationOption.MAX_OUTPUT_TOKENS) == true) {
-                    SettingField("Maximum output tokens", draft.maxOutputTokens, enabled) {
-                        draft = draft.copy(maxOutputTokens = it).also { candidate -> commit(draftModelId, candidate) }
-                    }
-                }
-                if (capabilities?.generationOptions?.contains(LlmGenerationOption.TOP_K) == true) {
-                    SettingField("Top-K (1–200)", draft.topK, enabled) {
-                        draft = draft.copy(topK = it).also { candidate -> commit(draftModelId, candidate) }
-                    }
-                }
-                if (capabilities?.generationOptions?.contains(LlmGenerationOption.TOP_P) == true) {
-                    SettingField("Top-P (0.05–1)", draft.topP, enabled) {
-                        draft = draft.copy(topP = it).also { candidate -> commit(draftModelId, candidate) }
-                    }
-                }
-                if (capabilities?.loadOptions?.contains(LlmLoadOption.CONTEXT_SIZE) == true) {
-                    SettingField("Context size", draft.contextSize, enabled) {
-                        draft = draft.copy(contextSize = it).also { candidate -> commit(draftModelId, candidate) }
-                    }
-                }
-                val hasAdvancedSettings = capabilities?.generationOptions?.contains(LlmGenerationOption.SEED) == true ||
-                    capabilities?.loadOptions?.contains(LlmLoadOption.THREAD_COUNT) == true
-                if (hasAdvancedSettings) {
-                    TextButton(
-                        onClick = { advancedSettingsVisible = !advancedSettingsVisible },
-                        enabled = enabled,
-                    ) {
-                        Text(
-                            stringResource(
-                                if (advancedSettingsVisible) {
-                                    CoreUiR.string.assistant_hide_advanced_settings
-                                } else {
-                                    CoreUiR.string.assistant_show_advanced_settings
-                                },
-                            ),
-                        )
-                    }
-                    if (advancedSettingsVisible) {
-                        AssistantSettingsSection("Advanced")
-                        if (capabilities.generationOptions.contains(LlmGenerationOption.SEED)) {
-                            SettingField("Seed (blank = engine-selected)", draft.seed, enabled) {
-                                draft = draft.copy(seed = it).also { candidate -> commit(draftModelId, candidate) }
-                            }
-                        }
-                        if (capabilities.loadOptions.contains(LlmLoadOption.THREAD_COUNT)) {
-                            SettingField("Thread count (0 = default)", draft.threadCount, enabled) {
-                                draft = draft.copy(threadCount = it).also { candidate -> commit(draftModelId, candidate) }
-                            }
-                        }
-                    }
-                }
-                error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    TextButton(onClick = onUnload, enabled = enabled) { Text(stringResource(CoreUiR.string.assistant_assistant_chat_settings_sheet_2)) }
-                    TextButton(
-                        onClick = {
-                            val model = models.firstOrNull { it.id == draftModelId }
-                            val context = model?.defaultContextSize ?: 512
-                            draft = ChatSettings(
-                                computePreference = model?.supportedComputePreference(ComputePreference.CPU)
-                                    ?: ComputePreference.CPU,
-                                contextSize = context.toString(),
-                            ).also { candidate -> commit(draftModelId, candidate) }
-                        },
-                        enabled = enabled,
-                    ) { Text(stringResource(CoreUiR.string.assistant_assistant_chat_settings_sheet_3)) }
-                }
-            }
+                },
+            )
         }
     }
 }
+
+@Composable
+private fun ChatSettingsEditor(
+    models: List<ChatModelOption>,
+    selectedModel: ChatModelOption?,
+    selectedModelId: ModelId?,
+    draft: ChatSettings,
+    error: String?,
+    advancedVisible: Boolean,
+    enabled: Boolean,
+    onSelectModel: () -> Unit,
+    onDraftChange: (ChatSettings) -> Unit,
+    onAdvancedVisibilityChange: (Boolean) -> Unit,
+    onUnload: () -> Unit,
+    onReset: () -> ChatSettings,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).imePadding()
+            .navigationBarsPadding().padding(horizontal = 20.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        AssistantSettingsSheetHeader(stringResource(CoreUiR.string.ui_copy_6), stringResource(CoreUiR.string.ui_description_2))
+        ChatModelSettings(models, selectedModel, selectedModelId, draft, enabled, onSelectModel, onDraftChange)
+        ChatGenerationSettings(selectedModel, draft, enabled, onDraftChange)
+        ChatAdvancedSettings(selectedModel, draft, advancedVisible, enabled, onAdvancedVisibilityChange, onDraftChange)
+        error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
+        ChatSettingsActions(enabled, onUnload) { onDraftChange(onReset()) }
+    }
+}
+
+@Composable
+private fun ChatModelSettings(
+    models: List<ChatModelOption>,
+    model: ChatModelOption?,
+    selectedModelId: ModelId?,
+    draft: ChatSettings,
+    enabled: Boolean,
+    onSelectModel: () -> Unit,
+    onDraftChange: (ChatSettings) -> Unit,
+) {
+    AssistantSettingsSection("Model")
+    AssistantChatModelPicker(models, selectedModelId?.value, enabled, onSelectModel)
+    model?.capabilities?.computePreferences?.takeIf { it.size > 1 }?.let { preferences ->
+        AssistantSettingsModelPicker(
+            label = stringResource(CoreUiR.string.ui_copy_7),
+            items = preferences.map { SettingsModelItem(it.name, it.displayName(), installed = true) },
+            selectedId = draft.computePreference.name,
+            onSelect = { onDraftChange(draft.copy(computePreference = ComputePreference.valueOf(it))) },
+            onOpenModels = {},
+            enabled = enabled,
+        )
+    }
+}
+
+@Composable
+private fun ChatGenerationSettings(
+    model: ChatModelOption?,
+    draft: ChatSettings,
+    enabled: Boolean,
+    onDraftChange: (ChatSettings) -> Unit,
+) {
+    val capabilities = model?.capabilities ?: return
+    if (capabilities.systemInstructions) {
+        AssistantSettingsSection("Instructions")
+        SettingField("System prompt", draft.systemPrompt, enabled) { onDraftChange(draft.copy(systemPrompt = it)) }
+    }
+    val options = capabilities.generationOptions
+    if (options.any { it in chatGenerationOptions }) AssistantSettingsSection("Generation")
+    if (LlmGenerationOption.TEMPERATURE in options) SettingField("Temperature (0–2)", draft.temperature, enabled) { onDraftChange(draft.copy(temperature = it)) }
+    if (LlmGenerationOption.MAX_OUTPUT_TOKENS in options) SettingField("Maximum output tokens", draft.maxOutputTokens, enabled) { onDraftChange(draft.copy(maxOutputTokens = it)) }
+    if (LlmGenerationOption.TOP_K in options) SettingField("Top-K (1–200)", draft.topK, enabled) { onDraftChange(draft.copy(topK = it)) }
+    if (LlmGenerationOption.TOP_P in options) SettingField("Top-P (0.05–1)", draft.topP, enabled) { onDraftChange(draft.copy(topP = it)) }
+    if (LlmLoadOption.CONTEXT_SIZE in capabilities.loadOptions) SettingField("Context size", draft.contextSize, enabled) { onDraftChange(draft.copy(contextSize = it)) }
+}
+
+@Composable
+private fun ChatAdvancedSettings(
+    model: ChatModelOption?,
+    draft: ChatSettings,
+    visible: Boolean,
+    enabled: Boolean,
+    onVisibilityChange: (Boolean) -> Unit,
+    onDraftChange: (ChatSettings) -> Unit,
+) {
+    val capabilities = model?.capabilities ?: return
+    val canSetSeed = LlmGenerationOption.SEED in capabilities.generationOptions
+    val canSetThreads = LlmLoadOption.THREAD_COUNT in capabilities.loadOptions
+    if (!canSetSeed && !canSetThreads) return
+    TextButton(onClick = { onVisibilityChange(!visible) }, enabled = enabled) {
+        Text(stringResource(if (visible) CoreUiR.string.assistant_hide_advanced_settings else CoreUiR.string.assistant_show_advanced_settings))
+    }
+    if (!visible) return
+    AssistantSettingsSection("Advanced")
+    if (canSetSeed) SettingField("Seed (blank = engine-selected)", draft.seed, enabled) { onDraftChange(draft.copy(seed = it)) }
+    if (canSetThreads) SettingField("Thread count (0 = default)", draft.threadCount, enabled) { onDraftChange(draft.copy(threadCount = it)) }
+}
+
+@Composable
+private fun ChatSettingsActions(enabled: Boolean, onUnload: () -> Unit, onReset: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        TextButton(onClick = onUnload, enabled = enabled) { Text(stringResource(CoreUiR.string.assistant_assistant_chat_settings_sheet_2)) }
+        TextButton(onClick = onReset, enabled = enabled) { Text(stringResource(CoreUiR.string.assistant_assistant_chat_settings_sheet_3)) }
+    }
+}
+
+private val chatGenerationOptions = setOf(
+    LlmGenerationOption.TEMPERATURE,
+    LlmGenerationOption.MAX_OUTPUT_TOKENS,
+    LlmGenerationOption.TOP_K,
+    LlmGenerationOption.TOP_P,
+)
 
 @Composable
 private fun ComputePreference.displayName(): String = when (this) {

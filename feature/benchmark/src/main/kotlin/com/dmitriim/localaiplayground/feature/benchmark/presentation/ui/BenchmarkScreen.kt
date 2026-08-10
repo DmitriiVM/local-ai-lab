@@ -22,18 +22,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.performance.BenchmarkWorkload
 import com.dmitriim.localaiplayground.core.performance.InferenceResourceMetrics
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.benchmark.presentation.BenchmarkLabUiState
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
+@Suppress("LongMethod") // This declarative screen is organized by its visual sections.
 fun BenchmarkScreen(
     state: BenchmarkLabUiState,
     onWarmupsChange: (Int) -> Unit,
@@ -355,19 +356,19 @@ private val BenchmarkWorkload.capability: AiCapability
 
 @Composable
 private fun BenchmarkWorkload.capabilityLabel(): String = stringResource(
-        when (this) {
-            is BenchmarkWorkload.Chat -> CoreUiR.string.benchmark_chat_profile
-            is BenchmarkWorkload.SpeechToText -> CoreUiR.string.benchmark_stt_profile
-            is BenchmarkWorkload.TextToSpeech -> CoreUiR.string.benchmark_tts_profile
-        },
-    )
+    when (this) {
+        is BenchmarkWorkload.Chat -> CoreUiR.string.benchmark_chat_profile
+        is BenchmarkWorkload.SpeechToText -> CoreUiR.string.benchmark_stt_profile
+        is BenchmarkWorkload.TextToSpeech -> CoreUiR.string.benchmark_tts_profile
+    },
+)
 
 @Composable
 private fun BenchmarkWorkload.workloadDescription(): String = when (this) {
-        is BenchmarkWorkload.Chat -> stringResource(CoreUiR.string.benchmark_workload_chat, messages.size)
-        is BenchmarkWorkload.SpeechToText -> stringResource(CoreUiR.string.benchmark_workload_stt, input.displayName, input.durationMs, languageCode)
-        is BenchmarkWorkload.TextToSpeech -> stringResource(CoreUiR.string.benchmark_workload_tts, text.length, languageCode)
-    }
+    is BenchmarkWorkload.Chat -> stringResource(CoreUiR.string.benchmark_workload_chat, messages.size)
+    is BenchmarkWorkload.SpeechToText -> stringResource(CoreUiR.string.benchmark_workload_stt, input.displayName, input.durationMs, languageCode)
+    is BenchmarkWorkload.TextToSpeech -> stringResource(CoreUiR.string.benchmark_workload_tts, text.length, languageCode)
+}
 
 private fun Double?.percentText(): String = this?.let { "%.1f%%".format(it) } ?: "Unavailable"
 

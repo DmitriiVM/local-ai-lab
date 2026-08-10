@@ -9,12 +9,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackState
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
-import androidx.compose.ui.res.stringResource
 import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
@@ -33,7 +33,8 @@ internal fun TextToSpeechPlaybackStatus(playback: SpeechPlaybackState) {
                 ),
                 style = MaterialTheme.typography.titleMedium,
             )
-            Text(stringResource(CoreUiR.string.tts_text_to_speech_status_format_18, formatDuration(playback.positionMs), formatDuration(playback.queuedDurationMs)),
+            Text(
+                stringResource(CoreUiR.string.tts_text_to_speech_status_format_18, formatDuration(playback.positionMs), formatDuration(playback.queuedDurationMs)),
                 fontFamily = FontFamily.Monospace,
             )
             playback.focusMessage?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
@@ -47,7 +48,8 @@ internal fun GeneratedAudioCard(output: GeneratedAudioFile) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(CoreUiR.string.tts_text_to_speech_status_185), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(CoreUiR.string.tts_text_to_speech_status_format_19, formatDuration(output.durationMs), output.sampleRateHz))
-            Text(stringResource(CoreUiR.string.tts_text_to_speech_status_186),
+            Text(
+                stringResource(CoreUiR.string.tts_text_to_speech_status_186),
                 style = MaterialTheme.typography.bodySmall,
             )
         }

@@ -63,39 +63,23 @@ class TranscribeAudio(
             )
             emit(SpeechTranscriptionEvent.Prepared(model.displayName, load.loadDurationMs, load.effectiveThreadCount))
 
-            val transcript = StringBuilder()
-            var segmentCount = 0
-            var processingDurationMs = 0L
-            profile.trace(InferencePhase.TRANSCRIPTION) {
-                audioInputStore.forEachSegment(request.input) { samples ->
-                    val segmentNumber = segmentCount + 1
-                    Log.i(TAG, "STT segment started: number=$segmentNumber, samples=${samples.size}, durationMs=${samples.size * 1_000L / request.input.sampleRateHz}")
-                    val result = speechEngine.transcribe(SpeechToTextRequest(samples, request.input.sampleRateHz))
-                    if (result.text.isNotBlank()) {
-                        if (transcript.isNotEmpty()) transcript.append(' ')
-                        transcript.append(result.text)
-                    }
-                    segmentCount++
-                    processingDurationMs += result.processingDurationMs
-                    Log.i(TAG, "STT segment completed: number=$segmentNumber, processingMs=${result.processingDurationMs}, transcriptLength=${result.text.length}")
-                }
-            }
+            val segments = transcribeSegments(request, profile)
             val totalDurationMs = SystemClock.elapsedRealtime() - startedAt
             Log.i(
                 TAG,
-                "STT transcription completed: segments=$segmentCount, transcriptLength=${transcript.length}, " +
-                    "processingMs=$processingDurationMs, totalMs=$totalDurationMs",
+                "STT transcription completed: segments=${segments.count}, transcriptLength=${segments.transcript.length}, " +
+                    "processingMs=${segments.processingDurationMs}, totalMs=$totalDurationMs",
             )
             val telemetry = profile.finish()
             emit(
                 SpeechTranscriptionEvent.Completed(
-                    transcript = transcript.toString(),
+                    transcript = segments.transcript,
                     metrics = SpeechTranscriptionMetrics(
                         audioDurationMs = request.input.durationMs,
-                        processingDurationMs = processingDurationMs,
+                        processingDurationMs = segments.processingDurationMs,
                         timeToFinalMs = totalDurationMs,
                         realTimeFactor = request.input.durationMs.takeIf { it > 0 }?.let { totalDurationMs.toDouble() / it },
-                        segmentCount = segmentCount,
+                        segmentCount = segments.count,
                         loadDurationMs = load.loadDurationMs,
                         effectiveThreadCount = load.effectiveThreadCount,
                         telemetry = telemetry,
@@ -121,7 +105,37 @@ class TranscribeAudio(
 
     fun unload() = speechEngine.unload()
 
+    private suspend fun transcribeSegments(
+        request: SpeechTranscriptionRequest,
+        profile: com.dmitriim.localaiplayground.core.performance.InferenceProfileSession,
+    ): TranscribedSegments {
+        val transcript = StringBuilder()
+        var count = 0
+        var processingDurationMs = 0L
+        profile.trace(InferencePhase.TRANSCRIPTION) {
+            audioInputStore.forEachSegment(request.input) { samples ->
+                val number = count + 1
+                Log.i(TAG, "STT segment started: number=$number, samples=${samples.size}, durationMs=${samples.size * 1_000L / request.input.sampleRateHz}")
+                val result = speechEngine.transcribe(SpeechToTextRequest(samples, request.input.sampleRateHz))
+                if (result.text.isNotBlank()) {
+                    if (transcript.isNotEmpty()) transcript.append(' ')
+                    transcript.append(result.text)
+                }
+                count++
+                processingDurationMs += result.processingDurationMs
+                Log.i(TAG, "STT segment completed: number=$number, processingMs=${result.processingDurationMs}, transcriptLength=${result.text.length}")
+            }
+        }
+        return TranscribedSegments(transcript.toString(), count, processingDurationMs)
+    }
+
     private companion object {
         const val TAG = "AiP123Stt"
     }
 }
+
+private data class TranscribedSegments(
+    val transcript: String,
+    val count: Int,
+    val processingDurationMs: Long,
+)

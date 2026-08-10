@@ -81,26 +81,7 @@ class GenerateAssistantResponse(
             var streamedTokenCallbacks = 0
             val generation = profile.trace(InferencePhase.DECODE) {
                 chatEngine.generate(
-                    request = LlmGenerationRequest(
-                        prompt = prepared.prompt,
-                        options = LlmGenerationOptions(
-                            maxTokens = request.config.maxOutputTokens.takeIf {
-                                LlmGenerationOption.MAX_OUTPUT_TOKENS in capabilities.generationOptions
-                            },
-                            temperature = request.config.temperature.takeIf {
-                                LlmGenerationOption.TEMPERATURE in capabilities.generationOptions
-                            },
-                            topK = request.config.topK.takeIf {
-                                LlmGenerationOption.TOP_K in capabilities.generationOptions
-                            },
-                            topP = request.config.topP.takeIf {
-                                LlmGenerationOption.TOP_P in capabilities.generationOptions
-                            },
-                            seed = request.config.seed.takeIf {
-                                LlmGenerationOption.SEED in capabilities.generationOptions
-                            },
-                        ),
-                    ),
+                    request = generationRequest(prepared.prompt, request, capabilities),
                     onToken = { token ->
                         streamedTokenCallbacks += 1
                         if (streamedTokenCallbacks == 1) Log.i(CHAT_TAG, "Chat first streamed token callback received: tokenChars=${token.length}")
@@ -124,4 +105,19 @@ class GenerateAssistantResponse(
             profile.finish()
         }
     }.buffer(Channel.UNLIMITED)
+
+    private fun generationRequest(
+        prompt: String,
+        request: ChatGenerationRequest,
+        capabilities: com.dmitriim.localaiplayground.ai.api.llm.LlmEngineCapabilities,
+    ) = LlmGenerationRequest(
+        prompt = prompt,
+        options = LlmGenerationOptions(
+            maxTokens = request.config.maxOutputTokens.takeIf { LlmGenerationOption.MAX_OUTPUT_TOKENS in capabilities.generationOptions },
+            temperature = request.config.temperature.takeIf { LlmGenerationOption.TEMPERATURE in capabilities.generationOptions },
+            topK = request.config.topK.takeIf { LlmGenerationOption.TOP_K in capabilities.generationOptions },
+            topP = request.config.topP.takeIf { LlmGenerationOption.TOP_P in capabilities.generationOptions },
+            seed = request.config.seed.takeIf { LlmGenerationOption.SEED in capabilities.generationOptions },
+        ),
+    )
 }

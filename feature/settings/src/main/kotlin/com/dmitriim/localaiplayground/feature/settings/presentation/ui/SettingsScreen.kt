@@ -25,9 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.component.AppSectionCard
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceCard
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceTone
@@ -38,8 +40,6 @@ import com.dmitriim.localaiplayground.source.settings.MetricDetail
 import com.dmitriim.localaiplayground.source.settings.ModelUnloadPolicy
 import com.dmitriim.localaiplayground.source.settings.ThemePreference
 import com.dmitriim.localaiplayground.source.settings.ThreadCountPolicy
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun SettingsScreen(
@@ -57,23 +57,7 @@ fun SettingsScreen(
 ) {
     val dimensions = LocalAppDimensions.current
     val settings = state.settings
-    if (state.pendingRunHistoryClear) {
-        AlertDialog(
-            onDismissRequest = onDismissClearRunHistory,
-            title = { Text(stringResource(CoreUiR.string.settings_settings_screen_107)) },
-            text = { Text(stringResource(CoreUiR.string.settings_settings_screen_108)) },
-            confirmButton = { OutlinedButton(onClick = onClearRunHistory) { Text(stringResource(CoreUiR.string.settings_settings_screen_109)) } },
-            dismissButton = { OutlinedButton(onClick = onDismissClearRunHistory) { Text(stringResource(CoreUiR.string.settings_settings_screen_110)) } },
-        )
-    }
-    if (state.showHuggingFaceTokenDialog) {
-        HuggingFaceTokenDialog(
-            saving = state.isSavingHuggingFaceToken,
-            error = state.huggingFaceTokenError,
-            onSave = onSaveHuggingFaceToken,
-            onDismiss = onDismissHuggingFaceToken,
-        )
-    }
+    SettingsDialogs(state, onDismissClearRunHistory, onClearRunHistory, onSaveHuggingFaceToken, onDismissHuggingFaceToken)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -87,23 +71,7 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(dimensions.sectionSpacing),
     ) {
         Text(stringResource(CoreUiR.string.settings_settings_screen_111), style = MaterialTheme.typography.headlineMedium)
-        SettingsSurfaceCard(onClick = onOpenDeviceAndRuntimes) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(stringResource(CoreUiR.string.settings_settings_screen_112), style = MaterialTheme.typography.titleMedium)
-                    Text(stringResource(CoreUiR.string.settings_settings_screen_113),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-                Text(stringResource(CoreUiR.string.settings_settings_screen_114), style = MaterialTheme.typography.headlineSmall)
-            }
-        }
+        DeviceAndRuntimeCard(onOpenDeviceAndRuntimes)
         if (settings.showAdvancedControls) {
             SettingsCard("Performance defaults", styled = false) {
                 EnumRadioGroup("Thread policy", settings.threadCountPolicy, ThreadCountPolicy.entries, ThreadCountPolicy::label) { value -> onUpdate { it.copy(threadCountPolicy = value) } }
@@ -159,6 +127,39 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(CoreUiR.string.settings_settings_screen_128)) }
             Text(stringResource(CoreUiR.string.settings_settings_screen_129), style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+@Composable
+private fun SettingsDialogs(
+    state: SettingsUiState,
+    onDismissHistory: () -> Unit,
+    onClearHistory: () -> Unit,
+    onSaveToken: (String) -> Unit,
+    onDismissToken: () -> Unit,
+) {
+    if (state.pendingRunHistoryClear) {
+        AlertDialog(
+            onDismissRequest = onDismissHistory,
+            title = { Text(stringResource(CoreUiR.string.settings_settings_screen_107)) },
+            text = { Text(stringResource(CoreUiR.string.settings_settings_screen_108)) },
+            confirmButton = { OutlinedButton(onClick = onClearHistory) { Text(stringResource(CoreUiR.string.settings_settings_screen_109)) } },
+            dismissButton = { OutlinedButton(onClick = onDismissHistory) { Text(stringResource(CoreUiR.string.settings_settings_screen_110)) } },
+        )
+    }
+    if (state.showHuggingFaceTokenDialog) HuggingFaceTokenDialog(state.isSavingHuggingFaceToken, state.huggingFaceTokenError, onSaveToken, onDismissToken)
+}
+
+@Composable
+private fun DeviceAndRuntimeCard(onClick: () -> Unit) {
+    SettingsSurfaceCard(onClick = onClick) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(stringResource(CoreUiR.string.settings_settings_screen_112), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(CoreUiR.string.settings_settings_screen_113), style = MaterialTheme.typography.bodySmall)
+            }
+            Text(stringResource(CoreUiR.string.settings_settings_screen_114), style = MaterialTheme.typography.headlineSmall)
         }
     }
 }

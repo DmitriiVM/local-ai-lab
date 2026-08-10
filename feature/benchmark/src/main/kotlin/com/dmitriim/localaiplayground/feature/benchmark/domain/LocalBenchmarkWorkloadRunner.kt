@@ -108,44 +108,54 @@ class LocalBenchmarkWorkloadRunner(
                     ),
                 ) { }
             }
-            val telemetry = profile.finish()
-            val rate = generation.generatedTokenCount?.takeIf { generation.generationDurationMs > 0 }
-                ?.toDouble()
-                ?.times(1_000.0 / generation.generationDurationMs)
-            return BenchmarkWorkloadResult(
-                iteration = BenchmarkIterationResult(runId, iteration, telemetry.wallDurationMs, rate, generation.generatedTokenCount, telemetry),
-                model = RunModelSnapshot(model.modelId.value, model.displayName, model.engineId.value, null),
-                input = workload.messages.joinToString("\n") { message -> "${message.role.wireName}: ${message.content}" },
-                output = generation.text,
-                parametersJson = Json.encodeToString(
-                    buildJsonObject {
-                        put("computePreference", workload.computePreference.name)
-                        put("contextSize", workload.contextSize)
-                        put("threadCount", workload.threadCount)
-                        put("maxTokens", workload.maxTokens)
-                    },
-                ),
-                metricsJson = Json.encodeToString(
-                    buildJsonObject {
-                        put("coldStart", load.coldStart)
-                        put("loadDurationMs", load.loadDurationMs)
-                        put("promptTokens", generation.promptTokenCount)
-                        put("promptDurationMs", generation.promptDurationMs)
-                        put("generatedTokens", generation.generatedTokenCount)
-                        put("generationDurationMs", generation.generationDurationMs)
-                        put("generatedTokensPerSecond", rate)
-                        put("timeToFirstTokenMs", generation.firstTokenLatencyMs)
-                        put("totalDurationMs", generation.totalDurationMs)
-                        put("effectiveComputePreference", load.effectiveComputePreference.name)
-                        put("computeDetail", load.diagnostics.computeDetail)
-                        put("fallbackReason", load.diagnostics.fallbackReason)
-                        putInferenceTelemetry(telemetry)
-                    },
-                ),
-            )
+            return chatResult(workload, runId, iteration, model, load, generation, profile.finish())
         } finally {
             profile.finish()
         }
+    }
+
+    private fun chatResult(
+        workload: BenchmarkWorkload.Chat,
+        runId: String,
+        iteration: Int,
+        model: com.dmitriim.localaiplayground.core.model.runtime.ChatModelReference,
+        load: com.dmitriim.localaiplayground.ai.api.llm.LlmLoadResult,
+        generation: com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationResult,
+        telemetry: com.dmitriim.localaiplayground.core.performance.InferenceTelemetry,
+    ): BenchmarkWorkloadResult {
+        val rate = generation.generatedTokenCount?.takeIf { generation.generationDurationMs > 0 }
+            ?.toDouble()?.times(1_000.0 / generation.generationDurationMs)
+        return BenchmarkWorkloadResult(
+            iteration = BenchmarkIterationResult(runId, iteration, telemetry.wallDurationMs, rate, generation.generatedTokenCount, telemetry),
+            model = RunModelSnapshot(model.modelId.value, model.displayName, model.engineId.value, null),
+            input = workload.messages.joinToString("\n") { message -> "${message.role.wireName}: ${message.content}" },
+            output = generation.text,
+            parametersJson = Json.encodeToString(
+                buildJsonObject {
+                    put("computePreference", workload.computePreference.name)
+                    put("contextSize", workload.contextSize)
+                    put("threadCount", workload.threadCount)
+                    put("maxTokens", workload.maxTokens)
+                },
+            ),
+            metricsJson = Json.encodeToString(
+                buildJsonObject {
+                    put("coldStart", load.coldStart)
+                    put("loadDurationMs", load.loadDurationMs)
+                    put("promptTokens", generation.promptTokenCount)
+                    put("promptDurationMs", generation.promptDurationMs)
+                    put("generatedTokens", generation.generatedTokenCount)
+                    put("generationDurationMs", generation.generationDurationMs)
+                    put("generatedTokensPerSecond", rate)
+                    put("timeToFirstTokenMs", generation.firstTokenLatencyMs)
+                    put("totalDurationMs", generation.totalDurationMs)
+                    put("effectiveComputePreference", load.effectiveComputePreference.name)
+                    put("computeDetail", load.diagnostics.computeDetail)
+                    put("fallbackReason", load.diagnostics.fallbackReason)
+                    putInferenceTelemetry(telemetry)
+                },
+            ),
+        )
     }
 
     private fun formatRoleLabeledPrompt(messages: List<LlmChatMessage>): String = buildString {

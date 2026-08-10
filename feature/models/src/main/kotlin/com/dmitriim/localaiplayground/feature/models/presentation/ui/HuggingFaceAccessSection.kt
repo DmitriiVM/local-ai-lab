@@ -4,8 +4,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalUriHandler
-import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
 import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
 import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable

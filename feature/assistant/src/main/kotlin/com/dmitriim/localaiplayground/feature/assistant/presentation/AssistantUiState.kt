@@ -52,6 +52,7 @@ data class AssistantUiState(
                 model.installed && model.capabilities != null
             } == true
     val canDictate: Boolean get() = isIdle && selectedSpeechModel?.installed == true
+
     @get:StringRes
     val voiceConfigurationError: Int?
         get() = when {

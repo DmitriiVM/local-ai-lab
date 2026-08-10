@@ -20,14 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.result.OperationState
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.playground.R
 import com.dmitriim.localaiplayground.feature.playground.presentation.PlaygroundUiState
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun PlaygroundScreen(
@@ -65,7 +65,8 @@ fun PlaygroundScreen(
                     colorFilter = ColorFilter.tint(AssistantPurple),
                 )
                 Text(stringResource(CoreUiR.string.playground_playground_screen_88), style = MaterialTheme.typography.headlineMedium)
-                Text(stringResource(CoreUiR.string.playground_privacy_description),
+                Text(
+                    stringResource(CoreUiR.string.playground_privacy_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),

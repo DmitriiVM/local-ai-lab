@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
@@ -35,9 +34,9 @@ import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
 import com.dmitriim.localaiplayground.core.result.StatusMessage
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun ModelDetailsScreen(
@@ -89,12 +88,14 @@ fun ModelDetailsScreen(
             dismissButton = { OutlinedButton(onClick = onCancelDelete) { Text(stringResource(CoreUiR.string.models_model_details_screen_45)) } },
         )
     }
-    if (uiState.pendingHuggingFaceTokenModelId == modelId) HuggingFaceTokenDialog(
-        saving = uiState.isSavingHuggingFaceToken,
-        error = uiState.huggingFaceTokenError,
-        onSave = onSaveHuggingFaceToken,
-        onDismiss = onDismissHuggingFaceToken,
-    )
+    if (uiState.pendingHuggingFaceTokenModelId == modelId) {
+        HuggingFaceTokenDialog(
+            saving = uiState.isSavingHuggingFaceToken,
+            error = uiState.huggingFaceTokenError,
+            onSave = onSaveHuggingFaceToken,
+            onDismiss = onDismissHuggingFaceToken,
+        )
+    }
 }
 
 @Composable
@@ -133,14 +134,30 @@ private fun ModelDetailsContent(
         ) {
             item { ModelDetailsHeader(manifest, status) }
             uiState.message?.let { message -> item { StatusMessage(stringResource(CoreUiR.string.models_lifecycle), message) } }
-            item { DetailsSection("At a glance") { size?.let { DetailValue("Size", it.toDetailsReadableBytes()) }; DetailValue("Languages", manifest.detailsLanguageSummary()); manifest.approximateRamBytes?.let { DetailValue("Approximate RAM", it.toDetailsReadableBytes()) } } }
-            item { DetailsSection("Model") { DetailValue("Family", manifest.family); DetailValue("Engine", manifest.engineId.value); DetailValue("Format", manifest.format.displayLabel()); manifest.architecture?.let { DetailValue("Architecture", it) }; manifest.quantization?.let { DetailValue("Quantization", it) } } }
+            item {
+                DetailsSection("At a glance") {
+                    size?.let { DetailValue("Size", it.toDetailsReadableBytes()) }
+                    DetailValue("Languages", manifest.detailsLanguageSummary())
+                    manifest.approximateRamBytes?.let { DetailValue("Approximate RAM", it.toDetailsReadableBytes()) }
+                }
+            }
+            item {
+                DetailsSection("Model") {
+                    DetailValue("Family", manifest.family)
+                    DetailValue("Engine", manifest.engineId.value)
+                    DetailValue("Format", manifest.format.displayLabel())
+                    manifest.architecture?.let { DetailValue("Architecture", it) }
+                    manifest.quantization?.let { DetailValue("Quantization", it) }
+                }
+            }
             item { CapabilityDetails(manifest) }
             item { CompatibilityDetails(uiState, manifest.modelId) }
             item { InstallationDetails(installedModel, uiState.validationFeedback[manifest.modelId]) }
             item { ModelSourceDetails(manifest, uriHandler::openUri) }
-            if (catalogModel?.download?.authentication == CatalogDownloadAuthentication.HUGGING_FACE_USER_TOKEN) item {
-                HuggingFaceAccessSection(manifest.source.url, uiState.huggingFaceCredentialStatus, onRequestHuggingFaceToken)
+            if (catalogModel?.download?.authentication == CatalogDownloadAuthentication.HUGGING_FACE_USER_TOKEN) {
+                item {
+                    HuggingFaceAccessSection(manifest.source.url, uiState.huggingFaceCredentialStatus, onRequestHuggingFaceToken)
+                }
             }
             item { TechnicalDetails(manifest, technicalExpanded) { technicalExpanded = !technicalExpanded } }
         }
@@ -151,7 +168,10 @@ private fun ModelDetailsContent(
 private fun ModelDetailsHeader(manifest: ModelManifest, status: String) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(manifest.displayName, style = MaterialTheme.typography.headlineMedium)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { DetailsBadge(manifest.detailsTypeLabel()); DetailsBadge(status) }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            DetailsBadge(manifest.detailsTypeLabel())
+            DetailsBadge(status)
+        }
         Text(
             manifest.description ?: if (manifest.family == "Imported") "User-imported model." else "No description is available for this model.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,

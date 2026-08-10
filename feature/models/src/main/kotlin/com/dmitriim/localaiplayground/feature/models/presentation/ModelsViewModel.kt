@@ -1,7 +1,7 @@
 package com.dmitriim.localaiplayground.feature.models.presentation
 
-import android.util.Log
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.di.AppScope

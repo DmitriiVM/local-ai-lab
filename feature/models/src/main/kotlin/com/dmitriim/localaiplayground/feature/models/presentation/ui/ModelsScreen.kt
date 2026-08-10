@@ -28,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,14 +43,14 @@ import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
+import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
 import com.dmitriim.localaiplayground.core.result.StatusMessage
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceCard
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceTone
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
-import androidx.compose.ui.res.stringResource
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun ModelsScreen(
@@ -76,6 +77,52 @@ fun ModelsScreen(
         .filter { typeFilter.matches(it.manifest) }
         .filter { runtimeFilter == null || it.manifest.engineId.value == runtimeFilter }
         .filter { installationFilter.matches(it) }
+    ModelsList(
+        modelItems = modelItems,
+        runtimeIds = runtimeIds,
+        typeFilter = typeFilter,
+        runtimeFilter = runtimeFilter,
+        installationFilter = installationFilter,
+        transfers = uiState.transfers,
+        credentialStatus = uiState.huggingFaceCredentialStatus,
+        onOpenDetails = onOpenDetails,
+        onDownload = onDownload,
+        onPauseTransfer = onPauseTransfer,
+        onResumeOnWifi = onResumeOnWifi,
+        onCancelTransfer = onCancelTransfer,
+        onDelete = onDelete,
+        onTypeFilterChange = { typeFilter = it },
+        onRuntimeFilterChange = { runtimeFilter = it },
+        onInstallationFilterChange = { installationFilter = it },
+        dimensions = dimensions,
+    )
+    DeleteModelDialog(
+        model = uiState.pendingDelete,
+        onConfirmDelete = onConfirmDelete,
+        onCancelDelete = onCancelDelete,
+    )
+}
+
+@Composable
+private fun ModelsList(
+    modelItems: List<ModelListItem>,
+    runtimeIds: List<EngineId>,
+    typeFilter: ModelTypeFilter,
+    runtimeFilter: String?,
+    installationFilter: ModelInstallationFilter,
+    transfers: Map<ModelId, ModelTransferState>,
+    credentialStatus: HuggingFaceCredentialStatus,
+    onOpenDetails: (ModelId) -> Unit,
+    onDownload: (ModelId) -> Unit,
+    onPauseTransfer: (ModelId) -> Unit,
+    onResumeOnWifi: (ModelId) -> Unit,
+    onCancelTransfer: (ModelId) -> Unit,
+    onDelete: (ModelId) -> Unit,
+    onTypeFilterChange: (ModelTypeFilter) -> Unit,
+    onRuntimeFilterChange: (String?) -> Unit,
+    onInstallationFilterChange: (ModelInstallationFilter) -> Unit,
+    dimensions: com.dmitriim.localaiplayground.core.ui.layout.AppDimensions,
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -100,9 +147,9 @@ fun ModelsScreen(
                 runtimeIds = runtimeIds,
                 runtimeFilter = runtimeFilter,
                 installationFilter = installationFilter,
-                onTypeFilterChange = { typeFilter = it },
-                onRuntimeFilterChange = { runtimeFilter = it },
-                onInstallationFilterChange = { installationFilter = it },
+                onTypeFilterChange = onTypeFilterChange,
+                onRuntimeFilterChange = onRuntimeFilterChange,
+                onInstallationFilterChange = onInstallationFilterChange,
             )
         }
         if (modelItems.isEmpty()) {
@@ -124,8 +171,8 @@ fun ModelsScreen(
                     )
                     is ModelListItem.Catalog -> CatalogModelCard(
                         model = item.model,
-                        transfer = uiState.transfers[item.manifest.modelId],
-                        huggingFaceCredentialStatus = uiState.huggingFaceCredentialStatus,
+                        transfer = transfers[item.manifest.modelId],
+                        huggingFaceCredentialStatus = credentialStatus,
                         onOpenDetails = onOpenDetails,
                         onDownload = onDownload,
                         onPause = onPauseTransfer,
@@ -136,11 +183,19 @@ fun ModelsScreen(
             }
         }
     }
-    uiState.pendingDelete?.let { model ->
+}
+
+@Composable
+private fun DeleteModelDialog(
+    model: InstalledModel?,
+    onConfirmDelete: () -> Unit,
+    onCancelDelete: () -> Unit,
+) {
+    model?.let {
         AlertDialog(
             onDismissRequest = onCancelDelete,
-            title = { Text(stringResource(CoreUiR.string.models_models_screen_format_11, model.manifest.displayName)) },
-            text = { Text(stringResource(CoreUiR.string.models_models_screen_format_12, model.totalBytes.toReadableBytes())) },
+            title = { Text(stringResource(CoreUiR.string.models_models_screen_format_11, it.manifest.displayName)) },
+            text = { Text(stringResource(CoreUiR.string.models_models_screen_format_12, it.totalBytes.toReadableBytes())) },
             confirmButton = { Button(onClick = onConfirmDelete) { Text(stringResource(CoreUiR.string.models_models_screen_71)) } },
             dismissButton = { OutlinedButton(onClick = onCancelDelete) { Text(stringResource(CoreUiR.string.models_models_screen_72)) } },
         )
@@ -478,12 +533,12 @@ private fun ModelCard(
 }
 
 private fun ModelManifest.typeLabelRes(): Int = when {
-        AiCapability.CHAT in capabilities -> CoreUiR.string.models_type_llm
-        AiCapability.TEXT_TO_SPEECH in capabilities -> CoreUiR.string.models_type_tts
-        AiCapability.SPEECH_TO_TEXT in capabilities -> CoreUiR.string.models_type_stt
-        AiCapability.VOICE_ACTIVITY_DETECTION in capabilities -> CoreUiR.string.models_type_vad
-        else -> CoreUiR.string.models_type_model
-    }
+    AiCapability.CHAT in capabilities -> CoreUiR.string.models_type_llm
+    AiCapability.TEXT_TO_SPEECH in capabilities -> CoreUiR.string.models_type_tts
+    AiCapability.SPEECH_TO_TEXT in capabilities -> CoreUiR.string.models_type_stt
+    AiCapability.VOICE_ACTIVITY_DETECTION in capabilities -> CoreUiR.string.models_type_vad
+    else -> CoreUiR.string.models_type_model
+}
 
 @Composable
 private fun ModelManifest.languageSummary(): String {
