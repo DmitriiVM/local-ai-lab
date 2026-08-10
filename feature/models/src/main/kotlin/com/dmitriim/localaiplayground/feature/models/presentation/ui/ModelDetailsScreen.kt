@@ -35,6 +35,7 @@ import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.core.ui.component.HuggingFaceTokenDialog
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
 
@@ -90,6 +91,8 @@ fun ModelDetailsScreen(
     }
     if (uiState.pendingHuggingFaceTokenModelId == modelId) {
         HuggingFaceTokenDialog(
+            instruction = stringResource(CoreUiR.string.models_hugging_face_token_dialog_40),
+            saveLabel = stringResource(CoreUiR.string.models_save_and_download),
             saving = uiState.isSavingHuggingFaceToken,
             error = uiState.huggingFaceTokenError,
             onSave = onSaveHuggingFaceToken,

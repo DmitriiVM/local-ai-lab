@@ -33,6 +33,7 @@ import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.component.AppSectionCard
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceCard
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceTone
+import com.dmitriim.localaiplayground.core.ui.component.HuggingFaceTokenDialog
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.settings.presentation.SettingsUiState
 import com.dmitriim.localaiplayground.source.settings.AppSettings
@@ -148,7 +149,16 @@ private fun SettingsDialogs(
             dismissButton = { OutlinedButton(onClick = onDismissHistory) { Text(stringResource(CoreUiR.string.settings_settings_screen_110)) } },
         )
     }
-    if (state.showHuggingFaceTokenDialog) HuggingFaceTokenDialog(state.isSavingHuggingFaceToken, state.huggingFaceTokenError, onSaveToken, onDismissToken)
+    if (state.showHuggingFaceTokenDialog) {
+        HuggingFaceTokenDialog(
+            instruction = stringResource(CoreUiR.string.settings_hugging_face_token_dialog_104),
+            saveLabel = stringResource(CoreUiR.string.settings_save_token),
+            saving = state.isSavingHuggingFaceToken,
+            error = state.huggingFaceTokenError,
+            onSave = onSaveToken,
+            onDismiss = onDismissToken,
+        )
+    }
 }
 
 @Composable

@@ -1,5 +1,6 @@
-package com.dmitriim.localaiplayground.feature.models.presentation.ui
+package com.dmitriim.localaiplayground.core.ui.component
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -14,10 +15,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.core.ui.R
 
 @Composable
 fun HuggingFaceTokenDialog(
+    instruction: String,
+    saveLabel: String,
     saving: Boolean,
     error: String?,
     onSave: (String) -> Unit,
@@ -26,14 +29,14 @@ fun HuggingFaceTokenDialog(
     var token by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = { if (!saving) onDismiss() },
-        title = { Text(stringResource(CoreUiR.string.models_hugging_face_token_dialog_39)) },
+        title = { Text(stringResource(R.string.hugging_face_token_dialog_title)) },
         text = {
-            androidx.compose.foundation.layout.Column {
-                Text(stringResource(CoreUiR.string.models_hugging_face_token_dialog_40))
+            Column {
+                Text(instruction)
                 OutlinedTextField(
                     value = token,
                     onValueChange = { token = it },
-                    label = { Text(stringResource(CoreUiR.string.models_hugging_face_token_dialog_41)) },
+                    label = { Text(stringResource(R.string.hugging_face_token_dialog_access_token)) },
                     supportingText = error?.let { message -> { Text(message) } },
                     isError = error != null,
                     singleLine = true,
@@ -44,11 +47,13 @@ fun HuggingFaceTokenDialog(
         },
         confirmButton = {
             Button(onClick = { onSave(token) }, enabled = token.isNotBlank() && !saving) {
-                Text(stringResource(if (saving) CoreUiR.string.models_saving else CoreUiR.string.models_save_and_download))
+                Text(if (saving) stringResource(R.string.hugging_face_token_dialog_saving) else saveLabel)
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss, enabled = !saving) { Text(stringResource(CoreUiR.string.models_hugging_face_token_dialog_42)) }
+            OutlinedButton(onClick = onDismiss, enabled = !saving) {
+                Text(stringResource(R.string.hugging_face_token_dialog_cancel))
+            }
         },
     )
 }

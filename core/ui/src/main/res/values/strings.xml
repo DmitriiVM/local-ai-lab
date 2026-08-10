@@ -37,10 +37,7 @@
     <string name="benchmark_benchmark_screen_36" formatted="false">+</string>
     <string name="models_hugging_face_access_section_37" formatted="false">This model requires that you accept its license in Hugging Face before downloading.</string>
     <string name="models_hugging_face_access_section_38" formatted="false">Open access page</string>
-    <string name="models_hugging_face_token_dialog_39" formatted="false">Hugging Face access token</string>
     <string name="models_hugging_face_token_dialog_40" formatted="false">After accepting the model license in Hugging Face, enter a fine-grained read-only token.</string>
-    <string name="models_hugging_face_token_dialog_41" formatted="false">Access token</string>
-    <string name="models_hugging_face_token_dialog_42" formatted="false">Cancel</string>
     <string name="models_model_details_screen_43" formatted="false">This deletes the model files and reclaims about </string>
     <string name="models_model_details_screen_44" formatted="false">Delete</string>
     <string name="models_model_details_screen_45" formatted="false">Cancel</string>
@@ -101,10 +98,7 @@
     <string name="runs_runs_screen_100" formatted="false">Back</string>
     <string name="runs_runs_screen_101" formatted="false">Repeat</string>
     <string name="runs_runs_screen_102" formatted="false">Export JSON</string>
-    <string name="settings_hugging_face_token_dialog_103" formatted="false">Hugging Face access token</string>
     <string name="settings_hugging_face_token_dialog_104" formatted="false">Enter a fine-grained read-only token. The token is encrypted and stored only on this device.</string>
-    <string name="settings_hugging_face_token_dialog_105" formatted="false">Access token</string>
-    <string name="settings_hugging_face_token_dialog_106" formatted="false">Cancel</string>
     <string name="settings_settings_screen_107" formatted="false">Clear run history?</string>
     <string name="settings_settings_screen_108" formatted="false">This removes saved runs, but leaves conversations, installed models, and exported files untouched.</string>
     <string name="settings_settings_screen_109" formatted="false">Clear run history</string>
@@ -130,7 +124,6 @@
     <string name="settings_settings_screen_129" formatted="false">Inference content stays on this device. Model downloads are the only feature that uses network access, and only after you start one.</string>
     <string name="stt_speech_model_picker_130" formatted="false">Speech model</string>
     <string name="stt_speech_to_text_screen_131" formatted="false">Local speech to text</string>
-    <string name="stt_speech_to_text_screen_132" formatted="false">Choose the Android on-device recognizer or an installed speech model. Recording shows live levels, then final text appears after you stop.</string>
     <string name="stt_speech_to_text_screen_133" formatted="false">Language</string>
     <string name="stt_speech_to_text_screen_134" formatted="false">CPU threads (0 = safe default)</string>
     <string name="stt_speech_to_text_screen_135" formatted="false">Profile current audio</string>
@@ -176,7 +169,6 @@
     <string name="tts_text_to_speech_metrics_card_175" formatted="false">Run metrics</string>
     <string name="tts_text_to_speech_model_picker_176" formatted="false">Speech engine / model</string>
     <string name="tts_text_to_speech_screen_177" formatted="false">On-device text to speech</string>
-    <string name="tts_text_to_speech_screen_178" formatted="false">Choose Android’s on-device speech engine or an installed local model. Generated audio can be replayed, processed, shared, and exported as WAV.</string>
     <string name="tts_text_to_speech_screen_179" formatted="false">Expressive tags: [laugh], [chuckle], [cough], [sigh], [whispering], [happy], [angry], [dramatic], and more.</string>
     <string name="tts_text_to_speech_screen_180" formatted="false">Generated output: Not watermarked</string>
     <string name="tts_text_to_speech_screen_181" formatted="false">Language</string>
@@ -213,7 +205,6 @@
     <string name="device_refresh_diagnostics" formatted="false">Refresh diagnostics</string>
     <string name="models_replace_token" formatted="false">Replace token</string>
     <string name="models_configure_token" formatted="false">Configure token</string>
-    <string name="models_saving" formatted="false">Saving…</string>
     <string name="models_save_and_download" formatted="false">Save and download</string>
     <string name="models_hide_technical_details" formatted="false">Hide technical details</string>
     <string name="models_show_technical_details" formatted="false">Show technical details</string>
@@ -222,6 +213,10 @@
     <string name="models_set_up_access" formatted="false">Set up access</string>
     <string name="models_retry" formatted="false">Retry</string>
     <string name="settings_save_token" formatted="false">Save token</string>
+    <string name="hugging_face_token_dialog_title" formatted="false">Hugging Face access token</string>
+    <string name="hugging_face_token_dialog_access_token" formatted="false">Access token</string>
+    <string name="hugging_face_token_dialog_saving" formatted="false">Saving…</string>
+    <string name="hugging_face_token_dialog_cancel" formatted="false">Cancel</string>
     <string name="tts_keep_recording" formatted="false">Keep recording</string>
     <string name="tts_save_reference" formatted="false">Save reference</string>
     <string name="tts_stopping" formatted="false">Stopping…</string>

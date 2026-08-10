@@ -82,12 +82,11 @@ fun TextToSpeechScreen(
             ),
         verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
-        Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_177), style = MaterialTheme.typography.headlineSmall)
         Text(
-            stringResource(CoreUiR.string.tts_text_to_speech_screen_178),
-            style = MaterialTheme.typography.bodyMedium,
+            stringResource(CoreUiR.string.tts_text_to_speech_screen_177),
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(bottom = 22.dp)
         )
-
         TtsSetupSection(state, !busy, onSelectModel, onSelectVoice, onPreviewVoice, onRecordReference, onStopReferenceRecording, onImportReference, onDeleteReference, onSelectLanguage, onApplySample, onStop)
         TtsComposeSection(state, !busy, onTextChange, onSynthesize, onProfile)
         TextToSpeechSettings(
