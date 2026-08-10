@@ -27,6 +27,8 @@ import com.dmitriim.localaiplayground.core.ui.component.OptionPickerItem
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechInputSettings
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechModelOption
 import com.dmitriim.localaiplayground.feature.assistant.presentation.normalizeLanguageCode
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,8 +66,8 @@ internal fun AssistantListenSettingsSheet(
     ModalBottomSheet(onDismissRequest = onDismiss) {
         if (selectingRecognitionModel) {
             AssistantInSheetModelSelection(
-                title = "Recognition model",
-                description = "Choose an installed model for on-device speech recognition.",
+                title = stringResource(CoreUiR.string.ui_copy_21),
+                description = stringResource(CoreUiR.string.ui_description_3),
                 items = models.map {
                     OptionPickerItem(
                         id = it.id.value,
@@ -94,12 +96,12 @@ internal fun AssistantListenSettingsSheet(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 AssistantSettingsSheetHeader(
-                    title = "Speech-to-text settings",
-                    description = "Choose a recognizer and language for voice input.",
+                    title = stringResource(CoreUiR.string.ui_copy_22),
+                    description = stringResource(CoreUiR.string.ui_description_4),
                 )
                 AssistantSettingsSection("Model")
                 AssistantInSheetModelPicker(
-                    label = "Recognition model",
+                    label = stringResource(CoreUiR.string.ui_copy_23),
                     items = models.map {
                         OptionPickerItem(
                             id = it.id.value,
@@ -113,7 +115,7 @@ internal fun AssistantListenSettingsSheet(
                     onClick = { selectingRecognitionModel = true },
                 )
                 AssistantSettingsSection("Recognition")
-                Text("Recognition language", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
+                Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_12), style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     languages.take(3).forEach { language ->
                         FilterChip(
@@ -122,7 +124,7 @@ internal fun AssistantListenSettingsSheet(
                                 draft = draft.copy(languageCode = language.code).also { candidate -> commit(draftModelId, candidate) }
                             },
                             enabled = enabled,
-                            label = { Text(language.label) },
+                            label = { Text(stringResource(language.labelRes)) },
                         )
                     }
                 }
@@ -135,7 +137,7 @@ internal fun AssistantListenSettingsSheet(
                                     draft = draft.copy(languageCode = language.code).also { candidate -> commit(draftModelId, candidate) }
                                 },
                                 enabled = enabled,
-                                label = { Text(language.label) },
+                                label = { Text(stringResource(language.labelRes)) },
                             )
                         }
                     }
@@ -146,7 +148,7 @@ internal fun AssistantListenSettingsSheet(
                     onValueChange = {
                         draft = draft.copy(threadCount = it.filter(Char::isDigit)).also { candidate -> commit(draftModelId, candidate) }
                     },
-                    label = { Text("Thread count (0 = default)") },
+                    label = { Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_13)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     enabled = enabled,
@@ -156,20 +158,20 @@ internal fun AssistantListenSettingsSheet(
                     TextButton(
                         onClick = { draft = SpeechInputSettings().also { candidate -> commit(draftModelId, candidate) } },
                         enabled = enabled,
-                    ) { Text("Reset") }
+                    ) { Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_14)) }
                 }
             }
         }
     }
 }
 
-private data class AssistantLanguage(val code: String, val label: String)
+private data class AssistantLanguage(val code: String, val labelRes: Int)
 
 private val assistantSttLanguages = listOf(
-    AssistantLanguage("en", "English"),
-    AssistantLanguage("ru", "Russian"),
-    AssistantLanguage("zh", "Chinese"),
-    AssistantLanguage("ja", "Japanese"),
-    AssistantLanguage("ko", "Korean"),
-    AssistantLanguage("yue", "Cantonese"),
+    AssistantLanguage("en", CoreUiR.string.language_english),
+    AssistantLanguage("ru", CoreUiR.string.language_russian),
+    AssistantLanguage("zh", CoreUiR.string.language_chinese),
+    AssistantLanguage("ja", CoreUiR.string.language_japanese),
+    AssistantLanguage("ko", CoreUiR.string.language_korean),
+    AssistantLanguage("yue", CoreUiR.string.language_cantonese),
 )

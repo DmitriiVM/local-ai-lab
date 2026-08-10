@@ -16,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 internal data class SettingsModelItem(
     val id: String,
@@ -41,12 +43,20 @@ internal fun AssistantSettingsModelPicker(
             enabled = enabled && items.isNotEmpty(),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(selected?.name ?: "Not configured", maxLines = 1)
+            Text(selected?.name ?: stringResource(CoreUiR.string.assistant_not_configured), maxLines = 1)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             items.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(if (item.installed) item.name else "${item.name} · Not installed") },
+                    text = {
+                        Text(
+                            if (item.installed) {
+                                item.name
+                            } else {
+                                stringResource(CoreUiR.string.assistant_model_not_installed, item.name)
+                            },
+                        )
+                    },
                     onClick = {
                         expanded = false
                         onSelect(item.id)
@@ -56,7 +66,7 @@ internal fun AssistantSettingsModelPicker(
             }
         }
         if (items.any { !it.installed }) {
-            TextButton(onClick = onOpenModels) { Text("Open Models") }
+            TextButton(onClick = onOpenModels) { Text(stringResource(CoreUiR.string.assistant_assistant_settings_model_picker_20)) }
         }
     }
 }

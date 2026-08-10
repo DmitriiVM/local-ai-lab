@@ -86,10 +86,7 @@ internal class AssistantOperationController(
             return
         }
         if (snapshot.inputMode == AssistantInputMode.VOICE) {
-            snapshot.voiceConfigurationError?.let { error ->
-                state.update { it.copy(errorMessage = error) }
-                return
-            }
+            if (snapshot.voiceConfigurationError != null) return
         }
         val settingsError = runCatching(snapshot.speechInputSettings::validate).exceptionOrNull()?.message
         if (settingsError != null) {

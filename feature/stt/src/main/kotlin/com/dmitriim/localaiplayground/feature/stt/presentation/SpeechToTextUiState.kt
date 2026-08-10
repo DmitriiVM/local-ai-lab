@@ -11,6 +11,7 @@ import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode
 import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionMetrics
+import com.dmitriim.localaiplayground.core.ui.text.UiText
 
 data class SpeechToTextUiState(
     val models: List<SpeechModelOption> = emptyList(),
@@ -22,7 +23,7 @@ data class SpeechToTextUiState(
     val level: AudioLevel? = null,
     val transcript: String = "",
     val metrics: SpeechTranscriptionMetrics? = null,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
 ) {
     val selectedModel: SpeechModelOption? get() = models.firstOrNull { it.id == selectedModelId }
     val availableLanguages: List<SttLanguage>

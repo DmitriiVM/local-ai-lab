@@ -44,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.ui.style.AppSurfaceStyle
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatMessage
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatMessageRole
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun AssistantConversation(
@@ -151,10 +153,14 @@ private fun ChatMessageCard(
                 MessageRoleLabel(isUserMessage)
                 Spacer(modifier = Modifier.weight(1f))
                 if (message.streaming) CircularProgressIndicator(modifier = Modifier.height(16.dp).width(16.dp), strokeWidth = 2.dp)
-                if (message.failed) Text("Incomplete", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+                if (message.failed) Text(stringResource(CoreUiR.string.assistant_assistant_conversation_8), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
             }
             Text(
-                text = if (message.content.isBlank() && message.streaming) "Generating…" else message.content,
+                text = if (message.content.isBlank() && message.streaming) {
+                    stringResource(CoreUiR.string.assistant_generating)
+                } else {
+                    message.content
+                },
                 style = MaterialTheme.typography.bodyLarge,
             )
             CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 32.dp) {
@@ -164,28 +170,28 @@ private fun ChatMessageCard(
                 ) {
                     MessageActionButton(
                         icon = Icons.Outlined.ContentCopy,
-                        contentDescription = "Copy message",
+                        contentDescription = stringResource(CoreUiR.string.ui_copy_17),
                         enabled = message.content.isNotBlank(),
                         onClick = { onCopy(message.content) },
                     )
                     onRegenerate?.let { regenerate ->
                         MessageActionButton(
                             icon = Icons.Outlined.Replay,
-                            contentDescription = "Regenerate response",
+                            contentDescription = stringResource(CoreUiR.string.ui_copy_18),
                             onClick = regenerate,
                         )
                     }
                     onSpeak?.let { speak ->
                         MessageActionButton(
                             icon = Icons.Outlined.VolumeUp,
-                            contentDescription = "Speak response",
+                            contentDescription = stringResource(CoreUiR.string.ui_copy_19),
                             onClick = speak,
                         )
                     }
                     if (message.role == ChatMessageRole.USER) {
                         MessageActionButton(
                             icon = Icons.Outlined.Edit,
-                            contentDescription = "Edit and retry",
+                            contentDescription = stringResource(CoreUiR.string.ui_copy_20),
                             onClick = { onEdit(message.id) },
                         )
                     }
@@ -224,7 +230,7 @@ private fun MessageRoleLabel(isUserMessage: Boolean) {
                 modifier = Modifier.size(14.dp),
             )
             Text(
-                text = if (isUserMessage) "You" else "Assistant",
+                text = stringResource(if (isUserMessage) CoreUiR.string.assistant_you else CoreUiR.string.assistant_assistant),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
             )

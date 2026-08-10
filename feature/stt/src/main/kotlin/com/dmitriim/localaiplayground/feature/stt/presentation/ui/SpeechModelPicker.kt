@@ -22,6 +22,8 @@ import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.ui.component.InstalledOptionList
 import com.dmitriim.localaiplayground.core.ui.component.OptionPickerItem
 import com.dmitriim.localaiplayground.feature.stt.presentation.SpeechModelOption
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun SpeechModelPicker(
@@ -33,14 +35,14 @@ internal fun SpeechModelPicker(
     var sheetVisible by remember { mutableStateOf(false) }
     val selected = models.firstOrNull { it.id == selectedId }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Speech model", style = MaterialTheme.typography.titleSmall)
+        Text(stringResource(CoreUiR.string.stt_speech_model_picker_130), style = MaterialTheme.typography.titleSmall)
         OutlinedButton(
             onClick = { sheetVisible = true },
             enabled = enabled && models.isNotEmpty(),
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = selected?.displayName ?: "Install a speech model in Models",
+                text = selected?.displayName ?: stringResource(CoreUiR.string.stt_install_speech_model),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -75,12 +77,12 @@ private fun SpeechModelSelectionSheet(
                 .padding(bottom = 24.dp),
         ) {
             Text(
-                text = "Speech model",
+                text = stringResource(CoreUiR.string.ui_copy_66),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
             Text(
-                text = "Choose an installed model for transcription.",
+                text = stringResource(CoreUiR.string.ui_copy_67),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 24.dp, top = 4.dp, end = 24.dp, bottom = 12.dp),

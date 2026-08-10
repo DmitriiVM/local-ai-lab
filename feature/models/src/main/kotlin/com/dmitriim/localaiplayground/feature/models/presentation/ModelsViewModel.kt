@@ -1,6 +1,7 @@
 package com.dmitriim.localaiplayground.feature.models.presentation
 
 import android.util.Log
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.di.AppScope
@@ -18,6 +19,7 @@ import com.dmitriim.localaiplayground.core.model.service.ModelDiagnostics
 import com.dmitriim.localaiplayground.core.model.service.ModelDownloadCredentials
 import com.dmitriim.localaiplayground.core.model.service.ModelLibrary
 import com.dmitriim.localaiplayground.core.model.service.ModelTransfers
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -32,6 +34,7 @@ import kotlinx.coroutines.launch
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
 class ModelsViewModel(
+    private val application: Application,
     private val modelLibrary: ModelLibrary,
     private val modelTransfers: ModelTransfers,
     private val modelDiagnostics: ModelDiagnostics,
@@ -68,7 +71,7 @@ class ModelsViewModel(
         val engine = if (profile == ModelProfileIds.LLM) EngineId("llama.cpp") else EngineId("sherpa-onnx")
         val modelId = modelLibrary.import(
             ModelImportRequest(
-                displayName = "Imported ${profile.displayName}",
+                displayName = application.getString(CoreUiR.string.models_imported_profile, application.getString(profile.displayNameRes)),
                 engineId = engine,
                 profileType = profile,
                 documentUris = uris,
@@ -328,21 +331,21 @@ private data class ModelData(
     val credentialStatus: com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus,
 )
 
-private val ModelProfileId.displayName: String
+private val ModelProfileId.displayNameRes: Int
     get() = when (this) {
-        ModelProfileIds.LLM -> "GGUF chat model"
-        ModelProfileIds.WHISPER_STT -> "Whisper STT bundle"
-        ModelProfileIds.PARAKEET_CTC_STT -> "Parakeet CTC STT bundle"
-        ModelProfileIds.GIGAAM_CTC_STT -> "GigaAM CTC STT bundle"
-        ModelProfileIds.ZIPFORMER_STT -> "Zipformer STT bundle"
-        ModelProfileIds.SENSE_VOICE_STT -> "SenseVoice STT bundle"
-        ModelProfileIds.PARAFORMER_STT -> "Paraformer STT bundle"
-        ModelProfileIds.MOONSHINE_STT -> "Moonshine STT bundle"
-        ModelProfileIds.VOSK_STT -> "Vosk STT bundle"
-        ModelProfileIds.ANDROID_SPEECH_RECOGNIZER_STT -> "Android on-device speech recognizer"
-        ModelProfileIds.SUPERTONIC_TTS -> "Supertonic TTS bundle"
-        ModelProfileIds.PIPER_VITS_TTS -> "Piper/VITS TTS bundle"
-        ModelProfileIds.KOKORO_TTS -> "Kokoro TTS bundle"
-        ModelProfileIds.POCKET_TTS -> "Pocket TTS bundle"
-        else -> "Model bundle"
+        ModelProfileIds.LLM -> CoreUiR.string.models_profile_gguf_chat
+        ModelProfileIds.WHISPER_STT -> CoreUiR.string.models_profile_whisper_stt
+        ModelProfileIds.PARAKEET_CTC_STT -> CoreUiR.string.models_profile_parakeet_stt
+        ModelProfileIds.GIGAAM_CTC_STT -> CoreUiR.string.models_profile_gigaam_stt
+        ModelProfileIds.ZIPFORMER_STT -> CoreUiR.string.models_profile_zipformer_stt
+        ModelProfileIds.SENSE_VOICE_STT -> CoreUiR.string.models_profile_sensevoice_stt
+        ModelProfileIds.PARAFORMER_STT -> CoreUiR.string.models_profile_paraformer_stt
+        ModelProfileIds.MOONSHINE_STT -> CoreUiR.string.models_profile_moonshine_stt
+        ModelProfileIds.VOSK_STT -> CoreUiR.string.models_profile_vosk_stt
+        ModelProfileIds.ANDROID_SPEECH_RECOGNIZER_STT -> CoreUiR.string.models_profile_android_stt
+        ModelProfileIds.SUPERTONIC_TTS -> CoreUiR.string.models_profile_supertonic_tts
+        ModelProfileIds.PIPER_VITS_TTS -> CoreUiR.string.models_profile_piper_tts
+        ModelProfileIds.KOKORO_TTS -> CoreUiR.string.models_profile_kokoro_tts
+        ModelProfileIds.POCKET_TTS -> CoreUiR.string.models_profile_pocket_tts
+        else -> CoreUiR.string.models_profile_bundle
     }

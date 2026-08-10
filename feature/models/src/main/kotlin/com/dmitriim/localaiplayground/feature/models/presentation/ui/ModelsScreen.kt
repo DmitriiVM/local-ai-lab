@@ -48,6 +48,8 @@ import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceTone
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun ModelsScreen(
@@ -69,7 +71,7 @@ fun ModelsScreen(
     val runtimeIds = allModelItems
         .map { it.manifest.engineId }
         .distinct()
-        .sortedBy { it.displayLabel }
+        .sortedBy { it.value }
     val modelItems = allModelItems
         .filter { typeFilter.matches(it.manifest) }
         .filter { runtimeFilter == null || it.manifest.engineId.value == runtimeFilter }
@@ -83,7 +85,7 @@ fun ModelsScreen(
     ) {
         item {
             Text(
-                text = "Models",
+                text = stringResource(CoreUiR.string.models_title),
                 modifier = Modifier
                     .padding(
                         top = dimensions.topBarOverlayClearance + 20.dp,
@@ -106,12 +108,12 @@ fun ModelsScreen(
         if (modelItems.isEmpty()) {
             item {
                 StatusMessage(
-                    title = "No matching models",
-                    explanation = "Try a different model type or availability filter.",
+                    title = stringResource(CoreUiR.string.models_no_matching),
+                    explanation = stringResource(CoreUiR.string.models_no_matching_explanation),
                 )
             }
         } else {
-            item { Text("Models (${modelItems.size})", style = MaterialTheme.typography.titleLarge) }
+            item { Text(stringResource(CoreUiR.string.models_models_screen_format_10, modelItems.size), style = MaterialTheme.typography.titleLarge) }
             items(modelItems.size, key = { modelItems[it].manifest.modelId.value }) { index ->
                 when (val item = modelItems[index]) {
                     is ModelListItem.Installed -> InstalledModelCard(
@@ -137,10 +139,10 @@ fun ModelsScreen(
     uiState.pendingDelete?.let { model ->
         AlertDialog(
             onDismissRequest = onCancelDelete,
-            title = { Text("Delete ${model.manifest.displayName}?") },
-            text = { Text("This deletes the model files and reclaims about ${model.totalBytes.toReadableBytes()}. Historical run metadata is preserved.") },
-            confirmButton = { Button(onClick = onConfirmDelete) { Text("Delete") } },
-            dismissButton = { OutlinedButton(onClick = onCancelDelete) { Text("Cancel") } },
+            title = { Text(stringResource(CoreUiR.string.models_models_screen_format_11, model.manifest.displayName)) },
+            text = { Text(stringResource(CoreUiR.string.models_models_screen_format_12, model.totalBytes.toReadableBytes())) },
+            confirmButton = { Button(onClick = onConfirmDelete) { Text(stringResource(CoreUiR.string.models_models_screen_71)) } },
+            dismissButton = { OutlinedButton(onClick = onCancelDelete) { Text(stringResource(CoreUiR.string.models_models_screen_72)) } },
         )
     }
 }
@@ -162,7 +164,7 @@ private fun ModelFilters(
                 FilterChip(
                     selected = typeFilter == filter,
                     onClick = { onTypeFilterChange(filter) },
-                    label = { Text(filter.label) },
+                    label = { Text(stringResource(filter.labelRes)) },
                     colors = AppFilterChipDefaults.colors(),
                 )
             }
@@ -172,7 +174,7 @@ private fun ModelFilters(
                 FilterChip(
                     selected = runtimeFilter == null,
                     onClick = { onRuntimeFilterChange(null) },
-                    label = { Text("All") },
+                    label = { Text(stringResource(CoreUiR.string.models_models_screen_73)) },
                     colors = AppFilterChipDefaults.colors(),
                 )
             }
@@ -181,7 +183,7 @@ private fun ModelFilters(
                 FilterChip(
                     selected = runtimeFilter == runtime.value,
                     onClick = { onRuntimeFilterChange(runtime.value) },
-                    label = { Text(runtime.displayLabel) },
+                    label = { Text(runtime.displayLabel()) },
                     colors = AppFilterChipDefaults.colors(),
                 )
             }
@@ -192,7 +194,7 @@ private fun ModelFilters(
                 FilterChip(
                     selected = installationFilter == filter,
                     onClick = { onInstallationFilterChange(filter) },
-                    label = { Text(filter.label) },
+                    label = { Text(stringResource(filter.labelRes)) },
                     colors = AppFilterChipDefaults.colors(),
                 )
             }
@@ -200,29 +202,29 @@ private fun ModelFilters(
     }
 }
 
-private val EngineId.displayLabel: String
-    get() = when (value) {
-        "litert-lm" -> "LiteRT-LM"
-        else -> value
-    }
+@Composable
+private fun EngineId.displayLabel(): String = when (value) {
+    "litert-lm" -> stringResource(CoreUiR.string.models_engine_litert_lm)
+    else -> value
+}
 
 private enum class ModelTypeFilter(
-    val label: String,
+    val labelRes: Int,
     private val capability: AiCapability? = null,
 ) {
-    ALL(label = "All"),
-    LLM(label = "LLM", capability = AiCapability.CHAT),
-    TTS(label = "TTS", capability = AiCapability.TEXT_TO_SPEECH),
-    STT(label = "STT", capability = AiCapability.SPEECH_TO_TEXT),
+    ALL(labelRes = CoreUiR.string.models_filter_all),
+    LLM(labelRes = CoreUiR.string.models_type_llm, capability = AiCapability.CHAT),
+    TTS(labelRes = CoreUiR.string.models_type_tts, capability = AiCapability.TEXT_TO_SPEECH),
+    STT(labelRes = CoreUiR.string.models_type_stt, capability = AiCapability.SPEECH_TO_TEXT),
     ;
 
     fun matches(manifest: ModelManifest): Boolean = capability == null || capability in manifest.capabilities
 }
 
-private enum class ModelInstallationFilter(val label: String) {
-    ALL(label = "All"),
-    INSTALLED(label = "Installed"),
-    NOT_INSTALLED(label = "Not installed"),
+private enum class ModelInstallationFilter(val labelRes: Int) {
+    ALL(labelRes = CoreUiR.string.models_filter_all),
+    INSTALLED(labelRes = CoreUiR.string.models_status_installed),
+    NOT_INSTALLED(labelRes = CoreUiR.string.models_status_not_installed),
     ;
 
     fun matches(item: ModelListItem): Boolean = when (this) {
@@ -272,10 +274,7 @@ private fun InstalledModelCard(
     onDelete: (ModelId) -> Unit,
 ) {
     ModelCard(onClick = { onOpenDetails(model.manifest.modelId) }) {
-        ModelCardIdentity(
-            manifest = displayManifest,
-            status = model.validationState.statusLabel(),
-        )
+        ModelCardIdentity(manifest = displayManifest, status = stringResource(model.validationState.statusLabelRes()))
         Spacer(modifier = Modifier.height(4.dp))
         ModelCardHeader(name = displayManifest.displayName)
         ModelCardMetadata(
@@ -283,7 +282,7 @@ private fun InstalledModelCard(
             size = model.totalBytes.toReadableBytes(),
         )
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            OutlinedButton(onClick = { onDelete(model.manifest.modelId) }) { Text("Delete") }
+            OutlinedButton(onClick = { onDelete(model.manifest.modelId) }) { Text(stringResource(CoreUiR.string.models_models_screen_74)) }
         }
     }
 }
@@ -304,7 +303,7 @@ private fun CatalogModelCard(
         huggingFaceCredentialStatus == com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus.MISSING
     var confirmCancel by rememberSaveable(manifest.modelId.value) { mutableStateOf(false) }
     ModelCard(onClick = { onOpenDetails(manifest.modelId) }) {
-        ModelCardIdentity(manifest = manifest, status = transfer.statusLabel())
+        ModelCardIdentity(manifest = manifest, status = stringResource(transfer.statusLabelRes()))
         Spacer(modifier = Modifier.height(4.dp))
         ModelCardHeader(name = manifest.displayName)
         ModelCardMetadata(
@@ -313,43 +312,47 @@ private fun CatalogModelCard(
             downloadedBytes = transfer.downloadedBytesOrNull(),
         )
         if (accessRequired) {
-            Text("Hugging Face access required", style = MaterialTheme.typography.bodySmall)
+            Text(stringResource(CoreUiR.string.models_models_screen_75), style = MaterialTheme.typography.bodySmall)
         }
         when {
             transfer is ModelTransferState.Queued -> {
                 ModelCardAction {
-                    OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text("Pause") }
-                    OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
+                    OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text(stringResource(CoreUiR.string.models_models_screen_76)) }
+                    OutlinedButton(onClick = { confirmCancel = true }) { Text(stringResource(CoreUiR.string.models_models_screen_77)) }
                 }
             }
             transfer is ModelTransferState.Running -> {
                 ModelCardAction {
-                    OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text("Pause") }
-                    OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
+                    OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text(stringResource(CoreUiR.string.models_models_screen_78)) }
+                    OutlinedButton(onClick = { confirmCancel = true }) { Text(stringResource(CoreUiR.string.models_models_screen_79)) }
                 }
             }
             transfer is ModelTransferState.Paused -> {
                 ModelCardAction {
-                    Button(onClick = { onResumeOnWifi(manifest.modelId) }) { Text("Resume") }
-                    OutlinedButton(onClick = { confirmCancel = true }) { Text("Cancel") }
+                    Button(onClick = { onResumeOnWifi(manifest.modelId) }) { Text(stringResource(CoreUiR.string.models_models_screen_80)) }
+                    OutlinedButton(onClick = { confirmCancel = true }) { Text(stringResource(CoreUiR.string.models_models_screen_81)) }
                 }
             }
             transfer == ModelTransferState.Installing -> {
                 ModelCardAction {
-                    OutlinedButton(onClick = {}, enabled = false) { Text("Installing…") }
+                    OutlinedButton(onClick = {}, enabled = false) { Text(stringResource(CoreUiR.string.models_models_screen_82)) }
                 }
             }
             transfer is ModelTransferState.Failed -> {
                 ModelCardAction {
                     Button(onClick = { if (accessRequired) onOpenDetails(manifest.modelId) else onDownload(manifest.modelId) }) {
-                        Text(if (accessRequired) "Set up access" else "Retry")
+                        Text(
+                            stringResource(
+                                if (accessRequired) CoreUiR.string.models_set_up_access else CoreUiR.string.models_retry,
+                            ),
+                        )
                     }
                 }
             }
             transfer == ModelTransferState.Idle || transfer == null -> ModelCardAction {
                 if (accessRequired) {
                     Button(onClick = { onOpenDetails(manifest.modelId) }) {
-                        Text("Set up access")
+                        Text(stringResource(CoreUiR.string.models_models_screen_83))
                     }
                 } else {
                     ModelDownloadButton(onClick = { onDownload(manifest.modelId) })
@@ -360,15 +363,15 @@ private fun CatalogModelCard(
     if (confirmCancel) {
         AlertDialog(
             onDismissRequest = { confirmCancel = false },
-            title = { Text("Cancel download?") },
-            text = { Text("The partial model download will be permanently deleted.") },
+            title = { Text(stringResource(CoreUiR.string.models_models_screen_84)) },
+            text = { Text(stringResource(CoreUiR.string.models_models_screen_85)) },
             confirmButton = {
                 Button(onClick = {
                     confirmCancel = false
                     onCancel(manifest.modelId)
-                }) { Text("Cancel download") }
+                }) { Text(stringResource(CoreUiR.string.models_models_screen_86)) }
             },
-            dismissButton = { OutlinedButton(onClick = { confirmCancel = false }) { Text("Keep download") } },
+            dismissButton = { OutlinedButton(onClick = { confirmCancel = false }) { Text(stringResource(CoreUiR.string.models_models_screen_87)) } },
         )
     }
 }
@@ -380,7 +383,7 @@ private fun ModelCardIdentity(manifest: ModelManifest, status: String) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TypeBadge(manifest.typeLabel)
+        TypeBadge(stringResource(manifest.typeLabelRes()))
         Text(manifest.engineId.value, style = MaterialTheme.typography.bodyMedium)
         Spacer(modifier = Modifier.weight(1f))
         StatusBadge(status)
@@ -474,44 +477,44 @@ private fun ModelCard(
     }
 }
 
-private val ModelManifest.typeLabel: String
-    get() = when {
-        AiCapability.CHAT in capabilities -> "LLM"
-        AiCapability.TEXT_TO_SPEECH in capabilities -> "TTS"
-        AiCapability.SPEECH_TO_TEXT in capabilities -> "STT"
-        AiCapability.VOICE_ACTIVITY_DETECTION in capabilities -> "VAD"
-        else -> "Model"
+private fun ModelManifest.typeLabelRes(): Int = when {
+        AiCapability.CHAT in capabilities -> CoreUiR.string.models_type_llm
+        AiCapability.TEXT_TO_SPEECH in capabilities -> CoreUiR.string.models_type_tts
+        AiCapability.SPEECH_TO_TEXT in capabilities -> CoreUiR.string.models_type_stt
+        AiCapability.VOICE_ACTIVITY_DETECTION in capabilities -> CoreUiR.string.models_type_vad
+        else -> CoreUiR.string.models_type_model
     }
 
+@Composable
 private fun ModelManifest.languageSummary(): String {
     val totalLanguageCount = supportedLanguageCount
     return when {
-        AiCapability.VOICE_ACTIVITY_DETECTION in capabilities -> "Language-independent"
-        languages.isEmpty() -> "Language not specified"
+        AiCapability.VOICE_ACTIVITY_DETECTION in capabilities -> stringResource(CoreUiR.string.models_language_independent)
+        languages.isEmpty() -> stringResource(CoreUiR.string.models_language_not_specified)
         totalLanguageCount != null && totalLanguageCount > languages.size ->
             "${languages.joinToString()} +${totalLanguageCount - languages.size}"
         else -> languages.joinToString()
     }
 }
 
-private fun ModelValidationState.statusLabel(): String = when (this) {
-    ModelValidationState.READY -> "Ready"
+private fun ModelValidationState.statusLabelRes(): Int = when (this) {
+    ModelValidationState.READY -> CoreUiR.string.models_status_ready
     ModelValidationState.INVALID,
     ModelValidationState.MISSING_FILES,
     ModelValidationState.INCOMPATIBLE,
-    -> "Needs attention"
+    -> CoreUiR.string.models_status_needs_attention
 }
 
-private fun ModelTransferState?.statusLabel(): String = when (this) {
-    is ModelTransferState.Queued -> "Queued"
-    is ModelTransferState.Running -> if (completedBytes >= totalBytes) "Verifying" else "Downloading"
-    is ModelTransferState.Paused -> "Paused"
-    ModelTransferState.Installing -> "Installing"
-    is ModelTransferState.Failed -> "Download failed"
-    ModelTransferState.Completed -> "Installed"
+private fun ModelTransferState?.statusLabelRes(): Int = when (this) {
+    is ModelTransferState.Queued -> CoreUiR.string.models_status_queued
+    is ModelTransferState.Running -> if (completedBytes >= totalBytes) CoreUiR.string.models_status_verifying else CoreUiR.string.models_status_downloading
+    is ModelTransferState.Paused -> CoreUiR.string.models_status_paused
+    ModelTransferState.Installing -> CoreUiR.string.models_status_installing
+    is ModelTransferState.Failed -> CoreUiR.string.models_status_download_failed
+    ModelTransferState.Completed -> CoreUiR.string.models_status_installed
     ModelTransferState.Idle,
     null,
-    -> "Not installed"
+    -> CoreUiR.string.models_status_not_installed
 }
 
 private fun ModelTransferState?.downloadedBytesOrNull(): Long? = when (this) {
@@ -526,9 +529,9 @@ private fun ModelTransferState?.downloadedBytesOrNull(): Long? = when (this) {
     -> null
 }
 
-private fun com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.networkLabel(): String = when (this) {
-    com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.WIFI_ONLY -> "Wi-Fi only"
-    com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.ANY_NETWORK -> "Any network"
+private fun com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.networkLabelRes(): Int = when (this) {
+    com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.WIFI_ONLY -> CoreUiR.string.models_network_wifi_only
+    com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy.ANY_NETWORK -> CoreUiR.string.models_network_any
 }
 
 private fun Long.toReadableBytes(): String = when {

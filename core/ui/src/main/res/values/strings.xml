@@ -1,0 +1,588 @@
+<resources>
+    <string name="core_ui_installed_option_list_1" formatted="false">Open Models</string>
+    <string name="assistant_assistant_chat_settings_sheet_2" formatted="false">Unload model</string>
+    <string name="assistant_assistant_chat_settings_sheet_3" formatted="false">Reset</string>
+    <string name="assistant_assistant_controls_4" formatted="false">Clear</string>
+    <string name="assistant_assistant_controls_5" formatted="false">Message</string>
+    <string name="assistant_assistant_controls_6" formatted="false">Ask the assistant…</string>
+    <string name="assistant_assistant_controls_7" formatted="false">Profile</string>
+    <string name="assistant_assistant_conversation_8" formatted="false">Incomplete</string>
+    <string name="assistant_assistant_in_sheet_model_picker_9" formatted="false">Back</string>
+    <string name="assistant_assistant_input_mode_settings_sheet_10" formatted="false">Voice input</string>
+    <string name="assistant_assistant_input_mode_settings_sheet_11" formatted="false">Choose what happens when you record with the microphone.</string>
+    <string name="assistant_assistant_listen_settings_sheet_12" formatted="false">Recognition language</string>
+    <string name="assistant_assistant_listen_settings_sheet_13" formatted="false">Thread count (0 = default)</string>
+    <string name="assistant_assistant_listen_settings_sheet_14" formatted="false">Reset</string>
+    <string name="assistant_assistant_metrics_card_15" formatted="false">Run details</string>
+    <string name="assistant_assistant_screen_16" formatted="false">Clear this conversation?</string>
+    <string name="assistant_assistant_screen_17" formatted="false">This removes all messages and metrics from this Assistant conversation.</string>
+    <string name="assistant_assistant_screen_18" formatted="false">Clear</string>
+    <string name="assistant_assistant_screen_19" formatted="false">Cancel</string>
+    <string name="assistant_assistant_settings_model_picker_20" formatted="false">Open Models</string>
+    <string name="assistant_assistant_speak_settings_sheet_21" formatted="false">Speech language</string>
+    <string name="assistant_assistant_speak_settings_sheet_22" formatted="false">Reference voices are created and managed in the Text to Speech playground.</string>
+    <string name="assistant_assistant_speak_settings_sheet_23" formatted="false">Reset</string>
+    <string name="assistant_assistant_speak_settings_sheet_24" formatted="false">Preview</string>
+    <string name="assistant_assistant_speak_settings_sheet_25" formatted="false">Voice</string>
+    <string name="benchmark_benchmark_screen_26" formatted="false">Profile</string>
+    <string name="benchmark_benchmark_screen_27" formatted="false">Open Profile from a Chat, STT, or TTS screen so its selected model and current workload can be used.</string>
+    <string name="benchmark_benchmark_screen_28" formatted="false">Model and workload come from the originating screen and cannot be changed here.</string>
+    <string name="benchmark_benchmark_screen_29" formatted="false">Profile configuration</string>
+    <string name="benchmark_benchmark_screen_30" formatted="false">Startup mode</string>
+    <string name="benchmark_benchmark_screen_31" formatted="false">Start profiling</string>
+    <string name="benchmark_benchmark_screen_32" formatted="false">Cancel</string>
+    <string name="benchmark_benchmark_screen_33" formatted="false">Measured results</string>
+    <string name="benchmark_benchmark_screen_34" formatted="false">Copy results</string>
+    <string name="benchmark_benchmark_screen_35" formatted="false">−</string>
+    <string name="benchmark_benchmark_screen_36" formatted="false">+</string>
+    <string name="models_hugging_face_access_section_37" formatted="false">This model requires that you accept its license in Hugging Face before downloading.</string>
+    <string name="models_hugging_face_access_section_38" formatted="false">Open access page</string>
+    <string name="models_hugging_face_token_dialog_39" formatted="false">Hugging Face access token</string>
+    <string name="models_hugging_face_token_dialog_40" formatted="false">After accepting the model license in Hugging Face, enter a fine-grained read-only token.</string>
+    <string name="models_hugging_face_token_dialog_41" formatted="false">Access token</string>
+    <string name="models_hugging_face_token_dialog_42" formatted="false">Cancel</string>
+    <string name="models_model_details_screen_43" formatted="false">This deletes the model files and reclaims about </string>
+    <string name="models_model_details_screen_44" formatted="false">Delete</string>
+    <string name="models_model_details_screen_45" formatted="false">Cancel</string>
+    <string name="models_model_details_screen_46" formatted="false">Open source</string>
+    <string name="models_model_details_screen_47" formatted="false">Files</string>
+    <string name="models_model_details_screen_48" formatted="false">Checking this device…</string>
+    <string name="models_model_details_screen_49" formatted="false">Compatibility has not been checked yet.</string>
+    <string name="models_model_details_screen_50" formatted="false">Delete</string>
+    <string name="models_model_details_screen_51" formatted="false">Pause</string>
+    <string name="models_model_details_screen_52" formatted="false">Cancel</string>
+    <string name="models_model_details_screen_53" formatted="false">Use mobile data</string>
+    <string name="models_model_details_screen_54" formatted="false">Pause</string>
+    <string name="models_model_details_screen_55" formatted="false">Cancel</string>
+    <string name="models_model_details_screen_56" formatted="false">Resume on Wi-Fi</string>
+    <string name="models_model_details_screen_57" formatted="false">Cancel</string>
+    <string name="models_model_details_screen_58" formatted="false">Installing…</string>
+    <string name="models_model_details_screen_59" formatted="false">Retry download</string>
+    <string name="models_model_details_screen_60" formatted="false">Use mobile data?</string>
+    <string name="models_model_details_screen_61" formatted="false">This transfer may use a large amount of mobile data.</string>
+    <string name="models_model_details_screen_62" formatted="false">Use mobile data</string>
+    <string name="models_model_details_screen_63" formatted="false">Keep Wi-Fi only</string>
+    <string name="models_model_details_screen_64" formatted="false">Cancel download?</string>
+    <string name="models_model_details_screen_65" formatted="false">The partial model download will be permanently deleted.</string>
+    <string name="models_model_details_screen_66" formatted="false">Cancel download</string>
+    <string name="models_model_details_screen_67" formatted="false">Keep download</string>
+    <string name="models_model_details_screen_68" formatted="false">Model unavailable</string>
+    <string name="models_model_details_screen_69" formatted="false">Back to models</string>
+    <string name="models_model_download_button_70" formatted="false">Download</string>
+    <string name="models_models_screen_71" formatted="false">Delete</string>
+    <string name="models_models_screen_72" formatted="false">Cancel</string>
+    <string name="models_models_screen_73" formatted="false">All</string>
+    <string name="models_models_screen_74" formatted="false">Delete</string>
+    <string name="models_models_screen_75" formatted="false">Hugging Face access required</string>
+    <string name="models_models_screen_76" formatted="false">Pause</string>
+    <string name="models_models_screen_77" formatted="false">Cancel</string>
+    <string name="models_models_screen_78" formatted="false">Pause</string>
+    <string name="models_models_screen_79" formatted="false">Cancel</string>
+    <string name="models_models_screen_80" formatted="false">Resume</string>
+    <string name="models_models_screen_81" formatted="false">Cancel</string>
+    <string name="models_models_screen_82" formatted="false">Installing…</string>
+    <string name="models_models_screen_83" formatted="false">Set up access</string>
+    <string name="models_models_screen_84" formatted="false">Cancel download?</string>
+    <string name="models_models_screen_85" formatted="false">The partial model download will be permanently deleted.</string>
+    <string name="models_models_screen_86" formatted="false">Cancel download</string>
+    <string name="models_models_screen_87" formatted="false">Keep download</string>
+    <string name="playground_playground_screen_88" formatted="false">Local playgrounds</string>
+    <string name="playground_playground_screen_89" formatted="false">Prompts, recordings, and generated content stay on this device. </string>
+    <string name="playground_playground_screen_90" formatted="false">Checking device engines…</string>
+    <string name="playground_playground_screen_91" formatted="false">Retry</string>
+    <string name="runs_runs_screen_92" formatted="false">Runs</string>
+    <string name="runs_runs_screen_93" formatted="false">Clear run history?</string>
+    <string name="runs_runs_screen_94" formatted="false">This removes saved runs, but leaves conversations, installed models, </string>
+    <string name="runs_runs_screen_95" formatted="false">Clear run history</string>
+    <string name="runs_runs_screen_96" formatted="false">Cancel</string>
+    <string name="runs_runs_screen_97" formatted="false">Clear run history</string>
+    <string name="runs_runs_screen_98" formatted="false">All</string>
+    <string name="runs_runs_screen_99" formatted="false">All</string>
+    <string name="runs_runs_screen_100" formatted="false">Back</string>
+    <string name="runs_runs_screen_101" formatted="false">Repeat</string>
+    <string name="runs_runs_screen_102" formatted="false">Export JSON</string>
+    <string name="settings_hugging_face_token_dialog_103" formatted="false">Hugging Face access token</string>
+    <string name="settings_hugging_face_token_dialog_104" formatted="false">Enter a fine-grained read-only token. The token is encrypted and stored only on this device.</string>
+    <string name="settings_hugging_face_token_dialog_105" formatted="false">Access token</string>
+    <string name="settings_hugging_face_token_dialog_106" formatted="false">Cancel</string>
+    <string name="settings_settings_screen_107" formatted="false">Clear run history?</string>
+    <string name="settings_settings_screen_108" formatted="false">This removes saved runs, but leaves conversations, installed models, and exported files untouched.</string>
+    <string name="settings_settings_screen_109" formatted="false">Clear run history</string>
+    <string name="settings_settings_screen_110" formatted="false">Cancel</string>
+    <string name="settings_settings_screen_111" formatted="false">Settings</string>
+    <string name="settings_settings_screen_112" formatted="false">Device &amp; runtimes</string>
+    <string name="settings_settings_screen_113" formatted="false">Hardware, runtime availability, and diagnostics</string>
+    <string name="settings_settings_screen_114" formatted="false">›</string>
+    <string name="settings_settings_screen_115" formatted="false">Microphone recordings: session only</string>
+    <string name="settings_settings_screen_116" formatted="false">Recordings are temporary and are cleared when you clear media.</string>
+    <string name="settings_settings_screen_117" formatted="false">Generated audio: latest successful WAV</string>
+    <string name="settings_settings_screen_118" formatted="false">The app retains one successful WAV until the next successful synthesis, as documented in the Stage 5 policy.</string>
+    <string name="settings_settings_screen_119" formatted="false">Hugging Face token</string>
+    <string name="settings_settings_screen_120" formatted="false">No token configured. Required only for gated model downloads.</string>
+    <string name="settings_settings_screen_121" formatted="false">Configure token</string>
+    <string name="settings_settings_screen_122" formatted="false">A token is encrypted and stored on this device.</string>
+    <string name="settings_settings_screen_123" formatted="false">Replace token</string>
+    <string name="settings_settings_screen_124" formatted="false">Remove token</string>
+    <string name="settings_settings_screen_125" formatted="false">A development token is supplied by local.properties in this debug build.</string>
+    <string name="settings_settings_screen_126" formatted="false">Use my token instead</string>
+    <string name="settings_settings_screen_127" formatted="false">Clear temporary media</string>
+    <string name="settings_settings_screen_128" formatted="false">Clear run history</string>
+    <string name="settings_settings_screen_129" formatted="false">Inference content stays on this device. Model downloads are the only feature that uses network access, and only after you start one.</string>
+    <string name="stt_speech_model_picker_130" formatted="false">Speech model</string>
+    <string name="stt_speech_to_text_screen_131" formatted="false">Local speech to text</string>
+    <string name="stt_speech_to_text_screen_132" formatted="false">Choose the Android on-device recognizer or an installed speech model. Recording shows live levels, then final text appears after you stop.</string>
+    <string name="stt_speech_to_text_screen_133" formatted="false">Language</string>
+    <string name="stt_speech_to_text_screen_134" formatted="false">CPU threads (0 = safe default)</string>
+    <string name="stt_speech_to_text_screen_135" formatted="false">Profile current audio</string>
+    <string name="stt_speech_to_text_screen_136" formatted="false">Copy</string>
+    <string name="stt_speech_to_text_screen_137" formatted="false">Share</string>
+    <string name="stt_speech_to_text_screen_138" formatted="false">Clear</string>
+    <string name="stt_speech_to_text_screen_139" formatted="false">Stop recording</string>
+    <string name="stt_speech_to_text_screen_140" formatted="false">Stopping…</string>
+    <string name="stt_speech_to_text_screen_141" formatted="false">Importing…</string>
+    <string name="stt_speech_to_text_screen_142" formatted="false">Cancel import</string>
+    <string name="stt_speech_to_text_screen_143" formatted="false">Transcribing…</string>
+    <string name="stt_speech_to_text_screen_144" formatted="false">Cancel transcription</string>
+    <string name="stt_speech_to_text_screen_145" formatted="false">Cancelling…</string>
+    <string name="stt_speech_to_text_screen_146" formatted="false">Record</string>
+    <string name="stt_speech_to_text_screen_147" formatted="false">Import audio</string>
+    <string name="stt_speech_to_text_screen_148" formatted="false">Repeat</string>
+    <string name="stt_speech_to_text_screen_149" formatted="false">Clear</string>
+    <string name="stt_stt_run_metrics_card_150" formatted="false">Run metrics</string>
+    <string name="tts_text_to_speech_route_151" formatted="false">Voice cloning permission</string>
+    <string name="tts_text_to_speech_route_152" formatted="false">Confirm that you own this voice or have the speaker’s permission to use it for voice cloning.</string>
+    <string name="tts_text_to_speech_route_153" formatted="false">I confirm</string>
+    <string name="tts_text_to_speech_route_154" formatted="false">Cancel</string>
+    <string name="tts_text_to_speech_controls_155" formatted="false">Voice</string>
+    <string name="tts_text_to_speech_controls_156" formatted="false">Reference voice</string>
+    <string name="tts_text_to_speech_controls_157" formatted="false">Use only a voice you own or have permission to clone. References are stored as app-private mono 24 kHz PCM.</string>
+    <string name="tts_text_to_speech_controls_158" formatted="false">Recording… %.1f / 10.0 s</string>
+    <string name="tts_text_to_speech_controls_159" formatted="false">Record voice</string>
+    <string name="tts_text_to_speech_controls_160" formatted="false">Import audio</string>
+    <string name="tts_text_to_speech_controls_161" formatted="false">Saved reference voices</string>
+    <string name="tts_text_to_speech_controls_162" formatted="false">No saved references yet. Record or import 5–10 seconds of speech.</string>
+    <string name="tts_text_to_speech_controls_163" formatted="false">Delete</string>
+    <string name="tts_text_to_speech_controls_164" formatted="false">CPU threads (0 = safe default)</string>
+    <string name="tts_text_to_speech_controls_165" formatted="false">Reset</string>
+    <string name="tts_text_to_speech_controls_166" formatted="false">These effects are applied to the generated PCM before playback, replay, sharing, and WAV export.</string>
+    <string name="tts_text_to_speech_controls_167" formatted="false">Equalizer</string>
+    <string name="tts_text_to_speech_controls_168" formatted="false">Pause</string>
+    <string name="tts_text_to_speech_controls_169" formatted="false">Stop</string>
+    <string name="tts_text_to_speech_controls_170" formatted="false">Resume</string>
+    <string name="tts_text_to_speech_controls_171" formatted="false">Stop</string>
+    <string name="tts_text_to_speech_controls_172" formatted="false">Replay</string>
+    <string name="tts_text_to_speech_controls_173" formatted="false">Export WAV</string>
+    <string name="tts_text_to_speech_controls_174" formatted="false">Share</string>
+    <string name="tts_text_to_speech_metrics_card_175" formatted="false">Run metrics</string>
+    <string name="tts_text_to_speech_model_picker_176" formatted="false">Speech engine / model</string>
+    <string name="tts_text_to_speech_screen_177" formatted="false">On-device text to speech</string>
+    <string name="tts_text_to_speech_screen_178" formatted="false">Choose Android’s on-device speech engine or an installed local model. Generated audio can be replayed, processed, shared, and exported as WAV.</string>
+    <string name="tts_text_to_speech_screen_179" formatted="false">Expressive tags: [laugh], [chuckle], [cough], [sigh], [whispering], [happy], [angry], [dramatic], and more.</string>
+    <string name="tts_text_to_speech_screen_180" formatted="false">Generated output: Not watermarked</string>
+    <string name="tts_text_to_speech_screen_181" formatted="false">Language</string>
+    <string name="tts_text_to_speech_screen_182" formatted="false">Text to synthesize</string>
+    <string name="tts_text_to_speech_screen_183" formatted="false">Synthesize &amp; play</string>
+    <string name="tts_text_to_speech_screen_184" formatted="false">Profile this synthesis</string>
+    <string name="tts_text_to_speech_status_185" formatted="false">Latest generated WAV</string>
+    <string name="tts_text_to_speech_status_186" formatted="false">Only this latest successful synthesis is retained. It is replaced after the next successful synthesis; explicit exports are unaffected.</string>
+    <string name="assistant_assistant_controls_format_1">Recording %1$ss · %2$s%% peak</string>
+    <string name="benchmark_benchmark_screen_format_2">Model: %1$s</string>
+    <string name="benchmark_benchmark_screen_format_3">Run %1$s</string>
+    <string name="models_model_details_screen_format_4">Delete %1$s?</string>
+    <string name="models_model_details_screen_format_5">• %1$s</string>
+    <string name="models_model_details_screen_format_6">SHA-256: %1$s</string>
+    <string name="models_model_details_screen_format_7">Waiting to download · %1$s</string>
+    <string name="models_model_details_screen_format_8">%1$s / %2$s</string>
+    <string name="models_model_details_screen_format_9">%1$s / %2$s</string>
+    <string name="models_models_screen_format_10">Models (%1$s)</string>
+    <string name="models_models_screen_format_11">Delete %1$s?</string>
+    <string name="models_models_screen_format_12">This deletes the model files and reclaims about %1$s. Historical run metadata is preserved.</string>
+    <string name="stt_speech_to_text_screen_format_13">Recording %1$s</string>
+    <string name="stt_speech_to_text_screen_format_14">Live input level: %1$s%% RMS · %2$s%% peak</string>
+    <string name="stt_speech_to_text_screen_format_15">Input: %1$s · %2$s · %3$s</string>
+    <string name="tts_text_to_speech_controls_format_16">%1$s sample</string>
+    <string name="tts_text_to_speech_screen_format_17">%1$s / %2$s characters</string>
+    <string name="tts_text_to_speech_status_format_18">%1$s / %2$s queued</string>
+    <string name="tts_text_to_speech_status_format_19">%1$s · %2$s Hz · mono PCM16</string>
+    <string name="core_ui_hide" formatted="false">Hide</string>
+    <string name="core_ui_show" formatted="false">Show</string>
+    <string name="assistant_hide_advanced_settings" formatted="false">Hide advanced settings</string>
+    <string name="assistant_show_advanced_settings" formatted="false">Show advanced settings</string>
+    <string name="assistant_model_not_installed">%1$s · Not installed</string>
+    <string name="device_refreshing" formatted="false">Refreshing…</string>
+    <string name="device_refresh_diagnostics" formatted="false">Refresh diagnostics</string>
+    <string name="models_replace_token" formatted="false">Replace token</string>
+    <string name="models_configure_token" formatted="false">Configure token</string>
+    <string name="models_saving" formatted="false">Saving…</string>
+    <string name="models_save_and_download" formatted="false">Save and download</string>
+    <string name="models_hide_technical_details" formatted="false">Hide technical details</string>
+    <string name="models_show_technical_details" formatted="false">Show technical details</string>
+    <string name="models_validating" formatted="false">Validating…</string>
+    <string name="models_validate" formatted="false">Validate</string>
+    <string name="models_set_up_access" formatted="false">Set up access</string>
+    <string name="models_retry" formatted="false">Retry</string>
+    <string name="settings_save_token" formatted="false">Save token</string>
+    <string name="tts_keep_recording" formatted="false">Keep recording</string>
+    <string name="tts_save_reference" formatted="false">Save reference</string>
+    <string name="tts_stopping" formatted="false">Stopping…</string>
+    <string name="tts_stop" formatted="false">Stop</string>
+    <string name="tts_playback_paused" formatted="false">Playback paused</string>
+    <string name="tts_playing_generated_speech" formatted="false">Playing generated speech</string>
+    <string name="ui_copy_1" formatted="false">Installed</string>
+    <string name="ui_copy_2">Available in Models (%1$s)</string>
+    <string name="ui_copy_3" formatted="false">Chat model</string>
+    <string name="ui_copy_4" formatted="false">Chat model</string>
+    <string name="ui_copy_5" formatted="false"></string>
+    <string name="ui_copy_6" formatted="false">Chat settings</string>
+    <string name="ui_copy_7" formatted="false">Compute</string>
+    <string name="ui_copy_8" formatted="false">Chat</string>
+    <string name="ui_copy_9" formatted="false">Listen</string>
+    <string name="ui_copy_10" formatted="false">Speak</string>
+    <string name="ui_copy_11" formatted="false">Assistant settings</string>
+    <string name="ui_copy_12" formatted="false">Record voice</string>
+    <string name="ui_copy_13" formatted="false">Send message</string>
+    <string name="ui_copy_14" formatted="false">Stop recording</string>
+    <string name="ui_copy_15" formatted="false">Stopping</string>
+    <string name="ui_copy_16" formatted="false">Cancel operation</string>
+    <string name="ui_copy_17" formatted="false">Copy message</string>
+    <string name="ui_copy_18" formatted="false">Regenerate response</string>
+    <string name="ui_copy_19" formatted="false">Speak response</string>
+    <string name="ui_copy_20" formatted="false">Edit and retry</string>
+    <string name="ui_copy_21" formatted="false">Recognition model</string>
+    <string name="ui_copy_22" formatted="false">Speech-to-text settings</string>
+    <string name="ui_copy_23" formatted="false">Recognition model</string>
+    <string name="ui_copy_24" formatted="false">Time to first token</string>
+    <string name="ui_copy_25" formatted="false">Output</string>
+    <string name="ui_copy_26" formatted="false">Total run time</string>
+    <string name="ui_copy_27" formatted="false">Context window</string>
+    <string name="ui_copy_28" formatted="false">Earlier messages omitted</string>
+    <string name="ui_copy_29" formatted="false">Prompt processing</string>
+    <string name="ui_copy_30" formatted="false">Generation settings</string>
+    <string name="ui_copy_31" formatted="false">Model</string>
+    <string name="ui_copy_32" formatted="false">Startup</string>
+    <string name="ui_copy_33" formatted="false">Model load</string>
+    <string name="ui_copy_34" formatted="false">Finish reason</string>
+    <string name="ui_copy_35" formatted="false">Speech model</string>
+    <string name="ui_copy_36" formatted="false">Text-to-speech settings</string>
+    <string name="ui_copy_37" formatted="false">Speech model</string>
+    <string name="ui_copy_38" formatted="false">Repeat the selected workload to measure on-device speed, CPU, memory, thermal state, and supported battery use. Warm-ups are excluded from the saved results.</string>
+    <string name="ui_copy_39" formatted="false">Warm-ups</string>
+    <string name="ui_copy_40" formatted="false">Measured runs</string>
+    <string name="ui_copy_42" formatted="false">Typical latency</string>
+    <string name="ui_copy_43" formatted="false">p95 latency</string>
+    <string name="ui_copy_44" formatted="false">Latency range</string>
+    <string name="ui_copy_45" formatted="false">Output rate</string>
+    <string name="ui_copy_46" formatted="false">CPU usage</string>
+    <string name="ui_copy_47" formatted="false">Peak app memory</string>
+    <string name="ui_copy_48" formatted="false">Thermal state</string>
+    <string name="ui_copy_49" formatted="false">Battery use</string>
+    <string name="ui_copy_50" formatted="false">Session energy</string>
+    <string name="ui_copy_51" formatted="false">Completion time for each saved measurement. Lower is faster.</string>
+    <string name="ui_copy_52" formatted="false">Device &amp; runtimes</string>
+    <string name="ui_copy_53" formatted="false">Refresh interrupted</string>
+    <string name="ui_copy_54" formatted="false">Non-destructive diagnostics</string>
+    <string name="ui_copy_55" formatted="false">Assistant</string>
+    <string name="ui_copy_56" formatted="false">Speech to text</string>
+    <string name="ui_copy_57" formatted="false">Text to speech</string>
+    <string name="ui_copy_58" formatted="false">Saved settings, results, and metrics remain readable </string>
+    <string name="ui_copy_59" formatted="false">No matching runs</string>
+    <string name="ui_copy_60" formatted="false">Completed, cancelled, and failed local inference </string>
+    <string name="ui_copy_61" formatted="false">More run actions</string>
+    <string name="ui_copy_65" formatted="false">Export contains this text and metadata. Audio, private </string>
+    <string name="ui_copy_66" formatted="false">Speech model</string>
+    <string name="ui_copy_67" formatted="false">Choose an installed model for transcription.</string>
+    <string name="ui_copy_68" formatted="false">Speech to text needs attention</string>
+    <string name="ui_copy_69">Final result in %1$s · %2$s</string>
+    <string name="ui_copy_70" formatted="false">Audio duration</string>
+    <string name="ui_copy_71" formatted="false">Final result</string>
+    <string name="ui_copy_72" formatted="false">Engine processing</string>
+    <string name="ui_copy_73" formatted="false">Real-time factor</string>
+    <string name="ui_copy_74" formatted="false">Segments</string>
+    <string name="ui_copy_75" formatted="false">Model load</string>
+    <string name="ui_copy_76" formatted="false">CPU threads</string>
+    <string name="ui_copy_77" formatted="false">Recognition mode</string>
+    <string name="ui_copy_78" formatted="false">Choose a voice</string>
+    <string name="ui_copy_79" formatted="false">Play previews the current text without changing the selected voice.</string>
+    <string name="ui_copy_80" formatted="false">Available voices</string>
+    <string name="ui_copy_81" formatted="false">Supported controls</string>
+    <string name="ui_copy_82" formatted="false">Post-processing</string>
+    <string name="ui_copy_83">Synthesis %1$s · %2$s</string>
+    <string name="ui_copy_84" formatted="false">First PCM chunk</string>
+    <string name="ui_copy_85" formatted="false">First playback write</string>
+    <string name="ui_copy_86" formatted="false">First audible presentation</string>
+    <string name="ui_copy_87" formatted="false">Synthesis time</string>
+    <string name="ui_copy_88" formatted="false">Generated audio</string>
+    <string name="ui_copy_89" formatted="false">Real-time factor</string>
+    <string name="ui_copy_90" formatted="false">Audio format</string>
+    <string name="ui_copy_91" formatted="false">Model load</string>
+    <string name="ui_copy_92" formatted="false">CPU threads</string>
+    <string name="ui_copy_93" formatted="false">Playback underruns</string>
+    <string name="ui_copy_94" formatted="false">Voice conditioning</string>
+    <string name="ui_copy_95" formatted="false">Speech tokens</string>
+    <string name="ui_copy_96" formatted="false">Token generation</string>
+    <string name="ui_copy_97" formatted="false">Waveform decoding</string>
+    <string name="ui_copy_98" formatted="false">Memory snapshot</string>
+    <string name="ui_copy_99" formatted="false">Speech engine / model</string>
+    <string name="ui_copy_100" formatted="false">Choose an installed engine or local model for speech synthesis.</string>
+    <string name="ui_copy_101" formatted="false">Text to speech</string>
+    <string name="ui_copy_102" formatted="false">Text to speech needs attention</string>
+    <string name="runs_history_retention_summary">Saved settings, results, and metrics remain readable even when a model is later removed.</string>
+    <string name="runs_no_matching_explanation">Completed, cancelled, and failed local inference attempts will appear here.</string>
+    <string name="runs_clear_history_explanation">This removes saved runs, but leaves conversations, installed models, and exported files untouched.</string>
+    <string name="runs_more_actions">More run actions</string>
+    <string name="runs_model_snapshot_unavailable">Model snapshot unavailable</string>
+    <string name="runs_row_summary">%1$s · %2$s · %3$s</string>
+    <string name="runs_kind_and_capability">%1$s · %2$s</string>
+    <string name="runs_status_and_model">%1$s · %2$s</string>
+    <string name="runs_model_removed">removed or unavailable model</string>
+    <string name="runs_input">Input</string>
+    <string name="runs_not_retained">Not retained</string>
+    <string name="runs_output">Output</string>
+    <string name="runs_not_available">Not available</string>
+    <string name="runs_effective_parameters">Effective parameters</string>
+    <string name="runs_metrics">Metrics</string>
+    <string name="runs_error">Error</string>
+    <string name="runs_linked_pipeline_runs">Linked pipeline runs</string>
+    <string name="runs_export_description">Export contains this text and metadata. Audio, private file paths, and source URIs are never included.</string>
+    <string name="runs_capability_chat">Chat</string>
+    <string name="runs_capability_speech_to_text">Speech to text</string>
+    <string name="runs_capability_text_to_speech">Text to speech</string>
+    <string name="runs_capability_voice_activity_detection">Voice activity detection</string>
+    <string name="runs_capability_voice_assistant">Voice assistant</string>
+    <string name="runs_filter_stt">STT</string>
+    <string name="runs_filter_tts">TTS</string>
+    <string name="runs_filter_assistant">Assistant</string>
+    <string name="benchmark_reuse_runtime">Reuse the runtime between iterations</string>
+    <string name="benchmark_reload_runtime">Reload the runtime for every iteration</string>
+    <string name="benchmark_measurement_summary">%1$s saved measurement%2$s. Latency is the time from inference start to completion; lower is faster.</string>
+    <string name="benchmark_trace_recording">External trace is recording. Use it to correlate these runs with system GPU and scheduling data.</string>
+    <string name="benchmark_trace_not_recording">External trace is not recording. In-app CPU, memory, thermal, and supported battery telemetry is still collected.</string>
+    <string name="ui_description_1" formatted="false">Choose an installed model for private local chat.</string>
+    <string name="ui_description_2" formatted="false">Configure the selected model’s instructions, generation, and runtime behavior.</string>
+    <string name="ui_description_3" formatted="false">Choose an installed model for on-device speech recognition.</string>
+    <string name="ui_description_4" formatted="false">Choose a recognizer and language for voice input.</string>
+    <string name="ui_description_5" formatted="false">Time from starting the run until the first response token arrives. Lower feels more responsive.</string>
+    <string name="ui_description_6" formatted="false">End-to-end time for this run, including model loading, prompt processing, and generation.</string>
+    <string name="ui_description_7" formatted="false">The conversation input and reserved response space available to this run. Older messages may be omitted when the limit is reached.</string>
+    <string name="ui_description_8" formatted="false">Earlier conversation messages left out to keep the prompt within the context window.</string>
+    <string name="ui_description_9" formatted="false">Input tokens read before the response. Tokens per second measures prompt processing speed; higher is faster.</string>
+    <string name="ui_description_10" formatted="false">Sampling controls that shape how varied the response can be. These settings affect output quality, not just speed.</string>
+    <string name="ui_description_11" formatted="false">The local model used to produce this response.</string>
+    <string name="ui_description_12" formatted="false">Cold starts load a model into memory. Warm starts reuse one that is already loaded; thread count is the effective CPU parallelism.</string>
+    <string name="ui_description_13" formatted="false">Time spent preparing the selected model before prompt processing begins.</string>
+    <string name="ui_description_14" formatted="false">Why generation stopped for this response.</string>
+    <string name="ui_description_15" formatted="false">Choose an installed engine or local model for speech synthesis.</string>
+    <string name="ui_description_16" formatted="false">Choose the voice and tune playback for spoken responses.</string>
+    <string name="ui_description_17" formatted="false">Run first and exclude from results</string>
+    <string name="ui_description_18" formatted="false">Save each run to Runs history</string>
+    <string name="ui_description_19" formatted="false">Median completion time across the measured runs.</string>
+    <string name="ui_description_20" formatted="false">95% of runs completed within this time; useful for spotting slow runs.</string>
+    <string name="ui_description_21" formatted="false">Fastest to slowest measured completion time.</string>
+    <string name="ui_description_22" formatted="false">Process CPU time over wall time. 100% equals one fully used CPU core, so multi-core work can exceed 100%.</string>
+    <string name="ui_description_23" formatted="false">Largest proportional set size (PSS) during this run. PSS estimates shared memory proportionally.</string>
+    <string name="ui_description_24" formatted="false">Android device thermal status at the end of the run. Severe or higher stops a profile to protect the device.</string>
+    <string name="ui_description_25" formatted="false">Battery reporting is coarse for short profiles. Longer workloads produce more useful readings; current sign follows the device power driver.</string>
+    <string name="ui_description_26" formatted="false">Energy-counter change over all measured runs. Availability depends on the device.</string>
+    <string name="ui_description_27" formatted="false">Chat privately with AI on your device.</string>
+    <string name="ui_description_28" formatted="false">Turn speech and recordings into text.</string>
+    <string name="ui_description_29" formatted="false">Turn text into natural-sounding audio.</string>
+    <string name="ui_description_30" formatted="false">Length of the recording or imported audio that was transcribed.</string>
+    <string name="ui_description_31" formatted="false">End-to-end time from starting the run until the completed transcript was available. This includes model loading and decoding.</string>
+    <string name="ui_description_32" formatted="false">Time reported by the speech engine while it decoded audio. This can differ from the full run time because setup and app overhead are excluded.</string>
+    <string name="ui_description_33" formatted="false">Final-result time divided by audio duration. Below 1× means the transcript completed faster than the audio length.</string>
+    <string name="ui_description_34" formatted="false">Number of audio pieces processed. Longer audio may be split into bounded segments before decoding.</string>
+    <string name="ui_description_35" formatted="false">Time spent preparing the selected speech model before transcription began.</string>
+    <string name="ui_description_36" formatted="false">Effective CPU worker count used by the speech runtime for this run.</string>
+    <string name="ui_description_37" formatted="false">Time until the model produced the first audio samples. Lower values make speech feel more responsive.</string>
+    <string name="ui_description_38" formatted="false">Time until the app handed the first generated audio samples to Android\'s playback buffer.</string>
+    <string name="ui_description_39" formatted="false">Time spent generating speech audio, excluding model loading and playback drain time.</string>
+    <string name="ui_description_40" formatted="false">Duration of the WAV audio created for this request.</string>
+    <string name="ui_description_41" formatted="false">Synthesis time divided by generated audio duration. Below 1× means audio was generated faster than it plays.</string>
+    <string name="ui_description_42" formatted="false">Sample rate and PCM format of the generated WAV file.</string>
+    <string name="ui_description_43" formatted="false">Time spent preparing the selected speech model before synthesis began.</string>
+    <string name="ui_description_44" formatted="false">Effective CPU worker count used by the speech runtime for this run.</string>
+    <string name="ui_description_45" formatted="false">Times Android\'s playback buffer ran short of audio. Zero indicates uninterrupted playback.</string>
+    <string name="ui_description_46" formatted="false">Time spent preparing the voice-conditioning representation. A cache hit reuses a previously prepared representation.</string>
+    <string name="ui_description_47" formatted="false">Intermediate speech tokens generated before waveform decoding.</string>
+    <string name="ui_description_48" formatted="false">Time spent producing intermediate speech tokens.</string>
+    <string name="ui_description_49" formatted="false">Time spent converting generated speech tokens into PCM audio samples.</string>
+    <string name="ui_description_50" formatted="false">Memory readings captured by the speech runtime. PSS estimates the app\'s proportional share of memory.</string>
+    <string name="assistant_generating">Generating…</string>
+    <string name="assistant_you">You</string>
+    <string name="assistant_assistant">Assistant</string>
+    <string name="assistant_install_model">Install a model in Models</string>
+    <string name="assistant_not_configured">Not configured</string>
+    <string name="assistant_no_compatible_voice">No compatible voice</string>
+    <string name="stt_install_speech_model">Install a speech model in Models</string>
+    <string name="tts_no_voice_for_language">No voice available for %1$s</string>
+    <string name="tts_choose_saved_reference">Choose a saved reference</string>
+    <string name="tts_install_model">Install a TTS model in Models</string>
+    <string name="models_title">Models</string>
+    <string name="models_no_matching">No matching models</string>
+    <string name="models_no_matching_explanation">Try a different model type or availability filter.</string>
+    <string name="playground_privacy_description">Explore each on-device capability and its readiness. Network access is used only for model downloads you explicitly start.</string>
+    <string name="models_lifecycle">Model lifecycle</string>
+    <string name="models_compatibility_unavailable">Compatibility unavailable</string>
+    <string name="models_validation_issue">Validation issue</string>
+    <string name="models_validation">Validation</string>
+    <string name="assistant_needs_attention">Assistant needs attention</string>
+    <string name="assistant_error_select_chat_model">Select an installed chat model.</string>
+    <string name="assistant_error_select_speech_model">Select an installed speech-to-text model.</string>
+    <string name="assistant_error_select_tts_model">Select an installed text-to-speech model.</string>
+    <string name="assistant_error_select_compatible_voice">Select a voice compatible with the speech language.</string>
+    <string name="assistant_settings_model">Model</string>
+    <string name="assistant_settings_voice_language">Voice &amp; language</string>
+    <string name="assistant_settings_playback">Playback</string>
+    <string name="assistant_settings_speech_rate">Speech rate (0.5–2)</string>
+    <string name="assistant_settings_volume">Volume (0–1)</string>
+    <string name="assistant_settings_sentence_silence">Sentence silence (0–2)</string>
+    <string name="assistant_settings_performance">Performance</string>
+    <string name="assistant_settings_thread_count">Thread count (0 = default)</string>
+    <string name="assistant_operation_listening">Listening…</string>
+    <string name="assistant_operation_transcribing">Transcribing…</string>
+    <string name="assistant_operation_loading_model">Loading model…</string>
+    <string name="assistant_operation_speaking">Speaking…</string>
+    <string name="assistant_operation_stopping">Stopping…</string>
+    <string name="compute_automatic">Automatic</string>
+    <string name="compute_cpu">CPU</string>
+    <string name="compute_gpu">GPU</string>
+    <string name="compute_npu">NPU</string>
+    <string name="compute_system_service">System service</string>
+    <string name="models_engine_litert_lm">LiteRT-LM</string>
+    <string name="models_filter_all">All</string>
+    <string name="models_type_llm">LLM</string>
+    <string name="models_type_tts">TTS</string>
+    <string name="models_type_stt">STT</string>
+    <string name="models_type_vad">VAD</string>
+    <string name="models_type_model">Model</string>
+    <string name="models_language_independent">Language-independent</string>
+    <string name="models_language_not_specified">Language not specified</string>
+    <string name="models_status_ready">Ready</string>
+    <string name="models_status_needs_attention">Needs attention</string>
+    <string name="models_status_queued">Queued</string>
+    <string name="models_status_verifying">Verifying</string>
+    <string name="models_status_downloading">Downloading</string>
+    <string name="models_status_paused">Paused</string>
+    <string name="models_status_installing">Installing</string>
+    <string name="models_status_download_failed">Download failed</string>
+    <string name="models_status_installed">Installed</string>
+    <string name="models_status_not_installed">Not installed</string>
+    <string name="models_network_wifi_only">Wi-Fi only</string>
+    <string name="models_network_any">Any network</string>
+    <string name="device_battery_charging">Charging</string>
+    <string name="device_battery_not_charging">Not charging</string>
+    <string name="device_thermal_status">Thermal status %1$d</string>
+    <string name="device_thermal_status_unavailable">Thermal status unavailable before Android 10</string>
+    <string name="device_android_version">Android %1$s (API %2$d)</string>
+    <string name="device_battery_plugged">%1$s (plugged in)</string>
+    <string name="device_available_processors">%1$d available processor(s)</string>
+    <string name="language_english">English</string>
+    <string name="language_russian">Russian</string>
+    <string name="language_chinese">Chinese</string>
+    <string name="language_japanese">Japanese</string>
+    <string name="language_korean">Korean</string>
+    <string name="language_cantonese">Cantonese</string>
+    <string name="models_hugging_face_access">Hugging Face access</string>
+    <string name="models_hugging_face_no_token">No token configured</string>
+    <string name="models_hugging_face_token_stored">Token securely stored on this device</string>
+    <string name="models_hugging_face_debug_token">Development token supplied by this debug build</string>
+    <string name="tts_status_record_reference">Record 5–10 seconds of clear speech. Recording stops automatically at 10 seconds.</string>
+    <string name="tts_status_saved_reference">Saved reference voice “%1$s”.</string>
+    <string name="tts_status_reference_recording_stopped">Reference recording stopped.</string>
+    <string name="tts_status_normalizing_reference">Normalizing reference audio to mono 24 kHz…</string>
+    <string name="tts_status_switching_preview">Switching preview to %1$s…</string>
+    <string name="tts_status_previewing_voice">Previewing %1$s locally…</string>
+    <string name="tts_status_preview_completed">Voice preview completed.</string>
+    <string name="tts_status_preview_stopped">Voice preview stopped.</string>
+    <string name="tts_status_generating_chatterbox">Generating Chatterbox speech locally…</string>
+    <string name="tts_status_synthesizing_platform">Synthesizing with Android’s on-device voice…</string>
+    <string name="tts_status_synthesizing_pcm">Synthesizing and streaming PCM locally…</string>
+    <string name="tts_status_synthesis_draining">Synthesis completed; playback is draining by presented frames.</string>
+    <string name="tts_status_wav_retained">Latest WAV retained in app-private storage until the next successful synthesis.</string>
+    <string name="tts_status_operation_stopped">Speech operation stopped.</string>
+    <string name="tts_status_replaying_wav">Replaying the retained WAV.</string>
+    <string name="tts_status_replay_completed">Replay completed.</string>
+    <string name="tts_status_playback_stopped">Playback stopped.</string>
+    <string name="tts_status_wav_exported">WAV exported successfully.</string>
+    <string name="tts_status_latest_wav_retained">Latest generated WAV is retained until the next successful synthesis.</string>
+    <string name="tts_error_record_reference">Could not record the reference voice.</string>
+    <string name="tts_error_import_reference">Could not import the reference audio.</string>
+    <string name="tts_error_voice_unsupported">That voice does not support %1$s.</string>
+    <string name="tts_error_enter_text_preview">Enter text before previewing a voice.</string>
+    <string name="tts_error_thread_count_integer">Thread count must be a whole number.</string>
+    <string name="tts_error_preview_voice">Could not preview the selected voice.</string>
+    <string name="tts_error_install_model">Install a compatible voice model before synthesizing speech.</string>
+    <string name="tts_error_select_voice">Select a voice that supports %1$s.</string>
+    <string name="tts_error_replay">Could not replay generated speech.</string>
+    <string name="tts_error_selected_reference_deleted">The selected reference was deleted. Record or import another voice.</string>
+    <string name="tts_error_microphone_permission_denied">Microphone permission was denied. Allow it in Android settings and try again.</string>
+    <string name="tts_error_select_model">Select an installed text-to-speech model.</string>
+    <string name="tts_error_select_compatible_voice">Select a compatible voice.</string>
+    <string name="tts_error_enter_text_profile">Enter text before profiling.</string>
+    <string name="tts_error_thread_count_range">Thread count must be between 0 and 64.</string>
+    <string name="tts_error_settings_invalid">Text-to-speech settings are invalid.</string>
+    <string name="tts_error_export_wav">Could not export the WAV file.</string>
+    <string name="tts_error_saved_model_missing">Saved model %1$s is no longer installed. Select a compatible model before synthesizing.</string>
+    <string name="tts_error_saved_reference_missing">The saved reference voice was deleted. Record or import another reference before synthesizing.</string>
+    <string name="stt_error_microphone_capture">Microphone capture failed.</string>
+    <string name="stt_error_audio_import">Audio import failed.</string>
+    <string name="stt_error_select_model">Select an installed speech-to-text model.</string>
+    <string name="stt_error_audio_before_profile">Record or import audio before profiling.</string>
+    <string name="stt_error_thread_count_range">Thread count must be between 0 and 64.</string>
+    <string name="stt_error_microphone_permission_denied">Microphone permission was denied. You can allow it in Android settings and try again.</string>
+    <string name="stt_error_no_speech_recognized">No speech was recognized in this audio. Try recording again or choose an installed local model.</string>
+    <string name="stt_error_transcription_cancelled">Transcription cancelled.</string>
+    <string name="stt_error_transcription_failed">Local transcription failed.</string>
+    <string name="stt_error_install_model">Install a compatible speech-to-text model before recording or importing audio.</string>
+    <string name="stt_error_saved_model_missing">Saved model %1$s is no longer installed. Select a compatible model.</string>
+    <string name="stt_status_configuration_restored">Saved configuration restored. Recording audio was session-only, so record or import audio before repeating.</string>
+    <string name="models_status_invalid">Invalid</string>
+    <string name="models_status_missing_files">Missing files</string>
+    <string name="models_status_incompatible">Incompatible</string>
+    <string name="models_compatibility_compatible">Compatible</string>
+    <string name="models_compatibility_warnings">Compatible with warnings</string>
+    <string name="models_voice_mode_bundled">Bundled speakers</string>
+    <string name="models_voice_mode_reference">Reference audio</string>
+    <string name="models_voice_mode_platform">Platform voices</string>
+    <string name="models_recognition_offline">Offline</string>
+    <string name="models_recognition_streaming">Streaming</string>
+    <string name="benchmark_chat_profile">Chat profile</string>
+    <string name="benchmark_stt_profile">Speech-to-text profile</string>
+    <string name="benchmark_tts_profile">Text-to-speech profile</string>
+    <string name="benchmark_workload_chat">Complete conversation context plus current draft · %1$d messages</string>
+    <string name="benchmark_workload_stt">%1$s · %2$d ms · %3$s</string>
+    <string name="benchmark_workload_tts">%1$d characters · %2$s</string>
+    <string name="thermal_none">None</string>
+    <string name="thermal_light">Light</string>
+    <string name="thermal_moderate">Moderate</string>
+    <string name="thermal_severe">Severe</string>
+    <string name="thermal_critical">Critical</string>
+    <string name="thermal_emergency">Emergency</string>
+    <string name="thermal_shutdown">Shutdown</string>
+    <string name="ui_unavailable">Unavailable</string>
+    <string name="ui_unknown">Unknown</string>
+    <string name="models_imported_profile">Imported %1$s</string>
+    <string name="models_profile_gguf_chat">GGUF chat model</string>
+    <string name="models_profile_whisper_stt">Whisper STT bundle</string>
+    <string name="models_profile_parakeet_stt">Parakeet CTC STT bundle</string>
+    <string name="models_profile_gigaam_stt">GigaAM CTC STT bundle</string>
+    <string name="models_profile_zipformer_stt">Zipformer STT bundle</string>
+    <string name="models_profile_sensevoice_stt">SenseVoice STT bundle</string>
+    <string name="models_profile_paraformer_stt">Paraformer STT bundle</string>
+    <string name="models_profile_moonshine_stt">Moonshine STT bundle</string>
+    <string name="models_profile_vosk_stt">Vosk STT bundle</string>
+    <string name="models_profile_android_stt">Android on-device speech recognizer</string>
+    <string name="models_profile_supertonic_tts">Supertonic TTS bundle</string>
+    <string name="models_profile_piper_tts">Piper/VITS TTS bundle</string>
+    <string name="models_profile_kokoro_tts">Kokoro TTS bundle</string>
+    <string name="models_profile_pocket_tts">Pocket TTS bundle</string>
+    <string name="models_profile_bundle">Model bundle</string>
+    <string name="device_engine_unsupported">Unsupported • %1$s</string>
+    <string name="stt_processing_recording">Processing recording</string>
+    <string name="stt_transcribing_locally">Transcribing locally</string>
+    <string name="runs_status_succeeded">Succeeded</string>
+    <string name="runs_status_cancelled">Cancelled</string>
+    <string name="runs_status_failed">Failed</string>
+    <string name="runs_kind_inference">Inference</string>
+    <string name="runs_kind_benchmark_session">Benchmark session</string>
+</resources>

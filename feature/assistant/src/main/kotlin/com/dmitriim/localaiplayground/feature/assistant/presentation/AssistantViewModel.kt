@@ -93,10 +93,7 @@ class AssistantViewModel(
     fun selectInputMode(mode: AssistantInputMode) {
         if (!mutableState.value.isIdle) return
         if (mode == AssistantInputMode.VOICE) {
-            mutableState.value.voiceConfigurationError?.let { error ->
-                mutableState.update { it.copy(errorMessage = error) }
-                return
-            }
+            if (mutableState.value.voiceConfigurationError != null) return
         }
         mutableState.update { it.copy(inputMode = mode, errorMessage = null) }
     }

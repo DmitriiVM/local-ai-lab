@@ -25,6 +25,9 @@ import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechUiState
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsLanguage
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsOperation
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.core.ui.text.asString
 
 @Composable
 fun TextToSpeechScreen(
@@ -79,9 +82,8 @@ fun TextToSpeechScreen(
             ),
         verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
-        Text("On-device text to speech", style = MaterialTheme.typography.headlineSmall)
-        Text(
-            "Choose Android’s on-device speech engine or an installed local model. Generated audio can be replayed, processed, shared, and exported as WAV.",
+        Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_177), style = MaterialTheme.typography.headlineSmall)
+        Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_178),
             style = MaterialTheme.typography.bodyMedium,
         )
 
@@ -97,12 +99,10 @@ fun TextToSpeechScreen(
                     onImport = onImportReference,
                     onDelete = onDeleteReference,
                 )
-                Text(
-                    "Expressive tags: [laugh], [chuckle], [cough], [sigh], [whispering], [happy], [angry], [dramatic], and more.",
+                Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_179),
                     style = MaterialTheme.typography.bodySmall,
                 )
-                Text(
-                    "Generated output: Not watermarked",
+                Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_180),
                     style = MaterialTheme.typography.labelLarge,
                 )
             } else {
@@ -120,7 +120,7 @@ fun TextToSpeechScreen(
                     onStopPreview = onStop,
                 )
             }
-            Text("Language", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_181), style = MaterialTheme.typography.titleSmall)
             TextToSpeechLanguageControls(
                 state.language,
                 !busy,
@@ -135,8 +135,8 @@ fun TextToSpeechScreen(
                 value = state.text,
                 onValueChange = onTextChange,
                 enabled = !busy,
-                label = { Text("Text to synthesize") },
-                supportingText = { Text("${state.text.length} / ${state.characterLimit} characters") },
+                label = { Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_182)) },
+                supportingText = { Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_format_17, state.text.length, state.characterLimit)) },
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -149,14 +149,14 @@ fun TextToSpeechScreen(
                     contentColor = MaterialTheme.colorScheme.onTertiary,
                 ),
             ) {
-                Text("Synthesize & play")
+                Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_183))
             }
             OutlinedButton(
                 onClick = onProfile,
                 enabled = !busy && state.selectedVoice != null && state.text.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Profile this synthesis")
+                Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_184))
             }
         }
         TextToSpeechSettings(
@@ -192,10 +192,10 @@ fun TextToSpeechScreen(
         state.output?.let { GeneratedAudioCard(it) }
         state.metrics?.let { TextToSpeechMetricsCard(it) }
         state.statusMessage?.let {
-            StatusMessage(title = "Text to speech", explanation = it)
+            StatusMessage(title = stringResource(CoreUiR.string.ui_copy_101), explanation = it.asString())
         }
         state.errorMessage?.let {
-            StatusMessage(title = "Text to speech needs attention", explanation = it)
+            StatusMessage(title = stringResource(CoreUiR.string.ui_copy_102), explanation = it.asString())
         }
     }
 }

@@ -4,9 +4,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.dmitriim.localaiplayground.R
 import com.dmitriim.localaiplayground.core.navigation.AppNavHost
 import com.dmitriim.localaiplayground.core.navigation.rememberAppNavigationState
 import com.dmitriim.localaiplayground.di.AppGraph
@@ -40,7 +42,7 @@ fun LocalAiPlaygroundApp(graph: AppGraph) {
         AppNavHost(
             state = navigationState,
             unavailableDestination = {
-                Text("This destination is no longer available.")
+                Text(stringResource(R.string.destination_unavailable))
             },
             modifier = modifier,
         )

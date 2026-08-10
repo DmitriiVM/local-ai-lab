@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackState
 import com.dmitriim.localaiplayground.core.audio.output.model.SpeechPlaybackStatus
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun TextToSpeechPlaybackStatus(playback: SpeechPlaybackState) {
@@ -22,11 +24,16 @@ internal fun TextToSpeechPlaybackStatus(playback: SpeechPlaybackState) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                if (playback.status == SpeechPlaybackStatus.PAUSED) "Playback paused" else "Playing generated speech",
+                stringResource(
+                    if (playback.status == SpeechPlaybackStatus.PAUSED) {
+                        CoreUiR.string.tts_playback_paused
+                    } else {
+                        CoreUiR.string.tts_playing_generated_speech
+                    },
+                ),
                 style = MaterialTheme.typography.titleMedium,
             )
-            Text(
-                "${formatDuration(playback.positionMs)} / ${formatDuration(playback.queuedDurationMs)} queued",
+            Text(stringResource(CoreUiR.string.tts_text_to_speech_status_format_18, formatDuration(playback.positionMs), formatDuration(playback.queuedDurationMs)),
                 fontFamily = FontFamily.Monospace,
             )
             playback.focusMessage?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
@@ -38,10 +45,9 @@ internal fun TextToSpeechPlaybackStatus(playback: SpeechPlaybackState) {
 internal fun GeneratedAudioCard(output: GeneratedAudioFile) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Latest generated WAV", style = MaterialTheme.typography.titleMedium)
-            Text("${formatDuration(output.durationMs)} · ${output.sampleRateHz} Hz · mono PCM16")
-            Text(
-                "Only this latest successful synthesis is retained. It is replaced after the next successful synthesis; explicit exports are unaffected.",
+            Text(stringResource(CoreUiR.string.tts_text_to_speech_status_185), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(CoreUiR.string.tts_text_to_speech_status_format_19, formatDuration(output.durationMs), output.sampleRateHz))
+            Text(stringResource(CoreUiR.string.tts_text_to_speech_status_186),
                 style = MaterialTheme.typography.bodySmall,
             )
         }

@@ -1,6 +1,8 @@
 package com.dmitriim.localaiplayground.feature.tts.presentation
 
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.core.ui.text.UiText
 import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import kotlinx.serialization.json.Json
@@ -66,11 +68,11 @@ internal object TtsReplayRestorer {
                 ),
                 errorMessage = when {
                     replayModelId != null && installedModelId == null ->
-                        "Saved model ${run.model?.displayName.orEmpty()} is no longer installed. Select a compatible model before synthesizing."
+                        UiText.Resource(CoreUiR.string.tts_error_saved_model_missing, listOf(run.model?.displayName.orEmpty()))
                     selectedModel?.voiceMode == TtsVoiceMode.REFERENCE_AUDIO &&
                         replayVoiceId != null &&
                         voices.none { it.id == replayVoiceId } ->
-                        "The saved reference voice was deleted. Record or import another reference before synthesizing."
+                        UiText.Resource(CoreUiR.string.tts_error_saved_reference_missing)
                     else -> null
                 },
             ),

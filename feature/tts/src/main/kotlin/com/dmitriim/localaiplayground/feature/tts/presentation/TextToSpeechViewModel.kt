@@ -2,6 +2,8 @@ package com.dmitriim.localaiplayground.feature.tts.presentation
 
 import android.net.Uri
 import android.util.Log
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.core.ui.text.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.system.SystemTextToSpeechSupport
@@ -222,7 +224,7 @@ class TextToSpeechViewModel(
             state.copy(
                 selectedVoiceId = state.selectedVoiceId.takeUnless { it == voiceId },
                 errorMessage = if (state.selectedVoiceId == voiceId) {
-                    "The selected reference was deleted. Record or import another voice."
+                    UiText.Resource(CoreUiR.string.tts_error_selected_reference_deleted)
                 } else {
                     state.errorMessage
                 },
@@ -231,7 +233,7 @@ class TextToSpeechViewModel(
     }
 
     fun microphonePermissionDenied() = mutableState.update {
-        it.copy(errorMessage = "Microphone permission was denied. Allow it in Android settings and try again.")
+        it.copy(errorMessage = UiText.Resource(CoreUiR.string.tts_error_microphone_permission_denied))
     }
 
     fun previewVoice(voiceId: String) = operationController.previewVoice(voiceId)
@@ -250,10 +252,10 @@ class TextToSpeechViewModel(
         val voice = snapshot.selectedVoice
         val threads = snapshot.threadCount.toIntOrNull()
         val error = when {
-            model?.installed != true -> "Select an installed text-to-speech model."
-            voice == null -> "Select a compatible voice."
-            snapshot.text.isBlank() -> "Enter text before profiling."
-            threads !in 0..64 -> "Thread count must be between 0 and 64."
+            model?.installed != true -> UiText.Resource(CoreUiR.string.tts_error_select_model)
+            voice == null -> UiText.Resource(CoreUiR.string.tts_error_select_compatible_voice)
+            snapshot.text.isBlank() -> UiText.Resource(CoreUiR.string.tts_error_enter_text_profile)
+            threads !in 0..64 -> UiText.Resource(CoreUiR.string.tts_error_thread_count_range)
             else -> null
         }
         if (error != null) {
@@ -263,7 +265,7 @@ class TextToSpeechViewModel(
         val settings = runCatching {
             TtsSpeechSettingsFactory.create(snapshot, requireNotNull(voice), requireNotNull(threads))
         }.getOrElse { cause ->
-            mutableState.update { it.copy(errorMessage = cause.message ?: "Text-to-speech settings are invalid.") }
+            mutableState.update { it.copy(errorMessage = cause.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.tts_error_settings_invalid)) }
             return false
         }
         profileLaunchCoordinator.open(
@@ -296,16 +298,16 @@ class TextToSpeechViewModel(
             runCatching { generatedAudioStore.export(output, destination) }
                 .onSuccess {
                     Log.i(TAG, "TTS UI export completed.")
-                    mutableState.update { it.copy(statusMessage = "WAV exported successfully.", errorMessage = null) }
+                    mutableState.update { it.copy(statusMessage = UiText.Resource(CoreUiR.string.tts_status_wav_exported), errorMessage = null) }
                 }
                 .onFailure { error ->
                     Log.e(TAG, "TTS UI export failed: ${error.message}", error)
-                    mutableState.update { it.copy(errorMessage = error.message ?: "Could not export the WAV file.") }
+                    mutableState.update { it.copy(errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.tts_error_export_wav)) }
                 }
         }
     }
 
-    fun shareFailed(message: String) = mutableState.update { it.copy(errorMessage = message) }
+    fun shareFailed(message: String) = mutableState.update { it.copy(errorMessage = UiText.Dynamic(message)) }
 
     override fun onCleared() {
         operationController.clear()
@@ -397,7 +399,7 @@ class TextToSpeechViewModel(
                 mutableState.update {
                     it.copy(
                         output = output,
-                        statusMessage = "Latest generated WAV is retained until the next successful synthesis.",
+                        statusMessage = UiText.Resource(CoreUiR.string.tts_status_latest_wav_retained),
                     )
                 }
             }

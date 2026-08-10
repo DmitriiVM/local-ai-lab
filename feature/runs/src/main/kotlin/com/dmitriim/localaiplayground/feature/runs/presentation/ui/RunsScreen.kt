@@ -41,6 +41,8 @@ import com.dmitriim.localaiplayground.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localaiplayground.feature.runs.presentation.RunsUiState
 import java.text.DateFormat
 import java.util.Date
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun RunsScreen(
@@ -82,7 +84,7 @@ fun RunsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text("Runs", style = MaterialTheme.typography.headlineMedium)
+                Text(stringResource(CoreUiR.string.runs_runs_screen_92), style = MaterialTheme.typography.headlineMedium)
                 RunsOverflowMenu(
                     hasRuns = state.runs.isNotEmpty(),
                     onClearRunHistory = onRequestClearRunHistory,
@@ -91,8 +93,7 @@ fun RunsScreen(
         }
         item {
             Text(
-                text = "Saved settings, results, and metrics remain readable " +
-                    "even when a model is later removed.",
+                text = stringResource(CoreUiR.string.runs_history_retention_summary),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -100,9 +101,8 @@ fun RunsScreen(
         if (state.filteredRuns.isEmpty()) {
             item {
                 StatusMessage(
-                    title = "No matching runs",
-                    explanation = "Completed, cancelled, and failed local inference " +
-                        "attempts will appear here.",
+                    title = stringResource(CoreUiR.string.ui_copy_59),
+                    explanation = stringResource(CoreUiR.string.runs_no_matching_explanation),
                 )
             }
         } else {
@@ -120,18 +120,15 @@ private fun ClearRunHistoryDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Clear run history?") },
+        title = { Text(stringResource(CoreUiR.string.runs_runs_screen_93)) },
         text = {
-            Text(
-                "This removes saved runs, but leaves conversations, installed models, " +
-                    "and exported files untouched.",
-            )
+            Text(stringResource(CoreUiR.string.runs_clear_history_explanation))
         },
         confirmButton = {
-            OutlinedButton(onClick = onConfirm) { Text("Clear run history") }
+            OutlinedButton(onClick = onConfirm) { Text(stringResource(CoreUiR.string.runs_runs_screen_95)) }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) { Text("Cancel") }
+            OutlinedButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.runs_runs_screen_96)) }
         },
     )
 }
@@ -146,7 +143,7 @@ private fun RunsOverflowMenu(
         IconButton(onClick = { expanded = true }) {
             Icon(
                 imageVector = Icons.Outlined.MoreVert,
-                contentDescription = "More run actions",
+                contentDescription = stringResource(CoreUiR.string.runs_more_actions),
             )
         }
         DropdownMenu(
@@ -154,7 +151,7 @@ private fun RunsOverflowMenu(
             onDismissRequest = { expanded = false },
         ) {
             DropdownMenuItem(
-                text = { Text("Clear run history") },
+                text = { Text(stringResource(CoreUiR.string.runs_runs_screen_97)) },
                 onClick = {
                     expanded = false
                     onClearRunHistory()
@@ -177,7 +174,7 @@ private fun FilterRow(
                 FilterChip(
                     selected = state.capability == null,
                     onClick = { onCapability(null) },
-                    label = { Text("All") },
+                    label = { Text(stringResource(CoreUiR.string.runs_runs_screen_98)) },
                     colors = AppFilterChipDefaults.colors(),
                 )
             }
@@ -186,7 +183,7 @@ private fun FilterRow(
                 FilterChip(
                     selected = state.capability == value,
                     onClick = { onCapability(value) },
-                    label = { Text(value.filterLabel) },
+                    label = { Text(value.filterLabel()) },
                     colors = AppFilterChipDefaults.colors(),
                 )
             }
@@ -196,7 +193,7 @@ private fun FilterRow(
                 FilterChip(
                     selected = state.status == null,
                     onClick = { onStatus(null) },
-                    label = { Text("All") },
+                    label = { Text(stringResource(CoreUiR.string.runs_runs_screen_99)) },
                     colors = AppFilterChipDefaults.colors(),
                 )
             }
@@ -205,7 +202,7 @@ private fun FilterRow(
                 FilterChip(
                     selected = state.status == value,
                     onClick = { onStatus(value) },
-                    label = { Text(value.label) },
+                    label = { Text(value.label()) },
                     colors = AppFilterChipDefaults.colors(),
                 )
             }
@@ -224,11 +221,16 @@ private fun RunRow(run: RunRecord, onSelect: (String) -> Unit) {
     Card(modifier = Modifier.fillMaxWidth().clickable { onSelect(run.id) }) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                text = "${run.kind.label} · ${run.capability.label} · ${run.status.label}",
+                text = stringResource(
+                    CoreUiR.string.runs_row_summary,
+                    run.kind.label(),
+                    run.capability.label(),
+                    run.status.label(),
+                ),
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                text = run.model?.displayName ?: "Model snapshot unavailable",
+                text = run.model?.displayName ?: stringResource(CoreUiR.string.runs_model_snapshot_unavailable),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
@@ -264,39 +266,41 @@ private fun RunDetails(
     ) {
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onClose) { Text("Back") }
-                OutlinedButton(onClick = onRepeat) { Text("Repeat") }
-                OutlinedButton(onClick = onShare) { Text("Export JSON") }
+                OutlinedButton(onClick = onClose) { Text(stringResource(CoreUiR.string.runs_runs_screen_100)) }
+                OutlinedButton(onClick = onRepeat) { Text(stringResource(CoreUiR.string.runs_runs_screen_101)) }
+                OutlinedButton(onClick = onShare) { Text(stringResource(CoreUiR.string.runs_runs_screen_102)) }
             }
         }
         item {
             Text(
-                text = "${run.kind.label} · ${run.capability.label}",
+                text = stringResource(CoreUiR.string.runs_kind_and_capability, run.kind.label(), run.capability.label()),
                 style = MaterialTheme.typography.headlineMedium,
             )
         }
         item {
             Text(
-                text = "${run.status.label} · " +
-                    (run.model?.displayName ?: "removed or unavailable model"),
+                text = stringResource(
+                    CoreUiR.string.runs_status_and_model,
+                    run.status.label(),
+                    run.model?.displayName ?: stringResource(CoreUiR.string.runs_model_removed),
+                ),
             )
         }
-        item { DetailCard("Input", run.input ?: "Not retained") }
-        item { DetailCard("Output", run.output ?: "Not available") }
-        item { DetailCard("Effective parameters", run.parametersJson) }
-        item { DetailCard("Metrics", run.metricsJson) }
+        item { DetailCard(stringResource(CoreUiR.string.runs_input), run.input ?: stringResource(CoreUiR.string.runs_not_retained)) }
+        item { DetailCard(stringResource(CoreUiR.string.runs_output), run.output ?: stringResource(CoreUiR.string.runs_not_available)) }
+        item { DetailCard(stringResource(CoreUiR.string.runs_effective_parameters), run.parametersJson) }
+        item { DetailCard(stringResource(CoreUiR.string.runs_metrics), run.metricsJson) }
         run.errorMessage?.let { error ->
-            item { DetailCard("Error", error) }
+            item { DetailCard(stringResource(CoreUiR.string.runs_error), error) }
         }
         if (run.linkedRunIds.isNotEmpty()) {
             item {
-                DetailCard("Linked pipeline runs", run.linkedRunIds.joinToString())
+                DetailCard(stringResource(CoreUiR.string.runs_linked_pipeline_runs), run.linkedRunIds.joinToString())
             }
         }
         item {
             Text(
-                text = "Export contains this text and metadata. Audio, private " +
-                    "file paths, and source URIs are never included.",
+                text = stringResource(CoreUiR.string.runs_export_description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -317,24 +321,40 @@ private fun DetailCard(title: String, body: String) {
     }
 }
 
-private val AiCapability.label get() = when (this) {
-    AiCapability.CHAT -> "Chat"
-    AiCapability.SPEECH_TO_TEXT -> "Speech to text"
-    AiCapability.TEXT_TO_SPEECH -> "Text to speech"
-    AiCapability.VOICE_ACTIVITY_DETECTION -> "Voice activity detection"
-    AiCapability.VOICE_ASSISTANT -> "Voice assistant"
-}
+@Composable
+private fun AiCapability.label(): String = stringResource(
+    when (this) {
+        AiCapability.CHAT -> CoreUiR.string.runs_capability_chat
+        AiCapability.SPEECH_TO_TEXT -> CoreUiR.string.runs_capability_speech_to_text
+        AiCapability.TEXT_TO_SPEECH -> CoreUiR.string.runs_capability_text_to_speech
+        AiCapability.VOICE_ACTIVITY_DETECTION -> CoreUiR.string.runs_capability_voice_activity_detection
+        AiCapability.VOICE_ASSISTANT -> CoreUiR.string.runs_capability_voice_assistant
+    },
+)
 
-private val AiCapability.filterLabel get() = when (this) {
-    AiCapability.SPEECH_TO_TEXT -> "STT"
-    AiCapability.TEXT_TO_SPEECH -> "TTS"
-    AiCapability.VOICE_ASSISTANT -> "Assistant"
-    else -> label
-}
+@Composable
+private fun AiCapability.filterLabel(): String = stringResource(
+    when (this) {
+        AiCapability.SPEECH_TO_TEXT -> CoreUiR.string.runs_filter_stt
+        AiCapability.TEXT_TO_SPEECH -> CoreUiR.string.runs_filter_tts
+        AiCapability.VOICE_ASSISTANT -> CoreUiR.string.runs_filter_assistant
+        else -> return label()
+    },
+)
 
-private val RunStatus.label get() = name.lowercase().replaceFirstChar(Char::uppercase)
+@Composable
+private fun RunStatus.label(): String = stringResource(
+    when (this) {
+        RunStatus.SUCCEEDED -> CoreUiR.string.runs_status_succeeded
+        RunStatus.CANCELLED -> CoreUiR.string.runs_status_cancelled
+        RunStatus.FAILED -> CoreUiR.string.runs_status_failed
+    },
+)
 
-private val RunKind.label get() = when (this) {
-    RunKind.INFERENCE -> "Inference"
-    RunKind.BENCHMARK_SESSION -> "Benchmark session"
-}
+@Composable
+private fun RunKind.label(): String = stringResource(
+    when (this) {
+        RunKind.INFERENCE -> CoreUiR.string.runs_kind_inference
+        RunKind.BENCHMARK_SESSION -> CoreUiR.string.runs_kind_benchmark_session
+    },
+)

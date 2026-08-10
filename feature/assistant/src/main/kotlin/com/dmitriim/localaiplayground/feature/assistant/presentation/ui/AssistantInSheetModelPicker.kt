@@ -17,6 +17,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.ui.component.InstalledOptionList
 import com.dmitriim.localaiplayground.core.ui.component.OptionPickerItem
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun AssistantInSheetModelPicker(
@@ -35,7 +37,7 @@ internal fun AssistantInSheetModelPicker(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = selected?.label ?: "Install a model in Models",
+                text = selected?.label ?: stringResource(CoreUiR.string.assistant_install_model),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -66,7 +68,7 @@ internal fun AssistantInSheetModelSelection(
                 .padding(start = 12.dp, end = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = onBack) { Text("Back") }
+            TextButton(onClick = onBack) { Text(stringResource(CoreUiR.string.assistant_assistant_in_sheet_model_picker_9)) }
             Text(title, style = MaterialTheme.typography.titleLarge)
         }
         Text(

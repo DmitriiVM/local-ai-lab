@@ -27,6 +27,8 @@ import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatModelOption
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatSettings
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,8 +87,8 @@ internal fun AssistantChatSettingsSheet(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 AssistantSettingsSheetHeader(
-                    title = "Chat settings",
-                    description = "Configure the selected model’s instructions, generation, and runtime behavior.",
+                    title = stringResource(CoreUiR.string.ui_copy_6),
+                    description = stringResource(CoreUiR.string.ui_description_2),
                 )
                 AssistantSettingsSection("Model")
                 AssistantChatModelPicker(
@@ -97,7 +99,7 @@ internal fun AssistantChatSettingsSheet(
                 )
                 capabilities?.computePreferences?.takeIf { it.size > 1 }?.let { computePreferences ->
                     AssistantSettingsModelPicker(
-                        label = "Compute",
+                        label = stringResource(CoreUiR.string.ui_copy_7),
                         items = computePreferences.map { preference ->
                             SettingsModelItem(preference.name, preference.displayName(), installed = true)
                         },
@@ -157,7 +159,15 @@ internal fun AssistantChatSettingsSheet(
                         onClick = { advancedSettingsVisible = !advancedSettingsVisible },
                         enabled = enabled,
                     ) {
-                        Text(if (advancedSettingsVisible) "Hide advanced settings" else "Show advanced settings")
+                        Text(
+                            stringResource(
+                                if (advancedSettingsVisible) {
+                                    CoreUiR.string.assistant_hide_advanced_settings
+                                } else {
+                                    CoreUiR.string.assistant_show_advanced_settings
+                                },
+                            ),
+                        )
                     }
                     if (advancedSettingsVisible) {
                         AssistantSettingsSection("Advanced")
@@ -175,7 +185,7 @@ internal fun AssistantChatSettingsSheet(
                 }
                 error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    TextButton(onClick = onUnload, enabled = enabled) { Text("Unload model") }
+                    TextButton(onClick = onUnload, enabled = enabled) { Text(stringResource(CoreUiR.string.assistant_assistant_chat_settings_sheet_2)) }
                     TextButton(
                         onClick = {
                             val model = models.firstOrNull { it.id == draftModelId }
@@ -187,19 +197,20 @@ internal fun AssistantChatSettingsSheet(
                             ).also { candidate -> commit(draftModelId, candidate) }
                         },
                         enabled = enabled,
-                    ) { Text("Reset") }
+                    ) { Text(stringResource(CoreUiR.string.assistant_assistant_chat_settings_sheet_3)) }
                 }
             }
         }
     }
 }
 
+@Composable
 private fun ComputePreference.displayName(): String = when (this) {
-    ComputePreference.AUTO -> "Automatic"
-    ComputePreference.CPU -> "CPU"
-    ComputePreference.GPU -> "GPU"
-    ComputePreference.NPU -> "NPU"
-    ComputePreference.SYSTEM_SERVICE -> "System service"
+    ComputePreference.AUTO -> stringResource(CoreUiR.string.compute_automatic)
+    ComputePreference.CPU -> stringResource(CoreUiR.string.compute_cpu)
+    ComputePreference.GPU -> stringResource(CoreUiR.string.compute_gpu)
+    ComputePreference.NPU -> stringResource(CoreUiR.string.compute_npu)
+    ComputePreference.SYSTEM_SERVICE -> stringResource(CoreUiR.string.compute_system_service)
 }
 
 @Composable

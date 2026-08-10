@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.feature.assistant.presentation
 
+import androidx.annotation.StringRes
 import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.ai.api.llm.LlmEngineCapabilities
 import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
@@ -12,6 +13,7 @@ import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId
 import com.dmitriim.localaiplayground.core.model.manifest.TtsControl
 import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localaiplayground.core.performance.InferenceTelemetry
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import java.util.UUID
 
 data class AssistantUiState(
@@ -50,12 +52,13 @@ data class AssistantUiState(
                 model.installed && model.capabilities != null
             } == true
     val canDictate: Boolean get() = isIdle && selectedSpeechModel?.installed == true
-    val voiceConfigurationError: String?
+    @get:StringRes
+    val voiceConfigurationError: Int?
         get() = when {
-            selectedChatModel?.installed != true -> "Select an installed chat model."
-            selectedSpeechModel?.installed != true -> "Select an installed speech-to-text model."
-            selectedVoiceModel?.installed != true -> "Select an installed text-to-speech model."
-            selectedVoice == null -> "Select a voice compatible with the speech language."
+            selectedChatModel?.installed != true -> CoreUiR.string.assistant_error_select_chat_model
+            selectedSpeechModel?.installed != true -> CoreUiR.string.assistant_error_select_speech_model
+            selectedVoiceModel?.installed != true -> CoreUiR.string.assistant_error_select_tts_model
+            selectedVoice == null -> CoreUiR.string.assistant_error_select_compatible_voice
             else -> null
         }
 }

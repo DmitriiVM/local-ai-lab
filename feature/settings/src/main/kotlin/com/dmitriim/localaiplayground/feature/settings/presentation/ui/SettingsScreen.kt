@@ -38,6 +38,8 @@ import com.dmitriim.localaiplayground.source.settings.MetricDetail
 import com.dmitriim.localaiplayground.source.settings.ModelUnloadPolicy
 import com.dmitriim.localaiplayground.source.settings.ThemePreference
 import com.dmitriim.localaiplayground.source.settings.ThreadCountPolicy
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun SettingsScreen(
@@ -58,10 +60,10 @@ fun SettingsScreen(
     if (state.pendingRunHistoryClear) {
         AlertDialog(
             onDismissRequest = onDismissClearRunHistory,
-            title = { Text("Clear run history?") },
-            text = { Text("This removes saved runs, but leaves conversations, installed models, and exported files untouched.") },
-            confirmButton = { OutlinedButton(onClick = onClearRunHistory) { Text("Clear run history") } },
-            dismissButton = { OutlinedButton(onClick = onDismissClearRunHistory) { Text("Cancel") } },
+            title = { Text(stringResource(CoreUiR.string.settings_settings_screen_107)) },
+            text = { Text(stringResource(CoreUiR.string.settings_settings_screen_108)) },
+            confirmButton = { OutlinedButton(onClick = onClearRunHistory) { Text(stringResource(CoreUiR.string.settings_settings_screen_109)) } },
+            dismissButton = { OutlinedButton(onClick = onDismissClearRunHistory) { Text(stringResource(CoreUiR.string.settings_settings_screen_110)) } },
         )
     }
     if (state.showHuggingFaceTokenDialog) {
@@ -84,7 +86,7 @@ fun SettingsScreen(
             ),
         verticalArrangement = Arrangement.spacedBy(dimensions.sectionSpacing),
     ) {
-        Text("Settings", style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(CoreUiR.string.settings_settings_screen_111), style = MaterialTheme.typography.headlineMedium)
         SettingsSurfaceCard(onClick = onOpenDeviceAndRuntimes) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -94,13 +96,12 @@ fun SettingsScreen(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text("Device & runtimes", style = MaterialTheme.typography.titleMedium)
-                    Text(
-                        "Hardware, runtime availability, and diagnostics",
+                    Text(stringResource(CoreUiR.string.settings_settings_screen_112), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(CoreUiR.string.settings_settings_screen_113),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
-                Text("›", style = MaterialTheme.typography.headlineSmall)
+                Text(stringResource(CoreUiR.string.settings_settings_screen_114), style = MaterialTheme.typography.headlineSmall)
             }
         }
         if (settings.showAdvancedControls) {
@@ -118,26 +119,26 @@ fun SettingsScreen(
             Toggle("Show advanced controls", settings.showAdvancedControls) { value -> onUpdate { it.copy(showAdvancedControls = value) } }
         }
         SettingsCard("Retention", purpleTonal = true) {
-            Text("Microphone recordings: session only", style = MaterialTheme.typography.titleSmall)
-            Text("Recordings are temporary and are cleared when you clear media.", style = MaterialTheme.typography.bodySmall)
-            Text("Generated audio: latest successful WAV", style = MaterialTheme.typography.titleSmall)
-            Text("The app retains one successful WAV until the next successful synthesis, as documented in the Stage 5 policy.", style = MaterialTheme.typography.bodySmall)
+            Text(stringResource(CoreUiR.string.settings_settings_screen_115), style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(CoreUiR.string.settings_settings_screen_116), style = MaterialTheme.typography.bodySmall)
+            Text(stringResource(CoreUiR.string.settings_settings_screen_117), style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(CoreUiR.string.settings_settings_screen_118), style = MaterialTheme.typography.bodySmall)
         }
         SettingsCard("Model downloads", purpleTonal = true) {
-            Text("Hugging Face token", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(CoreUiR.string.settings_settings_screen_119), style = MaterialTheme.typography.titleSmall)
             when (state.huggingFaceCredentialStatus) {
                 HuggingFaceCredentialStatus.MISSING -> {
-                    Text("No token configured. Required only for gated model downloads.", style = MaterialTheme.typography.bodySmall)
-                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text("Configure token") }
+                    Text(stringResource(CoreUiR.string.settings_settings_screen_120), style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text(stringResource(CoreUiR.string.settings_settings_screen_121)) }
                 }
                 HuggingFaceCredentialStatus.USER_CONFIGURED -> {
-                    Text("A token is encrypted and stored on this device.", style = MaterialTheme.typography.bodySmall)
-                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text("Replace token") }
-                    OutlinedButton(onClick = onClearHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text("Remove token") }
+                    Text(stringResource(CoreUiR.string.settings_settings_screen_122), style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text(stringResource(CoreUiR.string.settings_settings_screen_123)) }
+                    OutlinedButton(onClick = onClearHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text(stringResource(CoreUiR.string.settings_settings_screen_124)) }
                 }
                 HuggingFaceCredentialStatus.DEBUG_CONFIGURED -> {
-                    Text("A development token is supplied by local.properties in this debug build.", style = MaterialTheme.typography.bodySmall)
-                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text("Use my token instead") }
+                    Text(stringResource(CoreUiR.string.settings_settings_screen_125), style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text(stringResource(CoreUiR.string.settings_settings_screen_126)) }
                 }
             }
         }
@@ -146,7 +147,7 @@ fun SettingsScreen(
             StorageLine("Temporary recordings", state.storage.recordingsBytes)
             StorageLine("Generated audio", state.storage.generatedAudioBytes)
             StorageLine("History", state.storage.historyBytes)
-            OutlinedButton(onClick = onClearTemporaryMedia, modifier = Modifier.fillMaxWidth()) { Text("Clear temporary media") }
+            OutlinedButton(onClick = onClearTemporaryMedia, modifier = Modifier.fillMaxWidth()) { Text(stringResource(CoreUiR.string.settings_settings_screen_127)) }
             OutlinedButton(
                 onClick = {
                     if (settings.confirmDestructiveActions) {
@@ -156,8 +157,8 @@ fun SettingsScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Clear run history") }
-            Text("Inference content stays on this device. Model downloads are the only feature that uses network access, and only after you start one.", style = MaterialTheme.typography.bodySmall)
+            ) { Text(stringResource(CoreUiR.string.settings_settings_screen_128)) }
+            Text(stringResource(CoreUiR.string.settings_settings_screen_129), style = MaterialTheme.typography.bodySmall)
         }
     }
 }

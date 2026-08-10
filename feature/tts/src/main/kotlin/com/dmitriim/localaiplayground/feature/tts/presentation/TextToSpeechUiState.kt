@@ -21,6 +21,7 @@ import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceDescriptor
 import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisMetrics
 import com.dmitriim.localaiplayground.core.voice.tts.SynthesizeSpeech
+import com.dmitriim.localaiplayground.core.ui.text.UiText
 
 data class TextToSpeechUiState(
     val models: List<TtsModelOption> = emptyList(),
@@ -40,8 +41,8 @@ data class TextToSpeechUiState(
     val playback: SpeechPlaybackState = SpeechPlaybackState(),
     val output: GeneratedAudioFile? = null,
     val metrics: SpeechSynthesisMetrics? = null,
-    val errorMessage: String? = null,
-    val statusMessage: String? = null,
+    val errorMessage: UiText? = null,
+    val statusMessage: UiText? = null,
 ) {
     val selectedModel: TtsModelOption? get() = models.firstOrNull { it.id == selectedModelId }
     val compatibleVoices: List<TtsVoiceOption>

@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisMetrics
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun TextToSpeechMetricsCard(metrics: SpeechSynthesisMetrics) {
@@ -21,9 +23,13 @@ internal fun TextToSpeechMetricsCard(metrics: SpeechSynthesisMetrics) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Run metrics", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(CoreUiR.string.tts_text_to_speech_metrics_card_175), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = "Synthesis ${formatTtsDuration(metrics.synthesisDurationMs)} · ${metrics.realTimeFactor.formatRealTimeFactor()}",
+                    text = stringResource(
+                        CoreUiR.string.ui_copy_83,
+                        formatTtsDuration(metrics.synthesisDurationMs),
+                        metrics.realTimeFactor.formatRealTimeFactor(),
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -32,17 +38,17 @@ internal fun TextToSpeechMetricsCard(metrics: SpeechSynthesisMetrics) {
 
             TtsMetricsSection("Response and playback")
             TtsMetricsItem(
-                label = "First PCM chunk",
+                label = stringResource(CoreUiR.string.ui_copy_84),
                 value = metrics.timeToFirstChunkMs.formatOptionalDuration(),
-                description = "Time until the model produced the first audio samples. Lower values make speech feel more responsive.",
+                description = stringResource(CoreUiR.string.ui_description_37),
             )
             TtsMetricsItem(
-                label = "First playback write",
+                label = stringResource(CoreUiR.string.ui_copy_85),
                 value = metrics.timeToFirstWriteMs.formatOptionalDuration(),
-                description = "Time until the app handed the first generated audio samples to Android's playback buffer.",
+                description = stringResource(CoreUiR.string.ui_description_38),
             )
             TtsMetricsItem(
-                label = "First audible presentation",
+                label = stringResource(CoreUiR.string.ui_copy_86),
                 value = metrics.timeToFirstPresentationMs.formatOptionalDuration(),
                 description = if (metrics.timeToFirstPresentationMs == null) {
                     "This audio route did not expose a reliable presentation timestamp, so callback time is not substituted."
@@ -53,69 +59,69 @@ internal fun TextToSpeechMetricsCard(metrics: SpeechSynthesisMetrics) {
 
             TtsMetricsSection("Synthesis output")
             TtsMetricsItem(
-                label = "Synthesis time",
+                label = stringResource(CoreUiR.string.ui_copy_87),
                 value = formatTtsDuration(metrics.synthesisDurationMs),
-                description = "Time spent generating speech audio, excluding model loading and playback drain time.",
+                description = stringResource(CoreUiR.string.ui_description_39),
             )
             TtsMetricsItem(
-                label = "Generated audio",
+                label = stringResource(CoreUiR.string.ui_copy_88),
                 value = formatTtsDuration(metrics.generatedAudioDurationMs),
-                description = "Duration of the WAV audio created for this request.",
+                description = stringResource(CoreUiR.string.ui_description_40),
             )
             TtsMetricsItem(
-                label = "Real-time factor",
+                label = stringResource(CoreUiR.string.ui_copy_89),
                 value = metrics.realTimeFactor.formatRealTimeFactor(),
-                description = "Synthesis time divided by generated audio duration. Below 1× means audio was generated faster than it plays.",
+                description = stringResource(CoreUiR.string.ui_description_41),
             )
             TtsMetricsItem(
-                label = "Audio format",
+                label = stringResource(CoreUiR.string.ui_copy_90),
                 value = "${metrics.sampleRateHz} Hz · mono PCM16",
-                description = "Sample rate and PCM format of the generated WAV file.",
+                description = stringResource(CoreUiR.string.ui_description_42),
             )
 
             TtsMetricsSection("Runtime")
             TtsMetricsItem(
-                label = "Model load",
+                label = stringResource(CoreUiR.string.ui_copy_91),
                 value = formatTtsDuration(metrics.loadDurationMs),
-                description = "Time spent preparing the selected speech model before synthesis began.",
+                description = stringResource(CoreUiR.string.ui_description_43),
             )
             TtsMetricsItem(
-                label = "CPU threads",
+                label = stringResource(CoreUiR.string.ui_copy_92),
                 value = metrics.effectiveThreadCount.toString(),
-                description = "Effective CPU worker count used by the speech runtime for this run.",
+                description = stringResource(CoreUiR.string.ui_description_44),
             )
             TtsMetricsItem(
-                label = "Playback underruns",
+                label = stringResource(CoreUiR.string.ui_copy_93),
                 value = metrics.playbackUnderrunCount.toString(),
-                description = "Times Android's playback buffer ran short of audio. Zero indicates uninterrupted playback.",
+                description = stringResource(CoreUiR.string.ui_description_45),
             )
 
             metrics.conditioningDurationMs?.let { conditioningDurationMs ->
                 TtsMetricsSection("Chatterbox pipeline")
                 TtsMetricsItem(
-                    label = "Voice conditioning",
+                    label = stringResource(CoreUiR.string.ui_copy_94),
                     value = "${formatTtsDuration(conditioningDurationMs)} · ${if (metrics.conditioningCacheHit == true) "cache hit" else "encoded"}",
-                    description = "Time spent preparing the voice-conditioning representation. A cache hit reuses a previously prepared representation.",
+                    description = stringResource(CoreUiR.string.ui_description_46),
                 )
                 TtsMetricsItem(
-                    label = "Speech tokens",
+                    label = stringResource(CoreUiR.string.ui_copy_95),
                     value = metrics.generatedTokenCount?.toString() ?: "Unavailable",
-                    description = "Intermediate speech tokens generated before waveform decoding.",
+                    description = stringResource(CoreUiR.string.ui_description_47),
                 )
                 TtsMetricsItem(
-                    label = "Token generation",
+                    label = stringResource(CoreUiR.string.ui_copy_96),
                     value = metrics.tokenGenerationDurationMs.formatOptionalDuration(),
-                    description = "Time spent producing intermediate speech tokens.",
+                    description = stringResource(CoreUiR.string.ui_description_48),
                 )
                 TtsMetricsItem(
-                    label = "Waveform decoding",
+                    label = stringResource(CoreUiR.string.ui_copy_97),
                     value = metrics.decoderDurationMs.formatOptionalDuration(),
-                    description = "Time spent converting generated speech tokens into PCM audio samples.",
+                    description = stringResource(CoreUiR.string.ui_description_49),
                 )
                 TtsMetricsItem(
-                    label = "Memory snapshot",
+                    label = stringResource(CoreUiR.string.ui_copy_98),
                     value = "${metrics.peakProcessPssBytes.toMebibytes()} peak app · ${metrics.availableDeviceMemoryBytes.toMebibytes()} device available",
-                    description = "Memory readings captured by the speech runtime. PSS estimates the app's proportional share of memory.",
+                    description = stringResource(CoreUiR.string.ui_description_50),
                 )
             }
         }

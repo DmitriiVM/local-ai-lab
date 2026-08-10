@@ -11,8 +11,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.engine.EngineAvailability
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.device.presentation.DeviceUiState
 
@@ -41,7 +43,7 @@ fun DeviceScreen(
     ) {
         item {
             Text(
-                text = "Device & runtimes",
+                text = stringResource(CoreUiR.string.ui_copy_52),
                 modifier = Modifier.padding(top = 20.dp),
                 style = MaterialTheme.typography.headlineMedium,
             )
@@ -65,7 +67,7 @@ fun DeviceScreen(
         state.interruptionMessage?.let { message ->
             item {
                 DeviceInfoCard(
-                    title = "Refresh interrupted",
+                    title = stringResource(CoreUiR.string.ui_copy_53),
                     lines = listOf(message),
                     isError = true,
                 )
@@ -82,7 +84,7 @@ fun DeviceScreen(
                     when (engine) {
                         is EngineAvailability.Available ->
                             "Available • ${engine.effectiveComputePreference} • ${engine.detail}"
-                        is EngineAvailability.Unsupported -> "Unsupported • ${engine.reason}"
+                        is EngineAvailability.Unsupported -> stringResource(CoreUiR.string.device_engine_unsupported, engine.reason)
                         is EngineAvailability.TemporarilyUnavailable ->
                             "Temporarily unavailable • ${engine.reason}"
                     },
@@ -105,7 +107,7 @@ fun DeviceScreen(
         state.diagnostics?.let { diagnostics ->
             item {
                 DeviceInfoCard(
-                    title = "Non-destructive diagnostics",
+                    title = stringResource(CoreUiR.string.ui_copy_54),
                     lines = listOf(
                         "Model storage writable: ${diagnostics.modelDirectoryWritable}",
                         "Temporary storage: ${diagnostics.availableTemporaryBytes / 1024 / 1024} MiB available",
@@ -122,7 +124,15 @@ fun DeviceScreen(
                 enabled = !state.refreshing,
                 onClick = onRefresh,
             ) {
-                Text(if (state.refreshing) "Refreshing…" else "Refresh diagnostics")
+                Text(
+                    stringResource(
+                        if (state.refreshing) {
+                            CoreUiR.string.device_refreshing
+                        } else {
+                            CoreUiR.string.device_refresh_diagnostics
+                        },
+                    ),
+                )
             }
         }
     }

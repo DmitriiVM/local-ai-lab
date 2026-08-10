@@ -40,6 +40,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantOperation
 import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantUiState
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun AssistantConfigurationBar(
@@ -54,7 +56,7 @@ internal fun AssistantConfigurationBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ConfigurationButton(
-            title = "Chat",
+            title = stringResource(CoreUiR.string.ui_copy_8),
             value = state.selectedChatModel?.displayName ?: "Not configured",
             onClick = onOpenChat,
             ready = state.selectedChatModel?.installed == true,
@@ -62,7 +64,7 @@ internal fun AssistantConfigurationBar(
             modifier = Modifier.weight(1f),
         )
         ConfigurationButton(
-            title = "Listen",
+            title = stringResource(CoreUiR.string.ui_copy_9),
             value = state.selectedSpeechModel?.displayName ?: "Not configured",
             onClick = onOpenListen,
             ready = state.selectedSpeechModel?.installed == true,
@@ -70,7 +72,7 @@ internal fun AssistantConfigurationBar(
             modifier = Modifier.weight(1f),
         )
         ConfigurationButton(
-            title = "Speak",
+            title = stringResource(CoreUiR.string.ui_copy_10),
             value = state.selectedVoice?.displayName ?: "Not configured",
             onClick = onOpenSpeak,
             ready = state.selectedVoiceModel?.installed == true && state.selectedVoice != null,
@@ -92,10 +94,10 @@ internal fun AssistantToolbarActions(
             onClick = onClearConversation,
             enabled = state.isIdle && state.messages.isNotEmpty(),
         ) {
-            Text("Clear")
+            Text(stringResource(CoreUiR.string.assistant_assistant_controls_4))
         }
         IconButton(onClick = onOpenSettings) {
-            Icon(Icons.Outlined.MoreVert, contentDescription = "Assistant settings")
+            Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(CoreUiR.string.ui_copy_11))
         }
     }
 }
@@ -164,8 +166,8 @@ internal fun AssistantComposer(
                 onValueChange = onInput,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                label = { Text("Message") },
-                placeholder = { Text("Ask the assistant…") },
+                label = { Text(stringResource(CoreUiR.string.assistant_assistant_controls_5)) },
+                placeholder = { Text(stringResource(CoreUiR.string.assistant_assistant_controls_6)) },
                 minLines = 1,
                 maxLines = 4,
                 enabled = !active,
@@ -183,7 +185,7 @@ internal fun AssistantComposer(
                         modifier = Modifier.weight(1f),
                         contentAlignment = Alignment.CenterStart,
                     ) {
-                        TextButton(onClick = onProfile, enabled = state.canSend) { Text("Profile") }
+                        TextButton(onClick = onProfile, enabled = state.canSend) { Text(stringResource(CoreUiR.string.assistant_assistant_controls_7)) }
                     }
                 } else {
                     AssistantOperationStatus(
@@ -195,7 +197,7 @@ internal fun AssistantComposer(
                 when (state.operation) {
                     AssistantOperation.Idle -> {
                         OutlinedIconButton(onClick = onStartRecording, enabled = state.canDictate) {
-                            Icon(Icons.Outlined.Mic, contentDescription = "Record voice")
+                            Icon(Icons.Outlined.Mic, contentDescription = stringResource(CoreUiR.string.ui_copy_12))
                         }
                         AssistantPrimaryActionButton(
                             onClick = onSend,
@@ -204,22 +206,22 @@ internal fun AssistantComposer(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = "Send message",
+                                contentDescription = stringResource(CoreUiR.string.ui_copy_13),
                             )
                         }
                     }
                     AssistantOperation.Recording -> AssistantPrimaryActionButton(onClick = onStopRecording) {
-                        Icon(Icons.Outlined.Stop, contentDescription = "Stop recording")
+                        Icon(Icons.Outlined.Stop, contentDescription = stringResource(CoreUiR.string.ui_copy_14))
                     }
                     AssistantOperation.Cancelling -> AssistantPrimaryActionButton(onClick = {}, enabled = false) {
-                        Icon(Icons.Outlined.Stop, contentDescription = "Stopping")
+                        Icon(Icons.Outlined.Stop, contentDescription = stringResource(CoreUiR.string.ui_copy_15))
                     }
                     else -> {
                         val llmOperation = state.operation == AssistantOperation.Loading ||
                             state.operation == AssistantOperation.Generating
                         if (!llmOperation || state.selectedChatModel?.capabilities?.cancellation == true) {
                             AssistantPrimaryActionButton(onClick = onCancel) {
-                                Icon(Icons.Outlined.Close, contentDescription = "Cancel operation")
+                                Icon(Icons.Outlined.Close, contentDescription = stringResource(CoreUiR.string.ui_copy_16))
                             }
                         }
                     }
@@ -266,8 +268,7 @@ private fun AssistantOperationStatus(
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.CenterStart) {
         when {
-            level != null -> Text(
-                "Recording ${"%.1f".format(level.elapsedMs / 1_000.0)}s · ${(level.peak * 100).toInt()}% peak",
+            level != null -> Text(stringResource(CoreUiR.string.assistant_assistant_controls_format_1, "%.1f".format(level.elapsedMs / 1_000.0), (level.peak * 100).toInt()),
                 style = MaterialTheme.typography.bodySmall,
             )
             operation !in setOf(AssistantOperation.Idle, AssistantOperation.Recording) -> Row(
@@ -281,12 +282,13 @@ private fun AssistantOperationStatus(
     }
 }
 
+@Composable
 private fun operationLabel(operation: AssistantOperation): String = when (operation) {
     AssistantOperation.Idle -> ""
-    AssistantOperation.Recording -> "Listening…"
-    AssistantOperation.Transcribing -> "Transcribing…"
-    AssistantOperation.Loading -> "Loading model…"
-    AssistantOperation.Generating -> "Generating…"
-    AssistantOperation.Speaking -> "Speaking…"
-    AssistantOperation.Cancelling -> "Stopping…"
+    AssistantOperation.Recording -> stringResource(CoreUiR.string.assistant_operation_listening)
+    AssistantOperation.Transcribing -> stringResource(CoreUiR.string.assistant_operation_transcribing)
+    AssistantOperation.Loading -> stringResource(CoreUiR.string.assistant_operation_loading_model)
+    AssistantOperation.Generating -> stringResource(CoreUiR.string.assistant_generating)
+    AssistantOperation.Speaking -> stringResource(CoreUiR.string.assistant_operation_speaking)
+    AssistantOperation.Cancelling -> stringResource(CoreUiR.string.assistant_operation_stopping)
 }

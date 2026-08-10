@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantInputMode
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,9 +36,8 @@ internal fun AssistantInputModeSettingsSheet(
                 .padding(start = 24.dp, top = 8.dp, end = 24.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text("Voice input", style = MaterialTheme.typography.headlineSmall)
-            Text(
-                "Choose what happens when you record with the microphone.",
+            Text(stringResource(CoreUiR.string.assistant_assistant_input_mode_settings_sheet_10), style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(CoreUiR.string.assistant_assistant_input_mode_settings_sheet_11),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

@@ -52,6 +52,8 @@ import com.dmitriim.localaiplayground.feature.tts.presentation.TextToSpeechUiSta
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsLanguage
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsOperation
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsVoiceOption
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,13 +74,13 @@ internal fun TextToSpeechVoiceSelector(
     var sheetVisible by remember { mutableStateOf(false) }
     val selected = voices.firstOrNull { it.id == selectedId }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Voice", style = MaterialTheme.typography.labelLarge)
+        Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_155), style = MaterialTheme.typography.labelLarge)
         OutlinedButton(
             onClick = { sheetVisible = true },
             enabled = enabled && selected != null,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(selected?.displayName ?: "No voice available for ${language.label}")
+            Text(selected?.displayName ?: stringResource(CoreUiR.string.tts_no_voice_for_language, language.label))
         }
     }
     if (sheetVisible) {
@@ -97,17 +99,17 @@ internal fun TextToSpeechVoiceSelector(
                     .padding(bottom = 24.dp),
             ) {
                 Text(
-                    text = "Choose a voice",
+                    text = stringResource(CoreUiR.string.ui_copy_78),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 24.dp),
                 )
                 Text(
-                    text = "Play previews the current text without changing the selected voice.",
+                    text = stringResource(CoreUiR.string.ui_copy_79),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 24.dp, top = 4.dp, end = 24.dp),
                 )
                 Text(
-                    text = "Available voices",
+                    text = stringResource(CoreUiR.string.ui_copy_80),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(start = 24.dp, top = 20.dp, end = 24.dp, bottom = 8.dp),
@@ -250,21 +252,24 @@ internal fun ChatterboxReferenceVoiceSelector(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.30f))
-        Text("Reference voice", style = MaterialTheme.typography.titleSmall)
-        Text(
-            "Use only a voice you own or have permission to clone. References are stored as app-private mono 24 kHz PCM.",
+        Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_156), style = MaterialTheme.typography.titleSmall)
+        Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_157),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (state.operation in setOf(TtsOperation.RECORDING_REFERENCE, TtsOperation.STOPPING_REFERENCE)) {
             val elapsed = state.referenceLevel?.elapsedMs ?: 0L
-            Text("Recording… %.1f / 10.0 s".format(elapsed / 1_000.0))
+            Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_158).format(elapsed / 1_000.0))
             Button(
                 onClick = onStopRecording,
                 enabled = state.operation == TtsOperation.RECORDING_REFERENCE &&
                     elapsed >= 5_000,
             ) {
-                Text(if (elapsed < 5_000) "Keep recording" else "Save reference")
+                Text(
+                    stringResource(
+                        if (elapsed < 5_000) CoreUiR.string.tts_keep_recording else CoreUiR.string.tts_save_reference,
+                    ),
+                )
             }
         } else {
             OutlinedButton(
@@ -272,7 +277,7 @@ internal fun ChatterboxReferenceVoiceSelector(
                 enabled = enabled,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(selected?.displayName ?: "Choose a saved reference")
+                Text(selected?.displayName ?: stringResource(CoreUiR.string.tts_choose_saved_reference))
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -287,14 +292,14 @@ internal fun ChatterboxReferenceVoiceSelector(
                         contentColor = MaterialTheme.colorScheme.onTertiary,
                     ),
                 ) {
-                    Text("Record voice")
+                    Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_159))
                 }
                 OutlinedButton(
                     onClick = onImport,
                     enabled = enabled,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Import audio")
+                    Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_160))
                 }
             }
         }
@@ -307,14 +312,12 @@ internal fun ChatterboxReferenceVoiceSelector(
                     .navigationBarsPadding()
                     .padding(bottom = 24.dp),
             ) {
-                Text(
-                    "Saved reference voices",
+                Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_161),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
                 )
                 if (state.compatibleVoices.isEmpty()) {
-                    Text(
-                        "No saved references yet. Record or import 5–10 seconds of speech.",
+                    Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_162),
                         modifier = Modifier.padding(24.dp),
                     )
                 }
@@ -340,7 +343,7 @@ internal fun ChatterboxReferenceVoiceSelector(
                             TextButton(
                                 onClick = { onDelete(voice.id) },
                                 enabled = enabled,
-                            ) { Text("Delete") }
+                            ) { Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_163)) }
                         }
                         HorizontalDivider()
                     }
@@ -376,7 +379,7 @@ internal fun TextToSpeechLanguageControls(
                 onClick = { onApplySample(language) },
                 enabled = enabled && (!englishOnly || language == TtsLanguage.ENGLISH),
             ) {
-                Text("${language.label} sample", maxLines = 1, softWrap = false)
+                Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_format_16, language.label), maxLines = 1, softWrap = false)
             }
         }
     }
@@ -395,7 +398,7 @@ internal fun TextToSpeechSettings(
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             CollapsibleTtsSettingsHeader(
-                title = "Supported controls",
+                title = stringResource(CoreUiR.string.ui_copy_81),
                 summary = supportedControlsSummary(state),
                 expanded = expanded,
                 onToggle = { expanded = !expanded },
@@ -413,7 +416,7 @@ internal fun TextToSpeechSettings(
                         value = state.threadCount,
                         onValueChange = onThreadCountChange,
                         enabled = enabled,
-                        label = { Text("CPU threads (0 = safe default)") },
+                        label = { Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_164)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -440,7 +443,7 @@ internal fun TextToSpeechAudioEffectsSettings(
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             CollapsibleTtsSettingsHeader(
-                title = "Post-processing",
+                title = stringResource(CoreUiR.string.ui_copy_82),
                 summary = if (effects.isNeutral) "No effects applied" else "Custom effects applied",
                 expanded = expanded,
                 onToggle = { expanded = !expanded },
@@ -448,11 +451,10 @@ internal fun TextToSpeechAudioEffectsSettings(
             if (expanded) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     TextButton(onClick = onReset, enabled = enabled && !effects.isNeutral) {
-                        Text("Reset")
+                        Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_165))
                     }
                 }
-                Text(
-                    "These effects are applied to the generated PCM before playback, replay, sharing, and WAV export.",
+                Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_166),
                     style = MaterialTheme.typography.bodySmall,
                 )
                 TextToSpeechParameterSlider(
@@ -471,7 +473,7 @@ internal fun TextToSpeechAudioEffectsSettings(
                     enabled,
                     onFormantChange,
                 )
-                Text("Equalizer", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_167), style = MaterialTheme.typography.labelLarge)
                 TextToSpeechParameterSlider(
                     "Low · 160 Hz",
                     effects.lowEqDb,
@@ -529,7 +531,7 @@ private fun CollapsibleTtsSettingsHeader(
             )
         }
         TextButton(onClick = onToggle) {
-            Text(if (expanded) "Hide" else "Show")
+            Text(stringResource(if (expanded) CoreUiR.string.core_ui_hide else CoreUiR.string.core_ui_show))
         }
     }
 }
@@ -557,24 +559,32 @@ internal fun TextToSpeechPlaybackControls(
                 state.operation == TtsOperation.PREVIEWING -> Unit
                 state.operation in setOf(TtsOperation.SYNTHESIZING, TtsOperation.CANCELLING) -> {
                     Button(onClick = onStop, enabled = state.operation != TtsOperation.CANCELLING) {
-                        Text(if (state.operation == TtsOperation.CANCELLING) "Stopping…" else "Stop")
+                        Text(
+                            stringResource(
+                                if (state.operation == TtsOperation.CANCELLING) {
+                                    CoreUiR.string.tts_stopping
+                                } else {
+                                    CoreUiR.string.tts_stop
+                                },
+                            ),
+                        )
                     }
                 }
                 state.playback.status == SpeechPlaybackStatus.PLAYING -> {
-                    Button(onClick = onPause) { Text("Pause") }
-                    OutlinedButton(onClick = onStop) { Text("Stop") }
+                    Button(onClick = onPause) { Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_168)) }
+                    OutlinedButton(onClick = onStop) { Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_169)) }
                 }
                 state.playback.status == SpeechPlaybackStatus.PAUSED -> {
-                    Button(onClick = onResume) { Text("Resume") }
-                    OutlinedButton(onClick = onStop) { Text("Stop") }
+                    Button(onClick = onResume) { Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_170)) }
+                    OutlinedButton(onClick = onStop) { Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_171)) }
                 }
-                else -> if (state.output != null) OutlinedButton(onClick = onReplay) { Text("Replay") }
+                else -> if (state.output != null) OutlinedButton(onClick = onReplay) { Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_172)) }
             }
         }
         if (state.output != null) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onExport) { Text("Export WAV") }
-                OutlinedButton(onClick = onShare) { Text("Share") }
+                OutlinedButton(onClick = onExport) { Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_173)) }
+                OutlinedButton(onClick = onShare) { Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_174)) }
             }
         }
     }

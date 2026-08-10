@@ -20,6 +20,8 @@ import com.dmitriim.localaiplayground.core.navigation.NavigationTarget
 import com.dmitriim.localaiplayground.feature.tts.presentation.ui.TextToSpeechScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import java.io.File
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun TextToSpeechRoute(
@@ -103,10 +105,9 @@ fun TextToSpeechRoute(
     consentAction?.let { action ->
         AlertDialog(
             onDismissRequest = { consentAction = null },
-            title = { Text("Voice cloning permission") },
+            title = { Text(stringResource(CoreUiR.string.tts_text_to_speech_route_151)) },
             text = {
-                Text(
-                    "Confirm that you own this voice or have the speaker’s permission to use it for voice cloning.",
+                Text(stringResource(CoreUiR.string.tts_text_to_speech_route_152),
                 )
             },
             confirmButton = {
@@ -120,10 +121,10 @@ fun TextToSpeechRoute(
                                 referencePicker.launch(arrayOf("audio/*"))
                         }
                     },
-                ) { Text("I confirm") }
+                ) { Text(stringResource(CoreUiR.string.tts_text_to_speech_route_153)) }
             },
             dismissButton = {
-                TextButton(onClick = { consentAction = null }) { Text("Cancel") }
+                TextButton(onClick = { consentAction = null }) { Text(stringResource(CoreUiR.string.tts_text_to_speech_route_154)) }
             },
         )
     }

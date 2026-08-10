@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.voice.stt.SpeechTranscriptionMetrics
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun SttRunMetricsCard(
@@ -24,9 +26,13 @@ internal fun SttRunMetricsCard(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Run metrics", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(CoreUiR.string.stt_stt_run_metrics_card_150), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = "Final result in ${formatSttDuration(metrics.timeToFinalMs)} · ${metrics.realTimeFactor.formatRealTimeFactor()}",
+                    text = stringResource(
+                        CoreUiR.string.ui_copy_69,
+                        formatSttDuration(metrics.timeToFinalMs),
+                        metrics.realTimeFactor.formatRealTimeFactor(),
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -35,44 +41,44 @@ internal fun SttRunMetricsCard(
 
             SttMetricsSection("Timing")
             SttMetricsItem(
-                label = "Audio duration",
+                label = stringResource(CoreUiR.string.ui_copy_70),
                 value = formatSttDuration(metrics.audioDurationMs),
-                description = "Length of the recording or imported audio that was transcribed.",
+                description = stringResource(CoreUiR.string.ui_description_30),
             )
             SttMetricsItem(
-                label = "Final result",
+                label = stringResource(CoreUiR.string.ui_copy_71),
                 value = formatSttDuration(metrics.timeToFinalMs),
-                description = "End-to-end time from starting the run until the completed transcript was available. This includes model loading and decoding.",
+                description = stringResource(CoreUiR.string.ui_description_31),
             )
             SttMetricsItem(
-                label = "Engine processing",
+                label = stringResource(CoreUiR.string.ui_copy_72),
                 value = formatSttDuration(metrics.processingDurationMs),
-                description = "Time reported by the speech engine while it decoded audio. This can differ from the full run time because setup and app overhead are excluded.",
+                description = stringResource(CoreUiR.string.ui_description_32),
             )
             SttMetricsItem(
-                label = "Real-time factor",
+                label = stringResource(CoreUiR.string.ui_copy_73),
                 value = metrics.realTimeFactor.formatRealTimeFactor(),
-                description = "Final-result time divided by audio duration. Below 1× means the transcript completed faster than the audio length.",
+                description = stringResource(CoreUiR.string.ui_description_33),
             )
 
             SttMetricsSection("Model and decoding")
             SttMetricsItem(
-                label = "Segments",
+                label = stringResource(CoreUiR.string.ui_copy_74),
                 value = metrics.segmentCount.toString(),
-                description = "Number of audio pieces processed. Longer audio may be split into bounded segments before decoding.",
+                description = stringResource(CoreUiR.string.ui_description_34),
             )
             SttMetricsItem(
-                label = "Model load",
+                label = stringResource(CoreUiR.string.ui_copy_75),
                 value = formatSttDuration(metrics.loadDurationMs),
-                description = "Time spent preparing the selected speech model before transcription began.",
+                description = stringResource(CoreUiR.string.ui_description_35),
             )
             SttMetricsItem(
-                label = "CPU threads",
+                label = stringResource(CoreUiR.string.ui_copy_76),
                 value = metrics.effectiveThreadCount.toString(),
-                description = "Effective CPU worker count used by the speech runtime for this run.",
+                description = stringResource(CoreUiR.string.ui_description_36),
             )
             SttMetricsItem(
-                label = "Recognition mode",
+                label = stringResource(CoreUiR.string.ui_copy_77),
                 value = if (streamingModel) "Streaming-capable" else "Offline segment decoding",
                 description = if (streamingModel) {
                     "The selected model supports streaming, though this screen finalizes captured audio after recording stops."

@@ -25,6 +25,8 @@ import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatMetrics
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ContextUsage
 import kotlin.math.roundToInt
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun ChatMetricsCard(
@@ -44,7 +46,7 @@ internal fun ChatMetricsCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Run details", fontWeight = FontWeight.Bold)
+                    Text(stringResource(CoreUiR.string.assistant_assistant_metrics_card_15), fontWeight = FontWeight.Bold)
                     Text(
                         contextUsage?.let { formatContextSummary(it, metrics) }
                             ?: formatPerformanceSummary(metrics),
@@ -53,7 +55,7 @@ internal fun ChatMetricsCard(
                     )
                 }
                 TextButton(onClick = { expanded = !expanded }) {
-                    Text(if (expanded) "Hide" else "Show")
+                    Text(stringResource(if (expanded) CoreUiR.string.core_ui_hide else CoreUiR.string.core_ui_show))
                 }
             }
             if (expanded) {
@@ -65,12 +67,12 @@ internal fun ChatMetricsCard(
 
                     RunDetailsSection("Performance")
                     RunDetailsMetric(
-                        label = "Time to first token",
+                        label = stringResource(CoreUiR.string.ui_copy_24),
                         value = metrics.timeToFirstTokenMs?.let(::formatDuration) ?: "Not reached",
-                        description = "Time from starting the run until the first response token arrives. Lower feels more responsive.",
+                        description = stringResource(CoreUiR.string.ui_description_5),
                     )
                     RunDetailsMetric(
-                        label = "Output",
+                        label = stringResource(CoreUiR.string.ui_copy_25),
                         value = metrics.generatedTokens?.let { tokens ->
                             buildMetricValue(tokens, metrics.generatedTokensPerSecond)
                         } ?: "Token count unavailable",
@@ -81,62 +83,62 @@ internal fun ChatMetricsCard(
                         },
                     )
                     RunDetailsMetric(
-                        label = "Total run time",
+                        label = stringResource(CoreUiR.string.ui_copy_26),
                         value = formatDuration(metrics.totalDurationMs),
-                        description = "End-to-end time for this run, including model loading, prompt processing, and generation.",
+                        description = stringResource(CoreUiR.string.ui_description_6),
                     )
 
                     RunDetailsSection("Context and request")
                     contextUsage?.let { usage ->
                         RunDetailsMetric(
-                            label = "Context window",
+                            label = stringResource(CoreUiR.string.ui_copy_27),
                             value = formatContextDetails(usage),
-                            description = "The conversation input and reserved response space available to this run. Older messages may be omitted when the limit is reached.",
+                            description = stringResource(CoreUiR.string.ui_description_7),
                         )
                         if (usage.omittedMessageCount > 0) {
                             RunDetailsMetric(
-                                label = "Earlier messages omitted",
+                                label = stringResource(CoreUiR.string.ui_copy_28),
                                 value = "${usage.omittedMessageCount}",
-                                description = "Earlier conversation messages left out to keep the prompt within the context window.",
+                                description = stringResource(CoreUiR.string.ui_description_8),
                             )
                         }
                     }
                     RunDetailsMetric(
-                        label = "Prompt processing",
+                        label = stringResource(CoreUiR.string.ui_copy_29),
                         value = metrics.promptTokens?.let { tokens ->
                             buildMetricValue(tokens, metrics.promptTokensPerSecond)
                         } ?: "Token count unavailable",
-                        description = "Input tokens read before the response. Tokens per second measures prompt processing speed; higher is faster.",
+                        description = stringResource(CoreUiR.string.ui_description_9),
                     )
                     RunDetailsMetric(
-                        label = "Generation settings",
+                        label = stringResource(CoreUiR.string.ui_copy_30),
                         value = "Temperature ${metrics.effectiveSettings.temperature} · top-K ${metrics.effectiveSettings.topK} · top-P ${metrics.effectiveSettings.topP}",
-                        description = "Sampling controls that shape how varied the response can be. These settings affect output quality, not just speed.",
+                        description = stringResource(CoreUiR.string.ui_description_10),
                     )
 
                     RunDetailsSection("Runtime")
                     RunDetailsMetric(
-                        label = "Model",
+                        label = stringResource(CoreUiR.string.ui_copy_31),
                         value = metrics.modelName,
-                        description = "The local model used to produce this response.",
+                        description = stringResource(CoreUiR.string.ui_description_11),
                     )
                     RunDetailsMetric(
-                        label = "Startup",
+                        label = stringResource(CoreUiR.string.ui_copy_32),
                         value = buildString {
                             append(if (metrics.coldStart) "Cold start" else "Warm start")
                             metrics.effectiveThreadCount?.let { append(" · $it threads") }
                         },
-                        description = "Cold starts load a model into memory. Warm starts reuse one that is already loaded; thread count is the effective CPU parallelism.",
+                        description = stringResource(CoreUiR.string.ui_description_12),
                     )
                     RunDetailsMetric(
-                        label = "Model load",
+                        label = stringResource(CoreUiR.string.ui_copy_33),
                         value = formatDuration(metrics.loadDurationMs),
-                        description = "Time spent preparing the selected model before prompt processing begins.",
+                        description = stringResource(CoreUiR.string.ui_description_13),
                     )
                     RunDetailsMetric(
-                        label = "Finish reason",
+                        label = stringResource(CoreUiR.string.ui_copy_34),
                         value = metrics.finishReason.displayName(),
-                        description = "Why generation stopped for this response.",
+                        description = stringResource(CoreUiR.string.ui_description_14),
                     )
                 }
             }

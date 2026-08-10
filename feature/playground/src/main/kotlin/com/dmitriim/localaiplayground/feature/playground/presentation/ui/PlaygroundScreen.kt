@@ -26,6 +26,8 @@ import com.dmitriim.localaiplayground.core.result.OperationState
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.playground.R
 import com.dmitriim.localaiplayground.feature.playground.presentation.PlaygroundUiState
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun PlaygroundScreen(
@@ -62,10 +64,8 @@ fun PlaygroundScreen(
                         .padding(bottom = 12.dp),
                     colorFilter = ColorFilter.tint(AssistantPurple),
                 )
-                Text("Local playgrounds", style = MaterialTheme.typography.headlineMedium)
-                Text(
-                    "Prompts, recordings, and generated content stay on this device. " +
-                        "Network access is used only for model downloads you explicitly start.",
+                Text(stringResource(CoreUiR.string.playground_playground_screen_88), style = MaterialTheme.typography.headlineMedium)
+                Text(stringResource(CoreUiR.string.playground_privacy_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
@@ -76,7 +76,7 @@ fun PlaygroundScreen(
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     CircularProgressIndicator()
-                    Text("Checking device engines…")
+                    Text(stringResource(CoreUiR.string.playground_playground_screen_90))
                 }
             }
         }
@@ -94,7 +94,7 @@ fun PlaygroundScreen(
                     ) {
                         Text(error.title, style = MaterialTheme.typography.titleMedium)
                         Text(error.explanation)
-                        OutlinedButton(onClick = onRefresh) { Text("Retry") }
+                        OutlinedButton(onClick = onRefresh) { Text(stringResource(CoreUiR.string.playground_playground_screen_91)) }
                     }
                 }
             }

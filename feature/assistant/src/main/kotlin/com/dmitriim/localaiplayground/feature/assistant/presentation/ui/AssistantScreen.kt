@@ -29,6 +29,8 @@ import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantUi
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatSettings
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechInputSettings
 import com.dmitriim.localaiplayground.feature.assistant.presentation.SpeechOutputSettings
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun AssistantScreen(
@@ -91,7 +93,11 @@ fun AssistantScreen(
                 canSpeak = uiState.isIdle && uiState.selectedVoice != null,
                 canRegenerate = uiState.isIdle,
                 header = {
-                    uiState.errorMessage?.let { message -> StatusMessage("Assistant needs attention", message) }
+                    val message = uiState.errorMessage
+                        ?: uiState.voiceConfigurationError?.let { stringResource(it) }
+                    message?.let {
+                        StatusMessage(stringResource(CoreUiR.string.assistant_needs_attention), it)
+                    }
                 },
                 footer = { uiState.metrics?.let { metrics -> ChatMetricsCard(metrics, uiState.contextUsage) } },
             )
@@ -159,17 +165,17 @@ fun AssistantScreen(
     if (showClearConfirmation) {
         AlertDialog(
             onDismissRequest = { showClearConfirmation = false },
-            title = { Text("Clear this conversation?") },
-            text = { Text("This removes all messages and metrics from this Assistant conversation.") },
+            title = { Text(stringResource(CoreUiR.string.assistant_assistant_screen_16)) },
+            text = { Text(stringResource(CoreUiR.string.assistant_assistant_screen_17)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         onClearConversation()
                         showClearConfirmation = false
                     },
-                ) { Text("Clear") }
+                ) { Text(stringResource(CoreUiR.string.assistant_assistant_screen_18)) }
             },
-            dismissButton = { TextButton(onClick = { showClearConfirmation = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { showClearConfirmation = false }) { Text(stringResource(CoreUiR.string.assistant_assistant_screen_19)) } },
         )
     }
 }

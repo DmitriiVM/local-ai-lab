@@ -141,8 +141,8 @@ private val BenchmarkWorkload.capability: AiCapability
 
 private val BenchmarkWorkload.description: String
     get() = when (this) {
-        is BenchmarkWorkload.Chat -> "Complete conversation context (${messages.size} messages)"
-        is BenchmarkWorkload.SpeechToText -> "${input.displayName} · ${input.durationMs} ms"
+        is BenchmarkWorkload.Chat -> messages.size.toString()
+        is BenchmarkWorkload.SpeechToText -> listOf(input.displayName, input.durationMs).joinToString(separator = ":")
         is BenchmarkWorkload.TextToSpeech -> text
     }
 

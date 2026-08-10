@@ -2,6 +2,8 @@ package com.dmitriim.localaiplayground.feature.stt.presentation
 
 import android.net.Uri
 import android.util.Log
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.core.ui.text.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.system.SystemSpeechToTextSupport
@@ -158,7 +160,7 @@ class SpeechToTextViewModel(
                 mutableState.update { it.copy(operation = SttOperation.IDLE, level = null) }
             } catch (error: Throwable) {
                 Log.e(TAG, "STT UI recording failed: ${error.message}", error)
-                mutableState.update { it.copy(operation = SttOperation.IDLE, level = null, errorMessage = error.message ?: "Microphone capture failed.") }
+                mutableState.update { it.copy(operation = SttOperation.IDLE, level = null, errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.stt_error_microphone_capture)) }
             }
         }.also(::registerForegroundCancellation)
     }
@@ -190,7 +192,7 @@ class SpeechToTextViewModel(
                 mutableState.update { it.copy(operation = SttOperation.IDLE) }
             } catch (error: Throwable) {
                 Log.e(TAG, "STT UI import failed: ${error.message}", error)
-                mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = error.message ?: "Audio import failed.") }
+                mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.stt_error_audio_import)) }
             }
         }.also(::registerForegroundCancellation)
     }
@@ -211,9 +213,9 @@ class SpeechToTextViewModel(
         val input = snapshot.input
         val threads = snapshot.threadCount.toIntOrNull()
         val error = when {
-            model?.installed != true -> "Select an installed speech-to-text model."
-            input == null -> "Record or import audio before profiling."
-            threads !in 0..64 -> "Thread count must be between 0 and 64."
+            model?.installed != true -> UiText.Resource(CoreUiR.string.stt_error_select_model)
+            input == null -> UiText.Resource(CoreUiR.string.stt_error_audio_before_profile)
+            threads !in 0..64 -> UiText.Resource(CoreUiR.string.stt_error_thread_count_range)
             else -> null
         }
         if (error != null) {
@@ -251,7 +253,7 @@ class SpeechToTextViewModel(
 
     fun microphonePermissionDenied() = mutableState.update {
         Log.w(TAG, "STT microphone permission denied.")
-        it.copy(errorMessage = "Microphone permission was denied. You can allow it in Android settings and try again.")
+        it.copy(errorMessage = UiText.Resource(CoreUiR.string.stt_error_microphone_permission_denied))
     }
 
     private fun transcribe(input: PcmAudioInput) {
@@ -290,7 +292,7 @@ class SpeechToTextViewModel(
                                 transcript = event.transcript,
                                 metrics = event.metrics,
                                 errorMessage = event.transcript.takeIf(String::isBlank)?.let {
-                                    "No speech was recognized in this audio. Try recording again or choose an installed local model."
+                                    UiText.Resource(CoreUiR.string.stt_error_no_speech_recognized)
                                 },
                             )
                         }.also {
@@ -301,11 +303,11 @@ class SpeechToTextViewModel(
                 }
             } catch (_: CancellationException) {
                 Log.i(TAG, "STT UI transcription cancelled.")
-                mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = "Transcription cancelled.") }
+                mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = UiText.Resource(CoreUiR.string.stt_error_transcription_cancelled)) }
                 persistSttRun(snapshotForPersistence(runId, RunStatus.CANCELLED, startedAt, model, input, null, snapshot, null, "Transcription cancelled."))
             } catch (error: Throwable) {
                 Log.e(TAG, "STT UI transcription failed: ${error.message}", error)
-                mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = error.message ?: "Local transcription failed.") }
+                mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.stt_error_transcription_failed)) }
                 persistSttRun(snapshotForPersistence(runId, RunStatus.FAILED, startedAt, model, input, null, snapshot, null, error.message ?: "Local transcription failed."))
             }
         }.also(::registerForegroundCancellation)
@@ -314,7 +316,7 @@ class SpeechToTextViewModel(
     private fun requireModel(): Boolean {
         if (mutableState.value.selectedModel?.installed == true) return true
         Log.w(TAG, "STT cannot start because no compatible model is selected.")
-        mutableState.update { it.copy(errorMessage = "Install a compatible speech-to-text model before recording or importing audio.") }
+        mutableState.update { it.copy(errorMessage = UiText.Resource(CoreUiR.string.stt_error_install_model)) }
         return false
     }
 
@@ -354,8 +356,8 @@ class SpeechToTextViewModel(
                 language = parameters?.get("language")?.jsonPrimitive?.content?.let { code -> SttLanguage.entries.firstOrNull { it.whisperCode == code } } ?: state.language,
                 threadCount = parameters?.get("threadCount")?.jsonPrimitive?.content ?: state.threadCount,
                 errorMessage = when {
-                    modelId != null && selected == null -> "Saved model ${run.model?.displayName.orEmpty()} is no longer installed. Select a compatible model."
-                    else -> "Saved configuration restored. Recording audio was session-only, so record or import audio before repeating."
+                    modelId != null && selected == null -> UiText.Resource(CoreUiR.string.stt_error_saved_model_missing, listOf(run.model?.displayName.orEmpty()))
+                    else -> UiText.Resource(CoreUiR.string.stt_status_configuration_restored)
                 },
             )
         }

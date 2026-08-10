@@ -36,6 +36,9 @@ import com.dmitriim.localaiplayground.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localaiplayground.feature.stt.presentation.SpeechToTextUiState
 import com.dmitriim.localaiplayground.feature.stt.presentation.SttLanguage
 import com.dmitriim.localaiplayground.feature.stt.presentation.SttOperation
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
+import com.dmitriim.localaiplayground.core.ui.text.asString
 
 @Composable
 fun SpeechToTextScreen(
@@ -69,14 +72,13 @@ fun SpeechToTextScreen(
             .padding(start = dimensions.screenPadding, top = dimensions.topBarOverlayClearance + 44.dp, end = dimensions.screenPadding, bottom = 24.dp + dimensions.bottomNavigationOverlayClearance),
         verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
-        Text("Local speech to text", style = MaterialTheme.typography.headlineSmall)
-        Text(
-            "Choose the Android on-device recognizer or an installed speech model. Recording shows live levels, then final text appears after you stop.",
+        Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_131), style = MaterialTheme.typography.headlineSmall)
+        Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_132),
             style = MaterialTheme.typography.bodyMedium,
         )
         AppSectionCard("Setup", tone = AppSurfaceTone.TONAL) {
             SpeechModelPicker(state.models, state.selectedModelId, enabled = !busy, onSelectModel)
-            Text("Language", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_133), style = MaterialTheme.typography.titleSmall)
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(state.availableLanguages.size) { index ->
                     val language = state.availableLanguages[index]
@@ -93,7 +95,7 @@ fun SpeechToTextScreen(
                 value = state.threadCount,
                 onValueChange = onThreadCountChange,
                 enabled = !busy,
-                label = { Text("CPU threads (0 = safe default)") },
+                label = { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_134)) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -112,15 +114,13 @@ fun SpeechToTextScreen(
                 onClear = onClear,
             )
             state.level?.let { level ->
-                Text("Recording ${formatDuration(level.elapsedMs)}", style = MaterialTheme.typography.titleSmall)
-                Text(
-                    "Live input level: ${(level.rms * 100).toInt()}% RMS · ${(level.peak * 100).toInt()}% peak",
+                Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_format_13, formatDuration(level.elapsedMs)), style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_format_14, (level.rms * 100).toInt(), (level.peak * 100).toInt()),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
             state.input?.let { input ->
-                Text(
-                    "Input: ${input.displayName} · ${formatDuration(input.durationMs)} · ${input.sourceDescription}",
+                Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_format_15, input.displayName, formatDuration(input.durationMs), input.sourceDescription),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -130,14 +130,16 @@ fun SpeechToTextScreen(
                 enabled = !busy && state.input != null && state.selectedModel?.installed == true,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Profile current audio")
+                Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_135))
             }
         }
-        state.errorMessage?.let { StatusMessage(title = "Speech to text needs attention", explanation = it) }
+        state.errorMessage?.let { StatusMessage(title = stringResource(CoreUiR.string.ui_copy_68), explanation = it.asString()) }
         if (state.operation == SttOperation.TRANSCRIBING) {
             val isAndroidRecognizer = state.selectedModel?.engineId?.value == "android-speech-recognizer"
             StatusMessage(
-                title = if (isAndroidRecognizer) "Processing recording" else "Transcribing locally",
+                title = stringResource(
+                    if (isAndroidRecognizer) CoreUiR.string.stt_processing_recording else CoreUiR.string.stt_transcribing_locally,
+                ),
                 explanation = if (isAndroidRecognizer) {
                     "Recording has stopped. Android SpeechRecognizer is receiving the captured audio in real time, so this takes about as long as the recording."
                 } else {
@@ -156,7 +158,7 @@ fun SpeechToTextScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, androidx.compose.ui.Alignment.End),
                 ) {
-                    TextButton(onClick = { clipboard.setText(AnnotatedString(state.transcript)) }) { Text("Copy") }
+                    TextButton(onClick = { clipboard.setText(AnnotatedString(state.transcript)) }) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_136)) }
                     TextButton(onClick = {
                         context.startActivity(
                             Intent.createChooser(
@@ -167,11 +169,11 @@ fun SpeechToTextScreen(
                                 "Share transcript",
                             ),
                         )
-                    }) { Text("Share") }
+                    }) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_137)) }
                     TextButton(
                         onClick = onClear,
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                    ) { Text("Clear") }
+                    ) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_138)) }
                 }
             }
         }
@@ -197,17 +199,17 @@ private fun RecordingControls(
     onClear: () -> Unit,
 ) {
     when (operation) {
-        SttOperation.RECORDING -> Button(onClick = onStop) { Text("Stop recording") }
-        SttOperation.STOPPING -> OutlinedButton(onClick = {}, enabled = false) { Text("Stopping…") }
+        SttOperation.RECORDING -> Button(onClick = onStop) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_139)) }
+        SttOperation.STOPPING -> OutlinedButton(onClick = {}, enabled = false) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_140)) }
         SttOperation.IMPORTING -> {
-            OutlinedButton(onClick = {}, enabled = false) { Text("Importing…") }
-            TextButton(onClick = onCancel) { Text("Cancel import") }
+            OutlinedButton(onClick = {}, enabled = false) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_141)) }
+            TextButton(onClick = onCancel) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_142)) }
         }
         SttOperation.TRANSCRIBING -> {
-            OutlinedButton(onClick = {}, enabled = false) { Text("Transcribing…") }
-            TextButton(onClick = onCancel) { Text("Cancel transcription") }
+            OutlinedButton(onClick = {}, enabled = false) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_143)) }
+            TextButton(onClick = onCancel) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_144)) }
         }
-        SttOperation.CANCELLING -> OutlinedButton(onClick = {}, enabled = false) { Text("Cancelling…") }
+        SttOperation.CANCELLING -> OutlinedButton(onClick = {}, enabled = false) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_145)) }
         SttOperation.IDLE -> {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -220,11 +222,11 @@ private fun RecordingControls(
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.onTertiary,
                     ),
-                ) { Text("Record", maxLines = 1, softWrap = false) }
+                ) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_146), maxLines = 1, softWrap = false) }
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
                     onClick = onImport,
-                ) { Text("Import audio", maxLines = 1, softWrap = false) }
+                ) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_147), maxLines = 1, softWrap = false) }
             }
             if (hasInput) {
                 Row(
@@ -234,11 +236,11 @@ private fun RecordingControls(
                     OutlinedButton(
                         modifier = Modifier.weight(1f),
                         onClick = onRepeat,
-                    ) { Text("Repeat", maxLines = 1, softWrap = false) }
+                    ) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_148), maxLines = 1, softWrap = false) }
                     OutlinedButton(
                         modifier = Modifier.weight(1f),
                         onClick = onClear,
-                    ) { Text("Clear", maxLines = 1, softWrap = false) }
+                    ) { Text(stringResource(CoreUiR.string.stt_speech_to_text_screen_149), maxLines = 1, softWrap = false) }
                 }
             }
         }

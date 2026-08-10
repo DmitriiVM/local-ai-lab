@@ -22,6 +22,8 @@ import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.ui.component.InstalledOptionList
 import com.dmitriim.localaiplayground.core.ui.component.OptionPickerItem
 import com.dmitriim.localaiplayground.feature.tts.presentation.TtsModelOption
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun TextToSpeechModelPicker(
@@ -33,14 +35,14 @@ internal fun TextToSpeechModelPicker(
     var sheetVisible by remember { mutableStateOf(false) }
     val selected = models.firstOrNull { it.id == selectedId }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Speech engine / model", style = MaterialTheme.typography.labelLarge)
+        Text(stringResource(CoreUiR.string.tts_text_to_speech_model_picker_176), style = MaterialTheme.typography.labelLarge)
         OutlinedButton(
             onClick = { sheetVisible = true },
             enabled = enabled && models.isNotEmpty(),
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = selected?.displayName ?: "Install a TTS model in Models",
+                text = selected?.displayName ?: stringResource(CoreUiR.string.tts_install_model),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -75,12 +77,12 @@ private fun TextToSpeechModelSelectionSheet(
                 .padding(bottom = 24.dp),
         ) {
             Text(
-                text = "Speech engine / model",
+                text = stringResource(CoreUiR.string.ui_copy_99),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
             Text(
-                text = "Choose an installed engine or local model for speech synthesis.",
+                text = stringResource(CoreUiR.string.ui_copy_100),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 24.dp, top = 4.dp, end = 24.dp, bottom = 12.dp),

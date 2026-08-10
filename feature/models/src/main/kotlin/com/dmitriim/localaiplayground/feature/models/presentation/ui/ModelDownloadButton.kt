@@ -8,6 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun ModelDownloadButton(
@@ -22,6 +24,6 @@ internal fun ModelDownloadButton(
             contentColor = MaterialTheme.colorScheme.tertiary,
         ),
     ) {
-        Text("Download", style = MaterialTheme.typography.labelLarge)
+        Text(stringResource(CoreUiR.string.models_model_download_button_70), style = MaterialTheme.typography.labelLarge)
     }
 }

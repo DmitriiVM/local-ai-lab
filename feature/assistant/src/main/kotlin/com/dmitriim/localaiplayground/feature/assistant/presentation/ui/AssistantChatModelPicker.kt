@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.ui.component.OptionPickerItem
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatModelOption
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun AssistantChatModelPicker(
@@ -13,8 +15,10 @@ internal fun AssistantChatModelPicker(
     onClick: () -> Unit,
 ) {
     AssistantInSheetModelPicker(
-        label = "Chat model",
-        items = models.map(ChatModelOption::toPickerItem),
+        label = stringResource(CoreUiR.string.ui_copy_3),
+        items = models.map { model ->
+            model.toPickerItem(stringResource(CoreUiR.string.ui_copy_5))
+        },
         selectedId = selectedId,
         enabled = enabled,
         onClick = onClick,
@@ -31,9 +35,11 @@ internal fun AssistantChatModelSelection(
     onBack: () -> Unit,
 ) {
     AssistantInSheetModelSelection(
-        title = "Chat model",
-        description = "Choose an installed model for private local chat.",
-        items = models.map(ChatModelOption::toPickerItem),
+        title = stringResource(CoreUiR.string.ui_copy_4),
+        description = stringResource(CoreUiR.string.ui_description_1),
+        items = models.map { model ->
+            model.toPickerItem(stringResource(CoreUiR.string.ui_copy_5))
+        },
         selectedId = selectedId?.value,
         enabled = enabled,
         onSelect = { id -> models.firstOrNull { it.id.value == id }?.let { onSelect(it.id) } },
@@ -42,9 +48,9 @@ internal fun AssistantChatModelSelection(
     )
 }
 
-private fun ChatModelOption.toPickerItem() = OptionPickerItem(
+private fun ChatModelOption.toPickerItem(supportingText: String) = OptionPickerItem(
     id = id.value,
     label = displayName,
-    supportingText = "",
+    supportingText = supportingText,
     installed = installed,
 )

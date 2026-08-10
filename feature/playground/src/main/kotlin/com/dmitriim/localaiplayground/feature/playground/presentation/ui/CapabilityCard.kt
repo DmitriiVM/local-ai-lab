@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.annotation.StringRes
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -30,6 +31,8 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 internal fun CapabilityCard(
@@ -94,11 +97,11 @@ internal fun CapabilityCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
-                    content.title,
+                    stringResource(content.titleRes),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    content.description,
+                    stringResource(content.descriptionRes),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -116,8 +119,8 @@ internal fun CapabilityCard(
 private val AiCapability.cardContent: CapabilityCardContent
     get() = when (this) {
         AiCapability.CHAT -> CapabilityCardContent(
-            title = "Assistant",
-            description = "Chat privately with AI on your device.",
+            titleRes = CoreUiR.string.ui_copy_55,
+            descriptionRes = CoreUiR.string.ui_description_27,
             icon = Icons.AutoMirrored.Outlined.Chat,
             accent = CapabilityCardAccent(
                 darkContainerColor = Color(0xFF3B2B5A),
@@ -127,8 +130,8 @@ private val AiCapability.cardContent: CapabilityCardContent
             ),
         )
         AiCapability.SPEECH_TO_TEXT -> CapabilityCardContent(
-            title = "Speech to text",
-            description = "Turn speech and recordings into text.",
+            titleRes = CoreUiR.string.ui_copy_56,
+            descriptionRes = CoreUiR.string.ui_description_28,
             icon = Icons.Outlined.Mic,
             accent = CapabilityCardAccent(
                 darkContainerColor = Color(0xFF3B2B5A),
@@ -138,8 +141,8 @@ private val AiCapability.cardContent: CapabilityCardContent
             ),
         )
         AiCapability.TEXT_TO_SPEECH -> CapabilityCardContent(
-            title = "Text to speech",
-            description = "Turn text into natural-sounding audio.",
+            titleRes = CoreUiR.string.ui_copy_57,
+            descriptionRes = CoreUiR.string.ui_description_29,
             icon = Icons.AutoMirrored.Outlined.VolumeUp,
             accent = CapabilityCardAccent(
                 darkContainerColor = Color(0xFF3B2B5A),
@@ -154,8 +157,8 @@ private val AiCapability.cardContent: CapabilityCardContent
     }
 
 private data class CapabilityCardContent(
-    val title: String,
-    val description: String,
+    @StringRes val titleRes: Int,
+    @StringRes val descriptionRes: Int,
     val icon: ImageVector,
     val accent: CapabilityCardAccent,
 )

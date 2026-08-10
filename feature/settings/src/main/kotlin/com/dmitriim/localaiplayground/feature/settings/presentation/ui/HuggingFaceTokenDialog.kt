@@ -14,6 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun HuggingFaceTokenDialog(
@@ -25,14 +27,14 @@ fun HuggingFaceTokenDialog(
     var token by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = { if (!saving) onDismiss() },
-        title = { Text("Hugging Face access token") },
+        title = { Text(stringResource(CoreUiR.string.settings_hugging_face_token_dialog_103)) },
         text = {
             Column {
-                Text("Enter a fine-grained read-only token. The token is encrypted and stored only on this device.")
+                Text(stringResource(CoreUiR.string.settings_hugging_face_token_dialog_104))
                 OutlinedTextField(
                     value = token,
                     onValueChange = { token = it },
-                    label = { Text("Access token") },
+                    label = { Text(stringResource(CoreUiR.string.settings_hugging_face_token_dialog_105)) },
                     supportingText = error?.let { message -> { Text(message) } },
                     isError = error != null,
                     singleLine = true,
@@ -43,11 +45,11 @@ fun HuggingFaceTokenDialog(
         },
         confirmButton = {
             Button(onClick = { onSave(token) }, enabled = token.isNotBlank() && !saving) {
-                Text(if (saving) "Saving…" else "Save token")
+                Text(stringResource(if (saving) CoreUiR.string.models_saving else CoreUiR.string.settings_save_token))
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss, enabled = !saving) { Text("Cancel") }
+            OutlinedButton(onClick = onDismiss, enabled = !saving) { Text(stringResource(CoreUiR.string.settings_hugging_face_token_dialog_106)) }
         },
     )
 }

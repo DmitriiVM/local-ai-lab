@@ -30,6 +30,8 @@ import com.dmitriim.localaiplayground.core.performance.BenchmarkWorkload
 import com.dmitriim.localaiplayground.core.performance.InferenceResourceMetrics
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.benchmark.presentation.BenchmarkLabUiState
+import androidx.compose.ui.res.stringResource
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 
 @Composable
 fun BenchmarkScreen(
@@ -57,38 +59,39 @@ fun BenchmarkScreen(
         ),
         verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
-        Text("Profile", style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_26), style = MaterialTheme.typography.headlineMedium)
         Text(
-            text = "Repeat the selected workload to measure on-device speed, CPU, memory, thermal state, and supported battery use. Warm-ups are excluded from the saved results.",
+            text = stringResource(CoreUiR.string.ui_copy_38),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
         )
         if (workload == null) {
-            Text("Open Profile from a Chat, STT, or TTS screen so its selected model and current workload can be used.")
+            Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_27))
             return@Column
         }
+        val resultsCopyText = state.resultsCopyText(workload)
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(workload.capabilityLabel, style = MaterialTheme.typography.titleMedium)
-                Text("Model: ${workload.modelDisplayName}")
-                Text(workload.workloadDescription, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("Model and workload come from the originating screen and cannot be changed here.", style = MaterialTheme.typography.bodySmall)
+                Text(workload.capabilityLabel(), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_format_2, workload.modelDisplayName))
+                Text(workload.workloadDescription(), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_28), style = MaterialTheme.typography.bodySmall)
             }
         }
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("Profile configuration", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_29), style = MaterialTheme.typography.titleMedium)
                 IterationControl(
-                    label = "Warm-ups",
-                    description = "Run first and exclude from results",
+                    label = stringResource(CoreUiR.string.ui_copy_39),
+                    description = stringResource(CoreUiR.string.ui_description_17),
                     value = state.warmupIterations,
                     onDecrement = { onWarmupsChange(state.warmupIterations - 1) },
                     onIncrement = { onWarmupsChange(state.warmupIterations + 1) },
                     enabled = !state.isRunning,
                 )
                 IterationControl(
-                    label = "Measured runs",
-                    description = "Save each run to Runs history",
+                    label = stringResource(CoreUiR.string.ui_copy_40),
+                    description = stringResource(CoreUiR.string.ui_description_18),
                     value = state.measuredIterations,
                     onDecrement = { onMeasuredChange(state.measuredIterations - 1) },
                     onIncrement = { onMeasuredChange(state.measuredIterations + 1) },
@@ -101,12 +104,12 @@ fun BenchmarkScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text("Startup mode", style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_30), style = MaterialTheme.typography.titleSmall)
                         Text(
                             text = if (state.startupMode.name == "WARM") {
-                                "Reuse the runtime between iterations"
+                                stringResource(CoreUiR.string.benchmark_reuse_runtime)
                             } else {
-                                "Reload the runtime for every iteration"
+                                stringResource(CoreUiR.string.benchmark_reload_runtime)
                             },
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodySmall,
@@ -121,8 +124,8 @@ fun BenchmarkScreen(
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = onStart, enabled = !state.isRunning) { Text("Start profiling") }
-            if (state.isRunning) Button(onClick = onCancel) { Text("Cancel") }
+            Button(onClick = onStart, enabled = !state.isRunning) { Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_31)) }
+            if (state.isRunning) Button(onClick = onCancel) { Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_32)) }
         }
         state.message?.let { Text(it, color = MaterialTheme.colorScheme.secondary) }
         if (state.completedIterations.isNotEmpty()) {
@@ -133,23 +136,27 @@ fun BenchmarkScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Measured results", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_33), style = MaterialTheme.typography.titleMedium)
                         TextButton(
-                            onClick = { clipboard.setText(AnnotatedString(state.resultsCopyText(workload))) },
+                            onClick = { clipboard.setText(AnnotatedString(resultsCopyText)) },
                         ) {
-                            Text("Copy results")
+                            Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_34))
                         }
                     }
                     Text(
-                        text = "${state.completedIterations.size} saved measurement${if (state.completedIterations.size == 1) "" else "s"}. Latency is the time from inference start to completion; lower is faster.",
+                        text = stringResource(
+                            CoreUiR.string.benchmark_measurement_summary,
+                            state.completedIterations.size,
+                            if (state.completedIterations.size == 1) "" else "s",
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
                         text = if (state.completedIterations.any { it.telemetry.traceActive }) {
-                            "External trace is recording. Use it to correlate these runs with system GPU and scheduling data."
+                            stringResource(CoreUiR.string.benchmark_trace_recording)
                         } else {
-                            "External trace is not recording. In-app CPU, memory, thermal, and supported battery telemetry is still collected."
+                            stringResource(CoreUiR.string.benchmark_trace_not_recording)
                         },
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
@@ -157,22 +164,22 @@ fun BenchmarkScreen(
                     state.summary?.let { summary ->
                         ResultSection("Latency summary")
                         ResultMetric(
-                            label = "Typical latency",
+                            label = stringResource(CoreUiR.string.ui_copy_42),
                             value = summary.medianLatencyMs.durationText(),
-                            description = "Median completion time across the measured runs.",
+                            description = stringResource(CoreUiR.string.ui_description_19),
                         )
                         ResultMetric(
-                            label = "p95 latency",
+                            label = stringResource(CoreUiR.string.ui_copy_43),
                             value = summary.p95LatencyMs.durationText(),
-                            description = "95% of runs completed within this time; useful for spotting slow runs.",
+                            description = stringResource(CoreUiR.string.ui_description_20),
                         )
                         ResultMetric(
-                            label = "Latency range",
+                            label = stringResource(CoreUiR.string.ui_copy_44),
                             value = "${summary.minimumLatencyMs.durationText()}–${summary.maximumLatencyMs.durationText()}",
-                            description = "Fastest to slowest measured completion time.",
+                            description = stringResource(CoreUiR.string.ui_description_21),
                         )
                         ResultMetric(
-                            label = "Output rate",
+                            label = stringResource(CoreUiR.string.ui_copy_45),
                             value = summary.medianThroughputPerSecond?.throughputText(workload.capability) ?: "Unavailable",
                             description = if (summary.medianThroughputPerSecond == null) {
                                 "This runtime did not report output units, so only latency can be compared."
@@ -184,37 +191,37 @@ fun BenchmarkScreen(
                     state.completedIterations.last().telemetry.resources?.let { resources ->
                         ResultSection("Resources — last measured run")
                         ResultMetric(
-                            label = "CPU usage",
+                            label = stringResource(CoreUiR.string.ui_copy_46),
                             value = "${resources.averageProcessCpuPercent.percentText()} avg · ${resources.peakProcessCpuPercent.percentText()} peak",
-                            description = "Process CPU time over wall time. 100% equals one fully used CPU core, so multi-core work can exceed 100%.",
+                            description = stringResource(CoreUiR.string.ui_description_22),
                         )
                         ResultMetric(
-                            label = "Peak app memory",
+                            label = stringResource(CoreUiR.string.ui_copy_47),
                             value = resources.peakPssBytes.memoryText(),
-                            description = "Largest proportional set size (PSS) during this run. PSS estimates shared memory proportionally.",
+                            description = stringResource(CoreUiR.string.ui_description_23),
                         )
                         ResultMetric(
-                            label = "Thermal state",
+                            label = stringResource(CoreUiR.string.ui_copy_48),
                             value = resources.thermalStatusEnd.thermalStatusText(),
-                            description = "Android device thermal status at the end of the run. Severe or higher stops a profile to protect the device.",
+                            description = stringResource(CoreUiR.string.ui_description_24),
                         )
                         ResultMetric(
-                            label = "Battery use",
+                            label = stringResource(CoreUiR.string.ui_copy_49),
                             value = resources.batteryValueText(),
-                            description = "Battery reporting is coarse for short profiles. Longer workloads produce more useful readings; current sign follows the device power driver.",
+                            description = stringResource(CoreUiR.string.ui_description_25),
                         )
                         state.summary?.totalBatteryEnergyDeltaNwh?.let { energy ->
                             ResultMetric(
-                                label = "Session energy",
+                                label = stringResource(CoreUiR.string.ui_copy_50),
                                 value = energy.energyText(),
-                                description = "Energy-counter change over all measured runs. Availability depends on the device.",
+                                description = stringResource(CoreUiR.string.ui_description_26),
                             )
                         }
                     }
                     HorizontalDivider()
                     ResultSection("Individual run latency")
                     Text(
-                        text = "Completion time for each saved measurement. Lower is faster.",
+                        text = stringResource(CoreUiR.string.ui_copy_51),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
                     )
@@ -223,7 +230,7 @@ fun BenchmarkScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            Text("Run ${result.iteration}")
+                            Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_format_3, result.iteration))
                             Text(result.latencyMs.durationText(), style = MaterialTheme.typography.titleSmall)
                         }
                     }
@@ -262,11 +269,12 @@ private fun ResultMetric(
     }
 }
 
+@Composable
 private fun BenchmarkLabUiState.resultsCopyText(workload: BenchmarkWorkload): String = buildList {
     add("Profile results")
-    add(workload.capabilityLabel)
+    add(workload.capabilityLabel())
     add("Model: ${workload.modelDisplayName}")
-    add("Workload: ${workload.workloadDescription}")
+    add("Workload: ${workload.workloadDescription()}")
     add(
         "Configuration: $warmupIterations warm-up${if (warmupIterations == 1) "" else "s"}, " +
             "$measuredIterations measured run${if (measuredIterations == 1) "" else "s"}, " +
@@ -326,14 +334,14 @@ private fun IterationControl(
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onDecrement, enabled = enabled) { Text("−") }
+            TextButton(onClick = onDecrement, enabled = enabled) { Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_35)) }
             Text(
                 text = value.toString(),
                 modifier = Modifier.width(28.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
             )
-            TextButton(onClick = onIncrement, enabled = enabled) { Text("+") }
+            TextButton(onClick = onIncrement, enabled = enabled) { Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_36)) }
         }
     }
 }
@@ -345,18 +353,20 @@ private val BenchmarkWorkload.capability: AiCapability
         is BenchmarkWorkload.TextToSpeech -> AiCapability.TEXT_TO_SPEECH
     }
 
-private val BenchmarkWorkload.capabilityLabel: String
-    get() = when (this) {
-        is BenchmarkWorkload.Chat -> "Chat profile"
-        is BenchmarkWorkload.SpeechToText -> "Speech-to-text profile"
-        is BenchmarkWorkload.TextToSpeech -> "Text-to-speech profile"
-    }
+@Composable
+private fun BenchmarkWorkload.capabilityLabel(): String = stringResource(
+        when (this) {
+            is BenchmarkWorkload.Chat -> CoreUiR.string.benchmark_chat_profile
+            is BenchmarkWorkload.SpeechToText -> CoreUiR.string.benchmark_stt_profile
+            is BenchmarkWorkload.TextToSpeech -> CoreUiR.string.benchmark_tts_profile
+        },
+    )
 
-private val BenchmarkWorkload.workloadDescription: String
-    get() = when (this) {
-        is BenchmarkWorkload.Chat -> "Complete conversation context plus current draft · ${messages.size} messages"
-        is BenchmarkWorkload.SpeechToText -> "${input.displayName} · ${input.durationMs} ms · $languageCode"
-        is BenchmarkWorkload.TextToSpeech -> "${text.length} characters · $languageCode"
+@Composable
+private fun BenchmarkWorkload.workloadDescription(): String = when (this) {
+        is BenchmarkWorkload.Chat -> stringResource(CoreUiR.string.benchmark_workload_chat, messages.size)
+        is BenchmarkWorkload.SpeechToText -> stringResource(CoreUiR.string.benchmark_workload_stt, input.displayName, input.durationMs, languageCode)
+        is BenchmarkWorkload.TextToSpeech -> stringResource(CoreUiR.string.benchmark_workload_tts, text.length, languageCode)
     }
 
 private fun Double?.percentText(): String = this?.let { "%.1f%%".format(it) } ?: "Unavailable"
@@ -375,17 +385,20 @@ private fun Double.throughputText(capability: AiCapability): String = when (capa
 
 private fun Long?.memoryText(): String = this?.let { "%.1f MiB".format(it / 1_048_576.0) } ?: "Unavailable"
 
-private fun Int?.thermalStatusText(): String = when (this) {
-    PowerManager.THERMAL_STATUS_NONE -> "None"
-    PowerManager.THERMAL_STATUS_LIGHT -> "Light"
-    PowerManager.THERMAL_STATUS_MODERATE -> "Moderate"
-    PowerManager.THERMAL_STATUS_SEVERE -> "Severe"
-    PowerManager.THERMAL_STATUS_CRITICAL -> "Critical"
-    PowerManager.THERMAL_STATUS_EMERGENCY -> "Emergency"
-    PowerManager.THERMAL_STATUS_SHUTDOWN -> "Shutdown"
-    null -> "Unavailable"
-    else -> "Unknown"
-}
+@Composable
+private fun Int?.thermalStatusText(): String = stringResource(
+    when (this) {
+        PowerManager.THERMAL_STATUS_NONE -> CoreUiR.string.thermal_none
+        PowerManager.THERMAL_STATUS_LIGHT -> CoreUiR.string.thermal_light
+        PowerManager.THERMAL_STATUS_MODERATE -> CoreUiR.string.thermal_moderate
+        PowerManager.THERMAL_STATUS_SEVERE -> CoreUiR.string.thermal_severe
+        PowerManager.THERMAL_STATUS_CRITICAL -> CoreUiR.string.thermal_critical
+        PowerManager.THERMAL_STATUS_EMERGENCY -> CoreUiR.string.thermal_emergency
+        PowerManager.THERMAL_STATUS_SHUTDOWN -> CoreUiR.string.thermal_shutdown
+        null -> CoreUiR.string.ui_unavailable
+        else -> CoreUiR.string.ui_unknown
+    },
+)
 
 private fun InferenceResourceMetrics.batteryValueText(): String {
     if (!batteryMeasurementsAvailable) return "Unavailable"
