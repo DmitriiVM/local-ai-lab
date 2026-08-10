@@ -1,16 +1,12 @@
 plugins {
-    id("local-ai.android.library")
+    id("local-ai.jvm.library")
     alias(libs.plugins.metro)
-}
-
-android {
-    namespace = "com.dmitriim.localaiplayground.ai.api"
 }
 
 dependencies {
     api(project(":core:model"))
     implementation(project(":core:di"))
-    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.metro.runtime)
     testImplementation(libs.junit)
 }

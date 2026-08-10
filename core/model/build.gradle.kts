@@ -1,13 +1,9 @@
 plugins {
-    id("local-ai.android.library")
+    id("local-ai.jvm.library")
     alias(libs.plugins.kotlin.serialization)
-}
-
-android {
-    namespace = "com.dmitriim.localaiplayground.core.model"
 }
 
 dependencies {
     api(libs.kotlinx.serialization.core)
-    implementation(libs.kotlinx.coroutines.android)
+    api(libs.kotlinx.coroutines.core)
 }

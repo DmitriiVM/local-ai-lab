@@ -1,6 +1,7 @@
-package com.dmitriim.localaiplayground.core.di
+package com.dmitriim.localaiplayground.di
 
 import androidx.lifecycle.ViewModel
+import com.dmitriim.localaiplayground.core.di.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn

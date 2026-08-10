@@ -30,6 +30,11 @@ gradlePlugin {
             implementationClass =
                 "com.dmitriim.localaiplayground.buildlogic.android.AndroidLibraryConventionPlugin"
         }
+        register("jvmLibrary") {
+            id = "local-ai.jvm.library"
+            implementationClass =
+                "com.dmitriim.localaiplayground.buildlogic.jvm.JvmLibraryConventionPlugin"
+        }
         register("sherpaOnnx") {
             id = "local-ai.sherpa-onnx"
             implementationClass =

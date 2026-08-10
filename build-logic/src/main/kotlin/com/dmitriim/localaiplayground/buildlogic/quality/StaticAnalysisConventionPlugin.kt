@@ -13,17 +13,19 @@ class StaticAnalysisConventionPlugin : Plugin<Project> {
 
         tasks.register("staticAnalysis") {
             group = "verification"
-            description = "Runs Android Lint, Detekt, and Ktlint across the project."
+            description = "Runs Android Lint where applicable, Detekt, and Ktlint across the project."
 
             dependsOn("ktlintCheck")
             allprojects
                 .filter { project -> project != rootProject && project.buildFile.isFile }
                 .forEach { project ->
-                    dependsOn(
-                        "${project.path}:detekt",
-                        "${project.path}:ktlintCheck",
-                        "${project.path}:lint",
-                    )
+                    dependsOn("${project.path}:detekt", "${project.path}:ktlintCheck")
+                    project.pluginManager.withPlugin("com.android.application") {
+                        dependsOn("${project.path}:lint")
+                    }
+                    project.pluginManager.withPlugin("com.android.library") {
+                        dependsOn("${project.path}:lint")
+                    }
                 }
 
             val buildLogic = gradle.includedBuild("build-logic")
