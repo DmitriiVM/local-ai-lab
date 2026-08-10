@@ -59,7 +59,9 @@ class ModelTransferService(
 
     init {
         ModelDownloadRuntime.executor = this
-        applicationScope.launch(Dispatchers.IO) { reconcilePersistedTransfers() }
+        applicationScope.launch(Dispatchers.IO) {
+            ModelTransferRecovery(application, installedModels, transferState).reconcile()
+        }
     }
 
     override suspend fun download(
@@ -478,34 +480,6 @@ class ModelTransferService(
             Log.i(TAG, "Catalog model redirected: modelId=${modelId.value}, redirect=${redirect + 1}")
         }
         throw ModelDownloadFailure("The download redirected too many times.", retryable = false)
-    }
-
-    private suspend fun reconcilePersistedTransfers() {
-        val activeIds = mutableSetOf<String>()
-        transferState.all().forEach { transfer ->
-            val modelId = transfer.modelIdAsModelId()
-            val entry = ModelCatalog.entries.firstOrNull { it.manifest.modelId == modelId }
-            if (entry == null || entry.manifest.catalogVersion != transfer.catalogVersion || entry.manifest.revision != transfer.revision) {
-                stagingDirectory(modelId).deleteRecursively()
-                transferState.delete(modelId)
-                return@forEach
-            }
-            if (installedModels.registerInstalledDirectory(modelId)) {
-                transferState.delete(modelId)
-                return@forEach
-            }
-            activeIds += ModelImportPolicy.directoryName(modelId)
-            if (transfer.status == PersistedModelTransferStatus.RUNNING || transfer.status == PersistedModelTransferStatus.INSTALLING) {
-                transferState.update(
-                    transfer,
-                    status = PersistedModelTransferStatus.PAUSED,
-                    message = "Download interrupted. Tap Resume to continue.",
-                )
-                ModelTransferScheduler(application).cancel(modelId)
-            }
-        }
-        stagingRoot().listFiles { file -> file.isDirectory && file.name !in activeIds }
-            ?.forEach(File::deleteRecursively)
     }
 
     private fun stagingRoot(): File = File(application.filesDir, STAGING_DIRECTORY_NAME)
