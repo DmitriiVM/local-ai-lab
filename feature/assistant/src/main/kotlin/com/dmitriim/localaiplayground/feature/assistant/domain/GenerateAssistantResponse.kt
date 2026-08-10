@@ -8,8 +8,8 @@ import com.dmitriim.localaiplayground.ai.api.llm.LlmGenerationRequest
 import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadOption
 import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadOptions
 import com.dmitriim.localaiplayground.ai.api.llm.LlmLoadRequest
-import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import com.dmitriim.localaiplayground.core.performance.InferencePhase
 import com.dmitriim.localaiplayground.core.performance.InferenceProfiler
 import com.dmitriim.localaiplayground.core.performance.NoOpInferenceProfiler

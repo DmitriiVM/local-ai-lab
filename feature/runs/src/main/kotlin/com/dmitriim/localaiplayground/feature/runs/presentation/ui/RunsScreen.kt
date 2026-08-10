@@ -31,12 +31,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
-import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import com.dmitriim.localaiplayground.core.model.runs.RunKind
+import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import com.dmitriim.localaiplayground.core.model.runs.RunStatus
-import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceCard
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localaiplayground.feature.runs.presentation.RunsUiState
 import java.text.DateFormat

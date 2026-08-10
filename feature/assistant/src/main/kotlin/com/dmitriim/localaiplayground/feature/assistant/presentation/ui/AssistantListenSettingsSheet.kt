@@ -83,51 +83,39 @@ internal fun AssistantListenSettingsSheet(
                 onOpenModels = onOpenModels,
                 onBack = { selectingRecognitionModel = false },
             )
-        } else Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .imePadding()
-                .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            AssistantSettingsSheetHeader(
-                title = "Speech-to-text settings",
-                description = "Choose a recognizer and language for voice input.",
-            )
-            AssistantSettingsSection("Model")
-            AssistantInSheetModelPicker(
-                label = "Recognition model",
-                items = models.map {
-                    OptionPickerItem(
-                        id = it.id.value,
-                        label = it.displayName,
-                        supportingText = it.languages.joinToString(),
-                        installed = it.installed,
-                    )
-                },
-                selectedId = draftModelId?.value,
-                enabled = enabled,
-                onClick = { selectingRecognitionModel = true },
-            )
-            AssistantSettingsSection("Recognition")
-            Text("Recognition language", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                languages.take(3).forEach { language ->
-                    FilterChip(
-                        selected = draft.languageCode == language.code,
-                        onClick = {
-                            draft = draft.copy(languageCode = language.code).also { candidate -> commit(draftModelId, candidate) }
-                        },
-                        enabled = enabled,
-                        label = { Text(language.label) },
-                    )
-                }
-            }
-            if (languages.size > 3) {
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .imePadding()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                AssistantSettingsSheetHeader(
+                    title = "Speech-to-text settings",
+                    description = "Choose a recognizer and language for voice input.",
+                )
+                AssistantSettingsSection("Model")
+                AssistantInSheetModelPicker(
+                    label = "Recognition model",
+                    items = models.map {
+                        OptionPickerItem(
+                            id = it.id.value,
+                            label = it.displayName,
+                            supportingText = it.languages.joinToString(),
+                            installed = it.installed,
+                        )
+                    },
+                    selectedId = draftModelId?.value,
+                    enabled = enabled,
+                    onClick = { selectingRecognitionModel = true },
+                )
+                AssistantSettingsSection("Recognition")
+                Text("Recognition language", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    languages.drop(3).forEach { language ->
+                    languages.take(3).forEach { language ->
                         FilterChip(
                             selected = draft.languageCode == language.code,
                             onClick = {
@@ -138,24 +126,38 @@ internal fun AssistantListenSettingsSheet(
                         )
                     }
                 }
-            }
-            AssistantSettingsSection("Performance")
-            OutlinedTextField(
-                value = draft.threadCount,
-                onValueChange = {
-                    draft = draft.copy(threadCount = it.filter(Char::isDigit)).also { candidate -> commit(draftModelId, candidate) }
-                },
-                label = { Text("Thread count (0 = default)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                enabled = enabled,
-            )
-            error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(
-                    onClick = { draft = SpeechInputSettings().also { candidate -> commit(draftModelId, candidate) } },
+                if (languages.size > 3) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        languages.drop(3).forEach { language ->
+                            FilterChip(
+                                selected = draft.languageCode == language.code,
+                                onClick = {
+                                    draft = draft.copy(languageCode = language.code).also { candidate -> commit(draftModelId, candidate) }
+                                },
+                                enabled = enabled,
+                                label = { Text(language.label) },
+                            )
+                        }
+                    }
+                }
+                AssistantSettingsSection("Performance")
+                OutlinedTextField(
+                    value = draft.threadCount,
+                    onValueChange = {
+                        draft = draft.copy(threadCount = it.filter(Char::isDigit)).also { candidate -> commit(draftModelId, candidate) }
+                    },
+                    label = { Text("Thread count (0 = default)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
                     enabled = enabled,
-                ) { Text("Reset") }
+                )
+                error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(
+                        onClick = { draft = SpeechInputSettings().also { candidate -> commit(draftModelId, candidate) } },
+                        enabled = enabled,
+                    ) { Text("Reset") }
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.feature.playground.presentation.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,8 +22,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
-import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.OperationState
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.playground.R
 import com.dmitriim.localaiplayground.feature.playground.presentation.PlaygroundUiState
 
@@ -68,7 +68,7 @@ fun PlaygroundScreen(
                         "Network access is used only for model downloads you explicitly start.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
+                    modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
                 )
             }
         }

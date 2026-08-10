@@ -138,8 +138,7 @@ class ModelTransferStateStore(
         dao.upsertFile(current.copy(verified = true))
     }
 
-    internal suspend fun fileValidators(modelId: ModelId): Map<String, ModelTransferFileEntity> =
-        dao.filesFor(modelId.value).associateBy(ModelTransferFileEntity::relativePath)
+    internal suspend fun fileValidators(modelId: ModelId): Map<String, ModelTransferFileEntity> = dao.filesFor(modelId.value).associateBy(ModelTransferFileEntity::relativePath)
 
     suspend fun delete(modelId: ModelId) = dao.deleteTransfer(modelId.value)
 

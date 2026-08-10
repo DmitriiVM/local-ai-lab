@@ -114,7 +114,7 @@ private fun formatSttDuration(durationMs: Long): String {
     val seconds = durationMs / 1_000
     val millis = durationMs % 1_000
     return if (seconds == 0L) {
-        "${millis} ms"
+        "$millis ms"
     } else {
         "%d:%02d".format(seconds / 60, seconds % 60)
     }

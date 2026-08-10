@@ -42,8 +42,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
-import com.dmitriim.localaiplayground.core.model.library.CatalogModel
 import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadAuthentication
+import com.dmitriim.localaiplayground.core.model.library.CatalogModel
 import com.dmitriim.localaiplayground.core.model.library.InstalledModel
 import com.dmitriim.localaiplayground.core.model.library.ModelCompatibilityState
 import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
@@ -54,8 +54,8 @@ import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
 import com.dmitriim.localaiplayground.core.model.manifest.SttRecognitionMode
 import com.dmitriim.localaiplayground.core.model.manifest.TtsControl
 import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
-import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
 import java.text.DateFormat
 import java.util.Date
@@ -562,7 +562,12 @@ private fun ModelActionBar(
             onDismissRequest = { confirmAnyNetwork = false },
             title = { Text("Use mobile data?") },
             text = { Text("This transfer may use a large amount of mobile data.") },
-            confirmButton = { Button(onClick = { confirmAnyNetwork = false; onResumeOnAnyNetwork() }) { Text("Use mobile data") } },
+            confirmButton = {
+                Button(onClick = {
+                    confirmAnyNetwork = false
+                    onResumeOnAnyNetwork()
+                }) { Text("Use mobile data") }
+            },
             dismissButton = { OutlinedButton(onClick = { confirmAnyNetwork = false }) { Text("Keep Wi-Fi only") } },
         )
     }
@@ -571,7 +576,12 @@ private fun ModelActionBar(
             onDismissRequest = { confirmCancel = false },
             title = { Text("Cancel download?") },
             text = { Text("The partial model download will be permanently deleted.") },
-            confirmButton = { Button(onClick = { confirmCancel = false; onCancelTransfer() }) { Text("Cancel download") } },
+            confirmButton = {
+                Button(onClick = {
+                    confirmCancel = false
+                    onCancelTransfer()
+                }) { Text("Cancel download") }
+            },
             dismissButton = { OutlinedButton(onClick = { confirmCancel = false }) { Text("Keep download") } },
         )
     }

@@ -1,7 +1,7 @@
 package com.dmitriim.localaiplayground.core.performance
 
-import androidx.tracing.Trace
 import android.os.SystemClock
+import androidx.tracing.Trace
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.di.ApplicationCoroutineScope
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability

@@ -8,8 +8,8 @@ import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlaye
 import com.dmitriim.localaiplayground.core.audio.output.model.GeneratedAudioFile
 import com.dmitriim.localaiplayground.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localaiplayground.core.audio.processing.SpeechAudioEffectsProcessor
-import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import com.dmitriim.localaiplayground.core.performance.InferencePhase
 import com.dmitriim.localaiplayground.core.performance.InferenceProfiler
 import com.dmitriim.localaiplayground.core.performance.NoOpInferenceProfiler
@@ -141,13 +141,13 @@ class SynthesizeSpeech(
             val result = try {
                 profile.trace(InferencePhase.SYNTHESIS) {
                     textToSpeechEngine.synthesize(
-                    TextToSpeechRequest(
-                        text = request.text,
-                        languageCode = request.settings.languageCode,
-                        voice = request.settings.voiceCondition,
-                        speed = request.settings.speed,
-                        sentenceSilenceScale = request.settings.sentenceSilenceScale,
-                    ),
+                        TextToSpeechRequest(
+                            text = request.text,
+                            languageCode = request.settings.languageCode,
+                            voice = request.settings.voiceCondition,
+                            speed = request.settings.speed,
+                            sentenceSilenceScale = request.settings.sentenceSilenceScale,
+                        ),
                     ) { chunk ->
                         if (firstChunkNanos == null && chunk.isNotEmpty()) {
                             firstChunkNanos = System.nanoTime()
@@ -159,7 +159,7 @@ class SynthesizeSpeech(
                             (
                                 chunks == null ||
                                     chunks.trySendBlocking(chunk.copyOf()).isSuccess
-                            )
+                                )
                     }
                 }
             } finally {

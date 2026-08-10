@@ -22,8 +22,8 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
-import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantInputMode
 import com.dmitriim.localaiplayground.feature.assistant.presentation.AssistantUiState
 import com.dmitriim.localaiplayground.feature.assistant.presentation.ChatSettings

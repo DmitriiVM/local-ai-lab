@@ -28,12 +28,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
-import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 import com.dmitriim.localaiplayground.core.ui.component.AppSectionCard
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceTone
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.ui.style.AppFilterChipDefaults
-import com.dmitriim.localaiplayground.feature.stt.presentation.SpeechModelOption
 import com.dmitriim.localaiplayground.feature.stt.presentation.SpeechToTextUiState
 import com.dmitriim.localaiplayground.feature.stt.presentation.SttLanguage
 import com.dmitriim.localaiplayground.feature.stt.presentation.SttOperation
@@ -148,32 +147,32 @@ fun SpeechToTextScreen(
         }
         if (state.transcript.isNotBlank()) {
             AppSectionCard("Final transcript", tone = AppSurfaceTone.TONAL) {
-                    Text(
-                        state.transcript,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontFamily = FontFamily.SansSerif,
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, androidx.compose.ui.Alignment.End),
-                    ) {
-                        TextButton(onClick = { clipboard.setText(AnnotatedString(state.transcript)) }) { Text("Copy") }
-                        TextButton(onClick = {
-                            context.startActivity(
-                                Intent.createChooser(
-                                    Intent(Intent.ACTION_SEND).apply {
-                                        type = "text/plain"
-                                        putExtra(Intent.EXTRA_TEXT, state.transcript)
-                                    },
-                                    "Share transcript",
-                                ),
-                            )
-                        }) { Text("Share") }
-                        TextButton(
-                            onClick = onClear,
-                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                        ) { Text("Clear") }
-                    }
+                Text(
+                    state.transcript,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontFamily = FontFamily.SansSerif,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, androidx.compose.ui.Alignment.End),
+                ) {
+                    TextButton(onClick = { clipboard.setText(AnnotatedString(state.transcript)) }) { Text("Copy") }
+                    TextButton(onClick = {
+                        context.startActivity(
+                            Intent.createChooser(
+                                Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, state.transcript)
+                                },
+                                "Share transcript",
+                            ),
+                        )
+                    }) { Text("Share") }
+                    TextButton(
+                        onClick = onClear,
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    ) { Text("Clear") }
+                }
             }
         }
         state.metrics?.let { metrics ->

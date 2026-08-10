@@ -23,11 +23,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 
@@ -61,55 +61,55 @@ internal fun CapabilityCard(
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-            Row(
-                modifier = Modifier
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                accent.containerColor.copy(alpha = 0.52f),
-                                colors.surfaceContainerHigh.copy(alpha = 0.96f),
-                                colors.surfaceContainer.copy(alpha = 0.98f),
-                            ),
-                            start = Offset.Zero,
-                            end = Offset(0f, 300f),
+        Row(
+            modifier = Modifier
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            accent.containerColor.copy(alpha = 0.52f),
+                            colors.surfaceContainerHigh.copy(alpha = 0.96f),
+                            colors.surfaceContainer.copy(alpha = 0.98f),
                         ),
-                    )
-                    .padding(18.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                        start = Offset.Zero,
+                        end = Offset(0f, 300f),
+                    ),
+                )
+                .padding(18.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                color = accent.containerColor.copy(alpha = 0.68f),
+                contentColor = accent.contentColor,
+                shape = RoundedCornerShape(16.dp),
             ) {
-                Surface(
-                    color = accent.containerColor.copy(alpha = 0.68f),
-                    contentColor = accent.contentColor,
-                    shape = RoundedCornerShape(16.dp),
-                ) {
-                    Icon(
-                        imageVector = content.icon,
-                        contentDescription = null,
-                        modifier = Modifier.padding(12.dp).size(24.dp),
-                    )
-                }
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                        content.title,
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Text(
-                        content.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
                 Icon(
-                    imageVector = Icons.Filled.ChevronRight,
+                    imageVector = content.icon,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = accent.contentColor,
+                    modifier = Modifier.padding(12.dp).size(24.dp),
                 )
             }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(
+                    content.title,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    content.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(
+                imageVector = Icons.Filled.ChevronRight,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = accent.contentColor,
+            )
+        }
     }
 }
 

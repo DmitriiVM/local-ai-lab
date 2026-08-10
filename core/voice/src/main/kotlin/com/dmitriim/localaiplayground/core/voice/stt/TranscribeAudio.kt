@@ -6,8 +6,8 @@ import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextEngine
 import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextLoadRequest
 import com.dmitriim.localaiplayground.ai.api.stt.SpeechToTextRequest
 import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
-import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
+import com.dmitriim.localaiplayground.core.model.service.LocalModelResolver
 import com.dmitriim.localaiplayground.core.performance.InferencePhase
 import com.dmitriim.localaiplayground.core.performance.InferenceProfiler
 import com.dmitriim.localaiplayground.core.performance.NoOpInferenceProfiler

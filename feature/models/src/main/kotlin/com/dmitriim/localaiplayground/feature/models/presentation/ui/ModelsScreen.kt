@@ -2,7 +2,6 @@ package com.dmitriim.localaiplayground.feature.models.presentation.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,7 +28,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,17 +35,17 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.model.engine.EngineId
-import com.dmitriim.localaiplayground.core.model.library.CatalogModel
 import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadAuthentication
+import com.dmitriim.localaiplayground.core.model.library.CatalogModel
 import com.dmitriim.localaiplayground.core.model.library.InstalledModel
 import com.dmitriim.localaiplayground.core.model.library.ModelTransferState
 import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
-import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.result.StatusMessage
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceCard
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceTone
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localaiplayground.feature.models.presentation.ModelsUiState
 
@@ -89,7 +87,7 @@ fun ModelsScreen(
                 modifier = Modifier
                     .padding(
                         top = dimensions.topBarOverlayClearance + 20.dp,
-                        bottom = 20.dp
+                        bottom = 20.dp,
                     ),
                 style = MaterialTheme.typography.headlineMedium,
             )

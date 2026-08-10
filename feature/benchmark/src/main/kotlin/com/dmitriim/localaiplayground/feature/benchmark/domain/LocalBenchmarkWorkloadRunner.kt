@@ -117,27 +117,31 @@ class LocalBenchmarkWorkloadRunner(
                 model = RunModelSnapshot(model.modelId.value, model.displayName, model.engineId.value, null),
                 input = workload.messages.joinToString("\n") { message -> "${message.role.wireName}: ${message.content}" },
                 output = generation.text,
-                parametersJson = Json.encodeToString(buildJsonObject {
-                    put("computePreference", workload.computePreference.name)
-                    put("contextSize", workload.contextSize)
-                    put("threadCount", workload.threadCount)
-                    put("maxTokens", workload.maxTokens)
-                }),
-                metricsJson = Json.encodeToString(buildJsonObject {
-                    put("coldStart", load.coldStart)
-                    put("loadDurationMs", load.loadDurationMs)
-                    put("promptTokens", generation.promptTokenCount)
-                    put("promptDurationMs", generation.promptDurationMs)
-                    put("generatedTokens", generation.generatedTokenCount)
-                    put("generationDurationMs", generation.generationDurationMs)
-                    put("generatedTokensPerSecond", rate)
-                    put("timeToFirstTokenMs", generation.firstTokenLatencyMs)
-                    put("totalDurationMs", generation.totalDurationMs)
-                    put("effectiveComputePreference", load.effectiveComputePreference.name)
-                    put("computeDetail", load.diagnostics.computeDetail)
-                    put("fallbackReason", load.diagnostics.fallbackReason)
-                    putInferenceTelemetry(telemetry)
-                }),
+                parametersJson = Json.encodeToString(
+                    buildJsonObject {
+                        put("computePreference", workload.computePreference.name)
+                        put("contextSize", workload.contextSize)
+                        put("threadCount", workload.threadCount)
+                        put("maxTokens", workload.maxTokens)
+                    },
+                ),
+                metricsJson = Json.encodeToString(
+                    buildJsonObject {
+                        put("coldStart", load.coldStart)
+                        put("loadDurationMs", load.loadDurationMs)
+                        put("promptTokens", generation.promptTokenCount)
+                        put("promptDurationMs", generation.promptDurationMs)
+                        put("generatedTokens", generation.generatedTokenCount)
+                        put("generationDurationMs", generation.generationDurationMs)
+                        put("generatedTokensPerSecond", rate)
+                        put("timeToFirstTokenMs", generation.firstTokenLatencyMs)
+                        put("totalDurationMs", generation.totalDurationMs)
+                        put("effectiveComputePreference", load.effectiveComputePreference.name)
+                        put("computeDetail", load.diagnostics.computeDetail)
+                        put("fallbackReason", load.diagnostics.fallbackReason)
+                        putInferenceTelemetry(telemetry)
+                    },
+                ),
             )
         } finally {
             profile.finish()
@@ -181,17 +185,24 @@ class LocalBenchmarkWorkloadRunner(
             model = RunModelSnapshot(model.modelId.value, model.displayName, model.engineId.value, null),
             input = "${workload.input.displayName} (${workload.input.durationMs} ms)",
             output = event.transcript,
-            parametersJson = Json.encodeToString(buildJsonObject { put("language", workload.languageCode); put("threadCount", workload.threadCount) }),
-            metricsJson = Json.encodeToString(buildJsonObject {
-                put("audioDurationMs", metrics.audioDurationMs)
-                put("processingDurationMs", metrics.processingDurationMs)
-                put("timeToFinalMs", metrics.timeToFinalMs)
-                put("realTimeFactor", metrics.realTimeFactor)
-                put("segmentCount", metrics.segmentCount)
-                put("loadDurationMs", metrics.loadDurationMs)
-                put("effectiveThreadCount", metrics.effectiveThreadCount)
-                putInferenceTelemetry(metrics.telemetry)
-            }),
+            parametersJson = Json.encodeToString(
+                buildJsonObject {
+                    put("language", workload.languageCode)
+                    put("threadCount", workload.threadCount)
+                },
+            ),
+            metricsJson = Json.encodeToString(
+                buildJsonObject {
+                    put("audioDurationMs", metrics.audioDurationMs)
+                    put("processingDurationMs", metrics.processingDurationMs)
+                    put("timeToFinalMs", metrics.timeToFinalMs)
+                    put("realTimeFactor", metrics.realTimeFactor)
+                    put("segmentCount", metrics.segmentCount)
+                    put("loadDurationMs", metrics.loadDurationMs)
+                    put("effectiveThreadCount", metrics.effectiveThreadCount)
+                    putInferenceTelemetry(metrics.telemetry)
+                },
+            ),
         )
     }
 
@@ -225,25 +236,29 @@ class LocalBenchmarkWorkloadRunner(
                 model = RunModelSnapshot(model.modelId.value, model.displayName, model.engineId.value, null),
                 input = workload.text,
                 output = "Generated $audioDurationMs ms PCM at ${result.sampleRateHz} Hz.",
-                parametersJson = Json.encodeToString(buildJsonObject {
-                    put("language", workload.languageCode)
-                    put("speed", workload.speed)
-                    put("sentenceSilenceScale", workload.sentenceSilenceScale)
-                    put("threadCount", workload.threadCount)
-                }),
-                metricsJson = Json.encodeToString(buildJsonObject {
-                    put("loadDurationMs", load.loadDurationMs)
-                    put("effectiveThreadCount", load.effectiveThreadCount)
-                    put("synthesisDurationMs", durationMs)
-                    put("generatedAudioDurationMs", audioDurationMs)
-                    put("realTimeFactor", rtf)
-                    put("sampleRateHz", result.sampleRateHz)
-                    put("conditioningDurationMs", result.stageMetrics.conditioningDurationMs)
-                    put("tokenGenerationDurationMs", result.stageMetrics.tokenGenerationDurationMs)
-                    put("decoderDurationMs", result.stageMetrics.decoderDurationMs)
-                    put("generatedTokenCount", result.stageMetrics.generatedTokenCount)
-                    putInferenceTelemetry(telemetry)
-                }),
+                parametersJson = Json.encodeToString(
+                    buildJsonObject {
+                        put("language", workload.languageCode)
+                        put("speed", workload.speed)
+                        put("sentenceSilenceScale", workload.sentenceSilenceScale)
+                        put("threadCount", workload.threadCount)
+                    },
+                ),
+                metricsJson = Json.encodeToString(
+                    buildJsonObject {
+                        put("loadDurationMs", load.loadDurationMs)
+                        put("effectiveThreadCount", load.effectiveThreadCount)
+                        put("synthesisDurationMs", durationMs)
+                        put("generatedAudioDurationMs", audioDurationMs)
+                        put("realTimeFactor", rtf)
+                        put("sampleRateHz", result.sampleRateHz)
+                        put("conditioningDurationMs", result.stageMetrics.conditioningDurationMs)
+                        put("tokenGenerationDurationMs", result.stageMetrics.tokenGenerationDurationMs)
+                        put("decoderDurationMs", result.stageMetrics.decoderDurationMs)
+                        put("generatedTokenCount", result.stageMetrics.generatedTokenCount)
+                        putInferenceTelemetry(telemetry)
+                    },
+                ),
             )
         } finally {
             profile.finish()

@@ -3,7 +3,6 @@ package com.dmitriim.localaiplayground.feature.assistant.presentation
 import com.dmitriim.localaiplayground.ai.api.llm.LlmContextManagement
 import com.dmitriim.localaiplayground.ai.api.llm.LlmEngineCapabilities
 import com.dmitriim.localaiplayground.ai.api.llm.LlmFinishReason
-import com.dmitriim.localaiplayground.core.performance.InferenceTelemetry
 import com.dmitriim.localaiplayground.core.audio.input.model.AudioLevel
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoice
 import com.dmitriim.localaiplayground.core.model.engine.ComputePreference
@@ -12,6 +11,7 @@ import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId
 import com.dmitriim.localaiplayground.core.model.manifest.TtsControl
 import com.dmitriim.localaiplayground.core.model.manifest.TtsVoiceMode
+import com.dmitriim.localaiplayground.core.performance.InferenceTelemetry
 import java.util.UUID
 
 data class AssistantUiState(

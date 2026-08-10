@@ -1,5 +1,6 @@
 package com.dmitriim.localaiplayground.feature.settings.presentation.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -27,11 +27,11 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
+import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
 import com.dmitriim.localaiplayground.core.ui.component.AppSectionCard
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceCard
 import com.dmitriim.localaiplayground.core.ui.component.AppSurfaceTone
-import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
+import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localaiplayground.feature.settings.presentation.SettingsUiState
 import com.dmitriim.localaiplayground.source.settings.AppSettings
 import com.dmitriim.localaiplayground.source.settings.MetricDetail

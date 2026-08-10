@@ -26,7 +26,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
-import com.dmitriim.localaiplayground.core.performance.BenchmarkSessionSummary
 import com.dmitriim.localaiplayground.core.performance.BenchmarkWorkload
 import com.dmitriim.localaiplayground.core.performance.InferenceResourceMetrics
 import com.dmitriim.localaiplayground.core.ui.layout.LocalAppDimensions
@@ -356,7 +355,7 @@ private val BenchmarkWorkload.capabilityLabel: String
 private val BenchmarkWorkload.workloadDescription: String
     get() = when (this) {
         is BenchmarkWorkload.Chat -> "Complete conversation context plus current draft · ${messages.size} messages"
-        is BenchmarkWorkload.SpeechToText -> "${input.displayName} · ${input.durationMs} ms · ${languageCode}"
+        is BenchmarkWorkload.SpeechToText -> "${input.displayName} · ${input.durationMs} ms · $languageCode"
         is BenchmarkWorkload.TextToSpeech -> "${text.length} characters · $languageCode"
     }
 

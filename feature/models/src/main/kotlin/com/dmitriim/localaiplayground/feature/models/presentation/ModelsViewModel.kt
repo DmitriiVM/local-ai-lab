@@ -5,17 +5,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.engine.EngineId
+import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localaiplayground.core.model.library.ModelImportRequest
 import com.dmitriim.localaiplayground.core.model.library.ModelTransferNetworkPolicy
 import com.dmitriim.localaiplayground.core.model.library.ModelValidationState
-import com.dmitriim.localaiplayground.core.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localaiplayground.core.model.manifest.ModelId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelManifest
 import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileId
 import com.dmitriim.localaiplayground.core.model.manifest.ModelProfileIds
+import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
 import com.dmitriim.localaiplayground.core.model.service.ModelDiagnostics
 import com.dmitriim.localaiplayground.core.model.service.ModelDownloadCredentials
-import com.dmitriim.localaiplayground.core.model.service.HuggingFaceCredentialStatus
 import com.dmitriim.localaiplayground.core.model.service.ModelLibrary
 import com.dmitriim.localaiplayground.core.model.service.ModelTransfers
 import dev.zacsweers.metro.ContributesIntoMap
@@ -149,10 +149,10 @@ class ModelsViewModel(
             return
         }
         launchOperation("download") {
-        Log.i(TAG, "Models UI download requested: modelId=${modelId.value}")
-        modelTransfers.download(modelId, ModelTransferNetworkPolicy.WIFI_ONLY).getOrThrow()
-        Log.i(TAG, "Models UI download scheduled: modelId=${modelId.value}")
-        "Download scheduled."
+            Log.i(TAG, "Models UI download requested: modelId=${modelId.value}")
+            modelTransfers.download(modelId, ModelTransferNetworkPolicy.WIFI_ONLY).getOrThrow()
+            Log.i(TAG, "Models UI download scheduled: modelId=${modelId.value}")
+            "Download scheduled."
         }
     }
 

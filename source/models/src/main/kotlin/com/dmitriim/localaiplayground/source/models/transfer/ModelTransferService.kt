@@ -342,17 +342,24 @@ class ModelTransferService(
                 val status = connection.responseCode
                 if (status == HTTP_RANGE_NOT_SATISFIABLE) {
                     if (offset == expectedBytes) return transfer
-                    if (resetUsed) throw ModelDownloadFailure("Server rejected the download range.", retryable = false)
+                    if (resetUsed) failDownload(ModelDownloadFailure("Server rejected the download range.", retryable = false))
                     destination.delete()
                     offset = 0L
                     resetUsed = true
                     return@useResponse
                 }
-                if (status !in 200..299) throw httpFailure(status, connection)
+                if (status !in 200..299) failDownload(httpFailure(status, connection))
                 val append = when (status) {
                     HttpURLConnection.HTTP_OK -> {
                         if (offset > 0) {
-                            if (resetUsed) throw ModelDownloadFailure("Server does not support resuming this file.", retryable = false)
+                            if (resetUsed) {
+                                failDownload(
+                                    ModelDownloadFailure(
+                                        "Server does not support resuming this file.",
+                                        retryable = false,
+                                    ),
+                                )
+                            }
                             destination.delete()
                             offset = 0L
                             resetUsed = true
@@ -363,17 +370,24 @@ class ModelTransferService(
                         validateContentRange(connection.getHeaderField("Content-Range"), offset, expectedBytes)
                         true
                     }
-                    else -> throw ModelDownloadFailure("Unexpected HTTP $status response.", retryable = false)
+                    else -> failDownload(ModelDownloadFailure("Unexpected HTTP $status response.", retryable = false))
                 }
                 val announced = connection.getHeaderFieldLong("Content-Length", -1)
                 val expectedResponseBytes = if (append) expectedBytes - offset else expectedBytes
                 if (announced >= 0 && announced != expectedResponseBytes) {
-                    throw ModelDownloadFailure("Server response length does not match the catalog.", retryable = false)
+                    failDownload(ModelDownloadFailure("Server response length does not match the catalog.", retryable = false))
                 }
                 val eTag = connection.getHeaderField("ETag")
                 val lastModified = connection.getHeaderField("Last-Modified")
                 if (append && validator?.eTag != null && eTag != null && validator.eTag != eTag) {
-                    if (resetUsed) throw ModelDownloadFailure("Server changed the download while it was paused.", retryable = false)
+                    if (resetUsed) {
+                        failDownload(
+                            ModelDownloadFailure(
+                                "Server changed the download while it was paused.",
+                                retryable = false,
+                            ),
+                        )
+                    }
                     destination.delete()
                     offset = 0L
                     resetUsed = true
@@ -400,20 +414,22 @@ class ModelTransferService(
                                     completedBytes = completedBeforeFile + written,
                                     currentRelativePath = relativePath,
                                     message = null,
-                                ) ?: throw CancellationException("The download was paused.")
+                                ) ?: failDownload(CancellationException("The download was paused."))
                                 lastReportedBytes = written
                                 lastReportedAt = now
                             }
                         }
                     }
                 }
-                if (written != expectedBytes) throw ModelDownloadFailure("Download ended before the expected size.", retryable = true)
+                if (written != expectedBytes) {
+                    failDownload(ModelDownloadFailure("Download ended before the expected size.", retryable = true))
+                }
                 return transferState.updateWhileRunning(
                     current,
                     completedBytes = completedBeforeFile + written,
                     currentRelativePath = relativePath,
                     message = null,
-                ) ?: throw CancellationException("The download was paused.")
+                ) ?: failDownload(CancellationException("The download was paused."))
             }
         }
     }
@@ -529,6 +545,8 @@ class ModelTransferService(
                 ?.coerceAtMost(MAX_RETRY_AFTER_MS),
         )
     }
+
+    private fun failDownload(error: Throwable): Nothing = throw error
 
     private fun validateContentRange(value: String?, offset: Long, expectedBytes: Long) {
         val match = CONTENT_RANGE.matchEntire(requireNotNull(value) { "Missing Content-Range for resumed download." })

@@ -12,6 +12,7 @@ import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisEvent
 import com.dmitriim.localaiplayground.core.voice.tts.SpeechSynthesisRequest
 import com.dmitriim.localaiplayground.core.voice.tts.SynthesizeSpeech
 import com.dmitriim.localaiplayground.feature.tts.domain.PersistTtsRun
+import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +20,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 /** Owns the single foreground TTS operation and translates its outcomes into screen state. */
 internal class TextToSpeechOperationController(

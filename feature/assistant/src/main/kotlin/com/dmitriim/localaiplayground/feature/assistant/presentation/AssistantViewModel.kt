@@ -16,6 +16,8 @@ import com.dmitriim.localaiplayground.core.model.runs.RunRecord
 import com.dmitriim.localaiplayground.core.model.service.ModelLibrary
 import com.dmitriim.localaiplayground.core.model.service.ModelTransfers
 import com.dmitriim.localaiplayground.core.model.service.RunRepository
+import com.dmitriim.localaiplayground.core.performance.BenchmarkWorkload
+import com.dmitriim.localaiplayground.core.performance.ProfileLaunchCoordinator
 import com.dmitriim.localaiplayground.core.result.ForegroundOperationCoordinator
 import com.dmitriim.localaiplayground.feature.assistant.domain.AssistantAudioRecorder
 import com.dmitriim.localaiplayground.feature.assistant.domain.AssistantRunRecorder
@@ -23,8 +25,6 @@ import com.dmitriim.localaiplayground.feature.assistant.domain.AssistantSpeechOu
 import com.dmitriim.localaiplayground.feature.assistant.domain.AssistantTranscriber
 import com.dmitriim.localaiplayground.feature.assistant.domain.GenerateAssistantResponse
 import com.dmitriim.localaiplayground.feature.assistant.domain.PersistAssistantTurn
-import com.dmitriim.localaiplayground.core.performance.BenchmarkWorkload
-import com.dmitriim.localaiplayground.core.performance.ProfileLaunchCoordinator
 import com.dmitriim.localaiplayground.source.runs.RunReplayStore
 import com.dmitriim.localaiplayground.source.settings.AssistantPreferencesRepository
 import dev.zacsweers.metro.ContributesIntoMap
