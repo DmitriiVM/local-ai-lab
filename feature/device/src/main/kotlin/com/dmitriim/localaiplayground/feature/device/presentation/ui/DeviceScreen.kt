@@ -39,7 +39,7 @@ fun DeviceScreen(
             .then(systemNavigationPadding)
             .padding(horizontal = dimensions.screenPadding),
         contentPadding = PaddingValues(
-            top = dimensions.topBarOverlayClearance,
+            top = dimensions.topBarOverlayClearance + 16.dp,
             bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
         ),
         itemSpacing = dimensions.itemSpacing,

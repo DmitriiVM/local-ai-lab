@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dmitriim.localaiplayground.core.navigation.TopLevelDestination
@@ -60,6 +61,7 @@ fun AdaptiveNavigationScaffold(
     showTopLevelNavigation: Boolean,
     onSelectDestination: (TopLevelDestination) -> Unit,
     onNavigateUp: (() -> Unit)?,
+    toolbarTitle: String?,
     content: @Composable (Modifier) -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
@@ -96,6 +98,7 @@ fun AdaptiveNavigationScaffold(
                     }
                     AppTopBar(
                         onNavigateUp = onNavigateUp,
+                        title = toolbarTitle,
                         modifier = Modifier.align(Alignment.TopStart),
                     )
                 }
@@ -126,6 +129,7 @@ fun AdaptiveNavigationScaffold(
                 }
                 AppTopBar(
                     onNavigateUp = onNavigateUp,
+                    title = toolbarTitle,
                     modifier = Modifier.align(Alignment.TopStart),
                 )
             }
@@ -276,18 +280,33 @@ private fun LiquidGlassNavigationItem(
 }
 
 @Composable
-private fun AppTopBar(onNavigateUp: (() -> Unit)?, modifier: Modifier = Modifier) {
+private fun AppTopBar(
+    onNavigateUp: (() -> Unit)?,
+    title: String?,
+    modifier: Modifier = Modifier,
+) {
     onNavigateUp?.let { navigateUp ->
-        Box(
+        Row(
             modifier = modifier
                 .statusBarsPadding()
                 .padding(start = 16.dp, top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             LiquidGlassToolbarButton(
                 imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                 contentDescription = "Navigate back",
                 onClick = navigateUp,
             )
+            title?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(start = 12.dp, end = 16.dp),
+                )
+            }
         }
     }
 }

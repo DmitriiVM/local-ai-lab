@@ -76,17 +76,12 @@ fun TextToSpeechScreen(
             .verticalScroll(rememberScrollState())
             .padding(
                 start = dimensions.screenPadding,
-                top = dimensions.topBarOverlayClearance + 44.dp,
+                top = dimensions.topBarOverlayClearance + 50.dp,
                 end = dimensions.screenPadding,
                 bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
             ),
         verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
-        Text(
-            stringResource(CoreUiR.string.tts_text_to_speech_screen_177),
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 22.dp)
-        )
         TtsSetupSection(state, !busy, onSelectModel, onSelectVoice, onPreviewVoice, onRecordReference, onStopReferenceRecording, onImportReference, onDeleteReference, onSelectLanguage, onApplySample, onStop)
         TtsComposeSection(state, !busy, onTextChange, onSynthesize, onProfile)
         TextToSpeechSettings(

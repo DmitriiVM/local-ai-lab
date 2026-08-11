@@ -11,7 +11,10 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dmitriim.localaiplayground.R
 import com.dmitriim.localaiplayground.core.navigation.AppNavHost
 import com.dmitriim.localaiplayground.core.navigation.rememberAppNavigationState
+import com.dmitriim.localaiplayground.core.ui.R as CoreUiR
 import com.dmitriim.localaiplayground.di.AppGraph
+import com.dmitriim.localaiplayground.feature.stt.navigation.SpeechToTextKey
+import com.dmitriim.localaiplayground.feature.tts.navigation.TextToSpeechKey
 
 @Composable
 fun LocalAiPlaygroundApp(graph: AppGraph) {
@@ -33,11 +36,18 @@ fun LocalAiPlaygroundApp(graph: AppGraph) {
         onBack = navigationState::navigateBack,
     )
 
+    val toolbarTitle = when (navigationState.activeStack.lastOrNull()) {
+        SpeechToTextKey -> stringResource(CoreUiR.string.stt_speech_to_text_screen_131)
+        TextToSpeechKey -> stringResource(CoreUiR.string.tts_text_to_speech_screen_177)
+        else -> null
+    }
+
     AdaptiveNavigationScaffold(
         selectedDestination = navigationState.selectedDestination,
         showTopLevelNavigation = !navigationState.canNavigateUp,
         onSelectDestination = navigationState::selectTopLevelDestination,
         onNavigateUp = if (navigationState.canNavigateUp) navigationState::navigateBack else null,
+        toolbarTitle = toolbarTitle,
     ) { modifier ->
         AppNavHost(
             state = navigationState,

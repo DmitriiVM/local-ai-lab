@@ -69,14 +69,14 @@ fun SpeechToTextScreen(
             .fillMaxSize()
             .then(systemNavigationPadding)
             .verticalScroll(scroll)
-            .padding(start = dimensions.screenPadding, top = dimensions.topBarOverlayClearance + 44.dp, end = dimensions.screenPadding, bottom = 24.dp + dimensions.bottomNavigationOverlayClearance),
+            .padding(
+                start = dimensions.screenPadding,
+                top = dimensions.topBarOverlayClearance + 50.dp,
+                end = dimensions.screenPadding,
+                bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
+            ),
         verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
-        Text(
-            stringResource(id = CoreUiR.string.stt_speech_to_text_screen_131),
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 22.dp)
-        )
         SpeechToTextSetup(state, busy, onSelectModel, onSelectLanguage, onThreadCountChange)
         SpeechToTextAudioInput(state, busy, onStartRecording, onStopRecording, onImportAudio, onRepeat, onProfile, onCancel, onClear)
         SpeechToTextStatus(state)
