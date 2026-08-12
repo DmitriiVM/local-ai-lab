@@ -353,7 +353,6 @@ internal class TextToSpeechOperationController(
         synthesizeSpeech.cancel()
         referenceVoiceStore.stopCapture()
         operationJob?.cancel()
-        synthesizeSpeech.unloadRuntime()
     }
 
     private fun registerForegroundCancellation(job: Job) {

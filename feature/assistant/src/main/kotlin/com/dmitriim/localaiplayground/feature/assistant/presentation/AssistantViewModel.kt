@@ -6,6 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localaiplayground.ai.api.llm.ChatEngine
 import com.dmitriim.localaiplayground.ai.api.llm.LlmChatMessage
 import com.dmitriim.localaiplayground.ai.api.llm.LlmChatRole
+import com.dmitriim.localaiplayground.ai.api.memory.AiRuntimeKind
+import com.dmitriim.localaiplayground.ai.api.memory.AiRuntimeMemoryManager
+import com.dmitriim.localaiplayground.ai.api.memory.FeatureRuntimeLifecycle
 import com.dmitriim.localaiplayground.ai.api.system.SystemSpeechToTextSupport
 import com.dmitriim.localaiplayground.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoiceStore
@@ -61,6 +64,7 @@ class AssistantViewModel(
     private val runRepository: RunRepository,
     private val replayStore: RunReplayStore,
     private val profileLaunchCoordinator: ProfileLaunchCoordinator,
+    runtimeMemoryManager: AiRuntimeMemoryManager,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(AssistantUiState())
     val state: StateFlow<AssistantUiState> = mutableState.asStateFlow()
@@ -78,6 +82,15 @@ class AssistantViewModel(
         persistAssistantTurn = persistAssistantTurn,
         operationCoordinator = operationCoordinator,
         conversationId = { conversationId },
+    )
+    internal val runtimeLifecycle = FeatureRuntimeLifecycle(
+        memoryManager = runtimeMemoryManager,
+        runtimeKinds = setOf(
+            AiRuntimeKind.CHAT,
+            AiRuntimeKind.SPEECH_TO_TEXT,
+            AiRuntimeKind.TEXT_TO_SPEECH,
+        ),
+        onRelease = operationController::clear,
     )
 
     init {
@@ -250,7 +263,7 @@ class AssistantViewModel(
     fun cancel() = operationController.cancel()
 
     override fun onCleared() {
-        operationController.clear()
+        runtimeLifecycle.onHidden()
         super.onCleared()
     }
 

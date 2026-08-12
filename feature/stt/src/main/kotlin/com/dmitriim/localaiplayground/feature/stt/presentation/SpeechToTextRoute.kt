@@ -4,6 +4,7 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localaiplayground.core.navigation.AppNavigator
@@ -16,6 +17,10 @@ fun SpeechToTextRoute(
     navigator: AppNavigator,
     viewModel: SpeechToTextViewModel = metroViewModel(),
 ) {
+    DisposableEffect(viewModel) {
+        viewModel.runtimeLifecycle.onVisible()
+        onDispose(viewModel.runtimeLifecycle::onHidden)
+    }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val microphonePermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) viewModel.startRecording() else viewModel.microphonePermissionDenied()

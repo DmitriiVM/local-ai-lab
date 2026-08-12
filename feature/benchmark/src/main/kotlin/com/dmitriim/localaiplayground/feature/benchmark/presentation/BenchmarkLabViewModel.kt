@@ -3,6 +3,9 @@ package com.dmitriim.localaiplayground.feature.benchmark.presentation
 import android.os.PowerManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dmitriim.localaiplayground.ai.api.memory.AiRuntimeKind
+import com.dmitriim.localaiplayground.ai.api.memory.AiRuntimeMemoryManager
+import com.dmitriim.localaiplayground.ai.api.memory.FeatureRuntimeLifecycle
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.model.capability.AiCapability
 import com.dmitriim.localaiplayground.core.model.runs.RunKind
@@ -39,10 +42,16 @@ class BenchmarkLabViewModel(
     private val launchCoordinator: ProfileLaunchCoordinator,
     private val runner: LocalBenchmarkWorkloadRunner,
     private val runRepository: RunRepository,
+    runtimeMemoryManager: AiRuntimeMemoryManager,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(BenchmarkLabUiState(workload = launchCoordinator.workload.value))
     val state: StateFlow<BenchmarkLabUiState> = mutableState.asStateFlow()
     private var benchmarkJob: Job? = null
+    internal val runtimeLifecycle = FeatureRuntimeLifecycle(
+        memoryManager = runtimeMemoryManager,
+        runtimeKinds = AiRuntimeKind.entries.toSet(),
+        onRelease = ::cancel,
+    )
 
     init {
         viewModelScope.launch {
@@ -128,6 +137,11 @@ class BenchmarkLabViewModel(
     }
 
     fun cancel() = benchmarkJob?.cancel()
+
+    override fun onCleared() {
+        runtimeLifecycle.onHidden()
+        super.onCleared()
+    }
 
     private fun showMessage(message: String) = mutableState.update { it.copy(message = message) }
 }

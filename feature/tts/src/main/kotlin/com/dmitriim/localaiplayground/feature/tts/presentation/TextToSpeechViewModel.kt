@@ -4,6 +4,9 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dmitriim.localaiplayground.ai.api.memory.AiRuntimeKind
+import com.dmitriim.localaiplayground.ai.api.memory.AiRuntimeMemoryManager
+import com.dmitriim.localaiplayground.ai.api.memory.FeatureRuntimeLifecycle
 import com.dmitriim.localaiplayground.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localaiplayground.core.audio.input.storage.ReferenceVoiceStore
 import com.dmitriim.localaiplayground.core.audio.output.api.StreamingSpeechPlayer
@@ -57,6 +60,7 @@ class TextToSpeechViewModel(
     private val referenceVoiceStore: ReferenceVoiceStore,
     private val systemTextToSpeechSupport: SystemTextToSpeechSupport,
     private val profileLaunchCoordinator: ProfileLaunchCoordinator,
+    runtimeMemoryManager: AiRuntimeMemoryManager,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(TextToSpeechUiState())
     val state: StateFlow<TextToSpeechUiState> = mutableState.asStateFlow()
@@ -74,6 +78,11 @@ class TextToSpeechViewModel(
         operationCoordinator = operationCoordinator,
         persistTtsRun = persistTtsRun,
         onVoiceSelected = ::persistVoiceSelection,
+    )
+    internal val runtimeLifecycle = FeatureRuntimeLifecycle(
+        memoryManager = runtimeMemoryManager,
+        runtimeKinds = setOf(AiRuntimeKind.TEXT_TO_SPEECH),
+        onRelease = operationController::clear,
     )
 
     init {
@@ -310,7 +319,7 @@ class TextToSpeechViewModel(
     fun shareFailed(message: String) = mutableState.update { it.copy(errorMessage = UiText.Dynamic(message)) }
 
     override fun onCleared() {
-        operationController.clear()
+        runtimeLifecycle.onHidden()
         super.onCleared()
     }
 

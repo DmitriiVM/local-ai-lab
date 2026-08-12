@@ -4,6 +4,9 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dmitriim.localaiplayground.ai.api.memory.AiRuntimeKind
+import com.dmitriim.localaiplayground.ai.api.memory.AiRuntimeMemoryManager
+import com.dmitriim.localaiplayground.ai.api.memory.FeatureRuntimeLifecycle
 import com.dmitriim.localaiplayground.ai.api.system.SystemSpeechToTextSupport
 import com.dmitriim.localaiplayground.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localaiplayground.core.audio.input.storage.AudioInputStore
@@ -62,11 +65,17 @@ class SpeechToTextViewModel(
     private val settingsRepository: AppSettingsRepository,
     private val systemSpeechSupport: SystemSpeechToTextSupport,
     private val profileLaunchCoordinator: ProfileLaunchCoordinator,
+    runtimeMemoryManager: AiRuntimeMemoryManager,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(SpeechToTextUiState())
     val state: StateFlow<SpeechToTextUiState> = mutableState.asStateFlow()
     private var operationJob: Job? = null
     private var savedModelId: ModelId? = null
+    internal val runtimeLifecycle = FeatureRuntimeLifecycle(
+        memoryManager = runtimeMemoryManager,
+        runtimeKinds = setOf(AiRuntimeKind.SPEECH_TO_TEXT),
+        onRelease = ::cancel,
+    )
 
     init {
         viewModelScope.launch {
@@ -339,7 +348,7 @@ class SpeechToTextViewModel(
 
     override fun onCleared() {
         Log.i(TAG, "STT ViewModel cleared; cancelling active work.")
-        cancel()
+        runtimeLifecycle.onHidden()
         super.onCleared()
     }
 

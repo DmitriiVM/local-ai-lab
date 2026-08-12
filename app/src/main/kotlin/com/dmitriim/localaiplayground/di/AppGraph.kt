@@ -1,7 +1,7 @@
 package com.dmitriim.localaiplayground.di
 
 import android.app.Application
-import com.dmitriim.localaiplayground.ai.api.tts.TextToSpeechEngine
+import com.dmitriim.localaiplayground.ai.api.memory.AiRuntimeMemoryManager
 import com.dmitriim.localaiplayground.core.di.AppScope
 import com.dmitriim.localaiplayground.core.di.ApplicationCoroutineScope
 import com.dmitriim.localaiplayground.core.model.service.ModelTransfers
@@ -19,7 +19,7 @@ interface AppGraph : ViewModelGraph {
     val foregroundOperationCoordinator: ForegroundOperationCoordinator
     val modelTransfers: ModelTransfers
     val settingsRepository: AppSettingsRepository
-    val textToSpeechEngine: TextToSpeechEngine
+    val runtimeMemoryManager: AiRuntimeMemoryManager
 
     @get:ApplicationCoroutineScope
     val applicationScope: CoroutineScope
