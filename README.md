@@ -13,16 +13,14 @@ Developers can install curated models from the in-app catalog, import compatible
 model files, or clone this repository and add a model or runtime integration of their own.
 
 <p align="center">
-  <img src="screenshots/tab_main.png" alt="Local AI Playground capability dashboard" width="260" />
-</p>
-
-<p align="center">
   <img src="screenshots/assistant_main.png" alt="On-device assistant conversation" width="220" />
   <img src="screenshots/stt_main.png" alt="On-device speech-to-text transcription" width="220" />
   <img src="screenshots/tts_main.png" alt="On-device text-to-speech synthesis" width="220" />
 </p>
 
 <p align="center">
+  <img src="screenshots/tab_main.png" alt="Local AI Playground capability dashboard" width="220" />
+  <img src="screenshots/tab_models.png" alt="On-device model library" width="220" />
   <img src="screenshots/profiling_result.png" alt="On-device profiling results" width="220" />
 </p>
 
