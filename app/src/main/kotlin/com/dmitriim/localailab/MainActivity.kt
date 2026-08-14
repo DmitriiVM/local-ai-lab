@@ -8,14 +8,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localailab.core.ui.theme.LocalAiLabTheme
 import com.dmitriim.localailab.source.settings.AppSettings
-import com.dmitriim.localailab.source.settings.ThemePreference
 import com.dmitriim.localailab.ui.LocalAiLabApp
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 
@@ -31,25 +29,10 @@ class MainActivity : ComponentActivity() {
             val settings by graph.settingsRepository.settings.collectAsStateWithLifecycle(
                 initialValue = AppSettings(),
             )
-            val darkTheme = when (settings.theme) {
-                ThemePreference.SYSTEM -> isSystemInDarkTheme()
-                ThemePreference.LIGHT -> false
-                ThemePreference.DARK -> true
-            }
             SideEffect {
-                val statusBarStyle = if (darkTheme) {
-                    SystemBarStyle.dark(Color.TRANSPARENT)
-                } else {
-                    SystemBarStyle.light(Color.TRANSPARENT, Color.BLACK)
-                }
-                val navigationBarStyle = if (darkTheme) {
-                    SystemBarStyle.dark(Color.BLACK)
-                } else {
-                    SystemBarStyle.light(Color.WHITE, Color.BLACK)
-                }
                 enableEdgeToEdge(
-                    statusBarStyle = statusBarStyle,
-                    navigationBarStyle = navigationBarStyle,
+                    statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+                    navigationBarStyle = SystemBarStyle.dark(Color.BLACK),
                 )
                 if (settings.keepScreenAwake) {
                     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -60,7 +43,7 @@ class MainActivity : ComponentActivity() {
             CompositionLocalProvider(
                 LocalMetroViewModelFactory provides graph.metroViewModelFactory,
             ) {
-                LocalAiLabTheme(darkTheme = darkTheme) {
+                LocalAiLabTheme {
                     LocalAiLabApp(graph)
                 }
             }

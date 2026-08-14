@@ -27,7 +27,6 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
 
     override val settings: Flow<AppSettings> = store.data.map { values ->
         AppSettings(
-            theme = values[THEME]?.asEnum(ThemePreference.SYSTEM) ?: ThemePreference.SYSTEM,
             keepScreenAwake = values[KEEP_AWAKE] ?: true,
             confirmDestructiveActions = values[CONFIRM_DESTRUCTIVE] ?: true,
             recordingRetention = values[RECORDING_RETENTION]?.asEnum(AudioRetention.SESSION_ONLY) ?: AudioRetention.SESSION_ONLY,
@@ -52,7 +51,6 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
 
     override suspend fun update(settings: AppSettings) {
         store.edit { values ->
-            values[THEME] = settings.theme.name
             values[KEEP_AWAKE] = settings.keepScreenAwake
             values[CONFIRM_DESTRUCTIVE] = settings.confirmDestructiveActions
             values[RECORDING_RETENTION] = settings.recordingRetention.name
@@ -107,7 +105,6 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
     private inline fun <reified T : Enum<T>> String.asEnum(default: T): T = enumValues<T>().firstOrNull { it.name == this } ?: default
 
     private companion object {
-        val THEME = stringPreferencesKey("theme")
         val KEEP_AWAKE = booleanPreferencesKey("keep_screen_awake")
         val CONFIRM_DESTRUCTIVE = booleanPreferencesKey("confirm_destructive_actions")
         val RECORDING_RETENTION = stringPreferencesKey("recording_retention")

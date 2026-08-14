@@ -39,7 +39,6 @@ import com.dmitriim.localailab.feature.settings.presentation.SettingsUiState
 import com.dmitriim.localailab.source.settings.AppSettings
 import com.dmitriim.localailab.source.settings.MetricDetail
 import com.dmitriim.localailab.source.settings.ModelUnloadPolicy
-import com.dmitriim.localailab.source.settings.ThemePreference
 import com.dmitriim.localailab.source.settings.ThreadCountPolicy
 
 @Composable
@@ -82,7 +81,6 @@ fun SettingsScreen(
             }
         }
         SettingsCard("Appearance", styled = false) {
-            EnumRadioGroup("Theme", settings.theme, ThemePreference.entries, ThemePreference::name) { value -> onUpdate { it.copy(theme = value) } }
             Toggle("Keep screen awake during active inference", settings.keepScreenAwake) { value -> onUpdate { it.copy(keepScreenAwake = value) } }
             Toggle("Confirm before deleting history", settings.confirmDestructiveActions) { value -> onUpdate { it.copy(confirmDestructiveActions = value) } }
             Toggle("Show advanced controls", settings.showAdvancedControls) { value -> onUpdate { it.copy(showAdvancedControls = value) } }

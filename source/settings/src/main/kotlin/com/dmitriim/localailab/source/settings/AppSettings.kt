@@ -1,13 +1,11 @@
 package com.dmitriim.localailab.source.settings
 
-enum class ThemePreference { SYSTEM, LIGHT, DARK }
 enum class AudioRetention { SESSION_ONLY, LATEST_SUCCESSFUL, SEVEN_DAYS, THIRTY_DAYS, MANUAL }
 enum class ThreadCountPolicy { ENGINE_DEFAULT, AVAILABLE_PROCESSORS, FIXED }
 enum class ModelUnloadPolicy { WHEN_IDLE, WHEN_BACKGROUND, MANUAL }
 enum class MetricDetail { STANDARD, VERBOSE }
 
 data class AppSettings(
-    val theme: ThemePreference = ThemePreference.SYSTEM,
     val keepScreenAwake: Boolean = true,
     val confirmDestructiveActions: Boolean = true,
     val recordingRetention: AudioRetention = AudioRetention.SESSION_ONLY,

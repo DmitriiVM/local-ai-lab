@@ -27,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,7 +41,7 @@ internal fun CapabilityCard(
     val content = capability.cardContent
     val shape = RoundedCornerShape(24.dp)
     val colors = MaterialTheme.colorScheme
-    val accent = content.accent.colors(colors.surface.luminance() < 0.5f)
+    val accent = content.accent.colors
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -123,10 +122,8 @@ private val AiCapability.cardContent: CapabilityCardContent
             descriptionRes = CoreUiR.string.ui_description_27,
             icon = Icons.AutoMirrored.Outlined.Chat,
             accent = CapabilityCardAccent(
-                darkContainerColor = Color(0xFF3B2B5A),
-                darkContentColor = Color(0xFFECDDFF),
-                lightContainerColor = Color(0xFFECDDFF),
-                lightContentColor = Color(0xFF4A2A78),
+                containerColor = Color(0xFF3B2B5A),
+                contentColor = Color(0xFFECDDFF),
             ),
         )
         AiCapability.SPEECH_TO_TEXT -> CapabilityCardContent(
@@ -134,10 +131,8 @@ private val AiCapability.cardContent: CapabilityCardContent
             descriptionRes = CoreUiR.string.ui_description_28,
             icon = Icons.Outlined.Mic,
             accent = CapabilityCardAccent(
-                darkContainerColor = Color(0xFF3B2B5A),
-                darkContentColor = Color(0xFFECDDFF),
-                lightContainerColor = Color(0xFFECDDFF),
-                lightContentColor = Color(0xFF4A2A78),
+                containerColor = Color(0xFF3B2B5A),
+                contentColor = Color(0xFFECDDFF),
             ),
         )
         AiCapability.TEXT_TO_SPEECH -> CapabilityCardContent(
@@ -145,10 +140,8 @@ private val AiCapability.cardContent: CapabilityCardContent
             descriptionRes = CoreUiR.string.ui_description_29,
             icon = Icons.AutoMirrored.Outlined.VolumeUp,
             accent = CapabilityCardAccent(
-                darkContainerColor = Color(0xFF3B2B5A),
-                darkContentColor = Color(0xFFECDDFF),
-                lightContainerColor = Color(0xFFECDDFF),
-                lightContentColor = Color(0xFF4A2A78),
+                containerColor = Color(0xFF3B2B5A),
+                contentColor = Color(0xFFECDDFF),
             ),
         )
         AiCapability.VOICE_ACTIVITY_DETECTION,
@@ -164,16 +157,11 @@ private data class CapabilityCardContent(
 )
 
 private data class CapabilityCardAccent(
-    val darkContainerColor: Color,
-    val darkContentColor: Color,
-    val lightContainerColor: Color,
-    val lightContentColor: Color,
+    val containerColor: Color,
+    val contentColor: Color,
 ) {
-    fun colors(darkTheme: Boolean): CapabilityCardAccentColors = if (darkTheme) {
-        CapabilityCardAccentColors(darkContainerColor, darkContentColor)
-    } else {
-        CapabilityCardAccentColors(lightContainerColor, lightContentColor)
-    }
+    val colors: CapabilityCardAccentColors
+        get() = CapabilityCardAccentColors(containerColor, contentColor)
 }
 
 private data class CapabilityCardAccentColors(
