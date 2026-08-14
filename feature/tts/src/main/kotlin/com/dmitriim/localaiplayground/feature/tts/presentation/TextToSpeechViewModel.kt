@@ -178,7 +178,10 @@ class TextToSpeechViewModel(
     fun updateSpeed(value: Float) = mutableState.update { it.copy(speed = value, errorMessage = null) }
 
     fun updateSentenceSilence(value: Float) = mutableState.update {
-        it.copy(sentenceSilenceScale = value, errorMessage = null)
+        it.copy(
+            sentenceSilenceScale = value.coerceIn(MIN_SENTENCE_SILENCE_SCALE, MAX_SENTENCE_SILENCE_SCALE),
+            errorMessage = null,
+        )
     }
 
     fun updateVolume(value: Float) = mutableState.update { it.copy(volume = value, errorMessage = null) }
@@ -445,6 +448,8 @@ class TextToSpeechViewModel(
     }
 
     private companion object {
+        const val MIN_SENTENCE_SILENCE_SCALE = 0.01f
+        const val MAX_SENTENCE_SILENCE_SCALE = 1f
         const val TAG = "AiP123Tts"
     }
 }

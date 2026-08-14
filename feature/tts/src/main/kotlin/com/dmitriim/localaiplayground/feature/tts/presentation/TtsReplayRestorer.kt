@@ -49,6 +49,7 @@ internal object TtsReplayRestorer {
                 language = language,
                 speed = parameters?.get("speed")?.jsonPrimitive?.floatOrNull ?: state.speed,
                 sentenceSilenceScale = parameters?.get("sentenceSilenceScale")?.jsonPrimitive?.floatOrNull
+                    ?.coerceIn(MIN_SENTENCE_SILENCE_SCALE, MAX_SENTENCE_SILENCE_SCALE)
                     ?: state.sentenceSilenceScale,
                 volume = parameters?.get("volume")?.jsonPrimitive?.floatOrNull ?: state.volume,
                 threadCount = parameters?.get("threadCount")?.jsonPrimitive?.content ?: state.threadCount,
@@ -85,3 +86,6 @@ internal data class TtsReplayRestoreResult(
     val state: TextToSpeechUiState,
     val selectedModelIdToPersist: ModelId?,
 )
+
+private const val MIN_SENTENCE_SILENCE_SCALE = 0.01f
+private const val MAX_SENTENCE_SILENCE_SCALE = 1f

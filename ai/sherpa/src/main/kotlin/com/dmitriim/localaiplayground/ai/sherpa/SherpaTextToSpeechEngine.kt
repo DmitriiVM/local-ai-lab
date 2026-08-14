@@ -186,8 +186,8 @@ class SherpaTextToSpeechEngine : TextToSpeechBackend {
         }
         require(request.text.isNotBlank()) { "Enter text to synthesize." }
         require(request.speed in 0.5f..2f) { "Speech rate must be between 0.5 and 2.0." }
-        require(request.sentenceSilenceScale in 0f..2f) {
-            "Sentence silence must be between 0.0 and 2.0."
+        require(request.sentenceSilenceScale in MIN_SENTENCE_SILENCE_SCALE..MAX_SENTENCE_SILENCE_SCALE) {
+            "Sentence silence must be between $MIN_SENTENCE_SILENCE_SCALE and $MAX_SENTENCE_SILENCE_SCALE for Sherpa TTS."
         }
         val speaker = request.voice as? TextToSpeechVoiceCondition.FixedSpeaker
             ?: error("Sherpa TTS requires a fixed speaker voice.")
@@ -406,5 +406,7 @@ class SherpaTextToSpeechEngine : TextToSpeechBackend {
     private companion object {
         const val TAG = "AiP123Tts"
         const val pocketDefaultReferencePath = "test_wavs/bria.wav"
+        const val MIN_SENTENCE_SILENCE_SCALE = 0.001f
+        const val MAX_SENTENCE_SILENCE_SCALE = 1f
     }
 }

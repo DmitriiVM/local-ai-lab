@@ -40,7 +40,7 @@ internal fun TextToSpeechSettings(
             CollapsibleTtsSettingsHeader(stringResource(CoreUiR.string.ui_copy_81), supportedControlsSummary(state), expanded) { expanded = !expanded }
             if (expanded) {
                 if (state.supportsSpeechRate) TextToSpeechParameterSlider("Speech rate", state.speed, "%.2f×".format(state.speed), 0.5f..2f, enabled, onSpeedChange)
-                if (state.supportsSentenceSilence) TextToSpeechParameterSlider("Sentence silence", state.sentenceSilenceScale, "%.2f×".format(state.sentenceSilenceScale), 0f..2f, enabled, onSentenceSilenceChange)
+                if (state.supportsSentenceSilence) TextToSpeechParameterSlider("Sentence silence", state.sentenceSilenceScale, "%.2f×".format(state.sentenceSilenceScale), 0.01f..1f, enabled, onSentenceSilenceChange)
                 TextToSpeechParameterSlider("Playback volume", state.volume, "${(state.volume * 100).toInt()}%", 0f..1f, enabled, onVolumeChange)
                 if (!state.usesPlatformVoice) OutlinedTextField(value = state.threadCount, onValueChange = onThreadCountChange, enabled = enabled, label = { Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_164)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
             }
