@@ -24,6 +24,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import java.util.UUID
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,7 +72,7 @@ class BenchmarkLabViewModel(
         if (benchmarkJob?.isActive == true) return
         val initial = state.value
         val workload = initial.workload ?: return showMessage("Open Profile from Chat, STT, or TTS first.")
-        benchmarkJob = viewModelScope.launch {
+        benchmarkJob = viewModelScope.launch(Dispatchers.Default) {
             val capability = workload.capability
             val sessionId = UUID.randomUUID().toString()
             val plan = BenchmarkPlan(
