@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.ai.chatterbox"
+    namespace = "com.dmitriim.localailab.ai.chatterbox"
     defaultConfig {
         ndk { abiFilters += "arm64-v8a" }
     }

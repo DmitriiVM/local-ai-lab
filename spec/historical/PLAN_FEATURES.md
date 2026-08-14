@@ -1,4 +1,4 @@
-# Local AI Playground — Features and Screens
+# Local AI Lab — Features and Screens
 
 > [!WARNING]
 > **Historical planning document — not current project documentation.**

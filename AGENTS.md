@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Local AI Playground is a native Android app for running AI models locally.
+Local AI Lab is a native Android app for running AI models locally.
 
 ### Application
 

@@ -1,4 +1,4 @@
-# Local AI Playground — Technical Plan
+# Local AI Lab — Technical Plan
 
 > [!WARNING]
 > **Historical planning document — not current project documentation.**

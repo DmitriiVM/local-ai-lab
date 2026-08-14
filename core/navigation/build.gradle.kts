@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.core.navigation"
+    namespace = "com.dmitriim.localailab.core.navigation"
 }
 
 dependencies {

@@ -7,9 +7,9 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground"
+    namespace = "com.dmitriim.localailab"
     defaultConfig {
-        applicationId = "com.dmitriim.localaiplayground"
+        applicationId = "com.dmitriim.localailab"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

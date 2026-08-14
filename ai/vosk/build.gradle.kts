@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.ai.vosk"
+    namespace = "com.dmitriim.localailab.ai.vosk"
     defaultConfig {
         ndk { abiFilters += "arm64-v8a" }
     }

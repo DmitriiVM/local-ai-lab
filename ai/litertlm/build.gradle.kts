@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.ai.litertlm"
+    namespace = "com.dmitriim.localailab.ai.litertlm"
     defaultConfig {
         ndk { abiFilters += "arm64-v8a" }
     }

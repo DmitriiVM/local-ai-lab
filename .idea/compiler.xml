@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="11" />
+    <bytecodeTargetLevel target="11">
+      <module name="LocalAiPlayground.ai.chatterbox" target="21" />
+      <module name="LocalAiPlayground.ai.litertlm" target="21" />
+      <module name="LocalAiPlayground.ai.llamacpp" target="21" />
+      <module name="LocalAiPlayground.ai.sherpa" target="21" />
+      <module name="LocalAiPlayground.ai.system" target="21" />
+      <module name="LocalAiPlayground.ai.vosk" target="21" />
+      <module name="LocalAiPlayground.app" target="21" />
+      <module name="LocalAiPlayground.core.audio" target="21" />
+      <module name="LocalAiPlayground.core.navigation" target="21" />
+      <module name="LocalAiPlayground.core.performance" target="21" />
+      <module name="LocalAiPlayground.core.result" target="21" />
+      <module name="LocalAiPlayground.core.ui" target="21" />
+      <module name="LocalAiPlayground.core.voice" target="21" />
+      <module name="LocalAiPlayground.feature.assistant" target="21" />
+      <module name="LocalAiPlayground.feature.benchmark" target="21" />
+      <module name="LocalAiPlayground.feature.device" target="21" />
+      <module name="LocalAiPlayground.feature.models" target="21" />
+      <module name="LocalAiPlayground.feature.playground" target="21" />
+      <module name="LocalAiPlayground.feature.runs" target="21" />
+      <module name="LocalAiPlayground.feature.settings" target="21" />
+      <module name="LocalAiPlayground.feature.stt" target="21" />
+      <module name="LocalAiPlayground.feature.tts" target="21" />
+      <module name="LocalAiPlayground.source.database" target="21" />
+      <module name="LocalAiPlayground.source.models" target="21" />
+      <module name="LocalAiPlayground.source.runs" target="21" />
+      <module name="LocalAiPlayground.source.settings" target="21" />
+    </bytecodeTargetLevel>
   </component>
 </project>

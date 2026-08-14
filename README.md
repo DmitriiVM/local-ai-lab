@@ -1,6 +1,6 @@
-# Local AI Playground
+# Local AI Lab
 
-Local AI Playground is a native Android application for running, inspecting, and
+Local AI Lab is a native Android application for running, inspecting, and
 comparing language, speech-to-text, and text-to-speech models entirely on-device.
 
 The project explores the engineering behind private local inference: replaceable AI
@@ -19,7 +19,7 @@ model files, or clone this repository and add a model or runtime integration of 
 </p>
 
 <p align="center">
-  <img src="screenshots/tab_main.png" alt="Local AI Playground capability dashboard" width="220" />
+  <img src="screenshots/tab_main.png" alt="Local AI Lab capability dashboard" width="220" />
   <img src="screenshots/tab_models.png" alt="On-device model library" width="220" />
   <img src="screenshots/profiling_result.png" alt="On-device profiling results" width="220" />
 </p>
@@ -119,8 +119,8 @@ Android 13 and a compatible recognition service installed on the device.
 Clone the repository and open it in Android Studio, or build from the command line:
 
 ```bash
-git clone https://github.com/DmitriiVM/LocalAiPlayground.git
-cd LocalAiPlayground
+git clone https://github.com/DmitriiVM/LocalAiPlayground.git LocalAiLab
+cd LocalAiLab
 ./gradlew :app:assembleDebug
 ```
 
@@ -164,7 +164,7 @@ The project is meant to be extended.
 
 To add another model for an existing runtime, add a `CatalogModel` entry in the
 appropriate catalog under
-[`source/models/src/main/kotlin/com/dmitriim/localaiplayground/source/models/catalog`](source/models/src/main/kotlin/com/dmitriim/localaiplayground/source/models/catalog).
+[`source/models/src/main/kotlin/com/dmitriim/localailab/source/models/catalog`](source/models/src/main/kotlin/com/dmitriim/localailab/source/models/catalog).
 Define its `ModelManifest`, runtime/profile pair, download source, required files, and
 integrity data, then include it in `ModelCatalog`.
 
@@ -177,9 +177,9 @@ and run history.
 
 Relevant extension points include:
 
-- [`ModelAdapter`](ai/api/src/main/kotlin/com/dmitriim/localaiplayground/ai/api/model/ModelAdapter.kt) — maps a model profile to one packaged runtime and validates an installed model.
-- [`ModelCatalog`](source/models/src/main/kotlin/com/dmitriim/localaiplayground/source/models/catalog/ModelCatalog.kt) — assembles the immutable in-app catalog.
-- [`ChatModelCatalog`](source/models/src/main/kotlin/com/dmitriim/localaiplayground/source/models/catalog/chat/ChatModelCatalog.kt) — a GGUF catalog example for llama.cpp.
+- [`ModelAdapter`](ai/api/src/main/kotlin/com/dmitriim/localailab/ai/api/model/ModelAdapter.kt) — maps a model profile to one packaged runtime and validates an installed model.
+- [`ModelCatalog`](source/models/src/main/kotlin/com/dmitriim/localailab/source/models/catalog/ModelCatalog.kt) — assembles the immutable in-app catalog.
+- [`ChatModelCatalog`](source/models/src/main/kotlin/com/dmitriim/localailab/source/models/catalog/chat/ChatModelCatalog.kt) — a GGUF catalog example for llama.cpp.
 
 ## Technology
 

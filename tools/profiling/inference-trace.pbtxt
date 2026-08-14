@@ -1,6 +1,6 @@
 # Record with: perfetto -c /data/local/tmp/inference-trace.pbtxt -o /data/misc/perfetto-traces/local-ai-inference.perfetto-trace
-# The app's async slices are named LocalAiPlayground:<run-id> and
-# LocalAiPlayground:<run-id>:<phase>.
+# The app's async slices are named LocalAiLab:<run-id> and
+# LocalAiLab:<run-id>:<phase>.
 buffers { size_kb: 65536 fill_policy: RING_BUFFER }
 duration_ms: 120000
 data_sources {
@@ -11,7 +11,7 @@ data_sources {
       atrace_categories: "sched"
       atrace_categories: "freq"
       atrace_categories: "memory"
-      atrace_apps: "com.dmitriim.localaiplayground"
+      atrace_apps: "com.dmitriim.localailab"
       ftrace_events: "sched/sched_switch"
       ftrace_events: "sched/sched_waking"
       ftrace_events: "power/cpu_frequency"

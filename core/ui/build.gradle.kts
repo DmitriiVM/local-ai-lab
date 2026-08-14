@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.core.ui"
+    namespace = "com.dmitriim.localailab.core.ui"
 }
 
 dependencies {

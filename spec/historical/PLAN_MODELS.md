@@ -1,4 +1,4 @@
-# Local AI Playground — Runtime and Model Catalog Plan
+# Local AI Lab — Runtime and Model Catalog Plan
 
 > [!WARNING]
 > **Historical planning document — not current project documentation.**

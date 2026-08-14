@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.source.models"
+    namespace = "com.dmitriim.localailab.source.models"
     buildFeatures {
         buildConfig = true
     }

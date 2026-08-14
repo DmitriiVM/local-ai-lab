@@ -1,4 +1,4 @@
-# Local AI Playground — Product Plan
+# Local AI Lab — Product Plan
 
 > [!WARNING]
 > **Historical planning document — not current project documentation.**
@@ -10,7 +10,7 @@
 
 ## 1. Purpose
 
-Local AI Playground is an Android application for running, inspecting, and comparing
+Local AI Lab is an Android application for running, inspecting, and comparing
 AI inference entirely on the device.
 
 The first release focuses on four workflows:

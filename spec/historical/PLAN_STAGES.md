@@ -1,4 +1,4 @@
-# Local AI Playground — Implementation Stages
+# Local AI Lab — Implementation Stages
 
 > [!WARNING]
 > **Historical planning document — not current project documentation.**

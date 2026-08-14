@@ -1,0 +1,88 @@
+package com.dmitriim.localailab.ai.chatterbox
+
+import com.dmitriim.localailab.ai.api.model.ModelAdapter
+import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
+import com.dmitriim.localailab.ai.api.model.ModelImportFileDefinition
+import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
+import com.dmitriim.localailab.core.di.AppScope
+import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.core.model.engine.EngineId
+import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
+import com.dmitriim.localailab.core.model.manifest.ModelFormat
+import com.dmitriim.localailab.core.model.manifest.ModelManifest
+import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
+import dev.zacsweers.metro.ContributesIntoSet
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
+import java.io.File
+
+@Inject
+@ContributesIntoSet(AppScope::class, binding = binding<ModelAdapter>())
+class ChatterboxModelRuntimeValidator : ModelAdapter {
+    override val id = "chatterbox-turbo-q4"
+    override val engineId = EngineId("chatterbox-onnx")
+    override val profileTypes = setOf(ModelProfileIds.CHATTERBOX_TURBO_Q4)
+    override val capabilities = setOf(AiCapability.TEXT_TO_SPEECH)
+
+    override fun capabilitiesFor(
+        profileType: com.dmitriim.localailab.core.model.manifest.ModelProfileId,
+    ) = if (profileType in profileTypes) capabilities else emptySet()
+
+    override fun importDefinition(
+        profileType: com.dmitriim.localailab.core.model.manifest.ModelProfileId,
+    ) = if (profileType == ModelProfileIds.CHATTERBOX_TURBO_Q4) {
+        ModelImportDefinition(
+            displayName = "Chatterbox Turbo Q4 (English)",
+            format = ModelFormat.ONNX,
+            files = REQUIRED_FILES.map { (path, role) ->
+                ModelImportFileDefinition(role, relativePath = path)
+            },
+        )
+    } else {
+        null
+    }
+
+    override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
+        require(manifest.profileType == ModelProfileIds.CHATTERBOX_TURBO_Q4)
+        require(manifest.engineId == engineId)
+        require(manifest.sampleRateHz == 24_000) { "Chatterbox Turbo output must be 24 kHz." }
+        require(manifest.ttsVoiceMode == TtsVoiceMode.REFERENCE_AUDIO) {
+            "Chatterbox Turbo requires reference-audio voice metadata."
+        }
+        require(
+            manifest.languages.map(String::lowercase).any {
+                it == "english" || it == "en"
+            },
+        ) {
+            "Chatterbox Turbo must declare English support."
+        }
+        val missing = REQUIRED_FILES.keys.filterNot { File(directory, it).isFile }
+        require(missing.isEmpty()) { "Missing Chatterbox files: ${missing.joinToString()}" }
+        REQUIRED_FILES.keys.filter { it.endsWith(".onnx") }.forEach { graph ->
+            require(File(directory, "${graph}_data").isFile) {
+                "$graph external data is missing."
+            }
+        }
+        ChatterboxTokenizer(File(directory, "tokenizer.json"))
+    }.fold(
+        onSuccess = { RuntimeValidationResult(true) },
+        onFailure = { RuntimeValidationResult(false, it.message) },
+    )
+
+    companion object {
+        val REQUIRED_FILES = linkedMapOf(
+            "conditional_decoder_q4.onnx" to ModelFileRoles.CONDITIONAL_DECODER,
+            "conditional_decoder_q4.onnx_data" to ModelFileRoles.EXTERNAL_DATA,
+            "embed_tokens_q4.onnx" to ModelFileRoles.EMBED_TOKENS,
+            "embed_tokens_q4.onnx_data" to ModelFileRoles.EXTERNAL_DATA,
+            "language_model_q4.onnx" to ModelFileRoles.LANGUAGE_MODEL,
+            "language_model_q4.onnx_data" to ModelFileRoles.EXTERNAL_DATA,
+            "speech_encoder_q4.onnx" to ModelFileRoles.SPEECH_ENCODER,
+            "speech_encoder_q4.onnx_data" to ModelFileRoles.EXTERNAL_DATA,
+            "tokenizer.json" to ModelFileRoles.TOKENIZER,
+            "tokenizer_config.json" to ModelFileRoles.CONFIG,
+            "config.json" to ModelFileRoles.CONFIG,
+        )
+    }
+}

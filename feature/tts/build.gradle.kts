@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.feature.tts"
+    namespace = "com.dmitriim.localailab.feature.tts"
 
     testOptions {
         unitTests.isReturnDefaultValues = true

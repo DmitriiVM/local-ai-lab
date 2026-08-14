@@ -11,5 +11,5 @@ dependencies {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.core.audio"
+    namespace = "com.dmitriim.localailab.core.audio"
 }

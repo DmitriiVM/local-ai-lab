@@ -25,7 +25,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "LocalAiPlayground"
+rootProject.name = "LocalAiLab"
 include(":app")
 include(":ai:api")
 include(":ai:chatterbox")

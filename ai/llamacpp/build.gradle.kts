@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.ai.llamacpp"
+    namespace = "com.dmitriim.localailab.ai.llamacpp"
     ndkVersion = "27.2.12479018"
 
     defaultConfig {

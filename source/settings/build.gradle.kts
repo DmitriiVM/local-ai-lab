@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.source.settings"
+    namespace = "com.dmitriim.localailab.source.settings"
 }
 
 dependencies {

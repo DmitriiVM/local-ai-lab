@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
-group = "com.dmitriim.localaiplayground.buildlogic"
+group = "com.dmitriim.localailab.buildlogic"
 
 dependencies {
     implementation(libs.android.gradle.plugin)
@@ -18,57 +18,57 @@ gradlePlugin {
         register("androidApplication") {
             id = "local-ai.android.application"
             implementationClass =
-                "com.dmitriim.localaiplayground.buildlogic.android.AndroidApplicationConventionPlugin"
+                "com.dmitriim.localailab.buildlogic.android.AndroidApplicationConventionPlugin"
         }
         register("androidComposeLibrary") {
             id = "local-ai.android.compose-library"
             implementationClass =
-                "com.dmitriim.localaiplayground.buildlogic.android.AndroidComposeLibraryConventionPlugin"
+                "com.dmitriim.localailab.buildlogic.android.AndroidComposeLibraryConventionPlugin"
         }
         register("androidLibrary") {
             id = "local-ai.android.library"
             implementationClass =
-                "com.dmitriim.localaiplayground.buildlogic.android.AndroidLibraryConventionPlugin"
+                "com.dmitriim.localailab.buildlogic.android.AndroidLibraryConventionPlugin"
         }
         register("jvmLibrary") {
             id = "local-ai.jvm.library"
             implementationClass =
-                "com.dmitriim.localaiplayground.buildlogic.jvm.JvmLibraryConventionPlugin"
+                "com.dmitriim.localailab.buildlogic.jvm.JvmLibraryConventionPlugin"
         }
         register("sherpaOnnx") {
             id = "local-ai.sherpa-onnx"
             implementationClass =
-                "com.dmitriim.localaiplayground.buildlogic.dependency.SherpaOnnxConventionPlugin"
+                "com.dmitriim.localailab.buildlogic.dependency.SherpaOnnxConventionPlugin"
         }
         register("featureBoundaries") {
             id = "local-ai.feature-boundaries"
             implementationClass =
-                "com.dmitriim.localaiplayground.buildlogic.dependency.FeatureBoundaryConventionPlugin"
+                "com.dmitriim.localailab.buildlogic.dependency.FeatureBoundaryConventionPlugin"
         }
         register("androidLint") {
             id = "local-ai.android-lint"
             implementationClass =
-                "com.dmitriim.localaiplayground.buildlogic.android.AndroidLintConventionPlugin"
+                "com.dmitriim.localailab.buildlogic.android.AndroidLintConventionPlugin"
         }
         register("detekt") {
             id = "local-ai.detekt"
             implementationClass =
-                "com.dmitriim.localaiplayground.buildlogic.quality.DetektConventionPlugin"
+                "com.dmitriim.localailab.buildlogic.quality.DetektConventionPlugin"
         }
         register("ktlint") {
             id = "local-ai.ktlint"
             implementationClass =
-                "com.dmitriim.localaiplayground.buildlogic.quality.KtlintConventionPlugin"
+                "com.dmitriim.localailab.buildlogic.quality.KtlintConventionPlugin"
         }
         register("staticAnalysis") {
             id = "local-ai.static-analysis"
             implementationClass =
-                "com.dmitriim.localaiplayground.buildlogic.quality.StaticAnalysisConventionPlugin"
+                "com.dmitriim.localailab.buildlogic.quality.StaticAnalysisConventionPlugin"
         }
         register("androidStaticAnalysis") {
             id = "local-ai.android-static-analysis"
             implementationClass =
-                "com.dmitriim.localaiplayground.buildlogic.quality.AndroidStaticAnalysisConventionPlugin"
+                "com.dmitriim.localailab.buildlogic.quality.AndroidStaticAnalysisConventionPlugin"
         }
     }
 }

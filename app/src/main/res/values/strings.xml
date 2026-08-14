@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">LocalAiPlayground</string>
+    <string name="app_name">Local AI Lab</string>
     <string name="destination_unavailable">This destination is no longer available.</string>
 </resources>

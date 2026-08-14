@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.core.voice"
+    namespace = "com.dmitriim.localailab.core.voice"
 
     testOptions {
         unitTests.isReturnDefaultValues = true

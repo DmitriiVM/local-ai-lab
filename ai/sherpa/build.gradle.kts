@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.ai.sherpa"
+    namespace = "com.dmitriim.localailab.ai.sherpa"
     defaultConfig {
         ndk {
             abiFilters += "arm64-v8a"

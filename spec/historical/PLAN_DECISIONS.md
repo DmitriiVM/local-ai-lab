@@ -1,4 +1,4 @@
-# Local AI Playground — Decisions and Open Questions
+# Local AI Lab — Decisions and Open Questions
 
 > [!WARNING]
 > **Historical planning document — not current project documentation.**

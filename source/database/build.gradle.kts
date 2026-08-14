@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.source.database"
+    namespace = "com.dmitriim.localailab.source.database"
 }
 
 ksp {

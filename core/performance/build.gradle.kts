@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localaiplayground.core.performance"
+    namespace = "com.dmitriim.localailab.core.performance"
 }
 
 dependencies {
