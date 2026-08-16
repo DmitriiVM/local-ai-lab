@@ -119,7 +119,7 @@ Android 13 and a compatible recognition service installed on the device.
 Clone the repository and open it in Android Studio, or build from the command line:
 
 ```bash
-git clone https://github.com/DmitriiVM/LocalAiPlayground.git LocalAiLab
+git clone https://github.com/DmitriiVM/local-ai-lab.git LocalAiLab
 cd LocalAiLab
 ./gradlew :app:assembleDebug
 ```
