@@ -165,6 +165,14 @@ class SherpaSpeechToTextEngine : SpeechToTextBackend {
                                 encoder = files.require(ModelFileRoles.ENCODER).path
                                 mergedDecoder = files.require(ModelFileRoles.MERGED_DECODER).path
                             }
+                    ModelProfileIds.MOONSHINE_V1_STT ->
+                        moonshine =
+                            OfflineMoonshineModelConfig().apply {
+                                preprocessor = files.require(ModelFileRoles.PREPROCESSOR).path
+                                encoder = files.require(ModelFileRoles.ENCODER).path
+                                uncachedDecoder = files.require(ModelFileRoles.UNCACHED_DECODER).path
+                                cachedDecoder = files.require(ModelFileRoles.CACHED_DECODER).path
+                            }
                     else -> error("Unsupported offline STT profile: ${request.profileType.value}")
                 }
             }
@@ -266,6 +274,13 @@ class SherpaSpeechToTextEngine : SpeechToTextBackend {
             ModelFileRoles.MERGED_DECODER,
             ModelFileRoles.TOKENS,
         )
+        ModelProfileIds.MOONSHINE_V1_STT -> setOf(
+            ModelFileRoles.PREPROCESSOR,
+            ModelFileRoles.ENCODER,
+            ModelFileRoles.UNCACHED_DECODER,
+            ModelFileRoles.CACHED_DECODER,
+            ModelFileRoles.TOKENS,
+        )
         else -> emptySet()
     }
 
@@ -284,6 +299,7 @@ class SherpaSpeechToTextEngine : SpeechToTextBackend {
             ModelProfileIds.SENSE_VOICE_STT,
             ModelProfileIds.PARAFORMER_STT,
             ModelProfileIds.MOONSHINE_STT,
+            ModelProfileIds.MOONSHINE_V1_STT,
         )
     }
 }

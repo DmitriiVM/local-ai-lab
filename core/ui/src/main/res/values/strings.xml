@@ -565,6 +565,7 @@
     <string name="models_profile_sensevoice_stt">SenseVoice STT bundle</string>
     <string name="models_profile_paraformer_stt">Paraformer STT bundle</string>
     <string name="models_profile_moonshine_stt">Moonshine STT bundle</string>
+    <string name="models_profile_moonshine_v1_stt">Moonshine v1 STT bundle</string>
     <string name="models_profile_vosk_stt">Vosk STT bundle</string>
     <string name="models_profile_android_stt">Android on-device speech recognizer</string>
     <string name="models_profile_supertonic_tts">Supertonic TTS bundle</string>

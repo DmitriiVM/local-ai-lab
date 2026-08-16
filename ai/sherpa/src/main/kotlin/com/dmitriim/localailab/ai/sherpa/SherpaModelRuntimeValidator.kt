@@ -30,6 +30,7 @@ class SherpaModelRuntimeValidator : ModelAdapter {
         ModelProfileIds.SENSE_VOICE_STT,
         ModelProfileIds.PARAFORMER_STT,
         ModelProfileIds.MOONSHINE_STT,
+        ModelProfileIds.MOONSHINE_V1_STT,
         ModelProfileIds.SUPERTONIC_TTS,
         ModelProfileIds.PIPER_VITS_TTS,
         ModelProfileIds.KOKORO_TTS,
@@ -48,6 +49,7 @@ class SherpaModelRuntimeValidator : ModelAdapter {
         ModelProfileIds.SENSE_VOICE_STT,
         ModelProfileIds.PARAFORMER_STT,
         ModelProfileIds.MOONSHINE_STT,
+        ModelProfileIds.MOONSHINE_V1_STT,
         -> setOf(AiCapability.SPEECH_TO_TEXT)
         ModelProfileIds.SUPERTONIC_TTS,
         ModelProfileIds.PIPER_VITS_TTS,
@@ -66,6 +68,7 @@ class SherpaModelRuntimeValidator : ModelAdapter {
         -> singleModelSttDefinition()
         ModelProfileIds.ZIPFORMER_STT -> zipformerDefinition()
         ModelProfileIds.MOONSHINE_STT -> moonshineDefinition()
+        ModelProfileIds.MOONSHINE_V1_STT -> moonshineV1Definition()
         ModelProfileIds.SUPERTONIC_TTS -> supertonicDefinition()
         ModelProfileIds.PIPER_VITS_TTS -> piperDefinition()
         ModelProfileIds.KOKORO_TTS -> kokoroDefinition()
@@ -98,6 +101,15 @@ class SherpaModelRuntimeValidator : ModelAdapter {
         "Moonshine STT bundle",
         ModelImportFileDefinition(ModelFileRoles.ENCODER, relativePath = "encoder_model.ort"),
         ModelImportFileDefinition(ModelFileRoles.MERGED_DECODER, relativePath = "decoder_model_merged.ort"),
+        ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
+    )
+
+    private fun moonshineV1Definition() = importDefinition(
+        "Moonshine v1 STT bundle",
+        ModelImportFileDefinition(ModelFileRoles.PREPROCESSOR, relativePath = "preprocess.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.ENCODER, relativePath = "encode.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.UNCACHED_DECODER, relativePath = "uncached_decode.int8.onnx"),
+        ModelImportFileDefinition(ModelFileRoles.CACHED_DECODER, relativePath = "cached_decode.int8.onnx"),
         ModelImportFileDefinition(ModelFileRoles.TOKENS, relativePath = "tokens.txt"),
     )
 

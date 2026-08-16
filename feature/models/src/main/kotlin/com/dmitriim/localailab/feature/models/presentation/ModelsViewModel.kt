@@ -341,6 +341,7 @@ private val ModelProfileId.displayNameRes: Int
         ModelProfileIds.SENSE_VOICE_STT -> CoreUiR.string.models_profile_sensevoice_stt
         ModelProfileIds.PARAFORMER_STT -> CoreUiR.string.models_profile_paraformer_stt
         ModelProfileIds.MOONSHINE_STT -> CoreUiR.string.models_profile_moonshine_stt
+        ModelProfileIds.MOONSHINE_V1_STT -> CoreUiR.string.models_profile_moonshine_v1_stt
         ModelProfileIds.VOSK_STT -> CoreUiR.string.models_profile_vosk_stt
         ModelProfileIds.ANDROID_SPEECH_RECOGNIZER_STT -> CoreUiR.string.models_profile_android_stt
         ModelProfileIds.SUPERTONIC_TTS -> CoreUiR.string.models_profile_supertonic_tts
