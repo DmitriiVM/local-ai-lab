@@ -18,6 +18,7 @@ import com.dmitriim.localailab.ai.api.llm.LlmLoadRequest
 import com.dmitriim.localailab.ai.api.llm.LlmLoadResult
 import com.dmitriim.localailab.ai.api.llm.LlmRuntime
 import com.dmitriim.localailab.ai.api.llm.LlmRuntimeDiagnostics
+import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.engine.ComputePreference
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -32,6 +33,10 @@ import com.google.ai.edge.litertlm.EngineConfig
 import com.google.ai.edge.litertlm.Message
 import com.google.ai.edge.litertlm.MessageCallback
 import com.google.ai.edge.litertlm.SamplerConfig
+import dev.zacsweers.metro.ContributesIntoSet
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
+import dev.zacsweers.metro.binding
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
@@ -42,6 +47,9 @@ import kotlin.concurrent.withLock
 import kotlin.system.measureTimeMillis
 
 /** LiteRT-LM Kotlin-SDK runtime. It owns one engine and creates a conversation per app chat turn. */
+@Inject
+@SingleIn(AppScope::class)
+@ContributesIntoSet(AppScope::class, binding = binding<LlmRuntime>())
 class LiteRtLmRuntime(context: Context) :
     LlmRuntime,
     LlmChatFormatter {

@@ -17,18 +17,26 @@ import com.dmitriim.localailab.ai.api.llm.LlmLoadResult
 import com.dmitriim.localailab.ai.api.llm.LlmRuntime
 import com.dmitriim.localailab.ai.api.llm.LlmRuntimeDiagnostics
 import com.dmitriim.localailab.ai.api.llm.LlmTokenCounter
+import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.engine.ComputePreference
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.runtime.ChatModelReference
+import dev.zacsweers.metro.ContributesIntoSet
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
+import dev.zacsweers.metro.binding
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.system.measureTimeMillis
 
 /** JNI-backed llama.cpp engine. It owns one model/context and serializes native access. */
-class NativeLlama(context: Context) :
+@Inject
+@SingleIn(AppScope::class)
+@ContributesIntoSet(AppScope::class, binding = binding<LlmRuntime>())
+class LlamaCppRuntime(context: Context) :
     LlmRuntime,
     LlmChatFormatter,
     LlmTokenCounter {

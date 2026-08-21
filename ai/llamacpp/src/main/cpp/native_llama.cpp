@@ -74,7 +74,7 @@ long elapsed_ms(const std::chrono::steady_clock::time_point &start) {
 }  // namespace
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeInitialize(
+Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeInitialize(
         JNIEnv *env, jobject, jstring native_lib_dir) {
     std::lock_guard lock(engine_mutex);
     if (backend_initialized) return string_result(env, "");
@@ -89,7 +89,7 @@ Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeIni
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeLoad(
+Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeLoad(
         JNIEnv *env, jobject, jstring model_path, jint context_size, jint thread_count) {
     std::lock_guard lock(engine_mutex);
     if (!backend_initialized) return string_result(env, "Native backend is not initialized");
@@ -120,7 +120,7 @@ Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeLoa
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeFormatChat(
+Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeFormatChat(
         JNIEnv *env, jobject, jobjectArray roles, jobjectArray contents) {
     std::lock_guard lock(engine_mutex);
     if (model == nullptr) return string_result(env, "ERROR:No model is loaded");
@@ -168,7 +168,7 @@ Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeFor
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeTokenCount(
+Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeTokenCount(
         JNIEnv *env, jobject, jstring prompt) {
     std::lock_guard lock(engine_mutex);
     if (model == nullptr) return -1;
@@ -181,7 +181,7 @@ Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeTok
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeGenerate(
+Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeGenerate(
         JNIEnv *env, jobject, jstring prompt, jint max_tokens, jfloat temperature, jint top_k, jfloat top_p,
         jint seed, jobject callback) {
     std::lock_guard lock(engine_mutex);
@@ -263,23 +263,23 @@ Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeGen
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeCancel(JNIEnv *, jobject) {
+Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeCancel(JNIEnv *, jobject) {
     cancelled = true;
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeUnload(JNIEnv *, jobject) {
+Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeUnload(JNIEnv *, jobject) {
     std::lock_guard lock(engine_mutex);
     cancelled = true;
     release_model_locked();
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeSystemInfo(JNIEnv *env, jobject) {
+Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeSystemInfo(JNIEnv *env, jobject) {
     return string_result(env, llama_print_system_info());
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_NativeLlama_00024NativeBridge_nativeEffectiveThreads(JNIEnv *, jobject) {
+Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeEffectiveThreads(JNIEnv *, jobject) {
     return effective_threads;
 }

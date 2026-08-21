@@ -20,7 +20,7 @@
 
 # llama.cpp exposes NativeBridge by its compiled JNI name and dynamically calls
 # NativeTokenCallback.onToken while streaming generated text.
--keep class com.dmitriim.localailab.ai.llamacpp.NativeLlama$NativeBridge { *; }
+-keep class com.dmitriim.localailab.ai.llamacpp.LlamaCppRuntime$NativeBridge { *; }
 -keepclassmembers class com.dmitriim.localailab.ai.llamacpp.NativeTokenCallback {
     void onToken(java.lang.String);
 }
