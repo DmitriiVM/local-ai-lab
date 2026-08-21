@@ -2,6 +2,7 @@ package com.dmitriim.localailab
 
 import android.app.Application
 import android.content.ComponentCallbacks2
+import com.dmitriim.localailab.core.result.ForegroundOperationInterruption
 import com.dmitriim.localailab.di.AppGraph
 import dev.zacsweers.metro.createGraphFactory
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +27,9 @@ class LocalAiLabApplication : Application() {
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
         if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+            graph.foregroundOperationCoordinator.interruptActiveOperations(
+                ForegroundOperationInterruption.MEMORY_PRESSURE,
+            )
             graph.runtimeMemoryManager.evictAll()
         }
     }

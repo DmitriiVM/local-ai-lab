@@ -12,16 +12,22 @@ import java.util.concurrent.atomic.AtomicLong
 @ContributesBinding(AppScope::class)
 class DefaultForegroundOperationCoordinator : ForegroundOperationCoordinator {
     private val nextId = AtomicLong()
-    private val operations = ConcurrentHashMap<Long, () -> Unit>()
+    private val operations = ConcurrentHashMap<Long, (ForegroundOperationInterruption) -> Unit>()
 
-    override fun register(cancel: () -> Unit): AutoCloseable {
+    override fun register(cancel: () -> Unit): AutoCloseable = registerInterruptionHandler(
+        onInterrupt = { cancel() },
+    )
+
+    override fun registerInterruptionHandler(
+        onInterrupt: (ForegroundOperationInterruption) -> Unit,
+    ): AutoCloseable {
         val id = nextId.incrementAndGet()
-        operations[id] = cancel
+        operations[id] = onInterrupt
         return AutoCloseable { operations.remove(id) }
     }
 
-    override fun interruptActiveOperations() {
-        operations.values.toList().forEach { cancel -> cancel() }
+    override fun interruptActiveOperations(interruption: ForegroundOperationInterruption) {
+        operations.values.toList().forEach { onInterrupt -> onInterrupt(interruption) }
         operations.clear()
     }
 }

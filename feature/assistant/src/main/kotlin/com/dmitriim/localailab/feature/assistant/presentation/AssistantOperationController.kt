@@ -6,6 +6,7 @@ import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
 import com.dmitriim.localailab.core.model.runs.RunStatus
 import com.dmitriim.localailab.core.result.ForegroundOperationCoordinator
+import com.dmitriim.localailab.core.result.ForegroundOperationInterruption
 import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionEvent
 import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionMetrics
 import com.dmitriim.localailab.core.voice.tts.SpeechSynthesisEvent
@@ -465,11 +466,27 @@ internal class AssistantOperationController(
         activeLinkedRunIds.clear()
         val job = scope.launch(Dispatchers.Default) { block() }
         activeJob = job
-        val registration = operationCoordinator.register(::cancel)
+        val registration = operationCoordinator.registerInterruptionHandler { interruption ->
+            when (interruption) {
+                ForegroundOperationInterruption.APP_BACKGROUNDED -> cancel()
+                ForegroundOperationInterruption.MEMORY_PRESSURE -> interruptForMemoryPressure()
+            }
+        }
         job.invokeOnCompletion {
             registration.close()
             if (activeJob === job) activeJob = null
         }
+    }
+
+    private fun interruptForMemoryPressure() {
+        if (activeJob?.isActive != true) return
+        state.update {
+            it.copy(
+                errorMessage = "Generation stopped because the device is low on memory. " +
+                    "Close other apps or choose a smaller model, then try again.",
+            )
+        }
+        cancel()
     }
 
     private fun handleOperationFailure(error: Throwable) {
