@@ -78,6 +78,7 @@ internal class ModelTransferScheduler(
         }
         val job = JobInfo.Builder(jobId(entry.manifest.modelId), ComponentName(application, ModelDownloadJobService::class.java))
             .setRequiredNetwork(networkRequest(networkPolicy))
+            .setRequiresBatteryNotLow(true)
             .setEstimatedNetworkBytes(entry.download.expectedBytes, 0)
             .setUserInitiated(true)
             .setExtras(extras)
@@ -117,6 +118,9 @@ internal class ModelTransferScheduler(
     private fun networkRequest(policy: ModelTransferNetworkPolicy): NetworkRequest = NetworkRequest.Builder()
         .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
         .apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED)
+            }
             if (policy == ModelTransferNetworkPolicy.WIFI_ONLY) {
                 addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
             }
@@ -124,6 +128,7 @@ internal class ModelTransferScheduler(
         .build()
 
     private fun workConstraints(policy: ModelTransferNetworkPolicy): Constraints = Constraints.Builder().apply {
+        setRequiresBatteryNotLow(true)
         val fallbackType = when (policy) {
             ModelTransferNetworkPolicy.WIFI_ONLY -> NetworkType.UNMETERED
             ModelTransferNetworkPolicy.ANY_NETWORK -> NetworkType.CONNECTED
