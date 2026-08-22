@@ -3,6 +3,7 @@ package com.dmitriim.localailab.source.models.transfer
 import android.os.StatFs
 import com.dmitriim.localailab.core.model.library.CatalogArchiveFormat
 import com.dmitriim.localailab.core.model.library.CatalogModel
+import com.dmitriim.localailab.core.model.library.downloadStorageEstimate
 import java.io.File
 import java.util.Locale
 
@@ -22,6 +23,7 @@ internal class ModelDownloadStoragePreflight(
 
     private fun requiredAdditionalBytes(entry: CatalogModel, stagingDirectory: File): Long {
         val download = entry.download
+        val estimate = entry.downloadStorageEstimate()
         val remainingDownloadBytes = download.archive?.let { archive ->
             val archiveFile = File(
                 stagingDirectory,
@@ -31,26 +33,10 @@ internal class ModelDownloadStoragePreflight(
         } ?: (download.expectedBytes - stagingDirectory.totalFileBytes().coerceAtMost(download.expectedBytes))
             .coerceAtLeast(0L)
 
-        val extractionBytes = download.archive?.let { archive ->
-            val declaredFileBytes = entry.manifest.files.sumOf { it.expectedBytes ?: 0L }
-            if (entry.manifest.files.any { it.expectedBytes == null }) {
-                // Archives with directory-only manifest entries cannot state their complete expanded size.
-                // Reserving at least the archive size keeps that catalog shape conservative.
-                maxOf(declaredFileBytes, archive.expectedBytes)
-            } else {
-                declaredFileBytes
-            }
-        } ?: 0L
-
         return remainingDownloadBytes
-            .saturatingAdd(extractionBytes)
-            .saturatingAdd(safetyReserveBytes(entry.download.expectedBytes))
+            .saturatingAdd(estimate.temporaryExtractionBytes)
+            .saturatingAdd(estimate.safetyReserveBytes)
     }
-
-    private fun safetyReserveBytes(downloadBytes: Long): Long = maxOf(
-        MINIMUM_SAFETY_RESERVE_BYTES,
-        downloadBytes / SAFETY_RESERVE_DIVISOR,
-    )
 
     private fun File.totalFileBytes(): Long = walkTopDown()
         .filter(File::isFile)
@@ -68,8 +54,6 @@ internal class ModelDownloadStoragePreflight(
     private companion object {
         const val ARCHIVE_ZIP = ".download.zip"
         const val ARCHIVE_TAR_BZIP2 = ".download.tar.bz2"
-        const val MINIMUM_SAFETY_RESERVE_BYTES = 256L * 1024 * 1024
-        const val SAFETY_RESERVE_DIVISOR = 10L
         const val MEBIBYTE = 1024L * 1024
         const val GIBIBYTE = 1024L * MEBIBYTE
     }

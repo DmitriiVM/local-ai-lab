@@ -25,9 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.core.model.library.CatalogModel
 import com.dmitriim.localailab.core.model.library.ModelCompatibilityState
 import com.dmitriim.localailab.core.model.library.ModelTransferState
 import com.dmitriim.localailab.core.model.library.ModelValidationState
+import com.dmitriim.localailab.core.model.library.downloadStorageEstimate
 import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
@@ -104,6 +106,23 @@ internal fun CompatibilityDetails(uiState: ModelsUiState, modelId: ModelId) {
             }
             else -> Text(stringResource(CoreUiR.string.models_model_details_screen_49))
         }
+    }
+}
+
+@Composable
+internal fun DownloadStorageDetails(model: CatalogModel) {
+    val estimate = model.downloadStorageEstimate()
+    DetailsSection("Download and storage") {
+        DetailValue("Download", estimate.downloadBytes.toDetailsReadableBytes())
+        DetailValue("Peak app storage", estimate.peakRequiredBytes.toDetailsReadableBytes())
+        if (estimate.temporaryExtractionBytes > 0L) {
+            DetailValue("Temporary extraction", estimate.temporaryExtractionBytes.toDetailsReadableBytes())
+        }
+        Text(
+            "Peak storage includes the download, temporary extraction when needed, and a safety reserve.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

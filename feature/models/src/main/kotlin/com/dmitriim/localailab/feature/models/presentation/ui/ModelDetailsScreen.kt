@@ -144,6 +144,7 @@ private fun ModelDetailsContent(
                     manifest.approximateRamBytes?.let { DetailValue("Approximate RAM", it.toDetailsReadableBytes()) }
                 }
             }
+            catalogModel?.let { model -> item { DownloadStorageDetails(model) } }
             item {
                 DetailsSection("Model") {
                     DetailValue("Family", manifest.family)
