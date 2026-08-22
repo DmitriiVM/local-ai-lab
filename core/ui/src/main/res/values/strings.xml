@@ -185,6 +185,7 @@
     <string name="models_model_details_screen_format_5">• %1$s</string>
     <string name="models_model_details_screen_format_6">SHA-256: %1$s</string>
     <string name="models_model_details_screen_format_7">Waiting to download · %1$s</string>
+    <string name="models_model_download_battery_requirement">Starts automatically when the battery is no longer low.</string>
     <string name="models_model_details_screen_format_8">%1$s / %2$s</string>
     <string name="models_model_details_screen_format_9">%1$s / %2$s</string>
     <string name="models_models_screen_format_10">Models (%1$s)</string>

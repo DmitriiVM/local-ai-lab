@@ -107,6 +107,10 @@ internal fun ModelActionBar(
 @Composable
 private fun TransferQueuedActions(transfer: ModelTransferState.Queued, onPause: () -> Unit, onCancel: () -> Unit, onUseAnyNetwork: () -> Unit) {
     Text(stringResource(CoreUiR.string.models_model_details_screen_format_7, transfer.networkPolicy.detailsNetworkLabel()))
+    Text(
+        stringResource(CoreUiR.string.models_model_download_battery_requirement),
+        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+    )
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         OutlinedButton(onClick = onPause, modifier = Modifier.weight(1f)) { Text(stringResource(CoreUiR.string.models_model_details_screen_51)) }
         OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) { Text(stringResource(CoreUiR.string.models_model_details_screen_52)) }
