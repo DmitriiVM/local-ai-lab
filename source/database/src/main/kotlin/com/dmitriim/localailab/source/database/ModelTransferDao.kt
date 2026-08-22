@@ -22,15 +22,27 @@ interface ModelTransferDao {
 
     @Query(
         "UPDATE model_transfers SET status = :runningStatus, updatedAtEpochMs = :updatedAtEpochMs " +
-            "WHERE modelId = :modelId AND status = :queuedStatus AND executionGeneration = :executionGeneration",
+            "WHERE modelId = :modelId AND status = :queuedStatus AND executionGeneration = :executionGeneration " +
+            "AND NOT EXISTS (SELECT 1 FROM model_transfers " +
+            "WHERE status = :runningStatus OR status = :installingStatus)",
     )
-    suspend fun claimQueued(
+    suspend fun claimQueuedWhenNoTransferIsActive(
         modelId: String,
         executionGeneration: Long,
         queuedStatus: String,
         runningStatus: String,
+        installingStatus: String,
         updatedAtEpochMs: Long,
     ): Int
+
+    @Query("SELECT EXISTS(SELECT 1 FROM model_transfers WHERE status = :runningStatus OR status = :installingStatus)")
+    suspend fun hasActiveTransfer(
+        runningStatus: String,
+        installingStatus: String,
+    ): Boolean
+
+    @Query("SELECT * FROM model_transfers WHERE status = :queuedStatus ORDER BY updatedAtEpochMs ASC LIMIT 1")
+    suspend fun nextQueued(queuedStatus: String): ModelTransferEntity?
 
     @Query(
         "UPDATE model_transfers SET status = :status, completedBytes = :completedBytes, " +

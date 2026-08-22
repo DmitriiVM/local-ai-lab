@@ -53,13 +53,23 @@ class ModelTransferStateStore(
         return transfer.toStored()
     }
 
-    internal suspend fun claimQueued(modelId: ModelId, executionGeneration: Long): Boolean = dao.claimQueued(
-        modelId = modelId.value,
-        executionGeneration = executionGeneration,
-        queuedStatus = PersistedModelTransferStatus.QUEUED.name,
+    internal suspend fun claimQueuedWhenNoTransferIsActive(modelId: ModelId, executionGeneration: Long): Boolean =
+        dao.claimQueuedWhenNoTransferIsActive(
+            modelId = modelId.value,
+            executionGeneration = executionGeneration,
+            queuedStatus = PersistedModelTransferStatus.QUEUED.name,
+            runningStatus = PersistedModelTransferStatus.RUNNING.name,
+            installingStatus = PersistedModelTransferStatus.INSTALLING.name,
+            updatedAtEpochMs = System.currentTimeMillis(),
+        ) == 1
+
+    internal suspend fun hasActiveTransfer(): Boolean = dao.hasActiveTransfer(
         runningStatus = PersistedModelTransferStatus.RUNNING.name,
-        updatedAtEpochMs = System.currentTimeMillis(),
-    ) == 1
+        installingStatus = PersistedModelTransferStatus.INSTALLING.name,
+    )
+
+    internal suspend fun nextQueued(): StoredModelTransfer? =
+        dao.nextQueued(PersistedModelTransferStatus.QUEUED.name)?.toStored()
 
     internal suspend fun update(
         transfer: StoredModelTransfer,

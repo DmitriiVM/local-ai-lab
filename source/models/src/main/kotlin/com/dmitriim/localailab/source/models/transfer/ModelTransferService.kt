@@ -40,6 +40,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /** Owns persisted model download state, resumable transfer, and transactional installation. */
 @Inject
@@ -57,11 +59,16 @@ class ModelTransferService(
     ModelDownloadExecutor {
     override val catalog: Flow<List<CatalogModel>> = MutableStateFlow(ModelCatalog.entries).asStateFlow()
     override val transfers: Flow<Map<ModelId, ModelTransferState>> = transferState.transfers
+    private val transferSchedulingMutex = Mutex()
+    private val transferScheduler = ModelTransferScheduler(application)
 
     init {
         ModelDownloadRuntime.executor = this
         applicationScope.launch(Dispatchers.IO) {
-            ModelTransferRecovery(application, installedModels, transferState).reconcile()
+            transferSchedulingMutex.withLock {
+                ModelTransferRecovery(application, installedModels, transferState).reconcile()
+                scheduleNextQueuedLocked()
+            }
         }
     }
 
@@ -94,14 +101,18 @@ class ModelTransferService(
     }
 
     override suspend fun pauseTransfer(modelId: ModelId) {
-        val transfer = transferState.find(modelId) ?: return
-        if (transfer.status == PersistedModelTransferStatus.INSTALLING) return
-        transferState.update(
-            transfer,
-            status = PersistedModelTransferStatus.PAUSED,
-            message = "Paused by user.",
-        )
-        ModelTransferScheduler(application).cancel(modelId)
+        transferSchedulingMutex.withLock {
+            val transfer = transferState.find(modelId) ?: return@withLock
+            if (transfer.status == PersistedModelTransferStatus.INSTALLING) return@withLock
+            val wasRunning = transfer.status == PersistedModelTransferStatus.RUNNING
+            transferState.update(
+                transfer,
+                status = PersistedModelTransferStatus.PAUSED,
+                message = "Paused by user.",
+            )
+            transferScheduler.cancel(modelId)
+            if (!wasRunning) scheduleNextQueuedLocked()
+        }
     }
 
     override suspend fun resumeTransfer(
@@ -118,17 +129,25 @@ class ModelTransferService(
     }
 
     override suspend fun cancelTransfer(modelId: ModelId) {
-        val transfer = transferState.find(modelId) ?: return
-        if (transfer.status == PersistedModelTransferStatus.INSTALLING) return
-        transferState.delete(modelId)
-        ModelTransferScheduler(application).cancel(modelId)
-        stagingDirectory(modelId).deleteRecursively()
+        transferSchedulingMutex.withLock {
+            val transfer = transferState.find(modelId) ?: return@withLock
+            if (transfer.status == PersistedModelTransferStatus.INSTALLING) return@withLock
+            val wasRunning = transfer.status == PersistedModelTransferStatus.RUNNING
+            transferState.delete(modelId)
+            transferScheduler.cancel(modelId)
+            stagingDirectory(modelId).deleteRecursively()
+            if (!wasRunning) scheduleNextQueuedLocked()
+        }
     }
 
     override suspend fun executeScheduledDownload(modelId: ModelId, executionGeneration: Long) {
-        val transfer = transferState.find(modelId) ?: return
-        if (!transferState.claimQueued(modelId, executionGeneration)) return
-        val claimed = requireNotNull(transferState.find(modelId))
+        val claimed = transferSchedulingMutex.withLock {
+            if (!transferState.claimQueuedWhenNoTransferIsActive(modelId, executionGeneration)) {
+                null
+            } else {
+                requireNotNull(transferState.find(modelId))
+            }
+        } ?: return
         try {
             val entry = catalogEntry(modelId)
             require(claimed.catalogVersion == requireNotNull(entry.manifest.catalogVersion) && claimed.revision == entry.manifest.revision) {
@@ -154,32 +173,47 @@ class ModelTransferService(
                 message = error.message ?: if (retryable) "Download interrupted. Tap Resume to continue." else "Download failed.",
             )
             Log.e(TAG, "Catalog model transfer failed: modelId=${modelId.value}", error)
+        } finally {
+            transferSchedulingMutex.withLock { scheduleNextQueuedLocked() }
         }
     }
 
     private suspend fun queue(entry: CatalogModel, networkPolicy: ModelTransferNetworkPolicy) {
-        val modelId = entry.manifest.modelId
-        val stagingDirectory = stagingDirectory(modelId)
-        require(stagingDirectory.mkdirs() || stagingDirectory.isDirectory) {
-            "Could not prepare the download directory."
-        }
-        ModelDownloadStoragePreflight(application.filesDir).requireSpaceFor(entry, stagingDirectory)
-        val queued = transferState.queueNew(
-            modelId = modelId,
-            catalogVersion = requireNotNull(entry.manifest.catalogVersion),
-            revision = entry.manifest.revision,
-            totalBytes = entry.download.expectedBytes,
-            networkPolicy = networkPolicy,
-        )
-        try {
-            ModelTransferScheduler(application).schedule(entry, queued.executionGeneration, networkPolicy)
-        } catch (error: Throwable) {
-            transferState.update(
-                queued,
-                status = PersistedModelTransferStatus.FAILED,
-                message = error.message ?: "Download could not be scheduled.",
+        transferSchedulingMutex.withLock {
+            val modelId = entry.manifest.modelId
+            val stagingDirectory = stagingDirectory(modelId)
+            require(stagingDirectory.mkdirs() || stagingDirectory.isDirectory) {
+                "Could not prepare the download directory."
+            }
+            ModelDownloadStoragePreflight(application.filesDir).requireSpaceFor(entry, stagingDirectory)
+            transferState.queueNew(
+                modelId = modelId,
+                catalogVersion = requireNotNull(entry.manifest.catalogVersion),
+                revision = entry.manifest.revision,
+                totalBytes = entry.download.expectedBytes,
+                networkPolicy = networkPolicy,
             )
-            throw error
+            scheduleNextQueuedLocked()
+        }
+    }
+
+    private suspend fun scheduleNextQueuedLocked() {
+        while (!transferState.hasActiveTransfer()) {
+            val transfer = transferState.nextQueued() ?: return
+            try {
+                transferScheduler.schedule(
+                    catalogEntry(transfer.modelIdAsModelId()),
+                    transfer.executionGeneration,
+                    transfer.networkPolicy,
+                )
+                return
+            } catch (error: Throwable) {
+                transferState.update(
+                    transfer,
+                    status = PersistedModelTransferStatus.FAILED,
+                    message = error.message ?: "Download could not be scheduled.",
+                )
+            }
         }
     }
 
