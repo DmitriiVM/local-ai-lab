@@ -16,5 +16,7 @@ data class ModelTransferEntity(
     val totalBytes: Long,
     val currentRelativePath: String?,
     val message: String?,
+    val retryAttempt: Int,
+    val nextAttemptAtEpochMs: Long,
     val updatedAtEpochMs: Long,
 )

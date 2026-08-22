@@ -67,6 +67,7 @@ class ModelTransferService(
         applicationScope.launch(Dispatchers.IO) {
             transferSchedulingMutex.withLock {
                 ModelTransferRecovery(application, installedModels, transferState).reconcile()
+                scheduleDeferredRetriesLocked()
                 scheduleNextQueuedLocked()
             }
         }
@@ -157,21 +158,15 @@ class ModelTransferService(
         } catch (cancelled: CancellationException) {
             val latest = transferState.find(modelId)
             if (latest?.status == PersistedModelTransferStatus.RUNNING && latest.executionGeneration == executionGeneration) {
-                transferState.update(
-                    latest,
-                    status = PersistedModelTransferStatus.PAUSED,
-                    message = "Download interrupted. Tap Resume to continue.",
+                handleDownloadFailure(
+                    modelId,
+                    executionGeneration,
+                    ModelDownloadFailure("Download interrupted.", retryable = true),
                 )
             }
             throw cancelled
         } catch (error: Throwable) {
-            val latest = transferState.find(modelId) ?: return
-            val retryable = error.isRetryableDownloadFailure()
-            transferState.update(
-                latest,
-                status = if (retryable) PersistedModelTransferStatus.PAUSED else PersistedModelTransferStatus.FAILED,
-                message = error.message ?: if (retryable) "Download interrupted. Tap Resume to continue." else "Download failed.",
-            )
+            handleDownloadFailure(modelId, executionGeneration, error)
             Log.e(TAG, "Catalog model transfer failed: modelId=${modelId.value}", error)
         } finally {
             transferSchedulingMutex.withLock { scheduleNextQueuedLocked() }
@@ -215,6 +210,72 @@ class ModelTransferService(
                 )
             }
         }
+    }
+
+    private suspend fun handleDownloadFailure(modelId: ModelId, executionGeneration: Long, error: Throwable) {
+        transferSchedulingMutex.withLock {
+            val transfer = transferState.find(modelId) ?: return@withLock
+            if (transfer.status != PersistedModelTransferStatus.RUNNING || transfer.executionGeneration != executionGeneration) {
+                return@withLock
+            }
+            if (!error.isRetryableDownloadFailure()) {
+                transferState.update(
+                    transfer,
+                    status = PersistedModelTransferStatus.FAILED,
+                    message = error.message ?: "Download failed.",
+                )
+                return@withLock
+            }
+            val delayMillis = ModelDownloadRetryPolicy.delayMillis(
+                retryAttempt = transfer.retryAttempt,
+                minimumDelayMillis = (error as? ModelDownloadFailure)?.retryAfterMillis ?: 0L,
+            )
+            if (delayMillis == null) {
+                transferState.update(
+                    transfer,
+                    status = PersistedModelTransferStatus.PAUSED,
+                    message = "Automatic retries exhausted. Tap Resume to continue.",
+                )
+                return@withLock
+            }
+            val retry = transferState.scheduleRetry(transfer, delayMillis)
+            try {
+                transferScheduler.scheduleRetry(
+                    modelId = modelId,
+                    executionGeneration = retry.executionGeneration,
+                    networkPolicy = retry.networkPolicy,
+                    delayMillis = delayMillis,
+                )
+            } catch (schedulingError: Throwable) {
+                transferState.update(
+                    retry,
+                    status = PersistedModelTransferStatus.PAUSED,
+                    message = schedulingError.message ?: "Automatic retry could not be scheduled. Tap Resume to continue.",
+                )
+            }
+        }
+    }
+
+    private suspend fun scheduleDeferredRetriesLocked() {
+        val now = System.currentTimeMillis()
+        transferState.all()
+            .filter { it.status == PersistedModelTransferStatus.QUEUED && it.nextAttemptAtEpochMs > now }
+            .forEach { transfer ->
+                try {
+                    transferScheduler.scheduleRetry(
+                        modelId = transfer.modelIdAsModelId(),
+                        executionGeneration = transfer.executionGeneration,
+                        networkPolicy = transfer.networkPolicy,
+                        delayMillis = transfer.nextAttemptAtEpochMs - now,
+                    )
+                } catch (error: Throwable) {
+                    transferState.update(
+                        transfer,
+                        status = PersistedModelTransferStatus.PAUSED,
+                        message = error.message ?: "Automatic retry could not be scheduled. Tap Resume to continue.",
+                    )
+                }
+            }
     }
 
     private suspend fun downloadAndInstall(entry: CatalogModel, initialTransfer: StoredModelTransfer) {

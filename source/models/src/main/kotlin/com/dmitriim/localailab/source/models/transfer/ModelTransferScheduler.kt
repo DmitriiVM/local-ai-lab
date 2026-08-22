@@ -18,6 +18,7 @@ import androidx.work.workDataOf
 import com.dmitriim.localailab.core.model.library.CatalogModel
 import com.dmitriim.localailab.core.model.library.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.core.model.manifest.ModelId
+import java.util.concurrent.TimeUnit
 
 /** Selects one persisted scheduling mechanism; both invoke the same transactional installer. */
 internal class ModelTransferScheduler(
@@ -40,6 +41,29 @@ internal class ModelTransferScheduler(
             application.getSystemService(JobScheduler::class.java).cancel(jobId(modelId))
         }
         WorkManager.getInstance(application).cancelUniqueWork(workName(modelId))
+    }
+
+    fun scheduleRetry(
+        modelId: ModelId,
+        executionGeneration: Long,
+        networkPolicy: ModelTransferNetworkPolicy,
+        delayMillis: Long,
+    ) {
+        val request = OneTimeWorkRequestBuilder<ModelDownloadWorker>()
+            .setConstraints(workConstraints(networkPolicy))
+            .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
+            .setInputData(
+                workDataOf(
+                    MODEL_ID_KEY to modelId.value,
+                    MODEL_TRANSFER_GENERATION_KEY to executionGeneration,
+                ),
+            )
+            .build()
+        WorkManager.getInstance(application).enqueueUniqueWork(
+            workName(modelId),
+            ExistingWorkPolicy.APPEND_OR_REPLACE,
+            request,
+        )
     }
 
     @TargetApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)

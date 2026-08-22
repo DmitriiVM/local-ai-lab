@@ -12,7 +12,7 @@ import androidx.room.RoomDatabase
         ConversationEntity::class,
         ConversationMessageEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class AppModelDatabase : RoomDatabase() {

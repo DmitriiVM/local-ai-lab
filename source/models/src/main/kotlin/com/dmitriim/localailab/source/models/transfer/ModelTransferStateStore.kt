@@ -36,6 +36,7 @@ class ModelTransferStateStore(
         networkPolicy: ModelTransferNetworkPolicy,
     ): StoredModelTransfer {
         val existing = dao.find(modelId.value)
+        val now = System.currentTimeMillis()
         val transfer = ModelTransferEntity(
             modelId = modelId.value,
             catalogVersion = catalogVersion,
@@ -47,7 +48,9 @@ class ModelTransferStateStore(
             totalBytes = totalBytes,
             currentRelativePath = existing?.currentRelativePath,
             message = null,
-            updatedAtEpochMs = System.currentTimeMillis(),
+            retryAttempt = 0,
+            nextAttemptAtEpochMs = now,
+            updatedAtEpochMs = now,
         )
         dao.upsert(transfer)
         return transfer.toStored()
@@ -69,7 +72,18 @@ class ModelTransferStateStore(
     )
 
     internal suspend fun nextQueued(): StoredModelTransfer? =
-        dao.nextQueued(PersistedModelTransferStatus.QUEUED.name)?.toStored()
+        dao.nextQueued(PersistedModelTransferStatus.QUEUED.name, System.currentTimeMillis())?.toStored()
+
+    internal suspend fun scheduleRetry(transfer: StoredModelTransfer, delayMillis: Long): StoredModelTransfer {
+        val now = System.currentTimeMillis()
+        return update(
+            transfer,
+            status = PersistedModelTransferStatus.QUEUED,
+            message = "Retrying automatically.",
+            retryAttempt = transfer.retryAttempt + 1,
+            nextAttemptAtEpochMs = now.saturatingAdd(delayMillis),
+        )
+    }
 
     internal suspend fun update(
         transfer: StoredModelTransfer,
@@ -77,6 +91,8 @@ class ModelTransferStateStore(
         completedBytes: Long = transfer.completedBytes,
         currentRelativePath: String? = transfer.currentRelativePath,
         message: String? = transfer.message,
+        retryAttempt: Int = transfer.retryAttempt,
+        nextAttemptAtEpochMs: Long = transfer.nextAttemptAtEpochMs,
     ): StoredModelTransfer {
         val updated = ModelTransferEntity(
             modelId = transfer.modelId,
@@ -89,6 +105,8 @@ class ModelTransferStateStore(
             totalBytes = transfer.totalBytes,
             currentRelativePath = currentRelativePath,
             message = message,
+            retryAttempt = retryAttempt,
+            nextAttemptAtEpochMs = nextAttemptAtEpochMs,
             updatedAtEpochMs = System.currentTimeMillis(),
         )
         dao.upsert(updated)
@@ -163,7 +181,12 @@ class ModelTransferStateStore(
         totalBytes = totalBytes,
         currentRelativePath = currentRelativePath,
         message = message,
+        retryAttempt = retryAttempt,
+        nextAttemptAtEpochMs = nextAttemptAtEpochMs,
     )
+
+    private fun Long.saturatingAdd(other: Long): Long =
+        if (this > Long.MAX_VALUE - other) Long.MAX_VALUE else this + other
 
     private fun ModelTransferEntity.toState(): ModelTransferState = when (PersistedModelTransferStatus.valueOf(status)) {
         PersistedModelTransferStatus.QUEUED -> ModelTransferState.Queued(

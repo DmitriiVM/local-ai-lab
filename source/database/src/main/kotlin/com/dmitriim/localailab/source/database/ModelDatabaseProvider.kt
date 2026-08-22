@@ -15,7 +15,7 @@ class ModelDatabaseProvider(application: Application) {
         application,
         AppModelDatabase::class.java,
         "local-ai-playground.db",
-    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
+    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
 
     private companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -40,6 +40,13 @@ class ModelDatabaseProvider(application: Application) {
                         "modelId TEXT NOT NULL, relativePath TEXT NOT NULL, eTag TEXT, lastModified TEXT, " +
                         "verified INTEGER NOT NULL, PRIMARY KEY(modelId, relativePath))",
                 )
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE model_transfers ADD COLUMN retryAttempt INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE model_transfers ADD COLUMN nextAttemptAtEpochMs INTEGER NOT NULL DEFAULT 0")
             }
         }
     }

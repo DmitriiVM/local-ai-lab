@@ -28,11 +28,23 @@ internal class ModelTransferRecovery(
                 return@forEach
             }
             activeIds += ModelImportPolicy.directoryName(modelId)
-            if (transfer.status == PersistedModelTransferStatus.RUNNING || transfer.status == PersistedModelTransferStatus.INSTALLING) {
+            if (transfer.status == PersistedModelTransferStatus.RUNNING) {
+                val retryDelay = ModelDownloadRetryPolicy.delayMillis(transfer.retryAttempt)
+                if (retryDelay == null) {
+                    transferState.update(
+                        transfer,
+                        status = PersistedModelTransferStatus.PAUSED,
+                        message = "Automatic retries exhausted. Tap Resume to continue.",
+                    )
+                } else {
+                    transferState.scheduleRetry(transfer, retryDelay)
+                }
+                ModelTransferScheduler(application).cancel(modelId)
+            } else if (transfer.status == PersistedModelTransferStatus.INSTALLING) {
                 transferState.update(
                     transfer,
                     status = PersistedModelTransferStatus.PAUSED,
-                    message = "Download interrupted. Tap Resume to continue.",
+                    message = "Installation interrupted. Tap Resume to continue.",
                 )
                 ModelTransferScheduler(application).cancel(modelId)
             }
