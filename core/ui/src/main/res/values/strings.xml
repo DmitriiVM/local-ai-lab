@@ -65,6 +65,7 @@
     <string name="models_model_details_screen_67" formatted="false">Keep download</string>
     <string name="models_model_details_screen_68" formatted="false">Model unavailable</string>
     <string name="models_model_details_screen_69" formatted="false">Back to models</string>
+    <string name="models_model_transfer_speed_eta">%1$s/s · %2$s remaining</string>
     <string name="models_model_download_button_70" formatted="false">Download</string>
     <string name="models_models_screen_71" formatted="false">Delete</string>
     <string name="models_models_screen_72" formatted="false">Cancel</string>

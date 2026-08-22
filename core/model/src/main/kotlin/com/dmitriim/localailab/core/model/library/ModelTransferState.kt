@@ -11,6 +11,8 @@ sealed interface ModelTransferState {
         val completedBytes: Long,
         val totalBytes: Long,
         val networkPolicy: ModelTransferNetworkPolicy,
+        val bytesPerSecond: Long? = null,
+        val estimatedRemainingMillis: Long? = null,
     ) : ModelTransferState
     data class Paused(
         val completedBytes: Long,

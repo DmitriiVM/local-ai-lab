@@ -29,6 +29,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
@@ -49,7 +50,24 @@ class ModelTransferService(
 ) : ModelTransfers,
     ModelDownloadExecutor {
     override val catalog: Flow<List<CatalogModel>> = MutableStateFlow(ModelCatalog.entries).asStateFlow()
-    override val transfers: Flow<Map<ModelId, ModelTransferState>> = transferState.transfers
+    private val throughputEstimator = ModelTransferThroughputEstimator()
+    override val transfers: Flow<Map<ModelId, ModelTransferState>> = combine(
+        transferState.transfers,
+        throughputEstimator.estimates,
+    ) { transfers, throughput ->
+        transfers.mapValues { (modelId, state) ->
+            if (state is ModelTransferState.Running) {
+                throughput[modelId]?.let { estimate ->
+                    state.copy(
+                        bytesPerSecond = estimate.bytesPerSecond,
+                        estimatedRemainingMillis = estimate.estimatedRemainingMillis,
+                    )
+                } ?: state
+            } else {
+                state
+            }
+        }
+    }
     private val transferSchedulingMutex = Mutex()
     private val transferScheduler = ModelTransferScheduler(application)
     private val fileDownloader = ModelFileDownloader(transferState, ::ensureRunning, ::publishDownloadProgress)
@@ -110,6 +128,7 @@ class ModelTransferService(
                 status = PersistedModelTransferStatus.PAUSED,
                 message = "Paused by user.",
             )
+            throughputEstimator.clear(modelId)
             transferScheduler.cancel(modelId)
             if (!wasRunning) scheduleNextQueuedLocked()
         }
@@ -134,6 +153,7 @@ class ModelTransferService(
             if (transfer.status == PersistedModelTransferStatus.INSTALLING) return@withLock
             val wasRunning = transfer.status == PersistedModelTransferStatus.RUNNING
             transferState.delete(modelId)
+            throughputEstimator.clear(modelId)
             transferScheduler.cancel(modelId)
             stagingDirectory(modelId).deleteRecursively()
             if (!wasRunning) scheduleNextQueuedLocked()
@@ -171,6 +191,7 @@ class ModelTransferService(
             handleDownloadFailure(modelId, executionGeneration, error)
             Log.e(TAG, "Catalog model transfer failed: modelId=${modelId.value}", error)
         } finally {
+            throughputEstimator.clear(modelId)
             transferSchedulingMutex.withLock { scheduleNextQueuedLocked() }
         }
     }
@@ -220,6 +241,7 @@ class ModelTransferService(
             if (transfer.status != PersistedModelTransferStatus.RUNNING || transfer.executionGeneration != executionGeneration) {
                 return@withLock
             }
+            throughputEstimator.clear(modelId)
             if (!error.isRetryableDownloadFailure()) {
                 transferState.update(
                     transfer,
@@ -281,6 +303,7 @@ class ModelTransferService(
     }
 
     private fun publishDownloadProgress(transfer: StoredModelTransfer) {
+        throughputEstimator.record(transfer)
         updateModelDownloadNotification(application, transfer.completedBytes, transfer.totalBytes)
     }
 
