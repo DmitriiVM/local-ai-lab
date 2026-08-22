@@ -150,6 +150,7 @@ class ModelTransferService(
             }
         } ?: return
         try {
+            publishDownloadProgress(claimed)
             val entry = catalogEntry(modelId)
             require(claimed.catalogVersion == requireNotNull(entry.manifest.catalogVersion) && claimed.revision == entry.manifest.revision) {
                 "The bundled catalog changed. Restart this download."
@@ -309,6 +310,7 @@ class ModelTransferService(
                         completedBytes = completed,
                         currentRelativePath = download.relativePath,
                     ) ?: throw CancellationException("The download was paused.")
+                    publishDownloadProgress(transfer)
                     return@forEach
                 }
                 transfer = downloadFileWithRetries(
@@ -355,7 +357,7 @@ class ModelTransferService(
                 transfer,
                 completedBytes = archive.expectedBytes,
                 currentRelativePath = relativePath,
-            ) ?: throw CancellationException("The download was paused.")
+            )?.also(::publishDownloadProgress) ?: throw CancellationException("The download was paused.")
         } else {
             downloadFileWithRetries(
                 transfer = transfer,
@@ -506,12 +508,14 @@ class ModelTransferService(
                 if (progress.written != expectedBytes) {
                     failDownload(ModelDownloadFailure("Download ended before the expected size.", retryable = true))
                 }
-                return transferState.updateWhileRunning(
+                val updated = transferState.updateWhileRunning(
                     progress.transfer,
                     completedBytes = completedBeforeFile + progress.written,
                     currentRelativePath = relativePath,
                     message = null,
                 ) ?: failDownload(CancellationException("The download was paused."))
+                publishDownloadProgress(updated)
+                return updated
             }
         }
     }
@@ -546,6 +550,7 @@ class ModelTransferService(
                             currentRelativePath = relativePath,
                             message = null,
                         ) ?: failDownload(CancellationException("The download was paused."))
+                        publishDownloadProgress(transfer)
                         lastReportedBytes = written
                         lastReportedAt = now
                     }
@@ -556,6 +561,10 @@ class ModelTransferService(
     }
 
     private data class DownloadProgress(val transfer: StoredModelTransfer, val written: Long)
+
+    private fun publishDownloadProgress(transfer: StoredModelTransfer) {
+        updateModelDownloadNotification(application, transfer.completedBytes, transfer.totalBytes)
+    }
 
     private suspend fun ensureRunning(modelId: ModelId, generation: Long) {
         coroutineContext.ensureActive()

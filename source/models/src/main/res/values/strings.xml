@@ -1,4 +1,5 @@
 <resources>
     <string name="model_download_notification_channel_name">Model downloads</string>
     <string name="model_download_notification_content">The installation is verified before it becomes available.</string>
+    <string name="model_download_notification_progress">%1$s of %2$s downloaded</string>
 </resources>
