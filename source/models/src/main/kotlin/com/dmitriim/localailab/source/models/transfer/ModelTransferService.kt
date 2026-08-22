@@ -159,9 +159,11 @@ class ModelTransferService(
 
     private suspend fun queue(entry: CatalogModel, networkPolicy: ModelTransferNetworkPolicy) {
         val modelId = entry.manifest.modelId
-        require(stagingDirectory(modelId).mkdirs() || stagingDirectory(modelId).isDirectory) {
+        val stagingDirectory = stagingDirectory(modelId)
+        require(stagingDirectory.mkdirs() || stagingDirectory.isDirectory) {
             "Could not prepare the download directory."
         }
+        ModelDownloadStoragePreflight(application.filesDir).requireSpaceFor(entry, stagingDirectory)
         val queued = transferState.queueNew(
             modelId = modelId,
             catalogVersion = requireNotNull(entry.manifest.catalogVersion),
