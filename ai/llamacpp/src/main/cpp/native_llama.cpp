@@ -15,6 +15,10 @@
 namespace {
 
 constexpr char kLogTag[] = "LocalAiLlama";
+constexpr char kNativeGenerationResultClass[] =
+        "com/dmitriim/localailab/ai/llamacpp/NativeGenerationResult";
+constexpr char kNativeGenerationResultConstructor[] =
+        "(Ljava/lang/String;Ljava/lang/String;IIJJJJLjava/lang/String;)V";
 
 std::mutex engine_mutex;
 std::atomic_bool cancelled = false;
@@ -47,12 +51,46 @@ jstring string_result(JNIEnv *env, const std::string &value) {
     return env->NewStringUTF(value.c_str());
 }
 
-jobjectArray array_result(JNIEnv *env, const std::vector<std::string> &values) {
-    jclass string_class = env->FindClass("java/lang/String");
-    jobjectArray result = env->NewObjectArray(static_cast<jsize>(values.size()), string_class, nullptr);
-    for (size_t index = 0; index < values.size(); ++index) {
-        env->SetObjectArrayElement(result, static_cast<jsize>(index), string_result(env, values[index]));
+jobject generation_result(
+        JNIEnv *env,
+        const char *error_message,
+        const std::string &text = "",
+        jint prompt_token_count = 0,
+        jint generated_token_count = 0,
+        jlong first_token_latency_ms = -1,
+        jlong prompt_duration_ms = 0,
+        jlong generation_duration_ms = 0,
+        jlong total_duration_ms = 0,
+        const char *finish_reason = nullptr) {
+    jclass result_class = env->FindClass(kNativeGenerationResultClass);
+    if (result_class == nullptr) return nullptr;
+    jmethodID constructor = env->GetMethodID(
+            result_class,
+            "<init>",
+            kNativeGenerationResultConstructor);
+    if (constructor == nullptr) {
+        env->DeleteLocalRef(result_class);
+        return nullptr;
     }
+    jstring error = error_message == nullptr ? nullptr : string_result(env, error_message);
+    jstring output = string_result(env, text);
+    jstring reason = finish_reason == nullptr ? nullptr : string_result(env, finish_reason);
+    jobject result = env->NewObject(
+            result_class,
+            constructor,
+            error,
+            output,
+            prompt_token_count,
+            generated_token_count,
+            first_token_latency_ms,
+            prompt_duration_ms,
+            generation_duration_ms,
+            total_duration_ms,
+            reason);
+    env->DeleteLocalRef(error);
+    env->DeleteLocalRef(output);
+    env->DeleteLocalRef(reason);
+    env->DeleteLocalRef(result_class);
     return result;
 }
 
@@ -170,11 +208,11 @@ jint nativeTokenCount(JNIEnv *env, jobject, jstring prompt) {
     return count > 0 ? count : -1;
 }
 
-jobjectArray nativeGenerate(
+jobject nativeGenerate(
         JNIEnv *env, jobject, jstring prompt, jint max_tokens, jfloat temperature, jint top_k, jfloat top_p,
         jint seed, jobject callback) {
     std::lock_guard lock(engine_mutex);
-    if (model == nullptr || context == nullptr) return array_result(env, {"ERROR", "No model is loaded"});
+    if (model == nullptr || context == nullptr) return generation_result(env, "No model is loaded");
     cancelled = false;
     const auto started = std::chrono::steady_clock::now();
     const char *prompt_chars = env->GetStringUTFChars(prompt, nullptr);
@@ -183,15 +221,15 @@ jobjectArray nativeGenerate(
     const llama_vocab *vocab = llama_model_get_vocab(model);
     const int prompt_count = -llama_tokenize(vocab, prompt_text.c_str(), prompt_text.size(), nullptr, 0, true, true);
     if (prompt_count <= 0 || prompt_count >= static_cast<int>(llama_n_ctx(context))) {
-        return array_result(env, {"ERROR", "Prompt does not fit in the active context"});
+        return generation_result(env, "Prompt does not fit in the active context");
     }
     std::vector<llama_token> tokens(static_cast<size_t>(prompt_count));
     if (llama_tokenize(vocab, prompt_text.c_str(), prompt_text.size(), tokens.data(), tokens.size(), true, true) < 0) {
-        return array_result(env, {"ERROR", "Could not tokenize prompt"});
+        return generation_result(env, "Could not tokenize prompt");
     }
     llama_memory_clear(llama_get_memory(context), false);
     llama_batch batch = llama_batch_get_one(tokens.data(), tokens.size());
-    if (llama_decode(context, batch) != 0) return array_result(env, {"ERROR", "Prompt evaluation failed"});
+    if (llama_decode(context, batch) != 0) return generation_result(env, "Prompt evaluation failed");
     const long prompt_duration = elapsed_ms(started);
 
     llama_sampler_chain_params sampler_params = llama_sampler_chain_default_params();
@@ -203,12 +241,12 @@ jobjectArray nativeGenerate(
 
     jclass callback_class = env->GetObjectClass(callback);
     if (callback_class == nullptr) {
-        return array_result(env, {"ERROR", "Could not resolve the streaming callback class"});
+        return generation_result(env, "Could not resolve the streaming callback class");
     }
     jmethodID on_token = env->GetMethodID(callback_class, "onToken", "(Ljava/lang/String;)V");
     if (on_token == nullptr) {
         env->ExceptionClear();
-        return array_result(env, {"ERROR", "The streaming callback is unavailable"});
+        return generation_result(env, "The streaming callback is unavailable");
     }
     std::string output;
     int generated_count = 0;
@@ -232,23 +270,29 @@ jobjectArray nativeGenerate(
             env->DeleteLocalRef(java_piece);
             if (env->ExceptionCheck()) {
                 llama_sampler_free(sampler);
-                return array_result(env, {"ERROR", "The streaming callback failed"});
+                return generation_result(env, "The streaming callback failed");
             }
         }
         batch = llama_batch_get_one(&token, 1);
         if (llama_decode(context, batch) != 0) {
             llama_sampler_free(sampler);
-            return array_result(env, {"ERROR", "Token generation failed"});
+            return generation_result(env, "Token generation failed");
         }
     }
     if (cancelled) finish_reason = "CANCELLED";
     const long total_duration = elapsed_ms(started);
     llama_sampler_free(sampler);
-    return array_result(env, {
-        "OK", output, std::to_string(prompt_count), std::to_string(generated_count),
-        std::to_string(first_token_latency), std::to_string(prompt_duration),
-        std::to_string(std::max(0L, total_duration - prompt_duration)), std::to_string(total_duration), finish_reason,
-    });
+    return generation_result(
+            env,
+            nullptr,
+            output,
+            prompt_count,
+            generated_count,
+            first_token_latency,
+            prompt_duration,
+            std::max(0L, total_duration - prompt_duration),
+            total_duration,
+            finish_reason.c_str());
 }
 
 void nativeCancel(JNIEnv *, jobject) {
@@ -288,7 +332,7 @@ JNINativeMethod native_methods[] = {
         {const_cast<char *>("nativeGenerate"),
          const_cast<char *>(
                  "(Ljava/lang/String;IFIFILcom/dmitriim/localailab/ai/llamacpp/NativeTokenCallback;)"
-                 "[Ljava/lang/String;"),
+                 "Lcom/dmitriim/localailab/ai/llamacpp/NativeGenerationResult;"),
          reinterpret_cast<void *>(nativeGenerate)},
         {const_cast<char *>("nativeCancel"), const_cast<char *>("()V"),
          reinterpret_cast<void *>(nativeCancel)},

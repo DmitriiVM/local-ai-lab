@@ -8,6 +8,8 @@ android {
     ndkVersion = "27.2.12479018"
 
     defaultConfig {
+        consumerProguardFiles("consumer-rules.pro")
+
         ndk {
             abiFilters += "arm64-v8a"
         }

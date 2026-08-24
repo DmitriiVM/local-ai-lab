@@ -206,16 +206,16 @@ class LlamaCppRuntime(application: Application) :
             Log.e(TAG, "llama.cpp native generation failed: ${error.message}", error)
             throw error
         }
-        check(result.firstOrNull() == "OK") { result.getOrElse(1) { "Native generation failed." } }
+        check(result.errorMessage == null) { result.errorMessage ?: "Native generation failed." }
         LlmGenerationResult(
-            text = result[1],
-            promptTokenCount = result[2].toInt(),
-            generatedTokenCount = result[3].toInt(),
-            firstTokenLatencyMs = result[4].toLong().takeIf { it >= 0 },
-            promptDurationMs = result[5].toLong(),
-            generationDurationMs = result[6].toLong(),
-            totalDurationMs = result[7].toLong(),
-            finishReason = LlmFinishReason.valueOf(result[8]),
+            text = result.text,
+            promptTokenCount = result.promptTokenCount,
+            generatedTokenCount = result.generatedTokenCount,
+            firstTokenLatencyMs = result.firstTokenLatencyMs.takeIf { it >= 0 },
+            promptDurationMs = result.promptDurationMs,
+            generationDurationMs = result.generationDurationMs,
+            totalDurationMs = result.totalDurationMs,
+            finishReason = LlmFinishReason.valueOf(checkNotNull(result.finishReason)),
         ).also { generation ->
             Log.i(
                 TAG,
@@ -261,7 +261,7 @@ class LlamaCppRuntime(application: Application) :
             topP: Float,
             seed: Int,
             callback: NativeTokenCallback,
-        ): Array<String>
+        ): NativeGenerationResult
         external fun nativeCancel()
         external fun nativeUnload()
         external fun nativeSystemInfo(): String
