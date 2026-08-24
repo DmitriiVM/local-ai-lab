@@ -71,11 +71,7 @@ long elapsed_ms(const std::chrono::steady_clock::time_point &start) {
         std::chrono::steady_clock::now() - start).count();
 }
 
-}  // namespace
-
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeInitialize(
-        JNIEnv *env, jobject, jstring native_lib_dir) {
+jstring nativeInitialize(JNIEnv *env, jobject, jstring native_lib_dir) {
     std::lock_guard lock(engine_mutex);
     if (backend_initialized) return string_result(env, "");
     const char *directory = env->GetStringUTFChars(native_lib_dir, nullptr);
@@ -88,9 +84,7 @@ Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativ
     return string_result(env, "");
 }
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeLoad(
-        JNIEnv *env, jobject, jstring model_path, jint context_size, jint thread_count) {
+jstring nativeLoad(JNIEnv *env, jobject, jstring model_path, jint context_size, jint thread_count) {
     std::lock_guard lock(engine_mutex);
     if (!backend_initialized) return string_result(env, "Native backend is not initialized");
     release_model_locked();
@@ -119,9 +113,7 @@ Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativ
     return string_result(env, "");
 }
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeFormatChat(
-        JNIEnv *env, jobject, jobjectArray roles, jobjectArray contents) {
+jstring nativeFormatChat(JNIEnv *env, jobject, jobjectArray roles, jobjectArray contents) {
     std::lock_guard lock(engine_mutex);
     if (model == nullptr) return string_result(env, "ERROR:No model is loaded");
     const jsize count = env->GetArrayLength(roles);
@@ -167,9 +159,7 @@ Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativ
     return string_result(env, std::string(buffer.data(), static_cast<size_t>(size)));
 }
 
-extern "C" JNIEXPORT jint JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeTokenCount(
-        JNIEnv *env, jobject, jstring prompt) {
+jint nativeTokenCount(JNIEnv *env, jobject, jstring prompt) {
     std::lock_guard lock(engine_mutex);
     if (model == nullptr) return -1;
     const char *chars = env->GetStringUTFChars(prompt, nullptr);
@@ -180,8 +170,7 @@ Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativ
     return count > 0 ? count : -1;
 }
 
-extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeGenerate(
+jobjectArray nativeGenerate(
         JNIEnv *env, jobject, jstring prompt, jint max_tokens, jfloat temperature, jint top_k, jfloat top_p,
         jint seed, jobject callback) {
     std::lock_guard lock(engine_mutex);
@@ -262,24 +251,79 @@ Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativ
     });
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeCancel(JNIEnv *, jobject) {
+void nativeCancel(JNIEnv *, jobject) {
     cancelled = true;
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeUnload(JNIEnv *, jobject) {
+void nativeUnload(JNIEnv *, jobject) {
     std::lock_guard lock(engine_mutex);
     cancelled = true;
     release_model_locked();
 }
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeSystemInfo(JNIEnv *env, jobject) {
+jstring nativeSystemInfo(JNIEnv *env, jobject) {
     return string_result(env, llama_print_system_info());
 }
 
-extern "C" JNIEXPORT jint JNICALL
-Java_com_dmitriim_localailab_ai_llamacpp_LlamaCppRuntime_00024NativeBridge_nativeEffectiveThreads(JNIEnv *, jobject) {
+jint nativeEffectiveThreads(JNIEnv *, jobject) {
     return effective_threads;
+}
+
+constexpr char kNativeBridgeClass[] =
+        "com/dmitriim/localailab/ai/llamacpp/LlamaCppRuntime$NativeBridge";
+
+JNINativeMethod native_methods[] = {
+        {const_cast<char *>("nativeInitialize"),
+         const_cast<char *>("(Ljava/lang/String;)Ljava/lang/String;"),
+         reinterpret_cast<void *>(nativeInitialize)},
+        {const_cast<char *>("nativeLoad"),
+         const_cast<char *>("(Ljava/lang/String;II)Ljava/lang/String;"),
+         reinterpret_cast<void *>(nativeLoad)},
+        {const_cast<char *>("nativeFormatChat"),
+         const_cast<char *>("([Ljava/lang/String;[Ljava/lang/String;)Ljava/lang/String;"),
+         reinterpret_cast<void *>(nativeFormatChat)},
+        {const_cast<char *>("nativeTokenCount"),
+         const_cast<char *>("(Ljava/lang/String;)I"),
+         reinterpret_cast<void *>(nativeTokenCount)},
+        {const_cast<char *>("nativeGenerate"),
+         const_cast<char *>(
+                 "(Ljava/lang/String;IFIFILcom/dmitriim/localailab/ai/llamacpp/NativeTokenCallback;)"
+                 "[Ljava/lang/String;"),
+         reinterpret_cast<void *>(nativeGenerate)},
+        {const_cast<char *>("nativeCancel"), const_cast<char *>("()V"),
+         reinterpret_cast<void *>(nativeCancel)},
+        {const_cast<char *>("nativeUnload"), const_cast<char *>("()V"),
+         reinterpret_cast<void *>(nativeUnload)},
+        {const_cast<char *>("nativeSystemInfo"), const_cast<char *>("()Ljava/lang/String;"),
+         reinterpret_cast<void *>(nativeSystemInfo)},
+        {const_cast<char *>("nativeEffectiveThreads"), const_cast<char *>("()I"),
+         reinterpret_cast<void *>(nativeEffectiveThreads)},
+};
+
+}  // namespace
+
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
+    JNIEnv *env = nullptr;
+    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        __android_log_write(ANDROID_LOG_ERROR, kLogTag, "Could not acquire JNI 1.6 environment");
+        return JNI_ERR;
+    }
+
+    jclass native_bridge = env->FindClass(kNativeBridgeClass);
+    if (native_bridge == nullptr) {
+        env->ExceptionClear();
+        __android_log_print(ANDROID_LOG_ERROR, kLogTag, "Could not find %s", kNativeBridgeClass);
+        return JNI_ERR;
+    }
+
+    const jint method_count = static_cast<jint>(sizeof(native_methods) / sizeof(native_methods[0]));
+    if (env->RegisterNatives(native_bridge, native_methods, method_count) != JNI_OK) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(native_bridge);
+        __android_log_write(ANDROID_LOG_ERROR, kLogTag, "Could not register native bridge methods");
+        return JNI_ERR;
+    }
+
+    env->DeleteLocalRef(native_bridge);
+    return JNI_VERSION_1_6;
 }
