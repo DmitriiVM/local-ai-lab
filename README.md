@@ -113,10 +113,11 @@ models or settings change.
 
 ## Requirements
 
-An arm64-v8a or x86_64 Android device running Android 8.0 (API 26) or newer
+An arm64-v8a or x86_64 Android device running Android 11 (API 30) or newer.
 An arm64 physical device is strongly recommended. AI runtimes and model memory behavior are not
-represented well by most emulators. The Android on-device speech recognizer additionally requires
-Android 13 and a compatible recognition service installed on the device.
+represented well by most emulators. Android 12 or newer provides additional device metadata.
+The Android on-device speech recognizer additionally requires Android 13 and a compatible
+recognition service installed on the device.
 
 ## Build and run
 

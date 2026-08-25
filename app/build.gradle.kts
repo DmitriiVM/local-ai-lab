@@ -11,7 +11,7 @@ android {
     namespace = "com.dmitriim.localailab"
     defaultConfig {
         applicationId = "com.dmitriim.localailab"
-        minSdk = 26
+        minSdk = 30
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
