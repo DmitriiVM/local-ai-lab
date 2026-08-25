@@ -1,5 +1,6 @@
 plugins {
     id("local-ai.android.library")
+    id("local-ai.native-runtime")
     alias(libs.plugins.metro)
 }
 
@@ -9,10 +10,6 @@ android {
 
     defaultConfig {
         consumerProguardFiles("consumer-rules.pro")
-
-        ndk {
-            abiFilters += "arm64-v8a"
-        }
         externalNativeBuild {
             cmake {
                 arguments += listOf(

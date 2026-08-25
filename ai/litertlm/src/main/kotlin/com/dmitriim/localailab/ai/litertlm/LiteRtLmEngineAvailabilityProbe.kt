@@ -9,6 +9,7 @@ import com.dmitriim.localailab.core.model.engine.EngineAvailability
 import com.dmitriim.localailab.core.model.engine.EngineDescriptor
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.engine.EngineKind
+import com.dmitriim.localailab.core.model.engine.NativeAbiSupport
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers
@@ -18,10 +19,10 @@ import kotlinx.coroutines.withContext
 @ContributesIntoSet(AppScope::class)
 class LiteRtLmEngineAvailabilityProbe : EngineAvailabilityProbe {
     override suspend fun probe(): EngineAvailability = withContext(Dispatchers.IO) {
-        if ("arm64-v8a" !in Build.SUPPORTED_ABIS) {
+        if (!NativeAbiSupport.supports(Build.SUPPORTED_ABIS.toList())) {
             return@withContext EngineAvailability.Unsupported(
                 descriptor = descriptor,
-                reason = "The packaged LiteRT-LM Android runtime requires an arm64-v8a device.",
+                reason = "The packaged LiteRT-LM Android runtime requires arm64-v8a or x86_64.",
             )
         }
         runCatching {

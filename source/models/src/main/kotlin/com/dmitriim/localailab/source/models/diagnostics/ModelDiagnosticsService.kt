@@ -12,6 +12,7 @@ import com.dmitriim.localailab.core.model.library.ModelCompatibilityState
 import com.dmitriim.localailab.core.model.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.service.ModelDiagnostics
+import com.dmitriim.localailab.core.model.engine.NativeAbiSupport
 import com.dmitriim.localailab.source.models.library.InstalledModelService
 import com.dmitriim.localailab.source.models.validation.ModelFileValidator
 import com.dmitriim.localailab.source.models.validation.toReadableBytes
@@ -31,7 +32,9 @@ class ModelDiagnosticsService(
 ) : ModelDiagnostics {
     override suspend fun compatibility(model: ModelManifest): ModelCompatibility = withContext(Dispatchers.IO) {
         val reasons = mutableListOf<String>()
-        if ("arm64-v8a" !in Build.SUPPORTED_ABIS) reasons += "${model.engineId.value} requires an arm64-v8a runtime."
+        if (!NativeAbiSupport.supports(Build.SUPPORTED_ABIS.toList())) {
+            reasons += "${model.engineId.value} requires an arm64-v8a or x86_64 runtime."
+        }
         if (!validator.hasValidatorFor(model)) reasons += "The ${model.engineId.value} runtime is not packaged in this app build."
         val availableStorage = StatFs(application.filesDir.absolutePath).availableBytes
         val requiredStorage = model.files.sumOf { it.expectedBytes ?: 0L }

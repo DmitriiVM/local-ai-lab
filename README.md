@@ -109,7 +109,7 @@ output, device, and performance data instead of relying only on live model refer
 
 ## Requirements
 
-An arm64-v8a Android device running Android 8.0 (API 26) or newer
+An arm64-v8a or x86_64 Android device running Android 8.0 (API 26) or newer
 An arm64 physical device is strongly recommended. AI runtimes and model memory behavior are not
 represented well by most emulators. The Android on-device speech recognizer additionally requires
 Android 13 and a compatible recognition service installed on the device.
@@ -203,7 +203,7 @@ replay/export and provides controls to clear temporary media and run history.
 
 ## Current limitations
 
-- Native inference currently targets `arm64-v8a`; x86 and 32-bit runtimes are not
+- Native inference targets `arm64-v8a` and `x86_64`; x86 and 32-bit runtimes are not
   packaged.
 - Model files are not bundled, so a playground is unavailable until a compatible
   model is installed or imported.

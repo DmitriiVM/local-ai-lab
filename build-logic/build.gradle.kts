@@ -30,6 +30,11 @@ gradlePlugin {
             implementationClass =
                 "com.dmitriim.localailab.buildlogic.android.AndroidLibraryConventionPlugin"
         }
+        register("nativeRuntime") {
+            id = "local-ai.native-runtime"
+            implementationClass =
+                "com.dmitriim.localailab.buildlogic.android.NativeRuntimeConventionPlugin"
+        }
         register("jvmLibrary") {
             id = "local-ai.jvm.library"
             implementationClass =

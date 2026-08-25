@@ -1,5 +1,6 @@
 plugins {
     id("local-ai.android.application")
+    id("local-ai.native-runtime")
     id("local-ai.sherpa-onnx")
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
@@ -14,9 +15,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-        ndk {
-            abiFilters += "arm64-v8a"
-        }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

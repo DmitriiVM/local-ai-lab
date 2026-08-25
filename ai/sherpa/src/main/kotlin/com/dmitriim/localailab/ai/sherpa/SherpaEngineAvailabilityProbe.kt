@@ -9,6 +9,7 @@ import com.dmitriim.localailab.core.model.engine.EngineAvailability
 import com.dmitriim.localailab.core.model.engine.EngineDescriptor
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.engine.EngineKind
+import com.dmitriim.localailab.core.model.engine.NativeAbiSupport
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers
@@ -18,10 +19,10 @@ import kotlinx.coroutines.withContext
 @ContributesIntoSet(AppScope::class)
 class SherpaEngineAvailabilityProbe : EngineAvailabilityProbe {
     override suspend fun probe(): EngineAvailability = withContext(Dispatchers.IO) {
-        if ("arm64-v8a" !in Build.SUPPORTED_ABIS) {
+        if (!NativeAbiSupport.supports(Build.SUPPORTED_ABIS.toList())) {
             return@withContext EngineAvailability.Unsupported(
                 descriptor = descriptor,
-                reason = "The bundled sherpa-onnx runtime requires an arm64-v8a device.",
+                reason = "The bundled sherpa-onnx runtime requires arm64-v8a or x86_64.",
             )
         }
 
@@ -32,7 +33,7 @@ class SherpaEngineAvailabilityProbe : EngineAvailabilityProbe {
                 EngineAvailability.Available(
                     descriptor = descriptor,
                     effectiveComputePreference = ComputePreference.CPU,
-                    detail = "Bundled arm64 CPU runtime is available.",
+                    detail = "Bundled CPU runtime is available.",
                     requestedComputePreference = ComputePreference.CPU,
                     computeDetail = "ONNX Runtime CPU",
                     effectiveThreadCount = Runtime.getRuntime().availableProcessors(),
