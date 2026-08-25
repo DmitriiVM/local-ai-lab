@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.litertlm
 
-import android.content.Context
+import android.app.Application
 import android.util.Log
 import androidx.tracing.Trace
 import com.dmitriim.localailab.ai.api.llm.LlmChatFormatter
@@ -50,10 +50,9 @@ import kotlin.system.measureTimeMillis
 @Inject
 @SingleIn(AppScope::class)
 @ContributesIntoSet(AppScope::class, binding = binding<LlmRuntime>())
-class LiteRtLmRuntime(context: Context) :
+class LiteRtLmRuntime(private val application: Application) :
     LlmRuntime,
     LlmChatFormatter {
-    private val applicationContext = context.applicationContext
     private val lock = ReentrantLock()
     private var engine: Engine? = null
     private var activeRequest: LlmLoadRequest? = null
@@ -133,7 +132,7 @@ class LiteRtLmRuntime(context: Context) :
                 backend = backend,
                 maxNumTokens = contextSize,
                 cacheDir = File(
-                    applicationContext.cacheDir,
+                    application.cacheDir,
                     CACHE_DIRECTORY,
                 ).also(File::mkdirs).absolutePath,
             ),

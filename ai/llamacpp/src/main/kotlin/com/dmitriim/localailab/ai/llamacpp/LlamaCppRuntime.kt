@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.llamacpp
 
-import android.content.Context
+import android.app.Application
 import android.util.Log
 import com.dmitriim.localailab.ai.api.llm.LlmChatFormatter
 import com.dmitriim.localailab.ai.api.llm.LlmChatMessage
@@ -36,11 +36,11 @@ import kotlin.system.measureTimeMillis
 @Inject
 @SingleIn(AppScope::class)
 @ContributesIntoSet(AppScope::class, binding = binding<LlmRuntime>())
-class LlamaCppRuntime(context: Context) :
+class LlamaCppRuntime(application: Application) :
     LlmRuntime,
     LlmChatFormatter,
     LlmTokenCounter {
-    private val native = NativeBridge(context.applicationInfo.nativeLibraryDir)
+    private val native = NativeBridge(application.applicationInfo.nativeLibraryDir)
     private val lock = ReentrantLock()
     private var activeRequest: LlmLoadRequest? = null
 
