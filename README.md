@@ -90,9 +90,11 @@ so exported results should always be interpreted together with the workload and 
 
 ### Engineering decisions
 
-**Capability-specific contracts.** Engines expose the settings and metadata they actually support.
-Requested and effective configurations are kept separate, so runtime adjustments remain visible 
-in the UI and saved run.
+**Replaceable runtimes and models.** Features depend on engine-neutral capability contracts rather 
+than APIs from a specific AI runtime. Runtime adapters expose only their supported settings and 
+metadata, while model definitions and validation remain separate from feature UI. This minimizes 
+the work required  to add or swap runtimes and models and lets them use the same workflows and 
+run-recording pipeline.
 
 **Explicit resource ownership.** Inference engines have load, run, cancel, and unload boundaries.
 Runtime access is serialized, long-running work stays off the main thread, and foreground 
@@ -100,12 +102,14 @@ operations can be interrupted safely. Feature-scoped runtime leases keep models 
 are in use, release them after navigation or app backgrounding, and evict all runtime families
 when Android reports memory pressure.
 
-**Transactional model installation.** Downloads use staging storage and are promoted only after
-required files, integrity metadata, and runtime-specific structure have been validated.
-Transfer progress survives process recreation.
+**Resilient model delivery.** Downloads stream directly to disk, use Android background execution, 
+and can resume or recover after interruption. Preflight checks catch problems early, while staged 
+files are promoted to the model library only after structure and integrity validation succeed.
 
-**Self-contained run history.** Run records snapshot descriptive model, engine, parameter, input,
-output, device, and performance data instead of relying only on live model references.
+**Context-rich, reproducible measurements.** Profiling preserves measured iterations and records 
+performance data together with the workload, model, runtime, configuration, device, and 
+startup conditions. Run records are self-contained, so results remain interpretable after 
+models or settings change.
 
 ## Requirements
 
@@ -189,7 +193,6 @@ Relevant extension points include:
 - Room, DataStore, and WorkManager
 - C++/JNI, CMake, Android NDK, and vendored llama.cpp
 - LiteRT-LM, sherpa-onnx, ONNX Runtime, Vosk, Chatterbox, and Android speech APIs
-- Gradle Kotlin DSL, convention plugins, and a version catalog
 
 ## Privacy and data
 
