@@ -42,8 +42,7 @@ internal class ModelDownloadStoragePreflight(
         .filter(File::isFile)
         .fold(0L) { total, file -> total.saturatingAdd(file.length()) }
 
-    private fun Long.saturatingAdd(other: Long): Long =
-        if (this > Long.MAX_VALUE - other) Long.MAX_VALUE else this + other
+    private fun Long.saturatingAdd(other: Long): Long = if (this > Long.MAX_VALUE - other) Long.MAX_VALUE else this + other
 
     private fun Long.toReadableStorageBytes(): String = when {
         this >= GIBIBYTE -> String.format(Locale.US, "%.1f GiB", toDouble() / GIBIBYTE)

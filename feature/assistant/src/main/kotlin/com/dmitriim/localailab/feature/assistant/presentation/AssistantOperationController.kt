@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Owns the one cancellable assistant workflow and maps its progress to screen state. */
+@Suppress("LargeClass") // This coordinator owns the cohesive, serialized assistant workflow.
 internal class AssistantOperationController(
     private val scope: CoroutineScope,
     private val state: MutableStateFlow<AssistantUiState>,

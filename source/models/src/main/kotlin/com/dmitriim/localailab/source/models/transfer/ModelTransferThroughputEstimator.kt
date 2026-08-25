@@ -26,7 +26,9 @@ internal class ModelTransferThroughputEstimator {
         val previousRate = mutableEstimates.value[modelId]?.bytesPerSecond
         val smoothedRate = previousRate?.let { (it * PREVIOUS_RATE_WEIGHT + instantaneousRate) / RATE_WEIGHT_SUM } ?: instantaneousRate
         val remainingBytes = (transfer.totalBytes - transfer.completedBytes).coerceAtLeast(0L)
-        val remainingMillis = if (remainingBytes == 0L) 0L else {
+        val remainingMillis = if (remainingBytes == 0L) {
+            0L
+        } else {
             (remainingBytes.toDouble() * MILLIS_PER_SECOND / smoothedRate).toLong().coerceAtLeast(0L)
         }
         mutableEstimates.update {

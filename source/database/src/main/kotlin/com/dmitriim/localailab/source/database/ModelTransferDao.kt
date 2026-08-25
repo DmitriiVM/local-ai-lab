@@ -67,18 +67,12 @@ interface ModelTransferDao {
     @Query("DELETE FROM model_transfers WHERE modelId = :modelId")
     suspend fun delete(modelId: String)
 
-    @Query("SELECT * FROM model_transfer_files WHERE modelId = :modelId")
-    suspend fun filesFor(modelId: String): List<ModelTransferFileEntity>
-
-    @Upsert
-    suspend fun upsertFile(entity: ModelTransferFileEntity)
-
     @Query("DELETE FROM model_transfer_files WHERE modelId = :modelId")
-    suspend fun deleteFiles(modelId: String)
+    suspend fun deleteFilesForTransfer(modelId: String)
 
     @Transaction
     suspend fun deleteTransfer(modelId: String) {
-        deleteFiles(modelId)
+        deleteFilesForTransfer(modelId)
         delete(modelId)
     }
 }

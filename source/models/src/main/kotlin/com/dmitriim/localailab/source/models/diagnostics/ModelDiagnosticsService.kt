@@ -7,12 +7,12 @@ import android.os.StatFs
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.device.DeviceDiagnostics
+import com.dmitriim.localailab.core.model.engine.NativeAbiSupport
 import com.dmitriim.localailab.core.model.library.ModelCompatibility
 import com.dmitriim.localailab.core.model.library.ModelCompatibilityState
 import com.dmitriim.localailab.core.model.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.service.ModelDiagnostics
-import com.dmitriim.localailab.core.model.engine.NativeAbiSupport
 import com.dmitriim.localailab.source.models.library.InstalledModelService
 import com.dmitriim.localailab.source.models.validation.ModelFileValidator
 import com.dmitriim.localailab.source.models.validation.toReadableBytes

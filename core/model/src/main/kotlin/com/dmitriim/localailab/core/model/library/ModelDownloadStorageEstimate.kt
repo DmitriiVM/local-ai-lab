@@ -29,8 +29,7 @@ fun CatalogModel.downloadStorageEstimate(): ModelDownloadStorageEstimate {
     )
 }
 
-private fun Long.saturatingAdd(other: Long): Long =
-    if (this > Long.MAX_VALUE - other) Long.MAX_VALUE else this + other
+private fun Long.saturatingAdd(other: Long): Long = if (this > Long.MAX_VALUE - other) Long.MAX_VALUE else this + other
 
 private const val MINIMUM_SAFETY_RESERVE_BYTES = 256L * 1024 * 1024
 private const val SAFETY_RESERVE_DIVISOR = 10L

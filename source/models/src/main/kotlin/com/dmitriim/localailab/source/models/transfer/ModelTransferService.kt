@@ -31,9 +31,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 /** Owns persisted model download state, resumable transfer, and transactional installation. */
 @Inject
@@ -270,11 +270,11 @@ class ModelTransferService(
                     networkPolicy = retry.networkPolicy,
                     delayMillis = delayMillis,
                 )
-            } catch (schedulingError: Throwable) {
+            } catch (error: Throwable) {
                 transferState.update(
                     retry,
                     status = PersistedModelTransferStatus.PAUSED,
-                    message = schedulingError.message ?: "Automatic retry could not be scheduled. Tap Resume to continue.",
+                    message = error.message ?: "Automatic retry could not be scheduled. Tap Resume to continue.",
                 )
             }
         }

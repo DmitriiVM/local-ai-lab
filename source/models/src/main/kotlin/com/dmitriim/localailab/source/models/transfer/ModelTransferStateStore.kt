@@ -19,6 +19,7 @@ class ModelTransferStateStore(
     databaseProvider: ModelDatabaseProvider,
 ) {
     private val dao = databaseProvider.database.modelTransferDao()
+    private val fileDao = databaseProvider.database.modelTransferFileDao()
 
     val transfers: Flow<Map<ModelId, ModelTransferState>> = dao.observeAll().map { transfers ->
         transfers.associate { transfer -> ModelId(transfer.modelId) to transfer.toState() }
@@ -56,23 +57,21 @@ class ModelTransferStateStore(
         return transfer.toStored()
     }
 
-    internal suspend fun claimQueuedWhenNoTransferIsActive(modelId: ModelId, executionGeneration: Long): Boolean =
-        dao.claimQueuedWhenNoTransferIsActive(
-            modelId = modelId.value,
-            executionGeneration = executionGeneration,
-            queuedStatus = PersistedModelTransferStatus.QUEUED.name,
-            runningStatus = PersistedModelTransferStatus.RUNNING.name,
-            installingStatus = PersistedModelTransferStatus.INSTALLING.name,
-            updatedAtEpochMs = System.currentTimeMillis(),
-        ) == 1
+    internal suspend fun claimQueuedWhenNoTransferIsActive(modelId: ModelId, executionGeneration: Long): Boolean = dao.claimQueuedWhenNoTransferIsActive(
+        modelId = modelId.value,
+        executionGeneration = executionGeneration,
+        queuedStatus = PersistedModelTransferStatus.QUEUED.name,
+        runningStatus = PersistedModelTransferStatus.RUNNING.name,
+        installingStatus = PersistedModelTransferStatus.INSTALLING.name,
+        updatedAtEpochMs = System.currentTimeMillis(),
+    ) == 1
 
     internal suspend fun hasActiveTransfer(): Boolean = dao.hasActiveTransfer(
         runningStatus = PersistedModelTransferStatus.RUNNING.name,
         installingStatus = PersistedModelTransferStatus.INSTALLING.name,
     )
 
-    internal suspend fun nextQueued(): StoredModelTransfer? =
-        dao.nextQueued(PersistedModelTransferStatus.QUEUED.name, System.currentTimeMillis())?.toStored()
+    internal suspend fun nextQueued(): StoredModelTransfer? = dao.nextQueued(PersistedModelTransferStatus.QUEUED.name, System.currentTimeMillis())?.toStored()
 
     internal suspend fun scheduleRetry(transfer: StoredModelTransfer, delayMillis: Long): StoredModelTransfer {
         val now = System.currentTimeMillis()
@@ -149,7 +148,7 @@ class ModelTransferStateStore(
         lastModified: String?,
         verified: Boolean,
     ) {
-        dao.upsertFile(
+        fileDao.upsert(
             ModelTransferFileEntity(
                 modelId = modelId.value,
                 relativePath = relativePath,
@@ -161,12 +160,12 @@ class ModelTransferStateStore(
     }
 
     internal suspend fun markFileVerified(modelId: ModelId, relativePath: String) {
-        val current = dao.filesFor(modelId.value).firstOrNull { it.relativePath == relativePath }
+        val current = fileDao.filesFor(modelId.value).firstOrNull { it.relativePath == relativePath }
             ?: ModelTransferFileEntity(modelId.value, relativePath, null, null, verified = false)
-        dao.upsertFile(current.copy(verified = true))
+        fileDao.upsert(current.copy(verified = true))
     }
 
-    internal suspend fun fileValidators(modelId: ModelId): Map<String, ModelTransferFileEntity> = dao.filesFor(modelId.value).associateBy(ModelTransferFileEntity::relativePath)
+    internal suspend fun fileValidators(modelId: ModelId): Map<String, ModelTransferFileEntity> = fileDao.filesFor(modelId.value).associateBy(ModelTransferFileEntity::relativePath)
 
     suspend fun delete(modelId: ModelId) = dao.deleteTransfer(modelId.value)
 
@@ -185,8 +184,7 @@ class ModelTransferStateStore(
         nextAttemptAtEpochMs = nextAttemptAtEpochMs,
     )
 
-    private fun Long.saturatingAdd(other: Long): Long =
-        if (this > Long.MAX_VALUE - other) Long.MAX_VALUE else this + other
+    private fun Long.saturatingAdd(other: Long): Long = if (this > Long.MAX_VALUE - other) Long.MAX_VALUE else this + other
 
     private fun ModelTransferEntity.toState(): ModelTransferState = when (PersistedModelTransferStatus.valueOf(status)) {
         PersistedModelTransferStatus.QUEUED -> ModelTransferState.Queued(

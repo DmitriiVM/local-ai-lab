@@ -18,6 +18,7 @@ import androidx.room.RoomDatabase
 abstract class AppModelDatabase : RoomDatabase() {
     abstract fun installedModelDao(): InstalledModelDao
     abstract fun modelTransferDao(): ModelTransferDao
+    abstract fun modelTransferFileDao(): ModelTransferFileDao
     abstract fun runDao(): RunDao
     abstract fun conversationDao(): ConversationDao
 }
