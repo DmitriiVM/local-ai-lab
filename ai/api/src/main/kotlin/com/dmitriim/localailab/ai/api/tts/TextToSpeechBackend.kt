@@ -3,7 +3,7 @@ package com.dmitriim.localailab.ai.api.tts
 import com.dmitriim.localailab.core.model.engine.EngineId
 
 /** A concrete runtime contributed into the application engine set. */
-interface TextToSpeechBackend : AutoCloseable {
+interface TextToSpeechBackend {
     val engineId: EngineId
     val isLoaded: Boolean
 
@@ -16,5 +16,4 @@ interface TextToSpeechBackend : AutoCloseable {
 
     fun cancel()
     fun unload()
-    override fun close() = unload()
 }

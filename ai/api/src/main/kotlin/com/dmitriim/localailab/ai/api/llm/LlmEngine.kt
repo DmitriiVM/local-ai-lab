@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.api.llm
 
 /** Engine-neutral local chat boundary. Calls must run away from the Android main thread. */
-interface LlmEngine : AutoCloseable {
+interface LlmEngine {
     val isLoaded: Boolean
 
     fun load(request: LlmLoadRequest): LlmLoadResult
@@ -12,5 +12,4 @@ interface LlmEngine : AutoCloseable {
 
     fun unload()
 
-    override fun close() = unload()
 }
