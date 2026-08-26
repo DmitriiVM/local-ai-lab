@@ -25,7 +25,7 @@ fun LocalAiLabApp(graph: AppGraph) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
                 graph.foregroundOperationCoordinator.interruptActiveOperations()
-                graph.runtimeMemoryManager.evictAll()
+                graph.runtimeLeaseManager.evictAll()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)

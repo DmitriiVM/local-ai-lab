@@ -14,7 +14,7 @@ import com.dmitriim.localailab.ai.api.llm.LlmGenerationResult
 import com.dmitriim.localailab.ai.api.llm.LlmLoadOption
 import com.dmitriim.localailab.ai.api.llm.LlmLoadRequest
 import com.dmitriim.localailab.ai.api.llm.LlmLoadResult
-import com.dmitriim.localailab.ai.api.llm.LlmRuntime
+import com.dmitriim.localailab.ai.api.llm.ChatRuntime
 import com.dmitriim.localailab.ai.api.llm.LlmRuntimeDiagnostics
 import com.dmitriim.localailab.ai.api.llm.LlmTokenCounter
 import com.dmitriim.localailab.core.di.AppScope
@@ -35,9 +35,9 @@ import kotlin.system.measureTimeMillis
 /** JNI-backed llama.cpp engine. It owns one model/context and serializes native access. */
 @Inject
 @SingleIn(AppScope::class)
-@ContributesIntoSet(AppScope::class, binding = binding<LlmRuntime>())
+@ContributesIntoSet(AppScope::class, binding = binding<ChatRuntime>())
 class LlamaCppRuntime(application: Application) :
-    LlmRuntime,
+    ChatRuntime,
     LlmChatFormatter,
     LlmTokenCounter {
     private val native = NativeBridge(application.applicationInfo.nativeLibraryDir)

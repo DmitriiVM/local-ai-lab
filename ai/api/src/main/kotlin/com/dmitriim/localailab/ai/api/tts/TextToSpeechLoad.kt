@@ -15,7 +15,7 @@ data class TextToSpeechLoadResult(
     val effectiveThreadCount: Int,
     val loadDurationMs: Long,
     val coldStart: Boolean,
-    /** Zero when the backend reports its output format only after synthesis begins. */
+    /** Zero when the runtime reports its output format only after synthesis begins. */
     val sampleRateHz: Int,
     val speakerCount: Int?,
 )

@@ -18,8 +18,8 @@ fun AssistantRoute(
     viewModel: AssistantViewModel = metroViewModel(),
 ) {
     DisposableEffect(viewModel) {
-        viewModel.runtimeLifecycle.onVisible()
-        onDispose(viewModel.runtimeLifecycle::onHidden)
+        viewModel.runtimeLeaseController.onVisible()
+        onDispose(viewModel.runtimeLeaseController::onHidden)
     }
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val microphonePermission = rememberLauncherForActivityResult(

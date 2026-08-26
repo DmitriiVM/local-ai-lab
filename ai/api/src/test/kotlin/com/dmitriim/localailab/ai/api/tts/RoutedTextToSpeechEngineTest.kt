@@ -10,8 +10,8 @@ import org.junit.Test
 class RoutedTextToSpeechEngineTest {
     @Test
     fun switchingBackendsCancelsAndUnloadsThePreviousBackend() {
-        val first = FakeSpeechBackend("first")
-        val second = FakeSpeechBackend("second")
+        val first = FakeSpeechRuntime("first")
+        val second = FakeSpeechRuntime("second")
         val engine = RoutedTextToSpeechEngine(setOf(first, second))
 
         engine.load(requestFor("first"))
@@ -24,7 +24,7 @@ class RoutedTextToSpeechEngineTest {
 
     @Test(expected = IllegalStateException::class)
     fun synthesisBeforeLoadFails() {
-        RoutedTextToSpeechEngine(setOf(FakeSpeechBackend("only"))).synthesize(
+        RoutedTextToSpeechEngine(setOf(FakeSpeechRuntime("only"))).synthesize(
             TextToSpeechRequest(
                 text = "hello",
                 languageCode = "en",
@@ -38,7 +38,7 @@ class RoutedTextToSpeechEngineTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun duplicateBackendIdsAreRejected() {
-        RoutedTextToSpeechEngine(setOf(FakeSpeechBackend("duplicate"), FakeSpeechBackend("duplicate")))
+        RoutedTextToSpeechEngine(setOf(FakeSpeechRuntime("duplicate"), FakeSpeechRuntime("duplicate")))
     }
 
     private fun requestFor(id: String) = TextToSpeechLoadRequest(
@@ -47,7 +47,7 @@ class RoutedTextToSpeechEngineTest {
         modelDirectory = "model",
     )
 
-    private class FakeSpeechBackend(id: String) : TextToSpeechBackend {
+    private class FakeSpeechRuntime(id: String) : TextToSpeechRuntime {
         override val engineId = EngineId(id)
         override var isLoaded = false
         val events = mutableListOf<String>()

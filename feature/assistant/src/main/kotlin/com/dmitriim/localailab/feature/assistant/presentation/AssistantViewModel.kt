@@ -7,8 +7,8 @@ import com.dmitriim.localailab.ai.api.llm.ChatEngine
 import com.dmitriim.localailab.ai.api.llm.LlmChatMessage
 import com.dmitriim.localailab.ai.api.llm.LlmChatRole
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
-import com.dmitriim.localailab.ai.api.memory.AiRuntimeMemoryManager
-import com.dmitriim.localailab.ai.api.memory.FeatureRuntimeLifecycle
+import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
+import com.dmitriim.localailab.ai.api.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.ai.api.system.SystemSpeechToTextSupport
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoiceStore
@@ -64,7 +64,7 @@ class AssistantViewModel(
     private val runRepository: RunRepository,
     private val replayStore: RunReplayStore,
     private val profileLaunchCoordinator: ProfileLaunchCoordinator,
-    runtimeMemoryManager: AiRuntimeMemoryManager,
+    runtimeLeaseManager: AiRuntimeLeaseManager,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(AssistantUiState())
     val state: StateFlow<AssistantUiState> = mutableState.asStateFlow()
@@ -83,8 +83,8 @@ class AssistantViewModel(
         operationCoordinator = operationCoordinator,
         conversationId = { conversationId },
     )
-    internal val runtimeLifecycle = FeatureRuntimeLifecycle(
-        memoryManager = runtimeMemoryManager,
+    internal val runtimeLeaseController = FeatureRuntimeLeaseController(
+        leaseManager = runtimeLeaseManager,
         runtimeKinds = setOf(
             AiRuntimeKind.CHAT,
             AiRuntimeKind.SPEECH_TO_TEXT,
@@ -263,7 +263,7 @@ class AssistantViewModel(
     fun cancel() = operationController.cancel()
 
     override fun onCleared() {
-        runtimeLifecycle.onHidden()
+        runtimeLeaseController.onHidden()
         super.onCleared()
     }
 

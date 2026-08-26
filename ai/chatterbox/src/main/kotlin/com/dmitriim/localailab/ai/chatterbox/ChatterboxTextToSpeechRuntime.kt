@@ -10,7 +10,7 @@ import android.app.ActivityManager
 import android.app.Application
 import android.os.Debug
 import android.util.Log
-import com.dmitriim.localailab.ai.api.tts.TextToSpeechBackend
+import com.dmitriim.localailab.ai.api.tts.TextToSpeechRuntime
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadResult
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
@@ -35,8 +35,8 @@ import kotlin.system.measureTimeMillis
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesIntoSet(AppScope::class, binding = binding<TextToSpeechBackend>())
-class ChatterboxTextToSpeechEngine(private val application: Application) : TextToSpeechBackend {
+@ContributesIntoSet(AppScope::class, binding = binding<TextToSpeechRuntime>())
+class ChatterboxTextToSpeechRuntime(private val application: Application) : TextToSpeechRuntime {
     override val engineId = EngineId("chatterbox-onnx")
     private val lock = Any()
     private val cancelled = AtomicBoolean(false)
@@ -60,7 +60,7 @@ class ChatterboxTextToSpeechEngine(private val application: Application) : TextT
             return TextToSpeechLoadResult(threads, 0, false, SAMPLE_RATE_HZ, null)
         }
         unloadLocked()
-        val missing = ChatterboxModelRuntimeValidator.REQUIRED_FILES.keys
+        val missing = ChatterboxModelRuntimeAdapter.REQUIRED_FILES.keys
             .filterNot { File(directory, it).isFile }
         require(missing.isEmpty()) {
             "Chatterbox model files are missing: ${missing.joinToString()}"

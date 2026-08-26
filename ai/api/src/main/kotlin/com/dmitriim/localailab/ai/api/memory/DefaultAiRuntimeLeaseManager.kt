@@ -24,13 +24,13 @@ import kotlinx.coroutines.sync.withLock
  */
 @Inject
 @SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class, binding = binding<AiRuntimeMemoryManager>())
-class DefaultAiRuntimeMemoryManager(
+@ContributesBinding(AppScope::class, binding = binding<AiRuntimeLeaseManager>())
+class DefaultAiRuntimeLeaseManager(
     private val chatEngine: ChatEngine,
     private val speechToTextEngine: SpeechToTextEngine,
     private val textToSpeechEngine: TextToSpeechEngine,
     @param:ApplicationCoroutineScope private val applicationScope: CoroutineScope,
-) : AiRuntimeMemoryManager {
+) : AiRuntimeLeaseManager {
     private val lock = Any()
     private val evictionMutex = Mutex()
     private val leaseCounts = mutableMapOf<AiRuntimeKind, Int>()

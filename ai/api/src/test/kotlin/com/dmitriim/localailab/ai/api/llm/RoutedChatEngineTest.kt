@@ -13,8 +13,8 @@ import org.junit.Test
 class RoutedChatEngineTest {
     @Test
     fun switchingModelsCancelsAndUnloadsThePreviousRuntime() {
-        val first = FakeLlmRuntime("first")
-        val second = FakeLlmRuntime("second")
+        val first = FakeChatRuntime("first")
+        val second = FakeChatRuntime("second")
         val engine = RoutedChatEngine(setOf(first, second))
 
         engine.load(requestFor("first"))
@@ -28,7 +28,7 @@ class RoutedChatEngineTest {
 
     @Test
     fun loadingTheSameRuntimeDoesNotRestartIt() {
-        val runtime = FakeLlmRuntime("only")
+        val runtime = FakeChatRuntime("only")
         val engine = RoutedChatEngine(setOf(runtime))
 
         engine.load(requestFor("only"))
@@ -39,7 +39,7 @@ class RoutedChatEngineTest {
 
     @Test
     fun unloadClearsActiveRuntimeAndLoadedState() {
-        val runtime = FakeLlmRuntime("only")
+        val runtime = FakeChatRuntime("only")
         val engine = RoutedChatEngine(setOf(runtime))
         engine.load(requestFor("only"))
 
@@ -51,7 +51,7 @@ class RoutedChatEngineTest {
 
     @Test(expected = IllegalStateException::class)
     fun generationBeforeLoadFails() {
-        RoutedChatEngine(setOf(FakeLlmRuntime("only"))).generate(
+        RoutedChatEngine(setOf(FakeChatRuntime("only"))).generate(
             LlmGenerationRequest("prompt"),
             onToken = {},
         )
@@ -59,7 +59,7 @@ class RoutedChatEngineTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun duplicateEngineIdsAreRejected() {
-        RoutedChatEngine(setOf(FakeLlmRuntime("duplicate"), FakeLlmRuntime("duplicate")))
+        RoutedChatEngine(setOf(FakeChatRuntime("duplicate"), FakeChatRuntime("duplicate")))
     }
 
     private fun requestFor(engineId: String) = LlmLoadRequest(
@@ -73,7 +73,7 @@ class RoutedChatEngineTest {
         options = LlmLoadOptions(computePreference = ComputePreference.AUTO),
     )
 
-    private class FakeLlmRuntime(id: String) : LlmRuntime {
+    private class FakeChatRuntime(id: String) : ChatRuntime {
         override val engineId = EngineId(id)
         override val capabilities = LlmEngineCapabilities(
             computePreferences = setOf(ComputePreference.AUTO),

@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.vosk
 
-import com.dmitriim.localailab.ai.api.model.ModelAdapter
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapter
 import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.ai.api.model.ModelImportFileDefinition
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
@@ -18,8 +18,8 @@ import dev.zacsweers.metro.binding
 import java.io.File
 
 @Inject
-@ContributesIntoSet(AppScope::class, binding = binding<ModelAdapter>())
-class VoskModelRuntimeValidator : ModelAdapter {
+@ContributesIntoSet(AppScope::class, binding = binding<ModelRuntimeAdapter>())
+class VoskModelRuntimeAdapter : ModelRuntimeAdapter {
     override val id = "vosk-stt"
     override val engineId = EngineId("vosk")
     override val profileTypes = setOf(ModelProfileIds.VOSK_STT)

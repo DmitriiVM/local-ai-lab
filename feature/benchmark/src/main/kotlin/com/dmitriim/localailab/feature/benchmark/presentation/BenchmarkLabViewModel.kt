@@ -4,8 +4,8 @@ import android.os.PowerManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
-import com.dmitriim.localailab.ai.api.memory.AiRuntimeMemoryManager
-import com.dmitriim.localailab.ai.api.memory.FeatureRuntimeLifecycle
+import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
+import com.dmitriim.localailab.ai.api.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.runs.RunKind
@@ -43,13 +43,13 @@ class BenchmarkLabViewModel(
     private val launchCoordinator: ProfileLaunchCoordinator,
     private val runner: LocalBenchmarkWorkloadRunner,
     private val runRepository: RunRepository,
-    runtimeMemoryManager: AiRuntimeMemoryManager,
+    runtimeLeaseManager: AiRuntimeLeaseManager,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(BenchmarkLabUiState(workload = launchCoordinator.workload.value))
     val state: StateFlow<BenchmarkLabUiState> = mutableState.asStateFlow()
     private var benchmarkJob: Job? = null
-    internal val runtimeLifecycle = FeatureRuntimeLifecycle(
-        memoryManager = runtimeMemoryManager,
+    internal val runtimeLeaseController = FeatureRuntimeLeaseController(
+        leaseManager = runtimeLeaseManager,
         runtimeKinds = AiRuntimeKind.entries.toSet(),
         onRelease = ::cancel,
     )
@@ -140,7 +140,7 @@ class BenchmarkLabViewModel(
     fun cancel() = benchmarkJob?.cancel()
 
     override fun onCleared() {
-        runtimeLifecycle.onHidden()
+        runtimeLeaseController.onHidden()
         super.onCleared()
     }
 

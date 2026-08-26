@@ -18,7 +18,7 @@ import kotlinx.coroutines.sync.withLock
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
-class DefaultEngineAvailabilitySource(private val probes: Set<EngineAvailabilityProbe>) : EngineAvailabilitySource {
+class ProbedEngineAvailabilitySource(private val probes: Set<EngineAvailabilityProbe>) : EngineAvailabilitySource {
     private val refreshMutex = Mutex()
     private val mutableAvailability = MutableStateFlow<List<EngineAvailability>>(emptyList())
 

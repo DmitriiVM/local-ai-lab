@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.api.tts
 
-/** Describes the voice-selection mechanism requested from a text-to-speech backend. */
+/** Describes the voice-selection mechanism requested from a text-to-speech runtime. */
 sealed interface TextToSpeechVoiceCondition {
     data class FixedSpeaker(val speakerId: Int) : TextToSpeechVoiceCondition
 

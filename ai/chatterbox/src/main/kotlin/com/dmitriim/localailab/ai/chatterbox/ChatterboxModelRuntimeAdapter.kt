@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.chatterbox
 
-import com.dmitriim.localailab.ai.api.model.ModelAdapter
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapter
 import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.ai.api.model.ModelImportFileDefinition
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
@@ -18,8 +18,8 @@ import dev.zacsweers.metro.binding
 import java.io.File
 
 @Inject
-@ContributesIntoSet(AppScope::class, binding = binding<ModelAdapter>())
-class ChatterboxModelRuntimeValidator : ModelAdapter {
+@ContributesIntoSet(AppScope::class, binding = binding<ModelRuntimeAdapter>())
+class ChatterboxModelRuntimeAdapter : ModelRuntimeAdapter {
     override val id = "chatterbox-turbo-q4"
     override val engineId = EngineId("chatterbox-onnx")
     override val profileTypes = setOf(ModelProfileIds.CHATTERBOX_TURBO_Q4)

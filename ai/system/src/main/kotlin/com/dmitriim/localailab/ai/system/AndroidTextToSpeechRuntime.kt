@@ -10,7 +10,7 @@ import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechVoice
-import com.dmitriim.localailab.ai.api.tts.TextToSpeechBackend
+import com.dmitriim.localailab.ai.api.tts.TextToSpeechRuntime
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadResult
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
@@ -38,10 +38,10 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesIntoSet(AppScope::class, binding = binding<TextToSpeechBackend>())
+@ContributesIntoSet(AppScope::class, binding = binding<TextToSpeechRuntime>())
 @ContributesBinding(AppScope::class, binding = binding<SystemTextToSpeechSupport>())
-class AndroidTextToSpeechEngine(private val application: Application) :
-    TextToSpeechBackend,
+class AndroidTextToSpeechRuntime(private val application: Application) :
+    TextToSpeechRuntime,
     SystemTextToSpeechSupport {
     override val engineId = EngineId("android-text-to-speech")
 

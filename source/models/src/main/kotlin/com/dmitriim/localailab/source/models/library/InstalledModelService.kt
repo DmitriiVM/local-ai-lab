@@ -5,8 +5,8 @@ import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.util.Log
 import androidx.core.net.toUri
-import com.dmitriim.localailab.ai.api.model.ModelAdapter
-import com.dmitriim.localailab.ai.api.model.ModelAdapterRegistry
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapter
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapterRegistry
 import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
@@ -43,7 +43,7 @@ import kotlinx.serialization.json.Json
 class InstalledModelService(
     private val application: Application,
     private val databaseProvider: ModelDatabaseProvider,
-    private val adapters: ModelAdapterRegistry,
+    private val adapters: ModelRuntimeAdapterRegistry,
     private val validator: ModelFileValidator,
     private val transferState: ModelTransferStateStore,
     @param:ApplicationCoroutineScope private val applicationScope: CoroutineScope,
@@ -196,7 +196,7 @@ class InstalledModelService(
     private fun importedManifest(
         modelId: ModelId,
         request: ModelImportRequest,
-        adapter: ModelAdapter,
+        adapter: ModelRuntimeAdapter,
         definition: ModelImportDefinition,
         copiedNames: List<String>,
     ) = ModelManifest(

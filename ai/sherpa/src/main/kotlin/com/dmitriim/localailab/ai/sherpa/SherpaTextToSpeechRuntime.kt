@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.sherpa
 
 import android.util.Log
-import com.dmitriim.localailab.ai.api.tts.TextToSpeechBackend
+import com.dmitriim.localailab.ai.api.tts.TextToSpeechRuntime
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadResult
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
@@ -30,8 +30,8 @@ import kotlin.system.measureTimeMillis
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesIntoSet(AppScope::class, binding = binding<TextToSpeechBackend>())
-class SherpaTextToSpeechEngine : TextToSpeechBackend {
+@ContributesIntoSet(AppScope::class, binding = binding<TextToSpeechRuntime>())
+class SherpaTextToSpeechRuntime : TextToSpeechRuntime {
     override val engineId = EngineId("sherpa-onnx")
     private val lock = Any()
     private val cancelled = AtomicBoolean(false)

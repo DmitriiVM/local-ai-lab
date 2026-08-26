@@ -174,7 +174,7 @@ Define its `ModelManifest`, runtime/profile pair, download source, required file
 integrity data, then include it in `ModelCatalog`.
 
 To add a new runtime, create a dedicated `:ai:<runtime>` module that implements the
-engine contract from `:ai:api` and contributes a `ModelAdapter` with runtime-specific
+engine contract from `:ai:api` and contributes a `ModelRuntimeAdapter` with runtime-specific
 validation. Register the module in Gradle and add catalog entries only after their
 model profile and required files are defined. This keeps a new engine isolated from
 the feature UI while allowing it to participate in the same workflows, model library,
@@ -182,7 +182,7 @@ and run history.
 
 Relevant extension points include:
 
-- [`ModelAdapter`](ai/api/src/main/kotlin/com/dmitriim/localailab/ai/api/model/ModelAdapter.kt) — maps a model profile to one packaged runtime and validates an installed model.
+- [`ModelRuntimeAdapter`](ai/api/src/main/kotlin/com/dmitriim/localailab/ai/api/model/ModelRuntimeAdapter.kt) — maps a model profile to one packaged runtime and validates an installed model.
 - [`ModelCatalog`](source/models/src/main/kotlin/com/dmitriim/localailab/source/models/catalog/ModelCatalog.kt) — assembles the immutable in-app catalog.
 - [`ChatModelCatalog`](source/models/src/main/kotlin/com/dmitriim/localailab/source/models/catalog/chat/ChatModelCatalog.kt) — a GGUF catalog example for llama.cpp.
 

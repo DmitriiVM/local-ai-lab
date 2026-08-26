@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.di
 
 import android.app.Application
-import com.dmitriim.localailab.ai.api.memory.AiRuntimeMemoryManager
+import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
 import com.dmitriim.localailab.core.model.service.ModelTransfers
@@ -19,7 +19,7 @@ interface AppGraph : ViewModelGraph {
     val foregroundOperationCoordinator: ForegroundOperationCoordinator
     val modelTransfers: ModelTransfers
     val settingsRepository: AppSettingsRepository
-    val runtimeMemoryManager: AiRuntimeMemoryManager
+    val runtimeLeaseManager: AiRuntimeLeaseManager
 
     @get:ApplicationCoroutineScope
     val applicationScope: CoroutineScope

@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.ai.api.memory
 
 /** Connects one feature's visible lifecycle to its runtime-memory lease. */
-class FeatureRuntimeLifecycle(
-    private val memoryManager: AiRuntimeMemoryManager,
+class FeatureRuntimeLeaseController(
+    private val leaseManager: AiRuntimeLeaseManager,
     private val runtimeKinds: Set<AiRuntimeKind>,
     private val onRelease: () -> Unit,
 ) {
@@ -11,7 +11,7 @@ class FeatureRuntimeLifecycle(
 
     fun onVisible() {
         synchronized(lock) {
-            if (lease == null) lease = memoryManager.acquire(runtimeKinds)
+            if (lease == null) lease = leaseManager.acquire(runtimeKinds)
         }
     }
 

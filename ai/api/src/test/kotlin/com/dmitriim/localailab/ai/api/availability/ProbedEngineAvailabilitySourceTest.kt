@@ -14,10 +14,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class DefaultEngineAvailabilitySourceTest {
+class ProbedEngineAvailabilitySourceTest {
     @Test
     fun `refresh publishes results sorted by display name`() = runBlocking {
-        val source = DefaultEngineAvailabilitySource(setOf(FakeProbe("Zulu"), FakeProbe("Alpha")))
+        val source = ProbedEngineAvailabilitySource(setOf(FakeProbe("Zulu"), FakeProbe("Alpha")))
 
         source.refresh()
 
@@ -27,7 +27,7 @@ class DefaultEngineAvailabilitySourceTest {
     @Test
     fun `failed refresh preserves previously published availability`() = runBlocking {
         val probe = FakeProbe("Ready")
-        val source = DefaultEngineAvailabilitySource(setOf(probe))
+        val source = ProbedEngineAvailabilitySource(setOf(probe))
         source.refresh()
         probe.failure = IllegalStateException("runtime unavailable")
 
@@ -42,7 +42,7 @@ class DefaultEngineAvailabilitySourceTest {
         val release = CompletableDeferred<Unit>()
         val firstStarted = CompletableDeferred<Unit>()
         val secondStarted = CompletableDeferred<Unit>()
-        val source = DefaultEngineAvailabilitySource(
+        val source = ProbedEngineAvailabilitySource(
             setOf(
                 BlockingProbe("First", firstStarted, release),
                 BlockingProbe("Second", secondStarted, release),

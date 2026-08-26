@@ -5,8 +5,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
-import com.dmitriim.localailab.ai.api.memory.AiRuntimeMemoryManager
-import com.dmitriim.localailab.ai.api.memory.FeatureRuntimeLifecycle
+import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
+import com.dmitriim.localailab.ai.api.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoiceStore
 import com.dmitriim.localailab.core.audio.output.api.StreamingSpeechPlayer
@@ -60,7 +60,7 @@ class TextToSpeechViewModel(
     private val referenceVoiceStore: ReferenceVoiceStore,
     private val systemTextToSpeechSupport: SystemTextToSpeechSupport,
     private val profileLaunchCoordinator: ProfileLaunchCoordinator,
-    runtimeMemoryManager: AiRuntimeMemoryManager,
+    runtimeLeaseManager: AiRuntimeLeaseManager,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(TextToSpeechUiState())
     val state: StateFlow<TextToSpeechUiState> = mutableState.asStateFlow()
@@ -79,8 +79,8 @@ class TextToSpeechViewModel(
         persistTtsRun = persistTtsRun,
         onVoiceSelected = ::persistVoiceSelection,
     )
-    internal val runtimeLifecycle = FeatureRuntimeLifecycle(
-        memoryManager = runtimeMemoryManager,
+    internal val runtimeLeaseController = FeatureRuntimeLeaseController(
+        leaseManager = runtimeLeaseManager,
         runtimeKinds = setOf(AiRuntimeKind.TEXT_TO_SPEECH),
         onRelease = operationController::clear,
     )
@@ -322,7 +322,7 @@ class TextToSpeechViewModel(
     fun shareFailed(message: String) = mutableState.update { it.copy(errorMessage = UiText.Dynamic(message)) }
 
     override fun onCleared() {
-        runtimeLifecycle.onHidden()
+        runtimeLeaseController.onHidden()
         super.onCleared()
     }
 

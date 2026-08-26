@@ -30,8 +30,8 @@ fun TextToSpeechRoute(
     viewModel: TextToSpeechViewModel = metroViewModel(),
 ) {
     DisposableEffect(viewModel) {
-        viewModel.runtimeLifecycle.onVisible()
-        onDispose(viewModel.runtimeLifecycle::onHidden)
+        viewModel.runtimeLeaseController.onVisible()
+        onDispose(viewModel.runtimeLeaseController::onHidden)
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current

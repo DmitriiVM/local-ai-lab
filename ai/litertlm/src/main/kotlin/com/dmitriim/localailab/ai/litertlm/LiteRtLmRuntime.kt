@@ -16,7 +16,7 @@ import com.dmitriim.localailab.ai.api.llm.LlmGenerationResult
 import com.dmitriim.localailab.ai.api.llm.LlmLoadOption
 import com.dmitriim.localailab.ai.api.llm.LlmLoadRequest
 import com.dmitriim.localailab.ai.api.llm.LlmLoadResult
-import com.dmitriim.localailab.ai.api.llm.LlmRuntime
+import com.dmitriim.localailab.ai.api.llm.ChatRuntime
 import com.dmitriim.localailab.ai.api.llm.LlmRuntimeDiagnostics
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.engine.ComputePreference
@@ -49,9 +49,9 @@ import kotlin.system.measureTimeMillis
 /** LiteRT-LM Kotlin-SDK runtime. It owns one engine and creates a conversation per app chat turn. */
 @Inject
 @SingleIn(AppScope::class)
-@ContributesIntoSet(AppScope::class, binding = binding<LlmRuntime>())
+@ContributesIntoSet(AppScope::class, binding = binding<ChatRuntime>())
 class LiteRtLmRuntime(private val application: Application) :
-    LlmRuntime,
+    ChatRuntime,
     LlmChatFormatter {
     private val lock = ReentrantLock()
     private var engine: Engine? = null

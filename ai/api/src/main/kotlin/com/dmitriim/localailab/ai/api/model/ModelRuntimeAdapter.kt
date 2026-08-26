@@ -7,7 +7,7 @@ import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import java.io.File
 
 /** A packaged model-family integration. Model weights may be imported or downloaded separately. */
-interface ModelAdapter {
+interface ModelRuntimeAdapter {
     val id: String
     val profileTypes: Set<ModelProfileId>
     val engineId: EngineId

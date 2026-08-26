@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.api.llm
 
-/** Engine-neutral local chat boundary. Calls must run away from the Android main thread. */
-interface LlmEngine {
+/** Shared local-chat execution lifecycle. Calls must run away from the Android main thread. */
+interface ChatExecution {
     val isLoaded: Boolean
 
     fun load(request: LlmLoadRequest): LlmLoadResult

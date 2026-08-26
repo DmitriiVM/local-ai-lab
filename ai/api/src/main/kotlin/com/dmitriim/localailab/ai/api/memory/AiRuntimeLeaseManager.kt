@@ -8,7 +8,7 @@ enum class AiRuntimeKind {
 }
 
 /** Keeps runtimes warm while a feature owns them and evicts them when ownership ends. */
-interface AiRuntimeMemoryManager {
+interface AiRuntimeLeaseManager {
     fun acquire(runtimeKinds: Set<AiRuntimeKind>): AutoCloseable
 
     fun evictAll()

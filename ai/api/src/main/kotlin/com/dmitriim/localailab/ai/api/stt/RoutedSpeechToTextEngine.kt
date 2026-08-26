@@ -5,24 +5,24 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 
-/** Routes STT requests to the backend selected by engine ID and owns its active lifetime. */
+/** Routes STT requests to the runtime selected by engine ID and owns its active lifetime. */
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
-class RoutedSpeechToTextEngine(backends: Set<SpeechToTextBackend>) : SpeechToTextEngine {
+class RoutedSpeechToTextEngine(runtimes: Set<SpeechToTextRuntime>) : SpeechToTextEngine {
     private val lock = Any()
-    private val byEngineId = backends.associateBy(SpeechToTextBackend::engineId).also {
-        require(it.size == backends.size) {
-            "More than one STT backend declares the same engine ID."
+    private val byEngineId = runtimes.associateBy(SpeechToTextRuntime::engineId).also {
+        require(it.size == runtimes.size) {
+            "More than one STT runtime declares the same engine ID."
         }
     }
-    private var active: SpeechToTextBackend? = null
+    private var active: SpeechToTextRuntime? = null
 
     override val isLoaded: Boolean
         get() = synchronized(lock) { active?.isLoaded == true }
 
     override fun load(request: SpeechToTextLoadRequest): SpeechToTextLoadResult {
-        val backend = synchronized(lock) {
+        val runtime = synchronized(lock) {
             val selected = requireNotNull(byEngineId[request.engineId]) {
                 "No packaged speech-to-text engine supports ${request.engineId.value}."
             }
@@ -33,7 +33,7 @@ class RoutedSpeechToTextEngine(backends: Set<SpeechToTextBackend>) : SpeechToTex
             }
             selected
         }
-        return backend.load(request)
+        return runtime.load(request)
     }
 
     override fun transcribe(request: SpeechToTextRequest): SpeechToTextResult = synchronized(lock) { checkNotNull(active) { "Load a speech model before transcription." } }

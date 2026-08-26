@@ -10,15 +10,15 @@ import dev.zacsweers.metro.SingleIn
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
-class RoutedChatEngine(runtimes: Set<LlmRuntime>) : ChatEngine {
+class RoutedChatEngine(runtimes: Set<ChatRuntime>) : ChatEngine {
     private val lock = Any()
-    private val byEngineId = runtimes.associateBy(LlmRuntime::engineId).also { indexed ->
+    private val byEngineId = runtimes.associateBy(ChatRuntime::engineId).also { indexed ->
         require(indexed.size == runtimes.size) {
             "More than one LLM runtime declares the same engine ID."
         }
         runtimes.forEach(::validateOptionalOperations)
     }
-    private var active: LlmRuntime? = null
+    private var active: ChatRuntime? = null
 
     override val isLoaded: Boolean
         get() = synchronized(lock) { active?.isLoaded == true }
@@ -61,11 +61,11 @@ class RoutedChatEngine(runtimes: Set<LlmRuntime>) : ChatEngine {
         }
     }
 
-    private fun activeRuntime(): LlmRuntime = synchronized(lock) {
+    private fun activeRuntime(): ChatRuntime = synchronized(lock) {
         checkNotNull(active) { "Load a chat model before using the LLM runtime." }
     }
 
-    private fun validateOptionalOperations(runtime: LlmRuntime) {
+    private fun validateOptionalOperations(runtime: ChatRuntime) {
         if (runtime.capabilities.chatTemplateHandling ==
             LlmChatTemplateHandling.ENGINE_FORMATS_MESSAGES
         ) {

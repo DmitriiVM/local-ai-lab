@@ -1,6 +1,6 @@
-package com.dmitriim.localailab.ai.litertlm
+package com.dmitriim.localailab.ai.llamacpp
 
-import com.dmitriim.localailab.ai.api.model.ModelAdapter
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapter
 import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.ai.api.model.ModelImportFileDefinition
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
@@ -12,17 +12,17 @@ import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
-import com.google.ai.edge.litertlm.Capabilities
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import java.io.File
+import java.io.RandomAccessFile
 
 @Inject
-@ContributesIntoSet(AppScope::class, binding = binding<ModelAdapter>())
-class LiteRtLmModelRuntimeValidator : ModelAdapter {
-    override val id = "litert-lm-bundle"
-    override val engineId = EngineId("litert-lm")
+@ContributesIntoSet(AppScope::class, binding = binding<ModelRuntimeAdapter>())
+class LlamaCppModelRuntimeAdapter : ModelRuntimeAdapter {
+    override val id = "llama-cpp-gguf"
+    override val engineId = EngineId("llama.cpp")
     override val profileTypes = setOf(ModelProfileIds.LLM)
     override val capabilities = setOf(AiCapability.CHAT)
 
@@ -30,37 +30,30 @@ class LiteRtLmModelRuntimeValidator : ModelAdapter {
 
     override fun importDefinition(profileType: ModelProfileId) = when (profileType) {
         ModelProfileIds.LLM -> ModelImportDefinition(
-            displayName = "LiteRT-LM chat model",
-            format = ModelFormat.LITERT_LM,
+            displayName = "GGUF chat model",
+            format = ModelFormat.GGUF,
             files = listOf(
-                ModelImportFileDefinition(
-                    role = ModelFileRoles.PRIMARY_MODEL,
-                    extension = ".litertlm",
-                ),
+                ModelImportFileDefinition(role = ModelFileRoles.PRIMARY_MODEL, extension = ".gguf"),
             ),
         )
         else -> null
     }
 
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
-        require(manifest.engineId == engineId) {
-            "Unsupported LiteRT-LM engine: ${manifest.engineId.value}"
-        }
         require(manifest.profileType in profileTypes) {
-            "Unsupported LiteRT-LM profile: ${manifest.profileType.value}"
+            "Unsupported llama.cpp profile: ${manifest.profileType.value}"
         }
-        require(manifest.format == ModelFormat.LITERT_LM) {
-            "The LiteRT-LM manifest has an incompatible format."
+        val file = manifest.files.firstOrNull { it.required }
+            ?.let { File(directory, it.relativePath) }
+            ?: error("The GGUF manifest does not declare a primary file.")
+        require(file.isFile && file.canRead()) { "The GGUF model file is not readable." }
+        RandomAccessFile(file, "r").use { input ->
+            val signature = ByteArray(4)
+            input.readFully(signature)
+            require(signature.toString(Charsets.US_ASCII) == "GGUF") {
+                "The selected file is not a GGUF model."
+            }
         }
-        val specification = manifest.files.firstOrNull {
-            it.required && it.role == ModelFileRoles.PRIMARY_MODEL && !it.directory
-        } ?: error("The LiteRT-LM manifest does not declare a primary file.")
-        val file = File(directory, specification.relativePath)
-        require(file.isFile && file.canRead()) { "The LiteRT-LM model file is not readable." }
-        require(file.extension.equals("litertlm", ignoreCase = true)) {
-            "The selected file is not a .litertlm model bundle."
-        }
-        Capabilities(file.absolutePath).use { }
     }.fold(
         onSuccess = { RuntimeValidationResult(valid = true) },
         onFailure = { RuntimeValidationResult(valid = false, message = it.message) },

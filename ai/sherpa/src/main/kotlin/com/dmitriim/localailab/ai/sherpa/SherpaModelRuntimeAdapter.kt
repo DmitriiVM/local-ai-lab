@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.sherpa
 
-import com.dmitriim.localailab.ai.api.model.ModelAdapter
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapter
 import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.ai.api.model.ModelImportFileDefinition
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
@@ -18,8 +18,8 @@ import dev.zacsweers.metro.binding
 import java.io.File
 
 @Inject
-@ContributesIntoSet(AppScope::class, binding = binding<ModelAdapter>())
-class SherpaModelRuntimeValidator : ModelAdapter {
+@ContributesIntoSet(AppScope::class, binding = binding<ModelRuntimeAdapter>())
+class SherpaModelRuntimeAdapter : ModelRuntimeAdapter {
     override val id = "sherpa-onnx-families"
     override val engineId = EngineId("sherpa-onnx")
     override val profileTypes = setOf(

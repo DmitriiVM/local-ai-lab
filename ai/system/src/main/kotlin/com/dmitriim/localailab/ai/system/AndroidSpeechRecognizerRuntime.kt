@@ -15,7 +15,7 @@ import android.speech.RecognitionSupportCallback
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
-import com.dmitriim.localailab.ai.api.stt.SpeechToTextBackend
+import com.dmitriim.localailab.ai.api.stt.SpeechToTextRuntime
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadRequest
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadResult
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextRequest
@@ -38,8 +38,8 @@ import kotlin.system.measureTimeMillis
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesIntoSet(AppScope::class, binding = binding<SpeechToTextBackend>())
-class AndroidSpeechRecognizerEngine(private val application: Application) : SpeechToTextBackend {
+@ContributesIntoSet(AppScope::class, binding = binding<SpeechToTextRuntime>())
+class AndroidSpeechRecognizerRuntime(private val application: Application) : SpeechToTextRuntime {
     override val engineId = EngineId("android-speech-recognizer")
 
     private val lock = Any()

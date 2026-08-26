@@ -9,8 +9,8 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 @Composable
 fun BenchmarkRoute(viewModel: BenchmarkLabViewModel = metroViewModel()) {
     DisposableEffect(viewModel) {
-        viewModel.runtimeLifecycle.onVisible()
-        onDispose(viewModel.runtimeLifecycle::onHidden)
+        viewModel.runtimeLeaseController.onVisible()
+        onDispose(viewModel.runtimeLeaseController::onHidden)
     }
     val state = viewModel.state.collectAsStateWithLifecycle().value
     BenchmarkScreen(

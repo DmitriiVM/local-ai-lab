@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.vosk
 
 import android.util.Log
-import com.dmitriim.localailab.ai.api.stt.SpeechToTextBackend
+import com.dmitriim.localailab.ai.api.stt.SpeechToTextRuntime
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadRequest
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadResult
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextRequest
@@ -24,8 +24,8 @@ import org.vosk.Recognizer
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesIntoSet(AppScope::class, binding = binding<SpeechToTextBackend>())
-class VoskSpeechToTextEngine : SpeechToTextBackend {
+@ContributesIntoSet(AppScope::class, binding = binding<SpeechToTextRuntime>())
+class VoskSpeechToTextRuntime : SpeechToTextRuntime {
     override val engineId = EngineId("vosk")
 
     private val lock = Any()

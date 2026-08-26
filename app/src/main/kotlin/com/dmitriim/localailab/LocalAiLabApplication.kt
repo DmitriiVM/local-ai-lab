@@ -30,7 +30,7 @@ class LocalAiLabApplication : Application() {
             graph.foregroundOperationCoordinator.interruptActiveOperations(
                 ForegroundOperationInterruption.MEMORY_PRESSURE,
             )
-            graph.runtimeMemoryManager.evictAll()
+            graph.runtimeLeaseManager.evictAll()
         }
     }
 }

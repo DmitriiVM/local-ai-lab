@@ -12,7 +12,7 @@
 # sherpa-onnx JNI reads fields from its Java configuration objects when it
 # creates STT and TTS runtimes.
 -keep class com.k2fsa.sherpa.onnx.** { *; }
--keep class com.dmitriim.localailab.ai.sherpa.SherpaTextToSpeechEngine$AudioChunkCallback { *; }
+-keep class com.dmitriim.localailab.ai.sherpa.SherpaTextToSpeechRuntime$AudioChunkCallback { *; }
 
 # ONNX Runtime's native session bridge resolves Java tensor and value classes
 # dynamically while converting inference outputs.

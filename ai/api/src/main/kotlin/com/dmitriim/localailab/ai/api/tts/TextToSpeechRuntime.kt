@@ -2,8 +2,8 @@ package com.dmitriim.localailab.ai.api.tts
 
 import com.dmitriim.localailab.core.model.engine.EngineId
 
-/** A concrete runtime contributed into the application engine set. */
-interface TextToSpeechBackend {
+/** A concrete TTS runtime contributed into the application engine set. */
+interface TextToSpeechRuntime {
     val engineId: EngineId
     val isLoaded: Boolean
 

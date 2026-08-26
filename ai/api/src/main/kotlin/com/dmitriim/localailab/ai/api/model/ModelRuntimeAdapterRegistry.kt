@@ -6,7 +6,7 @@ import dev.zacsweers.metro.Inject
 
 /** Resolves one adapter per persisted engine/profile pair and rejects ambiguous app packaging. */
 @Inject
-class ModelAdapterRegistry(adapters: Set<ModelAdapter>) {
+class ModelRuntimeAdapterRegistry(adapters: Set<ModelRuntimeAdapter>) {
     init {
         require(adapters.map { it.id }.distinct().size == adapters.size) {
             "More than one packaged model adapter declares the same adapter ID."
@@ -24,5 +24,5 @@ class ModelAdapterRegistry(adapters: Set<ModelAdapter>) {
         }
     }
 
-    fun find(engineId: EngineId, profileType: ModelProfileId): ModelAdapter? = byEngineAndProfile[engineId to profileType]
+    fun find(engineId: EngineId, profileType: ModelProfileId): ModelRuntimeAdapter? = byEngineAndProfile[engineId to profileType]
 }

@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.source.models.validation
 
-import com.dmitriim.localailab.ai.api.model.ModelAdapter
-import com.dmitriim.localailab.ai.api.model.ModelAdapterRegistry
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapter
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapterRegistry
 import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.core.model.capability.AiCapability
@@ -105,7 +105,7 @@ class ModelFileValidatorTest {
         File(directory, "weights.bin").writeText("abc")
         val manifest = manifest(ModelFileSpec("weights.bin", ModelFileRole("WEIGHTS")))
 
-        val validation = ModelFileValidator(ModelAdapterRegistry(emptySet())).validate(manifest, directory)
+        val validation = ModelFileValidator(ModelRuntimeAdapterRegistry(emptySet())).validate(manifest, directory)
 
         assertEquals(ModelValidationState.INCOMPATIBLE, validation.first)
     }
@@ -121,7 +121,7 @@ class ModelFileValidatorTest {
         assertEquals(SHA_ABC, enriched.sha256)
     }
 
-    private fun validator() = ModelFileValidator(ModelAdapterRegistry(setOf(FakeAdapter)))
+    private fun validator() = ModelFileValidator(ModelRuntimeAdapterRegistry(setOf(FakeAdapter)))
 
     private fun manifest(vararg files: ModelFileSpec) = ModelManifest(
         modelId = ModelId("test-model"),
@@ -145,7 +145,7 @@ class ModelFileValidatorTest {
         }
     }
 
-    private object FakeAdapter : ModelAdapter {
+    private object FakeAdapter : ModelRuntimeAdapter {
         override val id = "test-adapter"
         override val profileTypes = setOf(PROFILE)
         override val engineId = EngineId("test-engine")
