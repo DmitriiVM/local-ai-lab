@@ -18,6 +18,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+/**
+ * Retains loaded runtimes while one or more visible features hold leases, then evicts idle
+ * runtime families after a short handoff period or immediately under memory pressure.
+ */
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class, binding = binding<AiRuntimeMemoryManager>())

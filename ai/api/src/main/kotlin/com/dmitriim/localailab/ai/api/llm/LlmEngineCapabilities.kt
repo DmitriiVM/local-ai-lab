@@ -2,6 +2,7 @@ package com.dmitriim.localailab.ai.api.llm
 
 import com.dmitriim.localailab.core.model.engine.ComputePreference
 
+/** Declares the execution, prompt-handling, and tuning features supported by one LLM runtime. */
 data class LlmEngineCapabilities(
     val computePreferences: Set<ComputePreference>,
     val streaming: Boolean,

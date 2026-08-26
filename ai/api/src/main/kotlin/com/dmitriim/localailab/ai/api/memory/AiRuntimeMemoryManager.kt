@@ -1,5 +1,6 @@
 package com.dmitriim.localailab.ai.api.memory
 
+/** Identifies a runtime family whose loaded resources can be retained or evicted together. */
 enum class AiRuntimeKind {
     CHAT,
     SPEECH_TO_TEXT,

@@ -5,6 +5,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 
+/** Routes STT requests to the backend selected by engine ID and owns its active lifetime. */
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)

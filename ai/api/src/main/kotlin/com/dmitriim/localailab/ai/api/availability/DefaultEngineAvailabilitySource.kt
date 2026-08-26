@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+/** Aggregates packaged engine probes into a refreshable, display-ready availability state. */
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
