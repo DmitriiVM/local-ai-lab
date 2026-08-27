@@ -15,7 +15,7 @@ import com.dmitriim.localailab.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffectsProcessor
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
+import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.core.model.runtime.ChatModelReference
 import com.dmitriim.localailab.core.model.runtime.SpeechToTextModelReference
@@ -124,7 +124,7 @@ class SynthesizeSpeechTest {
                 modelId = modelId,
                 displayName = "Test voice",
                 engineId = EngineId("test"),
-                profileType = ModelProfileId.PIPER_VITS_TTS,
+                profileType = ModelProfileIds.PIPER_VITS_TTS,
                 modelDirectory = "/models/test",
                 sampleRateHz = 16_000,
                 languages = setOf("en"),

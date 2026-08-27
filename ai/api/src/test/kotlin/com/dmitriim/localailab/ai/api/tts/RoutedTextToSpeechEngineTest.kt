@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.api.tts
 
 import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
+import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -43,7 +43,7 @@ class RoutedTextToSpeechEngineTest {
 
     private fun requestFor(id: String) = TextToSpeechLoadRequest(
         engineId = EngineId(id),
-        profileType = ModelProfileId.PIPER_VITS_TTS,
+        profileType = ModelProfileIds.PIPER_VITS_TTS,
         modelDirectory = "model",
     )
 

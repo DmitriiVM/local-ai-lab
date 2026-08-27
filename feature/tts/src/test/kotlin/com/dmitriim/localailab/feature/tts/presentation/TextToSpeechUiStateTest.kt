@@ -11,7 +11,7 @@ import com.dmitriim.localailab.core.model.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
+import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.ModelSource
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceDescriptor
 import org.junit.Assert.assertEquals
@@ -25,7 +25,7 @@ class TextToSpeechUiStateTest {
             id = ModelId("model"),
             displayName = "Model",
             engineId = EngineId("engine"),
-            profileType = ModelProfileId.PIPER_VITS_TTS,
+            profileType = ModelProfileIds.PIPER_VITS_TTS,
             languages = setOf("en-US", "ru"),
             speakerCount = 2,
             voiceMode = com.dmitriim.localailab.core.model.manifest.TtsVoiceMode.SPEAKER_ID,
@@ -91,7 +91,7 @@ class TextToSpeechUiStateTest {
         family = "Test",
         capabilities = setOf(AiCapability.TEXT_TO_SPEECH),
         engineId = EngineId("engine"),
-        profileType = ModelProfileId.PIPER_VITS_TTS,
+        profileType = ModelProfileIds.PIPER_VITS_TTS,
         format = ModelFormat.ONNX,
         revision = "r1",
         files = emptyList(),

@@ -12,7 +12,7 @@ import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localailab.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
+import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.SttRecognitionMode
 import com.dmitriim.localailab.core.model.runtime.ChatModelReference
 import com.dmitriim.localailab.core.model.runtime.SpeechToTextModelReference
@@ -95,7 +95,7 @@ class TranscribeAudioTest {
                 modelId = modelId,
                 displayName = "Test transcription",
                 engineId = EngineId("test"),
-                profileType = ModelProfileId.WHISPER_STT,
+                profileType = ModelProfileIds.WHISPER_STT,
                 modelDirectory = "/models/test",
                 files = emptyMap(),
                 sampleRateHz = 16_000,
