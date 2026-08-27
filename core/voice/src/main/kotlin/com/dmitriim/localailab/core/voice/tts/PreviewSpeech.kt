@@ -35,6 +35,7 @@ class PreviewSpeech(
                     profileType = model.profileType,
                     modelDirectory = model.modelDirectory,
                     threadCount = request.settings.threadCount,
+                    artifacts = model.artifacts,
                 ),
             )
             validateSpeaker(request, model.displayName, load.speakerCount)

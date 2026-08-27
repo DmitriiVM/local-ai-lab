@@ -1,0 +1,44 @@
+package com.dmitriim.localailab.ai.sherpa.tts
+
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
+import com.dmitriim.localailab.core.di.AppScope
+import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
+import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.runtime.ModelArtifacts
+import com.k2fsa.sherpa.onnx.OfflineTtsKokoroModelConfig
+import dev.zacsweers.metro.ContributesIntoSet
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
+
+@Inject
+@ContributesIntoSet(AppScope::class, binding = binding<ModelRuntimeProfile>())
+class KokoroTtsProfile :
+    BaseSherpaTtsProfile(
+        ModelProfileIds.KOKORO_TTS,
+        "Kokoro Multi-Lang v1.0",
+        sherpaTtsImport(
+            "Kokoro Multi-Lang v1.0",
+            (ModelFileRoles.KOKORO_MODEL to "model.onnx").file(),
+            (ModelFileRoles.VOICE_EMBEDDINGS to "voices.bin").file(),
+            (ModelFileRoles.TOKENS to "tokens.txt").file(),
+            (ModelFileRoles.LEXICON to "lexicon-us-en.txt").file(),
+            (ModelFileRoles.LEXICON to "lexicon-zh.txt").file(),
+            (ModelFileRoles.TEXT_RULES to "date-zh.fst").file(),
+            (ModelFileRoles.TEXT_RULES to "number-zh.fst").file(),
+            (ModelFileRoles.TEXT_RULES to "phone-zh.fst").file(),
+            (ModelFileRoles.FRONTEND_DATA to "espeak-ng-data") directory true,
+            (ModelFileRoles.DICTIONARY_DATA to "dict") directory true,
+        ),
+    ) {
+    override fun open(artifacts: ModelArtifacts, threadCount: Int) = openSherpaTts(threadCount) {
+        kokoro = OfflineTtsKokoroModelConfig().apply {
+            model = artifacts.require(ModelFileRoles.KOKORO_MODEL).path
+            voices = artifacts.require(ModelFileRoles.VOICE_EMBEDDINGS).path
+            tokens = artifacts.require(ModelFileRoles.TOKENS).path
+            dataDir = artifacts.require(ModelFileRoles.FRONTEND_DATA).path
+            lexicon = listOf("lexicon-us-en.txt", "lexicon-zh.txt")
+                .joinToString(",") { artifacts.requirePath(it).path }
+            dictDir = artifacts.require(ModelFileRoles.DICTIONARY_DATA).path
+        }
+    }
+}

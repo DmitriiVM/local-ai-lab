@@ -15,14 +15,15 @@ import android.speech.RecognitionSupportCallback
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
-import com.dmitriim.localailab.ai.api.stt.SpeechToTextRuntime
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadRequest
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadResult
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextRequest
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextResult
+import com.dmitriim.localailab.ai.api.stt.SpeechToTextRuntime
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
@@ -39,7 +40,10 @@ import kotlin.system.measureTimeMillis
 @Inject
 @SingleIn(AppScope::class)
 @ContributesIntoSet(AppScope::class, binding = binding<SpeechToTextRuntime>())
-class AndroidSpeechRecognizerRuntime(private val application: Application) : SpeechToTextRuntime {
+class AndroidSpeechRecognizerRuntime(
+    private val application: Application,
+    private val profiles: ModelRuntimeProfileRegistry,
+) : SpeechToTextRuntime {
     override val engineId = EngineId("android-speech-recognizer")
 
     private val lock = Any()
@@ -60,9 +64,9 @@ class AndroidSpeechRecognizerRuntime(private val application: Application) : Spe
         require(request.engineId == engineId) {
             "Unsupported STT engine: ${request.engineId.value}"
         }
-        require(request.profileType == ModelProfileIds.ANDROID_SPEECH_RECOGNIZER_STT) {
-            "Unsupported Android speech profile: ${request.profileType.value}"
-        }
+        profiles.requireTyped<AndroidSpeechRecognizerRuntimeProfile>(
+            ModelProfileKey(request.engineId, request.profileType),
+        )
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             error("Android SpeechRecognizer audio input requires Android 13 or newer.")
         }

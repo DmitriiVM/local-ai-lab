@@ -167,24 +167,23 @@ or send it.
 
 The project is meant to be extended.
 
-To add another model for an existing runtime, add a `CatalogModel` entry in the
-appropriate catalog under
-[`source/models/src/main/kotlin/com/dmitriim/localailab/source/models/catalog`](source/models/src/main/kotlin/com/dmitriim/localailab/source/models/catalog).
-Define its `ModelManifest`, runtime/profile pair, download source, required files, and
-integrity data, then include it in `ModelCatalog`.
+To add another model for an existing runtime, define a `ModelCatalogContribution`
+containing its `ModelManifest`, runtime-profile key, download source, required files,
+and integrity data. Contribute that definition to Metro;
+the catalog registry discovers it automatically.
 
 To add a new runtime, create a dedicated `:ai:<runtime>` module that implements the
-engine contract from `:ai:api` and contributes a `ModelRuntimeAdapter` with runtime-specific
-validation. Register the module in Gradle and add catalog entries only after their
+engine contract from `:ai:api` and contributes a `ModelRuntimeProfile` with runtime-specific
+configuration and validation. Register the module in Gradle and add catalog entries only after their
 model profile and required files are defined. This keeps a new engine isolated from
 the feature UI while allowing it to participate in the same workflows, model library,
 and run history.
 
 Relevant extension points include:
 
-- [`ModelRuntimeAdapter`](ai/api/src/main/kotlin/com/dmitriim/localailab/ai/api/model/ModelRuntimeAdapter.kt) — maps a model profile to one packaged runtime and validates an installed model.
-- [`ModelCatalog`](source/models/src/main/kotlin/com/dmitriim/localailab/source/models/catalog/ModelCatalog.kt) — assembles the immutable in-app catalog.
-- [`ChatModelCatalog`](source/models/src/main/kotlin/com/dmitriim/localailab/source/models/catalog/chat/ChatModelCatalog.kt) — a GGUF catalog example for llama.cpp.
+- [`ModelRuntimeProfile`](ai/api/src/main/kotlin/com/dmitriim/localailab/ai/api/model/ModelRuntimeProfile.kt) — describes one reusable engine/profile integration.
+- [`ModelCatalogContribution`](core/model/src/main/kotlin/com/dmitriim/localailab/core/model/library/ModelCatalogContribution.kt) — contributes one downloadable model.
+- [`MoonshineTinyEnglishInt8ModelDefinition`](ai/sherpa/src/main/kotlin/com/dmitriim/localailab/ai/sherpa/MoonshineTinyEnglishInt8ModelDefinition.kt) — a self-registering Sherpa model example.
 
 ## Technology
 

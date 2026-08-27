@@ -5,19 +5,18 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localailab.core.model.library.ModelImportRequest
 import com.dmitriim.localailab.core.model.library.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.core.model.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.core.model.service.HuggingFaceCredentialStatus
 import com.dmitriim.localailab.core.model.service.ModelDiagnostics
 import com.dmitriim.localailab.core.model.service.ModelDownloadCredentials
 import com.dmitriim.localailab.core.model.service.ModelLibrary
+import com.dmitriim.localailab.core.model.service.ModelProfileDirectory
 import com.dmitriim.localailab.core.model.service.ModelTransfers
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import dev.zacsweers.metro.ContributesIntoMap
@@ -39,6 +38,7 @@ class ModelsViewModel(
     private val modelTransfers: ModelTransfers,
     private val modelDiagnostics: ModelDiagnostics,
     private val downloadCredentials: ModelDownloadCredentials,
+    private val profileDirectory: ModelProfileDirectory,
 ) : ViewModel() {
     private val mutableUiState = MutableStateFlow(ModelsUiState())
     val uiState: StateFlow<ModelsUiState> = mutableUiState.asStateFlow()
@@ -66,18 +66,20 @@ class ModelsViewModel(
         }
     }
 
-    fun import(profile: ModelProfileId, uris: List<String>) = launchOperation("import ${profile.value}") {
-        Log.i(TAG, "Models UI import requested: profile=${profile.value}, documentCount=${uris.size}")
-        val engine = if (profile == ModelProfileIds.LLM) EngineId("llama.cpp") else EngineId("sherpa-onnx")
+    fun import(profile: ModelProfileKey, uris: List<String>) = launchOperation("import ${profile.profileId.value}") {
+        val descriptor = requireNotNull(profileDirectory.find(profile)) {
+            "This model profile is not packaged in the application."
+        }
+        require(descriptor.importable) { "${descriptor.displayName} does not support imports." }
+        Log.i(TAG, "Models UI import requested: profile=${profile.profileId.value}, documentCount=${uris.size}")
         val modelId = modelLibrary.import(
             ModelImportRequest(
-                displayName = application.getString(CoreUiR.string.models_imported_profile, application.getString(profile.displayNameRes)),
-                engineId = engine,
-                profileType = profile,
+                displayName = application.getString(CoreUiR.string.models_imported_profile, descriptor.displayName),
+                profileKey = profile,
                 documentUris = uris,
             ),
         ).getOrThrow()
-        Log.i(TAG, "Models UI import completed: profile=$profile, modelId=${modelId.value}")
+        Log.i(TAG, "Models UI import completed: profile=${profile.profileId.value}, modelId=${modelId.value}")
         "Model imported and validated."
     }
 
@@ -330,23 +332,3 @@ private data class ModelData(
     val transfers: Map<ModelId, com.dmitriim.localailab.core.model.library.ModelTransferState>,
     val credentialStatus: com.dmitriim.localailab.core.model.service.HuggingFaceCredentialStatus,
 )
-
-private val ModelProfileId.displayNameRes: Int
-    get() = when (this) {
-        ModelProfileIds.LLM -> CoreUiR.string.models_profile_gguf_chat
-        ModelProfileIds.WHISPER_STT -> CoreUiR.string.models_profile_whisper_stt
-        ModelProfileIds.PARAKEET_CTC_STT -> CoreUiR.string.models_profile_parakeet_stt
-        ModelProfileIds.GIGAAM_CTC_STT -> CoreUiR.string.models_profile_gigaam_stt
-        ModelProfileIds.ZIPFORMER_STT -> CoreUiR.string.models_profile_zipformer_stt
-        ModelProfileIds.SENSE_VOICE_STT -> CoreUiR.string.models_profile_sensevoice_stt
-        ModelProfileIds.PARAFORMER_STT -> CoreUiR.string.models_profile_paraformer_stt
-        ModelProfileIds.MOONSHINE_STT -> CoreUiR.string.models_profile_moonshine_stt
-        ModelProfileIds.MOONSHINE_V1_STT -> CoreUiR.string.models_profile_moonshine_v1_stt
-        ModelProfileIds.VOSK_STT -> CoreUiR.string.models_profile_vosk_stt
-        ModelProfileIds.ANDROID_SPEECH_RECOGNIZER_STT -> CoreUiR.string.models_profile_android_stt
-        ModelProfileIds.SUPERTONIC_TTS -> CoreUiR.string.models_profile_supertonic_tts
-        ModelProfileIds.PIPER_VITS_TTS -> CoreUiR.string.models_profile_piper_tts
-        ModelProfileIds.KOKORO_TTS -> CoreUiR.string.models_profile_kokoro_tts
-        ModelProfileIds.POCKET_TTS -> CoreUiR.string.models_profile_pocket_tts
-        else -> CoreUiR.string.models_profile_bundle
-    }

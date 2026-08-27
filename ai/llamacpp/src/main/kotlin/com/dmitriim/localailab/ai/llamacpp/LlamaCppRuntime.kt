@@ -2,6 +2,7 @@ package com.dmitriim.localailab.ai.llamacpp
 
 import android.app.Application
 import android.util.Log
+import com.dmitriim.localailab.ai.api.llm.ChatRuntime
 import com.dmitriim.localailab.ai.api.llm.LlmChatFormatter
 import com.dmitriim.localailab.ai.api.llm.LlmChatMessage
 import com.dmitriim.localailab.ai.api.llm.LlmChatTemplateHandling
@@ -14,14 +15,14 @@ import com.dmitriim.localailab.ai.api.llm.LlmGenerationResult
 import com.dmitriim.localailab.ai.api.llm.LlmLoadOption
 import com.dmitriim.localailab.ai.api.llm.LlmLoadRequest
 import com.dmitriim.localailab.ai.api.llm.LlmLoadResult
-import com.dmitriim.localailab.ai.api.llm.ChatRuntime
 import com.dmitriim.localailab.ai.api.llm.LlmRuntimeDiagnostics
 import com.dmitriim.localailab.ai.api.llm.LlmTokenCounter
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.engine.ComputePreference
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.core.model.runtime.ChatModelReference
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
@@ -36,8 +37,10 @@ import kotlin.system.measureTimeMillis
 @Inject
 @SingleIn(AppScope::class)
 @ContributesIntoSet(AppScope::class, binding = binding<ChatRuntime>())
-class LlamaCppRuntime(application: Application) :
-    ChatRuntime,
+class LlamaCppRuntime(
+    application: Application,
+    private val profiles: ModelRuntimeProfileRegistry,
+) : ChatRuntime,
     LlmChatFormatter,
     LlmTokenCounter {
     private val native = NativeBridge(application.applicationInfo.nativeLibraryDir)
@@ -72,9 +75,7 @@ class LlamaCppRuntime(application: Application) :
         require(reference.engineId == engineId) {
             "Unsupported LLM engine: ${reference.engineId.value}"
         }
-        require(reference.profileType == ModelProfileIds.LLM) {
-            "Unsupported chat profile: ${reference.profileType.value}"
-        }
+        profiles.requireTyped<LlamaCppProfile>(ModelProfileKey(reference.engineId, reference.profileType))
         require(reference is ChatModelReference.ArtifactBacked) {
             "The llama.cpp runtime requires an artifact-backed model."
         }

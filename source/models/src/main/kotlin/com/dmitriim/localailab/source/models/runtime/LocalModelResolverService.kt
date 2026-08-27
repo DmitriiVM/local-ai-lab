@@ -44,6 +44,7 @@ class LocalModelResolverService(
                 role = specification.role,
                 path = artifact.absolutePath,
                 directory = specification.directory,
+                relativePath = specification.relativePath,
             )
         }
         ChatModelReference.ArtifactBacked(
@@ -64,7 +65,7 @@ class LocalModelResolverService(
                 engineId = EngineId("android-speech-recognizer"),
                 profileType = ModelProfileIds.ANDROID_SPEECH_RECOGNIZER_STT,
                 modelDirectory = "",
-                files = emptyMap(),
+                artifacts = emptyList(),
                 sampleRateHz = 16_000,
                 languages = linkedSetOf("English", "Russian", "Chinese", "Japanese", "Korean", "Cantonese"),
                 recognitionMode = SttRecognitionMode.STREAMING,
@@ -74,15 +75,14 @@ class LocalModelResolverService(
         require(AiCapability.SPEECH_TO_TEXT in manifest.capabilities) {
             "This installed model is not a compatible local speech-to-text model."
         }
+        val artifacts = manifest.resolvedArtifacts(directory)
         SpeechToTextModelReference(
             modelId = modelId,
             displayName = manifest.displayName,
             engineId = manifest.engineId,
             profileType = manifest.profileType,
             modelDirectory = directory.absolutePath,
-            files = manifest.files
-                .filter { it.required && !it.directory }
-                .associate { it.role to File(directory, it.relativePath).absolutePath },
+            artifacts = artifacts,
             sampleRateHz = manifest.sampleRateHz ?: 16_000,
             languages = manifest.languages,
             recognitionMode = manifest.sttRecognitionMode,
@@ -123,6 +123,20 @@ class LocalModelResolverService(
             speakerCount = manifest.speakerCount,
             voiceMode = manifest.ttsVoiceMode,
             supportedControls = manifest.ttsControls,
+            artifacts = manifest.resolvedArtifacts(directory),
+        )
+    }
+
+    private fun com.dmitriim.localailab.core.model.manifest.ModelManifest.resolvedArtifacts(
+        directory: File,
+    ) = files.mapNotNull { specification ->
+        val artifact = File(directory, specification.relativePath)
+        if (!specification.required && !artifact.exists()) return@mapNotNull null
+        ModelArtifactReference(
+            role = specification.role,
+            path = artifact.absolutePath,
+            directory = specification.directory,
+            relativePath = specification.relativePath,
         )
     }
 }

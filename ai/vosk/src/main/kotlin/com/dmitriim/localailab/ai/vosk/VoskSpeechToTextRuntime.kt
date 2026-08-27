@@ -1,14 +1,15 @@
 package com.dmitriim.localailab.ai.vosk
 
 import android.util.Log
-import com.dmitriim.localailab.ai.api.stt.SpeechToTextRuntime
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadRequest
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadResult
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextRequest
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextResult
+import com.dmitriim.localailab.ai.api.stt.SpeechToTextRuntime
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
@@ -25,7 +26,9 @@ import org.vosk.Recognizer
 @Inject
 @SingleIn(AppScope::class)
 @ContributesIntoSet(AppScope::class, binding = binding<SpeechToTextRuntime>())
-class VoskSpeechToTextRuntime : SpeechToTextRuntime {
+class VoskSpeechToTextRuntime(
+    private val profiles: ModelRuntimeProfileRegistry,
+) : SpeechToTextRuntime {
     override val engineId = EngineId("vosk")
 
     private val lock = Any()
@@ -41,9 +44,7 @@ class VoskSpeechToTextRuntime : SpeechToTextRuntime {
         require(request.engineId == engineId) {
             "Unsupported STT engine: ${request.engineId.value}"
         }
-        require(request.profileType == ModelProfileIds.VOSK_STT) {
-            "Unsupported Vosk profile: ${request.profileType.value}"
-        }
+        profiles.requireTyped<VoskProfile>(ModelProfileKey(request.engineId, request.profileType))
         val directory = File(request.modelDirectory).canonicalFile
         require(directory.isDirectory) { "The Vosk model directory is missing." }
         if (model != null && modelPath == directory.path) {

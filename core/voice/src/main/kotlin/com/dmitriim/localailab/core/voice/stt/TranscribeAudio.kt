@@ -50,7 +50,7 @@ class TranscribeAudio(
                         engineId = model.engineId,
                         profileType = model.profileType,
                         modelDirectory = model.modelDirectory,
-                        files = model.files,
+                        artifacts = model.artifacts,
                         languageCode = effectiveSettings.languageCode,
                         threadCount = effectiveSettings.threadCount,
                     ),

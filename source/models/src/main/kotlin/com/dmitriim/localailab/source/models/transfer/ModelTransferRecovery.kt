@@ -2,7 +2,7 @@ package com.dmitriim.localailab.source.models.transfer
 
 import android.app.Application
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.source.models.catalog.ModelCatalog
+import com.dmitriim.localailab.source.models.catalog.ModelCatalogRegistry
 import com.dmitriim.localailab.source.models.library.InstalledModelService
 import com.dmitriim.localailab.source.models.library.ModelImportPolicy
 import java.io.File
@@ -12,12 +12,13 @@ internal class ModelTransferRecovery(
     private val application: Application,
     private val installedModels: InstalledModelService,
     private val transferState: ModelTransferStateStore,
+    private val modelCatalog: ModelCatalogRegistry,
 ) {
     suspend fun reconcile() {
         val activeIds = mutableSetOf<String>()
         transferState.all().forEach { transfer ->
             val modelId = ModelId(transfer.modelId)
-            val entry = ModelCatalog.entries.firstOrNull { it.manifest.modelId == modelId }
+            val entry = modelCatalog.find(modelId)
             if (entry == null || entry.manifest.catalogVersion != transfer.catalogVersion || entry.manifest.revision != transfer.revision) {
                 stagingDirectory(modelId).deleteRecursively()
                 transferState.delete(modelId)

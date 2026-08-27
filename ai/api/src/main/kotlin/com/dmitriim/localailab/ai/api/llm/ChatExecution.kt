@@ -11,5 +11,4 @@ interface ChatExecution {
     fun cancel()
 
     fun unload()
-
 }

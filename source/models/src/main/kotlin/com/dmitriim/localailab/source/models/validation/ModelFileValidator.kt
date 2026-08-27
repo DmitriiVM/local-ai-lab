@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.source.models.validation
 
 import android.util.Log
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapterRegistry
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
@@ -13,7 +13,7 @@ import java.io.File
 @Inject
 @SingleIn(AppScope::class)
 class ModelFileValidator(
-    private val adapters: ModelRuntimeAdapterRegistry,
+    private val profiles: ModelRuntimeProfileRegistry,
 ) {
     fun validate(
         manifest: ModelManifest,
@@ -34,13 +34,20 @@ class ModelFileValidator(
                 return validationFailure(manifest, ModelValidationState.INVALID, "${spec.relativePath} has an unexpected checksum.")
             }
         }
-        val adapter = adapters.find(manifest.engineId, manifest.profileType)
-            ?: return validationFailure(
+        val profile = profiles.runtimeProfile(
+            com.dmitriim.localailab.core.model.manifest.ModelProfileKey(
+                manifest.engineId,
+                manifest.profileType,
+            ),
+        )
+        if (profile == null) {
+            return validationFailure(
                 manifest,
                 ModelValidationState.INCOMPATIBLE,
-                "No packaged adapter supports ${manifest.engineId.value}/${manifest.profileType.value}.",
+                "No packaged runtime profile supports ${manifest.engineId.value}/${manifest.profileType.value}.",
             )
-        val result = adapter.validate(manifest, directory)
+        }
+        val result = profile.validate(manifest, directory)
         return if (result.valid) {
             Log.i(TAG, "Model file validation passed: modelId=${manifest.modelId.value}")
             ModelValidationState.READY to null
@@ -63,7 +70,12 @@ class ModelFileValidator(
         },
     )
 
-    fun hasValidatorFor(manifest: ModelManifest): Boolean = adapters.find(manifest.engineId, manifest.profileType) != null
+    fun hasValidatorFor(manifest: ModelManifest): Boolean = profiles.runtimeProfile(
+        com.dmitriim.localailab.core.model.manifest.ModelProfileKey(
+            manifest.engineId,
+            manifest.profileType,
+        ),
+    ) != null
 
     private fun validationFailure(
         manifest: ModelManifest,

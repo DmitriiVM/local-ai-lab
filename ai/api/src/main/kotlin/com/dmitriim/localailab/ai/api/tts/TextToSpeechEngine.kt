@@ -17,5 +17,4 @@ interface TextToSpeechEngine {
     fun cancel()
 
     fun unload()
-
 }

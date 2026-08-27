@@ -10,16 +10,17 @@ import android.app.ActivityManager
 import android.app.Application
 import android.os.Debug
 import android.util.Log
-import com.dmitriim.localailab.ai.api.tts.TextToSpeechRuntime
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadResult
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechResult
+import com.dmitriim.localailab.ai.api.tts.TextToSpeechRuntime
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechStageMetrics
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
@@ -36,7 +37,10 @@ import kotlin.system.measureTimeMillis
 @Inject
 @SingleIn(AppScope::class)
 @ContributesIntoSet(AppScope::class, binding = binding<TextToSpeechRuntime>())
-class ChatterboxTextToSpeechRuntime(private val application: Application) : TextToSpeechRuntime {
+class ChatterboxTextToSpeechRuntime(
+    private val application: Application,
+    private val profiles: ModelRuntimeProfileRegistry,
+) : TextToSpeechRuntime {
     override val engineId = EngineId("chatterbox-onnx")
     private val lock = Any()
     private val cancelled = AtomicBoolean(false)
@@ -49,9 +53,7 @@ class ChatterboxTextToSpeechRuntime(private val application: Application) : Text
 
     override fun load(request: TextToSpeechLoadRequest): TextToSpeechLoadResult = synchronized(lock) {
         require(request.engineId == engineId)
-        require(request.profileType == ModelProfileIds.CHATTERBOX_TURBO_Q4) {
-            "Unsupported Chatterbox profile: ${request.profileType.value}"
-        }
+        profiles.requireTyped<ChatterboxProfile>(ModelProfileKey(request.engineId, request.profileType))
         val directory = File(request.modelDirectory).canonicalFile
         val threads = request.threadCount.takeIf { it > 0 }
             ?: java.lang.Runtime.getRuntime().availableProcessors().coerceIn(1, 4)
@@ -60,7 +62,7 @@ class ChatterboxTextToSpeechRuntime(private val application: Application) : Text
             return TextToSpeechLoadResult(threads, 0, false, SAMPLE_RATE_HZ, null)
         }
         unloadLocked()
-        val missing = ChatterboxModelRuntimeAdapter.REQUIRED_FILES.keys
+        val missing = ChatterboxRuntimeProfile.requiredFiles.keys
             .filterNot { File(directory, it).isFile }
         require(missing.isEmpty()) {
             "Chatterbox model files are missing: ${missing.joinToString()}"

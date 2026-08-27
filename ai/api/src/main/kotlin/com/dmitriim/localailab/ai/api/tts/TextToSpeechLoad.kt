@@ -2,6 +2,7 @@ package com.dmitriim.localailab.ai.api.tts
 
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelProfileId
+import com.dmitriim.localailab.core.model.runtime.ModelArtifactReference
 
 data class TextToSpeechLoadRequest(
     val engineId: EngineId,
@@ -9,6 +10,7 @@ data class TextToSpeechLoadRequest(
     val modelDirectory: String,
     /** Zero selects an engine-safe default. */
     val threadCount: Int = 0,
+    val artifacts: List<ModelArtifactReference> = emptyList(),
 )
 
 data class TextToSpeechLoadResult(

@@ -229,7 +229,15 @@ class LocalBenchmarkWorkloadRunner(
                 modelResolver.resolveTextToSpeechModel(workload.modelId).getOrThrow()
             }
             val load = profile.trace(InferencePhase.MODEL_LOAD) {
-                textToSpeechEngine.load(TextToSpeechLoadRequest(model.engineId, model.profileType, model.modelDirectory, workload.threadCount))
+                textToSpeechEngine.load(
+                    TextToSpeechLoadRequest(
+                        model.engineId,
+                        model.profileType,
+                        model.modelDirectory,
+                        workload.threadCount,
+                        model.artifacts,
+                    ),
+                )
             }
             val startedAt = android.os.SystemClock.elapsedRealtime()
             val result = profile.trace(InferencePhase.SYNTHESIS) {

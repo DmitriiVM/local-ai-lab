@@ -1,0 +1,65 @@
+package com.dmitriim.localailab.ai.litertlm.catalog
+
+import com.dmitriim.localailab.core.di.AppScope
+import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.core.model.engine.EngineId
+import com.dmitriim.localailab.core.model.library.CatalogDownload
+import com.dmitriim.localailab.core.model.library.CatalogModel
+import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
+import com.dmitriim.localailab.core.model.library.ModelCatalogState
+import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
+import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
+import com.dmitriim.localailab.core.model.manifest.ModelFormat
+import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.core.model.manifest.ModelManifest
+import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelSource
+import dev.zacsweers.metro.ContributesIntoSet
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
+
+@Inject
+@ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
+class QwenThree0Point6bLiteRtLmInt4ModelDefinition : ModelCatalogContribution {
+    override val catalogModel = CatalogModel(
+        manifest = ModelManifest(
+            modelId = ModelId("qwen3-0.6b-litert-lm-int4"),
+            displayName = "Qwen3 0.6B LiteRT-LM INT4",
+            family = "Qwen3",
+            description = "A compact Qwen3 chat model in LiteRT-LM format with mixed INT4 weights for CPU or GPU inference.",
+            capabilities = setOf(AiCapability.CHAT),
+            engineId = EngineId("litert-lm"),
+            profileType = ModelProfileIds.LLM,
+            format = ModelFormat.LITERT_LM,
+            quantization = "Mixed INT4",
+            architecture = "Qwen3",
+            revision = "dd97997951bb15a2a71f539ba17f604707c0b11a",
+            files = listOf(
+                ModelFileSpec(
+                    relativePath = "qwen3_0_6b_mixed_int4.litertlm",
+                    role = ModelFileRoles.PRIMARY_MODEL,
+                    expectedBytes = 497_664_000L,
+                    sha256 = "b1baab462f6be49d70eada79d715c2c52cd9ece0cad00bddf6a2c097d23498e9",
+                ),
+            ),
+            source = ModelSource(
+                url = "https://huggingface.co/litert-community/Qwen3-0.6B/tree/dd97997951bb15a2a71f539ba17f604707c0b11a",
+                revision = "dd97997951bb15a2a71f539ba17f604707c0b11a",
+                licenseName = "Apache-2.0",
+                attribution = ModelCatalogDefaults.APACHE_ATTRIBUTION,
+            ),
+            languages = linkedSetOf("English", "Chinese"),
+            contextSize = 2_048,
+            approximateRamBytes = 3_000_000_000,
+            catalogVersion = ModelCatalogDefaults.VERSION,
+            installedAtEpochMs = 0,
+        ),
+        state = ModelCatalogState.OPTIONAL,
+        download = CatalogDownload(
+            url = "https://huggingface.co/litert-community/Qwen3-0.6B/resolve/dd97997951bb15a2a71f539ba17f604707c0b11a/qwen3_0_6b_mixed_int4.litertlm",
+            expectedBytes = 497_664_000L,
+            sha256 = "b1baab462f6be49d70eada79d715c2c52cd9ece0cad00bddf6a2c097d23498e9",
+        ),
+    )
+}

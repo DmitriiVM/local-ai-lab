@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.source.models.validation
 
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapter
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapterRegistry
 import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId
@@ -13,6 +13,7 @@ import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.manifest.ModelProfileId
+import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.core.model.manifest.ModelSource
 import java.io.File
 import java.nio.file.Files
@@ -23,7 +24,7 @@ import org.junit.Test
 
 class ModelFileValidatorTest {
     @Test
-    fun validRequiredFileAndAdapterProduceReadyState() = withDirectory { directory ->
+    fun validRequiredFileAndProfileProduceReadyState() = withDirectory { directory ->
         File(directory, "weights.bin").writeText("abc")
         val manifest = manifest(
             ModelFileSpec(
@@ -41,7 +42,7 @@ class ModelFileValidatorTest {
     }
 
     @Test
-    fun missingRequiredFileIsReportedBeforeAdapterValidation() = withDirectory { directory ->
+    fun missingRequiredFileIsReportedBeforeProfileValidation() = withDirectory { directory ->
         val validation = validator().validate(
             manifest(ModelFileSpec("weights.bin", ModelFileRole("WEIGHTS"))),
             directory,
@@ -105,7 +106,7 @@ class ModelFileValidatorTest {
         File(directory, "weights.bin").writeText("abc")
         val manifest = manifest(ModelFileSpec("weights.bin", ModelFileRole("WEIGHTS")))
 
-        val validation = ModelFileValidator(ModelRuntimeAdapterRegistry(emptySet())).validate(manifest, directory)
+        val validation = ModelFileValidator(ModelRuntimeProfileRegistry(emptySet())).validate(manifest, directory)
 
         assertEquals(ModelValidationState.INCOMPATIBLE, validation.first)
     }
@@ -121,14 +122,14 @@ class ModelFileValidatorTest {
         assertEquals(SHA_ABC, enriched.sha256)
     }
 
-    private fun validator() = ModelFileValidator(ModelRuntimeAdapterRegistry(setOf(FakeAdapter)))
+    private fun validator() = ModelFileValidator(ModelRuntimeProfileRegistry(setOf(FakeProfile)))
 
     private fun manifest(vararg files: ModelFileSpec) = ModelManifest(
         modelId = ModelId("test-model"),
         displayName = "Test model",
         family = "Tests",
         capabilities = setOf(AiCapability.CHAT),
-        engineId = FakeAdapter.engineId,
+        engineId = FakeProfile.key.engineId,
         profileType = PROFILE,
         format = ModelFormat.BINARY,
         files = files.toList(),
@@ -145,14 +146,11 @@ class ModelFileValidatorTest {
         }
     }
 
-    private object FakeAdapter : ModelRuntimeAdapter {
-        override val id = "test-adapter"
-        override val profileTypes = setOf(PROFILE)
-        override val engineId = EngineId("test-engine")
+    private object FakeProfile : ModelRuntimeProfile {
+        override val key = ModelProfileKey(EngineId("test-engine"), PROFILE)
+        override val displayName = "Test profile"
         override val capabilities = setOf(AiCapability.CHAT)
-
-        override fun capabilitiesFor(profileType: ModelProfileId) = capabilities
-        override fun importDefinition(profileType: ModelProfileId): ModelImportDefinition? = null
+        override val importDefinition: ModelImportDefinition? = null
         override fun validate(manifest: ModelManifest, directory: File) = RuntimeValidationResult(valid = true)
     }
 

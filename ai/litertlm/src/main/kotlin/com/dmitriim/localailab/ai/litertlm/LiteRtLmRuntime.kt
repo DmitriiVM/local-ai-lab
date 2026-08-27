@@ -3,6 +3,7 @@ package com.dmitriim.localailab.ai.litertlm
 import android.app.Application
 import android.util.Log
 import androidx.tracing.Trace
+import com.dmitriim.localailab.ai.api.llm.ChatRuntime
 import com.dmitriim.localailab.ai.api.llm.LlmChatFormatter
 import com.dmitriim.localailab.ai.api.llm.LlmChatMessage
 import com.dmitriim.localailab.ai.api.llm.LlmChatRole
@@ -16,13 +17,13 @@ import com.dmitriim.localailab.ai.api.llm.LlmGenerationResult
 import com.dmitriim.localailab.ai.api.llm.LlmLoadOption
 import com.dmitriim.localailab.ai.api.llm.LlmLoadRequest
 import com.dmitriim.localailab.ai.api.llm.LlmLoadResult
-import com.dmitriim.localailab.ai.api.llm.ChatRuntime
 import com.dmitriim.localailab.ai.api.llm.LlmRuntimeDiagnostics
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.engine.ComputePreference
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.core.model.runtime.ChatModelReference
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Contents
@@ -50,8 +51,10 @@ import kotlin.system.measureTimeMillis
 @Inject
 @SingleIn(AppScope::class)
 @ContributesIntoSet(AppScope::class, binding = binding<ChatRuntime>())
-class LiteRtLmRuntime(private val application: Application) :
-    ChatRuntime,
+class LiteRtLmRuntime(
+    private val application: Application,
+    private val profiles: ModelRuntimeProfileRegistry,
+) : ChatRuntime,
     LlmChatFormatter {
     private val lock = ReentrantLock()
     private var engine: Engine? = null
@@ -90,9 +93,7 @@ class LiteRtLmRuntime(private val application: Application) :
         require(reference.engineId == engineId) {
             "Unsupported LLM engine: ${reference.engineId.value}"
         }
-        require(reference.profileType == ModelProfileIds.LLM) {
-            "Unsupported chat profile: ${reference.profileType.value}"
-        }
+        profiles.requireTyped<LiteRtLmProfile>(ModelProfileKey(reference.engineId, reference.profileType))
         require(reference is ChatModelReference.ArtifactBacked) {
             "The LiteRT-LM runtime requires an artifact-backed model."
         }

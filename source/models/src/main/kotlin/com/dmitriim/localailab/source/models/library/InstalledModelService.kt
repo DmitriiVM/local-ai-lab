@@ -5,9 +5,9 @@ import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.util.Log
 import androidx.core.net.toUri
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapter
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeAdapterRegistry
 import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
 import com.dmitriim.localailab.core.model.library.InstalledModel
@@ -43,7 +43,7 @@ import kotlinx.serialization.json.Json
 class InstalledModelService(
     private val application: Application,
     private val databaseProvider: ModelDatabaseProvider,
-    private val adapters: ModelRuntimeAdapterRegistry,
+    private val profiles: ModelRuntimeProfileRegistry,
     private val validator: ModelFileValidator,
     private val transferState: ModelTransferStateStore,
     @param:ApplicationCoroutineScope private val applicationScope: CoroutineScope,
@@ -71,11 +71,9 @@ class InstalledModelService(
 
     override suspend fun import(request: ModelImportRequest): Result<ModelId> = runCatching {
         require(request.documentUris.isNotEmpty() || request.directoryUri != null) { "Select model files or an extracted model directory." }
-        val adapter = requireNotNull(adapters.find(request.engineId, request.profileType)) {
-            "No packaged adapter supports ${request.engineId.value}/${request.profileType.value}."
-        }
-        val importDefinition = requireNotNull(adapter.importDefinition(request.profileType)) {
-            "${adapter.id} does not support importing ${request.profileType.value}."
+        val profile = profiles.requireRuntimeProfile(request.profileKey)
+        val importDefinition = requireNotNull(profile.importDefinition) {
+            "${profile.displayName} does not support importing ${request.profileType.value}."
         }
         Log.i(TAG, "Model import started: profile=${request.profileType}, engine=${request.engineId.value}, documentCount=${request.documentUris.size}")
         withContext(Dispatchers.IO) {
@@ -95,7 +93,7 @@ class InstalledModelService(
                     }
                     name
                 } + request.directoryUri?.let { treeUri -> copyDirectoryTree(treeUri.toUri(), temporary) }.orEmpty()
-                installDirectory(importedManifest(modelId, request, adapter, importDefinition, copiedNames), temporary)
+                installDirectory(importedManifest(modelId, request, profile, importDefinition, copiedNames), temporary)
                 Log.i(TAG, "Model import completed: modelId=${modelId.value}, files=${copiedNames.size}")
                 modelId
             } catch (error: Throwable) {
@@ -196,14 +194,14 @@ class InstalledModelService(
     private fun importedManifest(
         modelId: ModelId,
         request: ModelImportRequest,
-        adapter: ModelRuntimeAdapter,
+        profile: ModelRuntimeProfile,
         definition: ModelImportDefinition,
         copiedNames: List<String>,
     ) = ModelManifest(
         modelId = modelId,
         displayName = request.displayName.ifBlank { definition.displayName },
         family = "Imported",
-        capabilities = adapter.capabilitiesFor(request.profileType),
+        capabilities = profile.capabilities,
         engineId = request.engineId,
         profileType = request.profileType,
         format = definition.format,

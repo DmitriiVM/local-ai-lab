@@ -8,17 +8,18 @@ import android.os.Looper
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechVoice
-import com.dmitriim.localailab.ai.api.tts.TextToSpeechRuntime
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadResult
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechResult
+import com.dmitriim.localailab.ai.api.tts.TextToSpeechRuntime
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
@@ -40,8 +41,10 @@ import kotlinx.coroutines.flow.asStateFlow
 @SingleIn(AppScope::class)
 @ContributesIntoSet(AppScope::class, binding = binding<TextToSpeechRuntime>())
 @ContributesBinding(AppScope::class, binding = binding<SystemTextToSpeechSupport>())
-class AndroidTextToSpeechRuntime(private val application: Application) :
-    TextToSpeechRuntime,
+class AndroidTextToSpeechRuntime(
+    private val application: Application,
+    private val profiles: ModelRuntimeProfileRegistry,
+) : TextToSpeechRuntime,
     SystemTextToSpeechSupport {
     override val engineId = EngineId("android-text-to-speech")
 
@@ -79,9 +82,9 @@ class AndroidTextToSpeechRuntime(private val application: Application) :
         require(request.engineId == engineId) {
             "Unsupported Android text-to-speech engine: ${request.engineId.value}"
         }
-        require(request.profileType == ModelProfileIds.ANDROID_TEXT_TO_SPEECH_TTS) {
-            "Unsupported Android text-to-speech profile: ${request.profileType.value}"
-        }
+        profiles.requireTyped<AndroidTextToSpeechRuntimeProfile>(
+            ModelProfileKey(request.engineId, request.profileType),
+        )
         val coldStart = !isLoaded
         val startedAt = System.nanoTime()
         ensureInitialized()

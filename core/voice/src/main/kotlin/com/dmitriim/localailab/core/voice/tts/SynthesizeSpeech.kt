@@ -71,6 +71,7 @@ class SynthesizeSpeech(
                         profileType = model.profileType,
                         modelDirectory = model.modelDirectory,
                         threadCount = request.settings.threadCount,
+                        artifacts = model.artifacts,
                     ),
                 )
             }

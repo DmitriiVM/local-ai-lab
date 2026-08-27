@@ -11,7 +11,7 @@ import com.dmitriim.localailab.core.model.library.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.core.model.library.ModelTransferState
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.service.ModelTransfers
-import com.dmitriim.localailab.source.models.catalog.ModelCatalog
+import com.dmitriim.localailab.source.models.catalog.ModelCatalogRegistry
 import com.dmitriim.localailab.source.models.credentials.HuggingFaceTokenStore
 import com.dmitriim.localailab.source.models.diagnostics.ModelDiagnosticsService
 import com.dmitriim.localailab.source.models.library.InstalledModelService
@@ -46,10 +46,11 @@ class ModelTransferService(
     private val diagnostics: ModelDiagnosticsService,
     private val transferState: ModelTransferStateStore,
     private val huggingFaceTokens: HuggingFaceTokenStore,
+    private val modelCatalog: ModelCatalogRegistry,
     @param:ApplicationCoroutineScope private val applicationScope: CoroutineScope,
 ) : ModelTransfers,
     ModelDownloadExecutor {
-    override val catalog: Flow<List<CatalogModel>> = MutableStateFlow(ModelCatalog.entries).asStateFlow()
+    override val catalog: Flow<List<CatalogModel>> = MutableStateFlow(modelCatalog.entries).asStateFlow()
     private val throughputEstimator = ModelTransferThroughputEstimator()
     override val transfers: Flow<Map<ModelId, ModelTransferState>> = combine(
         transferState.transfers,
@@ -83,7 +84,7 @@ class ModelTransferService(
         ModelDownloadRuntime.executor = this
         applicationScope.launch(Dispatchers.IO) {
             transferSchedulingMutex.withLock {
-                ModelTransferRecovery(application, installedModels, transferState).reconcile()
+                ModelTransferRecovery(application, installedModels, transferState, modelCatalog).reconcile()
                 scheduleDeferredRetriesLocked()
                 scheduleNextQueuedLocked()
             }
@@ -325,7 +326,7 @@ class ModelTransferService(
             ?: throw ModelDownloadFailure("A Hugging Face access token is required for this model.", retryable = false)
     }
 
-    private fun catalogEntry(modelId: ModelId) = ModelCatalog.entries.firstOrNull { it.manifest.modelId == modelId }
+    private fun catalogEntry(modelId: ModelId) = modelCatalog.find(modelId)
         ?: error("This catalog model is no longer available in the bundled catalog.")
 
     private fun StoredModelTransfer.modelIdAsModelId() = ModelId(modelId)
