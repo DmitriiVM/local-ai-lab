@@ -1,6 +1,7 @@
 package com.dmitriim.localailab.feature.assistant.presentation
 
 import com.dmitriim.localailab.ai.api.chat.LlmEngineCapabilities
+import com.dmitriim.localailab.ai.api.system.SystemModelProfileKeys
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechVoice
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoice
 import com.dmitriim.localailab.core.model.capability.AiCapability
@@ -11,7 +12,6 @@ import com.dmitriim.localailab.core.model.library.CatalogModel
 import com.dmitriim.localailab.core.model.library.InstalledModel
 import com.dmitriim.localailab.core.model.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.TtsControl
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceDescriptor
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
@@ -154,8 +154,8 @@ private fun ModelManifest.toTtsOption(
 private fun androidTextToSpeechOption(voices: List<SystemTextToSpeechVoice>): TtsModelOption = TtsModelOption(
     id = BuiltInTextToSpeechModels.ANDROID_TEXT_TO_SPEECH,
     displayName = "Android On-device TextToSpeech",
-    engineId = EngineId("android-text-to-speech"),
-    profileType = ModelProfileIds.ANDROID_TEXT_TO_SPEECH_TTS,
+    engineId = SystemModelProfileKeys.ANDROID_TEXT_TO_SPEECH.engineId,
+    profileType = SystemModelProfileKeys.ANDROID_TEXT_TO_SPEECH.profileId,
     languages = voices.mapTo(linkedSetOf()) { normalizeLanguageCode(it.languageTag) },
     speakerCount = null,
     voiceMode = TtsVoiceMode.PLATFORM,

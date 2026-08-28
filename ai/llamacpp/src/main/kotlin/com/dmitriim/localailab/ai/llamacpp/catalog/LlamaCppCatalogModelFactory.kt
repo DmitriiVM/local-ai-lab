@@ -1,7 +1,6 @@
 package com.dmitriim.localailab.ai.llamacpp.catalog
 
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogModel
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
@@ -11,7 +10,7 @@ import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.core.model.manifest.ModelSource
 
 internal fun llamaCppCatalogModel(
@@ -27,6 +26,7 @@ internal fun llamaCppCatalogModel(
     sha256: String,
     languages: Set<String>,
     approximateRamBytes: Long,
+    profileKey: ModelProfileKey,
     supportedLanguageCount: Int? = null,
     licenseName: String = "Apache-2.0",
     attribution: String = ModelCatalogDefaults.APACHE_ATTRIBUTION,
@@ -41,8 +41,8 @@ internal fun llamaCppCatalogModel(
             family = family,
             description = description,
             capabilities = setOf(AiCapability.CHAT),
-            engineId = EngineId("llama.cpp"),
-            profileType = ModelProfileIds.LLM,
+            engineId = profileKey.engineId,
+            profileType = profileKey.profileId,
             format = ModelFormat.GGUF,
             quantization = quantization,
             architecture = family,

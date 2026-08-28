@@ -13,7 +13,7 @@ import com.dmitriim.localailab.core.audio.output.model.SpeechPlaybackState
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffectsProcessor
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.core.model.runtime.ChatModelReference
 import com.dmitriim.localailab.core.model.runtime.SpeechToTextModelReference
@@ -78,7 +78,7 @@ class PreviewSpeechTest {
                 modelId = modelId,
                 displayName = "Test voice",
                 engineId = EngineId("test"),
-                profileType = ModelProfileIds.PIPER_VITS_TTS,
+                profileType = ModelProfileId("PIPER_VITS_TTS"),
                 modelDirectory = "/models/test",
                 sampleRateHz = 16_000,
                 languages = setOf("en"),

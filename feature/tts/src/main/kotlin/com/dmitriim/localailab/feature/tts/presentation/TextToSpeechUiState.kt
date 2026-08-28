@@ -1,5 +1,6 @@
 package com.dmitriim.localailab.feature.tts.presentation
 
+import com.dmitriim.localailab.ai.api.system.SystemModelProfileKeys
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechVoice
 import com.dmitriim.localailab.core.audio.input.model.AudioLevel
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoice
@@ -15,7 +16,6 @@ import com.dmitriim.localailab.core.model.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.TtsControl
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceDescriptor
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
@@ -180,8 +180,8 @@ internal fun androidTextToSpeechOption(
     return TtsModelOption(
         id = BuiltInTextToSpeechModels.ANDROID_TEXT_TO_SPEECH,
         displayName = "Android On-device TextToSpeech",
-        engineId = EngineId("android-text-to-speech"),
-        profileType = ModelProfileIds.ANDROID_TEXT_TO_SPEECH_TTS,
+        engineId = SystemModelProfileKeys.ANDROID_TEXT_TO_SPEECH.engineId,
+        profileType = SystemModelProfileKeys.ANDROID_TEXT_TO_SPEECH.profileId,
         languages = TtsLanguage.entries
             .filter { language ->
                 systemVoices.any { voice -> languageCode(voice.languageTag) == language.code }

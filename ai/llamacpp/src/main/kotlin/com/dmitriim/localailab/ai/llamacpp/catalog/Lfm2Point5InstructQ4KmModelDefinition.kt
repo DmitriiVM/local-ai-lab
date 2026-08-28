@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.ai.llamacpp.catalog
 
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.llamacpp.LlamaCppRuntimeProfile
+import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -13,6 +13,7 @@ class Lfm2Point5InstructQ4KmModelDefinition(
     override val runtimeProfile: LlamaCppRuntimeProfile,
 ) : ModelCatalogContribution {
     override val catalogModel = llamaCppCatalogModel(
+        profileKey = runtimeProfile.key,
         modelId = "lfm2.5-1.2b-instruct-q4-k-m",
         displayName = "LFM2.5 1.2B Instruct Q4_K_M",
         family = "LFM2.5",

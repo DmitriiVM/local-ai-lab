@@ -6,7 +6,7 @@ import com.dmitriim.localailab.ai.api.stt.SpeechToTextRequest
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextResult
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextRuntime
 import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -41,7 +41,7 @@ class RoutedSpeechToTextEngineTest {
 
     private fun requestFor(id: String) = SpeechToTextLoadRequest(
         engineId = EngineId(id),
-        profileType = ModelProfileIds.WHISPER_STT,
+        profileType = ModelProfileId("WHISPER_STT"),
         modelDirectory = "model",
         files = emptyMap(),
         languageCode = "en",

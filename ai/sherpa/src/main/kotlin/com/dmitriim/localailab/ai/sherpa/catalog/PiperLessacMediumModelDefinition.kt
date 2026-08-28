@@ -1,13 +1,13 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.sherpa.tts.PiperTtsArtifacts
+import com.dmitriim.localailab.ai.sherpa.tts.PiperTtsProfile
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogDownloadArchive
 import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
-import com.dmitriim.localailab.ai.sherpa.tts.PiperTtsProfile
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
 import com.dmitriim.localailab.core.model.library.ModelCatalogState
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -15,7 +15,6 @@ import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.ModelSource
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
@@ -37,14 +36,14 @@ class PiperLessacMediumModelDefinition(
             family = "Piper/VITS",
             description = "A single-speaker English text-to-speech model using the Lessac voice.",
             capabilities = setOf(AiCapability.TEXT_TO_SPEECH),
-            engineId = EngineId("sherpa-onnx"),
-            profileType = ModelProfileIds.PIPER_VITS_TTS,
+            engineId = runtimeProfile.key.engineId,
+            profileType = runtimeProfile.key.profileId,
             format = ModelFormat.ONNX,
             revision = "tts-models",
             files = listOf(
                 ModelFileSpec(
                     "en_US-lessac-medium.onnx",
-                    ModelFileRoles.VITS_MODEL,
+                    PiperTtsArtifacts.MODEL,
                     expectedBytes = 63_149_198,
                     sha256 = "4ba07d8549906668ee855fd9abf9faf66c5db74742712ff026a159f7277fca9f",
                 ),

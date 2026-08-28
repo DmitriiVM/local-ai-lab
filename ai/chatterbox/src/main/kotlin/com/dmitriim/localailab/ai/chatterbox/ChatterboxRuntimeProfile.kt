@@ -3,9 +3,10 @@ package com.dmitriim.localailab.ai.chatterbox
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.core.model.engine.EngineId
+import com.dmitriim.localailab.core.model.manifest.ModelFileRole
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
 import dev.zacsweers.metro.Inject
@@ -13,9 +14,19 @@ import java.io.File
 
 internal interface ChatterboxProfile : ModelRuntimeProfile
 
+internal object ChatterboxTtsArtifacts {
+    val CONDITIONAL_DECODER = ModelFileRole("CONDITIONAL_DECODER")
+    val EMBED_TOKENS = ModelFileRole("EMBED_TOKENS")
+    val LANGUAGE_MODEL = ModelFileRole("LANGUAGE_MODEL")
+    val SPEECH_ENCODER = ModelFileRole("SPEECH_ENCODER")
+    val TOKENIZER = ModelFileRole("TOKENIZER")
+}
+
+private val chatterboxTtsProfileId = ModelProfileId("CHATTERBOX_TURBO_Q4")
+
 @Inject
 class ChatterboxRuntimeProfile : ChatterboxProfile {
-    override val key = ModelProfileKey(EngineId("chatterbox-onnx"), ModelProfileIds.CHATTERBOX_TURBO_Q4)
+    override val key = ModelProfileKey(EngineId("chatterbox-onnx"), chatterboxTtsProfileId)
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
         require(manifest.sampleRateHz == 24_000) { "Chatterbox Turbo output must be 24 kHz." }
         require(manifest.ttsVoiceMode == TtsVoiceMode.REFERENCE_AUDIO) {
@@ -37,15 +48,15 @@ class ChatterboxRuntimeProfile : ChatterboxProfile {
 
     companion object {
         val requiredFiles = linkedMapOf(
-            "conditional_decoder_q4.onnx" to ModelFileRoles.CONDITIONAL_DECODER,
+            "conditional_decoder_q4.onnx" to ChatterboxTtsArtifacts.CONDITIONAL_DECODER,
             "conditional_decoder_q4.onnx_data" to ModelFileRoles.EXTERNAL_DATA,
-            "embed_tokens_q4.onnx" to ModelFileRoles.EMBED_TOKENS,
+            "embed_tokens_q4.onnx" to ChatterboxTtsArtifacts.EMBED_TOKENS,
             "embed_tokens_q4.onnx_data" to ModelFileRoles.EXTERNAL_DATA,
-            "language_model_q4.onnx" to ModelFileRoles.LANGUAGE_MODEL,
+            "language_model_q4.onnx" to ChatterboxTtsArtifacts.LANGUAGE_MODEL,
             "language_model_q4.onnx_data" to ModelFileRoles.EXTERNAL_DATA,
-            "speech_encoder_q4.onnx" to ModelFileRoles.SPEECH_ENCODER,
+            "speech_encoder_q4.onnx" to ChatterboxTtsArtifacts.SPEECH_ENCODER,
             "speech_encoder_q4.onnx_data" to ModelFileRoles.EXTERNAL_DATA,
-            "tokenizer.json" to ModelFileRoles.TOKENIZER,
+            "tokenizer.json" to ChatterboxTtsArtifacts.TOKENIZER,
             "tokenizer_config.json" to ModelFileRoles.CONFIG,
             "config.json" to ModelFileRoles.CONFIG,
         )

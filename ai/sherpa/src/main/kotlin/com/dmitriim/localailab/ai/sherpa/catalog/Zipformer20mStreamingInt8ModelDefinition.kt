@@ -1,11 +1,10 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.sherpa.stt.ZipformerSttProfile
+import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.SttRecognitionMode
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
@@ -21,7 +20,7 @@ class Zipformer20mStreamingInt8ModelDefinition(
         displayName = "Zipformer 20M Streaming INT8",
         family = "Zipformer",
         description = "An English streaming speech-to-text model quantized to INT8.",
-        profileType = ModelProfileIds.ZIPFORMER_STT,
+        profileKey = runtimeProfile.key,
         archiveName = "sherpa-onnx-streaming-zipformer-en-20M-2023-02-17",
         archiveBytes = 127_887_156,
         archiveSha256 = "9c559283e8498d3fe95913c79ca1cb454bb26281ac2b102b41306c7d752765d9",

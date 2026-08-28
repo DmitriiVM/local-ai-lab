@@ -13,7 +13,7 @@ import com.dmitriim.localailab.ai.api.chat.LlmLoadResult
 import com.dmitriim.localailab.core.model.engine.ComputePreference
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.runtime.ChatModelReference
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -77,7 +77,7 @@ class RoutedChatEngineTest {
             modelId = ModelId("model-$engineId"),
             displayName = engineId,
             engineId = EngineId(engineId),
-            profileType = ModelProfileIds.LLM,
+            profileType = ModelProfileId("LLM"),
             defaultContextSize = 512,
         ),
         options = LlmLoadOptions(computePreference = ComputePreference.AUTO),

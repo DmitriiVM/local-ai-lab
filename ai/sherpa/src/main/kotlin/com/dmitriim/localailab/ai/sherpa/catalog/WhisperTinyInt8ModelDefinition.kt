@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.sherpa.stt.WhisperSttProfile
+import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -13,6 +13,7 @@ class WhisperTinyInt8ModelDefinition(
     override val runtimeProfile: WhisperSttProfile,
 ) : ModelCatalogContribution {
     override val catalogModel = whisperCatalogModel(
+        profileKey = runtimeProfile.key,
         modelId = "whisper-tiny-int8",
         displayName = "Whisper Tiny INT8",
         description = "A multilingual Whisper Tiny speech-to-text model quantized to INT8 for offline transcription.",

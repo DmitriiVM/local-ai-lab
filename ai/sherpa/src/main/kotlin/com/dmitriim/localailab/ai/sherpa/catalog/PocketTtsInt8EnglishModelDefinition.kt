@@ -1,21 +1,19 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.sherpa.tts.PocketTtsArtifacts
+import com.dmitriim.localailab.ai.sherpa.tts.PocketTtsProfile
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogDownloadArchive
 import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
-import com.dmitriim.localailab.ai.sherpa.tts.PocketTtsProfile
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
 import com.dmitriim.localailab.core.model.library.ModelCatalogState
-import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.ModelSource
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
@@ -37,21 +35,21 @@ class PocketTtsInt8EnglishModelDefinition(
             family = "Pocket TTS",
             description = "An English reference-voice text-to-speech model with bundled reference audio.",
             capabilities = setOf(AiCapability.TEXT_TO_SPEECH),
-            engineId = EngineId("sherpa-onnx"),
-            profileType = ModelProfileIds.POCKET_TTS,
+            engineId = runtimeProfile.key.engineId,
+            profileType = runtimeProfile.key.profileId,
             format = ModelFormat.ONNX,
             quantization = "INT8",
             architecture = "Pocket TTS",
             revision = "2026-01-26",
             files = listOf(
-                ModelFileSpec("lm_flow.int8.onnx", ModelFileRoles.LM_FLOW, 9_962_530, "8d627d235c44a597da908e1085ebe241cbbe358964c502c5a5063d18851a5529"),
-                ModelFileSpec("lm_main.int8.onnx", ModelFileRoles.LM_MAIN, 76_341_079, "bfc0c7e7e3d72864fa3bb2ee499f62f21ddc1474b885f5f3ca570f8be73e787e"),
-                ModelFileSpec("encoder.onnx", ModelFileRoles.POCKET_ENCODER, 72_713_165, "e8f2f6d301ffb96e398b138a7dc6d3038622d236044636b73d920bab85890260"),
-                ModelFileSpec("decoder.int8.onnx", ModelFileRoles.POCKET_DECODER, 22_693_618, "12b0857402d31aead94df19d6783b4350d1f740e811f3a3202c70ad89ae11eea"),
-                ModelFileSpec("text_conditioner.onnx", ModelFileRoles.TEXT_CONDITIONER, 16_388_343, "0b84e837d7bfaf2c896627b03e3f080320309f37f4fc7df7698c644f7ba5e6b1"),
-                ModelFileSpec("vocab.json", ModelFileRoles.VOCABULARY, 69_478, "6fb646346cf931016f70c4921aab0900ce7a304b893cb02135c74e294abfea01"),
-                ModelFileSpec("token_scores.json", ModelFileRoles.TOKEN_SCORES, 123_616, "5be2f278caf9b9800741f0fd82bff677f4943ec764c356f907213434b622d958"),
-                ModelFileSpec("test_wavs/bria.wav", ModelFileRoles.REFERENCE_AUDIO, 2_152_986, "85f46d6f0642f657a6bd689ddaa52d5a5f53e4314715e1032704c80917392181"),
+                ModelFileSpec("lm_flow.int8.onnx", PocketTtsArtifacts.LM_FLOW, 9_962_530, "8d627d235c44a597da908e1085ebe241cbbe358964c502c5a5063d18851a5529"),
+                ModelFileSpec("lm_main.int8.onnx", PocketTtsArtifacts.LM_MAIN, 76_341_079, "bfc0c7e7e3d72864fa3bb2ee499f62f21ddc1474b885f5f3ca570f8be73e787e"),
+                ModelFileSpec("encoder.onnx", PocketTtsArtifacts.ENCODER, 72_713_165, "e8f2f6d301ffb96e398b138a7dc6d3038622d236044636b73d920bab85890260"),
+                ModelFileSpec("decoder.int8.onnx", PocketTtsArtifacts.DECODER, 22_693_618, "12b0857402d31aead94df19d6783b4350d1f740e811f3a3202c70ad89ae11eea"),
+                ModelFileSpec("text_conditioner.onnx", PocketTtsArtifacts.TEXT_CONDITIONER, 16_388_343, "0b84e837d7bfaf2c896627b03e3f080320309f37f4fc7df7698c644f7ba5e6b1"),
+                ModelFileSpec("vocab.json", PocketTtsArtifacts.VOCABULARY, 69_478, "6fb646346cf931016f70c4921aab0900ce7a304b893cb02135c74e294abfea01"),
+                ModelFileSpec("token_scores.json", PocketTtsArtifacts.TOKEN_SCORES, 123_616, "5be2f278caf9b9800741f0fd82bff677f4943ec764c356f907213434b622d958"),
+                ModelFileSpec("test_wavs/bria.wav", PocketTtsArtifacts.REFERENCE_AUDIO, 2_152_986, "85f46d6f0642f657a6bd689ddaa52d5a5f53e4314715e1032704c80917392181"),
             ),
             source = ModelSource(
                 url = pocketTtsDownloadUrl,

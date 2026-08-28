@@ -1,12 +1,11 @@
 package com.dmitriim.localailab.ai.litertlm.catalog
 
-import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.library.CatalogDownload
-import com.dmitriim.localailab.core.model.library.CatalogModel
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.litertlm.LiteRtLmRuntimeProfile
+import com.dmitriim.localailab.core.di.AppScope
+import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.core.model.library.CatalogDownload
+import com.dmitriim.localailab.core.model.library.CatalogModel
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
 import com.dmitriim.localailab.core.model.library.ModelCatalogState
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -14,7 +13,6 @@ import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.ModelSource
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
@@ -32,8 +30,8 @@ class QwenThree0Point6bLiteRtLmInt4ModelDefinition(
             family = "Qwen3",
             description = "A compact Qwen3 chat model in LiteRT-LM format with mixed INT4 weights for CPU or GPU inference.",
             capabilities = setOf(AiCapability.CHAT),
-            engineId = EngineId("litert-lm"),
-            profileType = ModelProfileIds.LLM,
+            engineId = runtimeProfile.key.engineId,
+            profileType = runtimeProfile.key.profileId,
             format = ModelFormat.LITERT_LM,
             quantization = "Mixed INT4",
             architecture = "Qwen3",

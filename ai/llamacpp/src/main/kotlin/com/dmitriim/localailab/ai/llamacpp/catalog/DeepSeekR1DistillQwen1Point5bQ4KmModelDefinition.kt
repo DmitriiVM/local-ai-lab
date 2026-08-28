@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.ai.llamacpp.catalog
 
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.llamacpp.LlamaCppRuntimeProfile
+import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -13,6 +13,7 @@ class DeepSeekR1DistillQwen1Point5bQ4KmModelDefinition(
     override val runtimeProfile: LlamaCppRuntimeProfile,
 ) : ModelCatalogContribution {
     override val catalogModel = llamaCppCatalogModel(
+        profileKey = runtimeProfile.key,
         modelId = "deepseek-r1-distill-qwen-1.5b-q4-k-m",
         displayName = "DeepSeek R1 Distill Qwen 1.5B Q4_K_M",
         family = "DeepSeek R1 Distill Qwen",

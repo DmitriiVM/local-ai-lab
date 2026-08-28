@@ -1,17 +1,18 @@
 package com.dmitriim.localailab.ai.sherpa.stt
 
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadRequest
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.runtime.ModelArtifacts
 import com.k2fsa.sherpa.onnx.OfflineSenseVoiceModelConfig
 import dev.zacsweers.metro.Inject
 
+private val senseVoiceSttProfileId = ModelProfileId("SENSE_VOICE_STT")
+
 @Inject
 class SenseVoiceSttProfile :
     BaseSherpaSttProfile(
-        ModelProfileIds.SENSE_VOICE_STT,
+        senseVoiceSttProfileId,
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = offlineSherpaSession(artifacts, threadCount) {
         senseVoice = OfflineSenseVoiceModelConfig().apply {

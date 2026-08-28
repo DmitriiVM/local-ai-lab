@@ -1,13 +1,12 @@
 package com.dmitriim.localailab.source.models.runtime
 
+import com.dmitriim.localailab.ai.api.system.SystemModelProfileKeys
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.BuiltInSpeechToTextModels
 import com.dmitriim.localailab.core.model.library.BuiltInTextToSpeechModels
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.SttRecognitionMode
 import com.dmitriim.localailab.core.model.manifest.TtsControl
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
@@ -62,8 +61,8 @@ class LocalModelResolverService(
             return@runCatching SpeechToTextModelReference(
                 modelId = modelId,
                 displayName = "Android On-device SpeechRecognizer",
-                engineId = EngineId("android-speech-recognizer"),
-                profileType = ModelProfileIds.ANDROID_SPEECH_RECOGNIZER_STT,
+                engineId = SystemModelProfileKeys.ANDROID_SPEECH_RECOGNIZER.engineId,
+                profileType = SystemModelProfileKeys.ANDROID_SPEECH_RECOGNIZER.profileId,
                 modelDirectory = "",
                 artifacts = emptyList(),
                 sampleRateHz = 16_000,
@@ -94,8 +93,8 @@ class LocalModelResolverService(
             return@runCatching TextToSpeechModelReference(
                 modelId = modelId,
                 displayName = "Android On-device TextToSpeech",
-                engineId = EngineId("android-text-to-speech"),
-                profileType = ModelProfileIds.ANDROID_TEXT_TO_SPEECH_TTS,
+                engineId = SystemModelProfileKeys.ANDROID_TEXT_TO_SPEECH.engineId,
+                profileType = SystemModelProfileKeys.ANDROID_TEXT_TO_SPEECH.profileId,
                 modelDirectory = "",
                 sampleRateHz = 0,
                 languages = linkedSetOf("English", "Russian", "Chinese"),

@@ -1,12 +1,12 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.sherpa.tts.SupertonicTtsArtifacts
+import com.dmitriim.localailab.ai.sherpa.tts.SupertonicTtsProfile
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
-import com.dmitriim.localailab.ai.sherpa.tts.SupertonicTtsProfile
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
 import com.dmitriim.localailab.core.model.library.ModelCatalogState
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -14,7 +14,6 @@ import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.ModelSource
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
@@ -33,25 +32,26 @@ class Supertonic3Int8ModelDefinition(
             modelId = ModelId("supertonic-3-int8"), displayName = "Supertonic 3 INT8", family = "Supertonic",
             description = "A multilingual text-to-speech model with 10 bundled voices.",
             capabilities = setOf(AiCapability.TEXT_TO_SPEECH),
-            engineId = EngineId("sherpa-onnx"), profileType = ModelProfileIds.SUPERTONIC_TTS,
+            engineId = runtimeProfile.key.engineId,
+            profileType = runtimeProfile.key.profileId,
             format = ModelFormat.ONNX, quantization = "INT8",
             revision = supertonicRevision,
             files = listOf(
                 ModelFileSpec(
                     "duration_predictor.int8.onnx",
-                    ModelFileRoles.DURATION_PREDICTOR,
+                    SupertonicTtsArtifacts.DURATION_PREDICTOR,
                     expectedBytes = 3_700_147,
                     sha256 = "c3eb91414d5ff8a7a239b7fe9e34e7e2bf8a8140d8375ffb14718b1c639325db",
                 ),
                 ModelFileSpec(
                     "text_encoder.int8.onnx",
-                    ModelFileRoles.TEXT_ENCODER,
+                    SupertonicTtsArtifacts.TEXT_ENCODER,
                     expectedBytes = 36_416_150,
                     sha256 = "c7befd5ea8c3119769e8a6c1486c4edc6a3bc8365c67621c881bbb774b9902ff",
                 ),
                 ModelFileSpec(
                     "vector_estimator.int8.onnx",
-                    ModelFileRoles.VECTOR_ESTIMATOR,
+                    SupertonicTtsArtifacts.VECTOR_ESTIMATOR,
                     expectedBytes = 78_400_833,
                     sha256 = "20cd86fa5c6effedfda0e7cffe5b0569ca401c440a0c3a1d72bf39286c0db3fd",
                 ),
@@ -69,13 +69,13 @@ class Supertonic3Int8ModelDefinition(
                 ),
                 ModelFileSpec(
                     "unicode_indexer.bin",
-                    ModelFileRoles.UNICODE_INDEXER,
+                    SupertonicTtsArtifacts.UNICODE_INDEXER,
                     expectedBytes = 262_144,
                     sha256 = "8402ca48e5189a8950138580b0fff64db6f072f24ac07cd54ba8b2fbb9883b30",
                 ),
                 ModelFileSpec(
                     "voice.bin",
-                    ModelFileRoles.VOICE_STYLE,
+                    SupertonicTtsArtifacts.VOICE_STYLE,
                     expectedBytes = 517_168,
                     sha256 = "67d5209b0ee8ce6c74105ffbe12fe6a7628aea3b4ba2fcb308a4a67938a93ce8",
                 ),

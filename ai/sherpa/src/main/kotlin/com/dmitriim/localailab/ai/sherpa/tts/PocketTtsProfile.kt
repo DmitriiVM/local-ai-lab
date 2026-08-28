@@ -1,9 +1,8 @@
 package com.dmitriim.localailab.ai.sherpa.tts
 
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
-import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelFileRole
+import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.runtime.ModelArtifacts
 import com.k2fsa.sherpa.onnx.GenerationConfig
 import com.k2fsa.sherpa.onnx.OfflineTts
@@ -13,10 +12,23 @@ import com.k2fsa.sherpa.onnx.OfflineTtsPocketModelConfig
 import dev.zacsweers.metro.Inject
 import java.io.File
 
+internal object PocketTtsArtifacts {
+    val LM_FLOW = ModelFileRole("LM_FLOW")
+    val LM_MAIN = ModelFileRole("LM_MAIN")
+    val ENCODER = ModelFileRole("POCKET_ENCODER")
+    val DECODER = ModelFileRole("POCKET_DECODER")
+    val TEXT_CONDITIONER = ModelFileRole("TEXT_CONDITIONER")
+    val VOCABULARY = ModelFileRole("VOCABULARY")
+    val TOKEN_SCORES = ModelFileRole("TOKEN_SCORES")
+    val REFERENCE_AUDIO = ModelFileRole("REFERENCE_AUDIO")
+}
+
+private val pocketTtsProfileId = ModelProfileId("POCKET_TTS")
+
 @Inject
 class PocketTtsProfile :
     BaseSherpaTtsProfile(
-        ModelProfileIds.POCKET_TTS,
+        pocketTtsProfileId,
     ) {
     override fun open(artifacts: ModelArtifacts, threadCount: Int): SherpaTtsModel {
         val runtime = OfflineTts(
@@ -24,13 +36,13 @@ class PocketTtsProfile :
             OfflineTtsConfig().apply {
                 model = OfflineTtsModelConfig().apply {
                     pocket = OfflineTtsPocketModelConfig().apply {
-                        lmFlow = artifacts.require(ModelFileRoles.LM_FLOW).path
-                        lmMain = artifacts.require(ModelFileRoles.LM_MAIN).path
-                        encoder = artifacts.require(ModelFileRoles.POCKET_ENCODER).path
-                        decoder = artifacts.require(ModelFileRoles.POCKET_DECODER).path
-                        textConditioner = artifacts.require(ModelFileRoles.TEXT_CONDITIONER).path
-                        vocabJson = artifacts.require(ModelFileRoles.VOCABULARY).path
-                        tokenScoresJson = artifacts.require(ModelFileRoles.TOKEN_SCORES).path
+                        lmFlow = artifacts.require(PocketTtsArtifacts.LM_FLOW).path
+                        lmMain = artifacts.require(PocketTtsArtifacts.LM_MAIN).path
+                        encoder = artifacts.require(PocketTtsArtifacts.ENCODER).path
+                        decoder = artifacts.require(PocketTtsArtifacts.DECODER).path
+                        textConditioner = artifacts.require(PocketTtsArtifacts.TEXT_CONDITIONER).path
+                        vocabJson = artifacts.require(PocketTtsArtifacts.VOCABULARY).path
+                        tokenScoresJson = artifacts.require(PocketTtsArtifacts.TOKEN_SCORES).path
                         voiceEmbeddingCacheCapacity = 1
                     }
                     numThreads = threadCount
@@ -41,7 +53,7 @@ class PocketTtsProfile :
         )
         return SherpaTtsModel(
             runtime = runtime,
-            referenceAudio = Pcm16Wave.read(File(artifacts.require(ModelFileRoles.REFERENCE_AUDIO).path)),
+            referenceAudio = Pcm16Wave.read(File(artifacts.require(PocketTtsArtifacts.REFERENCE_AUDIO).path)),
         )
     }
 

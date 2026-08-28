@@ -17,7 +17,7 @@ import com.dmitriim.localailab.ai.api.chat.LlmTokenCounter
 import com.dmitriim.localailab.core.model.engine.ComputePreference
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.runtime.ChatModelReference
 import com.dmitriim.localailab.core.model.runtime.SpeechToTextModelReference
 import com.dmitriim.localailab.core.model.runtime.TextToSpeechModelReference
@@ -76,7 +76,7 @@ class GenerateAssistantResponseTest {
                 modelId = modelId,
                 displayName = "Test model",
                 engineId = EngineId("test"),
-                profileType = ModelProfileIds.LLM,
+                profileType = ModelProfileId("LLM"),
                 defaultContextSize = 2_048,
             ),
         )

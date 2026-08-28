@@ -1,11 +1,10 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.sherpa.stt.GigaAmCtcSttProfile
+import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -20,7 +19,7 @@ class GigaAmV2CtcInt8ModelDefinition(
         displayName = "GigaAM v2 CTC INT8",
         family = "GigaAM",
         description = "A Russian offline speech-to-text model quantized to INT8.",
-        profileType = ModelProfileIds.GIGAAM_CTC_STT,
+        profileKey = runtimeProfile.key,
         archiveName = "sherpa-onnx-nemo-ctc-giga-am-v2-russian-2025-04-19",
         archiveBytes = 166_917_722,
         archiveSha256 = "777be8717d8aaf04861823671290f7687f7579fd9ac63a2124955573f920caf5",

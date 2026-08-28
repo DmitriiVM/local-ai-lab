@@ -1,13 +1,12 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.sherpa.stt.MoonshineV1SttProfile
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogDownloadArchive
 import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
-import com.dmitriim.localailab.ai.sherpa.stt.MoonshineV1SttProfile
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
 import com.dmitriim.localailab.core.model.library.ModelCatalogState
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -15,7 +14,6 @@ import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.ModelSource
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
@@ -33,8 +31,8 @@ class MoonshineTinyEnglishInt8ModelDefinition(
             family = "Moonshine",
             description = "A compact English offline speech-to-text model quantized to INT8.",
             capabilities = setOf(AiCapability.SPEECH_TO_TEXT),
-            engineId = EngineId("sherpa-onnx"),
-            profileType = ModelProfileIds.MOONSHINE_V1_STT,
+            engineId = runtimeProfile.key.engineId,
+            profileType = runtimeProfile.key.profileId,
             format = ModelFormat.ONNX,
             quantization = "INT8",
             architecture = "Moonshine",

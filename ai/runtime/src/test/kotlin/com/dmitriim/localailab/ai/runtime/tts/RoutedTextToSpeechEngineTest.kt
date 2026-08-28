@@ -1,6 +1,5 @@
 package com.dmitriim.localailab.ai.runtime.tts
 
-import com.dmitriim.localailab.ai.api.tts.TextToSpeechEngine
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadResult
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
@@ -8,7 +7,7 @@ import com.dmitriim.localailab.ai.api.tts.TextToSpeechResult
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRuntime
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -50,7 +49,7 @@ class RoutedTextToSpeechEngineTest {
 
     private fun requestFor(id: String) = TextToSpeechLoadRequest(
         engineId = EngineId(id),
-        profileType = ModelProfileIds.PIPER_VITS_TTS,
+        profileType = ModelProfileId("PIPER_VITS_TTS"),
         modelDirectory = "model",
     )
 

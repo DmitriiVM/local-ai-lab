@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.ai.llamacpp.catalog
 
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.llamacpp.LlamaCppRuntimeProfile
+import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -13,6 +13,7 @@ class QwenThreePointFive0Point8bQ4ModelDefinition(
     override val runtimeProfile: LlamaCppRuntimeProfile,
 ) : ModelCatalogContribution {
     override val catalogModel = llamaCppCatalogModel(
+        profileKey = runtimeProfile.key,
         modelId = "qwen3.5-0.8b-q4-0",
         displayName = "Qwen3.5 0.8B Q4_0",
         family = "Qwen3.5",

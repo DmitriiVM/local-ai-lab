@@ -1,7 +1,6 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogArchiveFormat
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogDownloadArchive
@@ -13,6 +12,7 @@ import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
+import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.core.model.manifest.ModelSource
 import com.dmitriim.localailab.core.model.manifest.SttRecognitionMode
 
@@ -21,7 +21,7 @@ internal fun archiveSttCatalogModel(
     displayName: String,
     family: String,
     description: String,
-    profileType: com.dmitriim.localailab.core.model.manifest.ModelProfileId,
+    profileKey: ModelProfileKey,
     archiveName: String,
     archiveBytes: Long,
     archiveSha256: String,
@@ -30,7 +30,6 @@ internal fun archiveSttCatalogModel(
     licenseName: String,
     attribution: String,
     approximateRamBytes: Long,
-    engineId: EngineId = EngineId("sherpa-onnx"),
     downloadUrl: String = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/$archiveName.tar.bz2",
     archiveFormat: CatalogArchiveFormat = CatalogArchiveFormat.TAR_BZIP2,
     recognitionMode: SttRecognitionMode = SttRecognitionMode.OFFLINE,
@@ -42,9 +41,9 @@ internal fun archiveSttCatalogModel(
         family = family,
         description = description,
         capabilities = setOf(AiCapability.SPEECH_TO_TEXT),
-        engineId = engineId,
-        profileType = profileType,
-        format = if (engineId.value == "vosk") ModelFormat.BINARY else ModelFormat.ONNX,
+        engineId = profileKey.engineId,
+        profileType = profileKey.profileId,
+        format = if (profileKey.engineId.value == "vosk") ModelFormat.BINARY else ModelFormat.ONNX,
         quantization = quantization,
         architecture = family,
         revision = archiveName.substringAfterLast('-'),

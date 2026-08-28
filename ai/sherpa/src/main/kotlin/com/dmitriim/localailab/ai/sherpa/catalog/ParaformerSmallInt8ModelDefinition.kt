@@ -1,11 +1,10 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.sherpa.stt.ParaformerSttProfile
+import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
@@ -20,7 +19,7 @@ class ParaformerSmallInt8ModelDefinition(
         displayName = "Paraformer Small INT8",
         family = "Paraformer",
         description = "A Chinese-and-English offline speech-to-text model quantized to INT8.",
-        profileType = ModelProfileIds.PARAFORMER_STT,
+        profileKey = runtimeProfile.key,
         archiveName = "sherpa-onnx-paraformer-zh-small-2024-03-09",
         archiveBytes = 77_920_048,
         archiveSha256 = "da92b3db5218c5be53aad53e57d1b6e63e7fc98a0e054fbdd6dbe18e9c6b1450",

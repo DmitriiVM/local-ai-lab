@@ -1,7 +1,6 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogModel
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
@@ -11,7 +10,7 @@ import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.core.model.manifest.ModelSource
 
 internal fun whisperCatalogModel(
@@ -26,6 +25,7 @@ internal fun whisperCatalogModel(
     decoderBytes: Long,
     decoderSha256: String,
     approximateRamBytes: Long,
+    profileKey: ModelProfileKey,
 ): CatalogModel {
     val encoder = "$filePrefix-encoder.int8.onnx"
     val decoder = "$filePrefix-decoder.int8.onnx"
@@ -38,8 +38,8 @@ internal fun whisperCatalogModel(
             family = "Whisper",
             description = description,
             capabilities = setOf(AiCapability.SPEECH_TO_TEXT),
-            engineId = EngineId("sherpa-onnx"),
-            profileType = ModelProfileIds.WHISPER_STT,
+            engineId = profileKey.engineId,
+            profileType = profileKey.profileId,
             format = ModelFormat.ONNX,
             quantization = "INT8",
             architecture = displayName.removeSuffix(" INT8"),

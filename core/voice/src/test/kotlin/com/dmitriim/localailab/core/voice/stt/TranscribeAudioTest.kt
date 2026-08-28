@@ -12,13 +12,12 @@ import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localailab.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.manifest.SttRecognitionMode
 import com.dmitriim.localailab.core.model.runtime.ChatModelReference
 import com.dmitriim.localailab.core.model.runtime.SpeechToTextModelReference
 import com.dmitriim.localailab.core.model.runtime.TextToSpeechModelReference
 import com.dmitriim.localailab.core.model.service.LocalModelResolver
-import java.io.File
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -26,6 +25,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import java.io.File
 
 class TranscribeAudioTest {
     @get:Rule
@@ -95,7 +95,7 @@ class TranscribeAudioTest {
                 modelId = modelId,
                 displayName = "Test transcription",
                 engineId = EngineId("test"),
-                profileType = ModelProfileIds.WHISPER_STT,
+                profileType = ModelProfileId("WHISPER_STT"),
                 modelDirectory = "/models/test",
                 files = emptyMap(),
                 sampleRateHz = 16_000,

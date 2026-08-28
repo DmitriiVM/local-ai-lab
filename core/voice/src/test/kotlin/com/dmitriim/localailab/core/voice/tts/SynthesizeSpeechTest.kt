@@ -15,13 +15,12 @@ import com.dmitriim.localailab.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffectsProcessor
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
+import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.core.model.runtime.ChatModelReference
 import com.dmitriim.localailab.core.model.runtime.SpeechToTextModelReference
 import com.dmitriim.localailab.core.model.runtime.TextToSpeechModelReference
 import com.dmitriim.localailab.core.model.service.LocalModelResolver
-import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.toList
@@ -31,6 +30,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import java.io.File
 
 class SynthesizeSpeechTest {
     @get:Rule
@@ -124,7 +124,7 @@ class SynthesizeSpeechTest {
                 modelId = modelId,
                 displayName = "Test voice",
                 engineId = EngineId("test"),
-                profileType = ModelProfileIds.PIPER_VITS_TTS,
+                profileType = ModelProfileId("PIPER_VITS_TTS"),
                 modelDirectory = "/models/test",
                 sampleRateHz = 16_000,
                 languages = setOf("en"),
