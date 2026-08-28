@@ -167,23 +167,43 @@ or send it.
 
 The project is meant to be extended.
 
-To add another model for an existing runtime, define a `ModelCatalogContribution`
-containing its `ModelManifest`, runtime-profile key, download source, required files,
-and integrity data. Contribute that definition to Metro;
-the catalog registry discovers it automatically.
+### What can be added without a new runtime
 
-To add a new runtime, create a dedicated `:ai:<runtime>` module that implements the
-engine contract from `:ai:api` and contributes a `ModelRuntimeProfile` with runtime-specific
-configuration and validation. Register the module in Gradle and add catalog entries only after their
-model profile and required files are defined. This keeps a new engine isolated from
-the feature UI while allowing it to participate in the same workflows, model library,
-and run history.
+A model is addable to an existing runtime only when that packaged runtime can load
+its exact model architecture and artifact layout. A compatible file format alone is
+not sufficient. For example, any supported single-file GGUF chat model can use the
+llama.cpp runtime, while a multimodal GGUF model that requires a vision, audio, or
+diffusion component cannot use the app's text-chat path.
+
+Current catalog-friendly model shapes include:
+
+- **Chat:** a llama.cpp-compatible, text-only GGUF model, or a LiteRT-LM bundle
+  accepted by the LiteRT-LM runtime.
+- **Speech to text:** a Vosk archive with its expected `am`, `conf`, and `graph`
+  directories, or a Sherpa-ONNX model family already represented by a compatible
+  STT profile and its required files.
+- **Text to speech:** a Sherpa-ONNX model family already represented by a compatible
+  TTS profile and its required files, such as Piper, Kokoro, Kitten, Pocket, or
+  Supertonic.
+
+To add another qualifying model, define one `ModelCatalogContribution` in the
+runtime module. Inject the compatible `ModelRuntimeProfile`, describe the manifest,
+download plan, files, and integrity data, and derive `engineId` and `profileType`
+from `runtimeProfile.key`. Contribute the definition to Metro; both the catalog and
+runtime-profile registries discover it automatically.
+
+To add a model that does not meet those requirements, first create a dedicated
+`:ai:<runtime>` module. It must implement the relevant execution contract from
+`:ai:api` and define a `ModelRuntimeProfile` for each distinct model-bundle layout.
+Then add catalog contributions that use those profiles. Register a profile directly
+only for a standalone model with no catalog download, such as an Android system
+speech service.
 
 Relevant extension points include:
 
 - [`ModelRuntimeProfile`](ai/api/src/main/kotlin/com/dmitriim/localailab/ai/api/model/ModelRuntimeProfile.kt) — describes one reusable engine/profile integration.
-- [`ModelCatalogContribution`](core/model/src/main/kotlin/com/dmitriim/localailab/core/model/library/ModelCatalogContribution.kt) — contributes one downloadable model.
-- [`MoonshineTinyEnglishInt8ModelDefinition`](ai/sherpa/src/main/kotlin/com/dmitriim/localailab/ai/sherpa/MoonshineTinyEnglishInt8ModelDefinition.kt) — a self-registering Sherpa model example.
+- [`ModelCatalogContribution`](ai/api/src/main/kotlin/com/dmitriim/localailab/ai/api/model/ModelCatalogContribution.kt) — contributes one downloadable model.
+- [`MoonshineTinyEnglishInt8ModelDefinition`](ai/sherpa/src/main/kotlin/com/dmitriim/localailab/ai/sherpa/catalog/MoonshineTinyEnglishInt8ModelDefinition.kt) — a self-registering Sherpa model example.
 
 ## Technology
 
@@ -209,7 +229,7 @@ replay/export and provides controls to clear temporary media and run history.
 - Native inference targets `arm64-v8a` and `x86_64`; x86 and 32-bit runtimes are not
   packaged.
 - Model files are not bundled, so a playground is unavailable until a compatible
-  model is installed or imported.
+  catalog model is installed.
 - Performance and memory requirements vary substantially by device, model,
   quantization, context size, audio length, and thermal state.
 - Packaging several comparison runtimes produces a large application artifact.
