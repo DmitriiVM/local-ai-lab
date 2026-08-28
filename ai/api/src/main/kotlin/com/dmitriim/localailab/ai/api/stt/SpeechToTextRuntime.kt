@@ -8,11 +8,6 @@ import com.dmitriim.localailab.core.model.engine.EngineId
  * [engineId] must be unique among packaged STT runtimes. Implementations own their loaded model
  * lifetime and must reject requests for a different engine ID.
  */
-interface SpeechToTextRuntime {
+interface SpeechToTextRuntime : SpeechToTextEngine {
     val engineId: EngineId
-    val isLoaded: Boolean
-    fun load(request: SpeechToTextLoadRequest): SpeechToTextLoadResult
-    fun transcribe(request: SpeechToTextRequest): SpeechToTextResult
-    fun cancel()
-    fun unload()
 }

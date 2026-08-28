@@ -8,6 +8,7 @@ package com.dmitriim.localailab.ai.api.tts
  * requests that synthesis stop. [cancel] is best-effort and [unload] releases model resources.
  */
 interface TextToSpeechEngine {
+    /** Whether a synthesizer is currently loaded and ready to generate PCM audio. */
     val isLoaded: Boolean
 
     /** Loads or reuses the synthesizer selected by [request]. */

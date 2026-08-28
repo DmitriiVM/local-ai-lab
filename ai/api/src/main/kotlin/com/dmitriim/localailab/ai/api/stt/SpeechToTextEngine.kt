@@ -8,6 +8,7 @@ package com.dmitriim.localailab.ai.api.stt
  * and releases the selected runtime's resources.
  */
 interface SpeechToTextEngine {
+    /** Whether a recognizer is currently loaded and ready to transcribe. */
     val isLoaded: Boolean
 
     /** Loads or reuses the recognizer selected by [request]. */
