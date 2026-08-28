@@ -4,7 +4,7 @@ import android.app.Application
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
-import com.dmitriim.localailab.core.model.service.ModelTransfers
+import com.dmitriim.localailab.core.model.service.ModelTransferStartup
 import com.dmitriim.localailab.core.navigation.NavigationEntryProvider
 import com.dmitriim.localailab.core.result.ForegroundOperationCoordinator
 import com.dmitriim.localailab.source.settings.AppSettingsRepository
@@ -17,7 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 interface AppGraph : ViewModelGraph {
     val navigationEntryProviders: Set<NavigationEntryProvider>
     val foregroundOperationCoordinator: ForegroundOperationCoordinator
-    val modelTransfers: ModelTransfers
+    val modelTransferStartup: ModelTransferStartup
     val settingsRepository: AppSettingsRepository
     val runtimeLeaseManager: AiRuntimeLeaseManager
 

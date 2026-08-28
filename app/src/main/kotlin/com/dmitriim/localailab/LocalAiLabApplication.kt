@@ -21,7 +21,7 @@ class LocalAiLabApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        graph.modelTransfers
+        graph.modelTransferStartup.initialize()
     }
 
     override fun onTrimMemory(level: Int) {

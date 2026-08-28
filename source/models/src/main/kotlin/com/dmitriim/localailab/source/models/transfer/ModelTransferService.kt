@@ -3,7 +3,6 @@ package com.dmitriim.localailab.source.models.transfer
 import android.app.Application
 import android.util.Log
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
 import com.dmitriim.localailab.core.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localailab.core.model.library.CatalogModel
 import com.dmitriim.localailab.core.model.library.ModelCompatibilityState
@@ -23,14 +22,12 @@ import dev.zacsweers.metro.binding
 import java.io.File
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -47,7 +44,6 @@ class ModelTransferService(
     private val transferState: ModelTransferStateStore,
     private val huggingFaceTokens: HuggingFaceTokenStore,
     private val modelCatalog: ModelCatalogRegistry,
-    @param:ApplicationCoroutineScope private val applicationScope: CoroutineScope,
 ) : ModelTransfers,
     ModelDownloadExecutor {
     override val catalog: Flow<List<CatalogModel>> = MutableStateFlow(modelCatalog.entries).asStateFlow()
@@ -79,17 +75,6 @@ class ModelTransferService(
         ::ensureRunning,
         ::publishDownloadProgress,
     )
-
-    init {
-        ModelDownloadRuntime.executor = this
-        applicationScope.launch(Dispatchers.IO) {
-            transferSchedulingMutex.withLock {
-                ModelTransferRecovery(application, installedModels, transferState, modelCatalog).reconcile()
-                scheduleDeferredRetriesLocked()
-                scheduleNextQueuedLocked()
-            }
-        }
-    }
 
     override suspend fun download(
         modelId: ModelId,
@@ -194,6 +179,14 @@ class ModelTransferService(
         } finally {
             throughputEstimator.clear(modelId)
             transferSchedulingMutex.withLock { scheduleNextQueuedLocked() }
+        }
+    }
+
+    internal suspend fun recoverPersistedTransfers() {
+        transferSchedulingMutex.withLock {
+            ModelTransferRecovery(application, installedModels, transferState, modelCatalog).reconcile()
+            scheduleDeferredRetriesLocked()
+            scheduleNextQueuedLocked()
         }
     }
 
@@ -341,8 +334,4 @@ class ModelTransferService(
         const val TAG = "AiP123Models"
         const val STAGING_DIRECTORY_NAME = "model-downloads"
     }
-}
-
-internal interface ModelDownloadExecutor {
-    suspend fun executeScheduledDownload(modelId: ModelId, executionGeneration: Long)
 }
