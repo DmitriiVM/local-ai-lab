@@ -15,6 +15,7 @@ import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.di.AppGraph
 import com.dmitriim.localailab.feature.stt.navigation.SpeechToTextKey
 import com.dmitriim.localailab.feature.tts.navigation.TextToSpeechKey
+import com.dmitriim.localailab.ui.navigation.AdaptiveNavigationScaffold
 
 @Composable
 fun LocalAiLabApp(graph: AppGraph) {

@@ -99,8 +99,7 @@ run-recording pipeline.
 **Explicit resource ownership.** Inference engines have load, run, cancel, and unload boundaries.
 Runtime access is serialized, long-running work stays off the main thread, and foreground 
 operations can be interrupted safely. Feature-scoped runtime leases keep models warm while they
-are in use, release them after navigation or app backgrounding, and evict all runtime families
-when Android reports memory pressure.
+are in use, release them after navigation or app backgrounding.
 
 **Resilient model delivery.** Downloads stream directly to disk, use Android background execution, 
 and can resume or recover after interruption. Preflight checks catch problems early, while staged 
