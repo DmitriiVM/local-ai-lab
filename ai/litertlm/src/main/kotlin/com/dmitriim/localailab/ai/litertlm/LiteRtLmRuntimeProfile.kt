@@ -18,7 +18,6 @@ internal interface LiteRtLmProfile : ModelRuntimeProfile
 @Inject
 class LiteRtLmRuntimeProfile : LiteRtLmProfile {
     override val key = ModelProfileKey(EngineId("litert-lm"), ModelProfileIds.LLM)
-    override val displayName = "LiteRT-LM chat model"
     override val capabilities = setOf(AiCapability.CHAT)
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
         require(manifest.engineId == key.engineId && manifest.profileType == key.profileId)

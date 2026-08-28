@@ -12,7 +12,6 @@ import dev.zacsweers.metro.Inject
 class SenseVoiceSttProfile :
     BaseSherpaSttProfile(
         ModelProfileIds.SENSE_VOICE_STT,
-        "SenseVoice STT bundle",
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = offlineSherpaSession(artifacts, threadCount) {
         senseVoice = OfflineSenseVoiceModelConfig().apply {

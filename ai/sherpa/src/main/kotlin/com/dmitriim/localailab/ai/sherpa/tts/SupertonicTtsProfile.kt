@@ -11,7 +11,6 @@ import dev.zacsweers.metro.Inject
 class SupertonicTtsProfile :
     BaseSherpaTtsProfile(
         ModelProfileIds.SUPERTONIC_TTS,
-        "Supertonic TTS bundle",
     ) {
     override fun open(artifacts: ModelArtifacts, threadCount: Int) = openSherpaTts(threadCount) {
         supertonic = OfflineTtsSupertonicModelConfig().apply {

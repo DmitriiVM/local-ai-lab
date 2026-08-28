@@ -11,7 +11,6 @@ import dev.zacsweers.metro.Inject
 class KokoroTtsProfile :
     BaseSherpaTtsProfile(
         ModelProfileIds.KOKORO_TTS,
-        "Kokoro Multi-Lang v1.0",
     ) {
     override fun open(artifacts: ModelArtifacts, threadCount: Int): SherpaTtsModel = openSherpaTts(threadCount) {
         kokoro = OfflineTtsKokoroModelConfig().apply {

@@ -15,7 +15,6 @@ import dev.zacsweers.metro.Inject
 class ZipformerSttProfile :
     BaseSherpaSttProfile(
         ModelProfileIds.ZIPFORMER_STT,
-        "Streaming Zipformer bundle",
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = SherpaSttSession.Online(
         OnlineRecognizer(

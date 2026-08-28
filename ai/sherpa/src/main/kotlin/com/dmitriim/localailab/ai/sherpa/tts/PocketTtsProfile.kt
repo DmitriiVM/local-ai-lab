@@ -17,7 +17,6 @@ import java.io.File
 class PocketTtsProfile :
     BaseSherpaTtsProfile(
         ModelProfileIds.POCKET_TTS,
-        "Pocket TTS INT8 (English)",
     ) {
     override fun open(artifacts: ModelArtifacts, threadCount: Int): SherpaTtsModel {
         val runtime = OfflineTts(

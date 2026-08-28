@@ -18,7 +18,6 @@ internal interface LlamaCppProfile : ModelRuntimeProfile
 @Inject
 class LlamaCppRuntimeProfile : LlamaCppProfile {
     override val key = ModelProfileKey(EngineId("llama.cpp"), ModelProfileIds.LLM)
-    override val displayName = "GGUF chat model"
     override val capabilities = setOf(AiCapability.CHAT)
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
         require(manifest.engineId == key.engineId && manifest.profileType == key.profileId)

@@ -10,7 +10,6 @@ import java.io.File
 
 abstract class BaseSherpaSttProfile(
     profileId: ModelProfileId,
-    final override val displayName: String,
 ) : SherpaSttProfile {
     final override val key = ModelProfileKey(EngineId("sherpa-onnx"), profileId)
     final override val capabilities = setOf(AiCapability.SPEECH_TO_TEXT)

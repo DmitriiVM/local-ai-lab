@@ -12,7 +12,6 @@ import dev.zacsweers.metro.Inject
 class MoonshineV1SttProfile :
     BaseSherpaSttProfile(
         ModelProfileIds.MOONSHINE_V1_STT,
-        "Moonshine v1 STT bundle",
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = offlineSherpaSession(artifacts, threadCount) {
         moonshine = OfflineMoonshineModelConfig().apply {

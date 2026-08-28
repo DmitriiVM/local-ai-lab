@@ -12,7 +12,6 @@ import dev.zacsweers.metro.Inject
 class ParaformerSttProfile :
     BaseSherpaSttProfile(
         ModelProfileIds.PARAFORMER_STT,
-        "Paraformer STT bundle",
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = offlineSherpaSession(artifacts, threadCount) {
         paraformer = OfflineParaformerModelConfig().apply {

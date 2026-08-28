@@ -11,7 +11,6 @@ import dev.zacsweers.metro.Inject
 class PiperTtsProfile :
     BaseSherpaTtsProfile(
         ModelProfileIds.PIPER_VITS_TTS,
-        "Piper Lessac Medium (English)",
     ) {
     override fun open(artifacts: ModelArtifacts, threadCount: Int) = openSherpaTts(threadCount) {
         vits = OfflineTtsVitsModelConfig().apply {

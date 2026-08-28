@@ -12,7 +12,6 @@ import dev.zacsweers.metro.Inject
 class WhisperSttProfile :
     BaseSherpaSttProfile(
         profileId = ModelProfileIds.WHISPER_STT,
-        displayName = "Whisper STT bundle",
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = offlineSherpaSession(artifacts, threadCount) {
         whisper = OfflineWhisperModelConfig().apply {

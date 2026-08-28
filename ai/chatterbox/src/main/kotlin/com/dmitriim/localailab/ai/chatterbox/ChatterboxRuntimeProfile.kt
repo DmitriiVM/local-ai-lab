@@ -17,7 +17,6 @@ internal interface ChatterboxProfile : ModelRuntimeProfile
 @Inject
 class ChatterboxRuntimeProfile : ChatterboxProfile {
     override val key = ModelProfileKey(EngineId("chatterbox-onnx"), ModelProfileIds.CHATTERBOX_TURBO_Q4)
-    override val displayName = "Chatterbox Turbo Q4 (English)"
     override val capabilities = setOf(AiCapability.TEXT_TO_SPEECH)
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
         require(manifest.engineId == key.engineId && manifest.profileType == key.profileId)

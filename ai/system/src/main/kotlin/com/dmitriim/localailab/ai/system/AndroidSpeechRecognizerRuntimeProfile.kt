@@ -20,7 +20,6 @@ class AndroidSpeechRecognizerRuntimeProfile : ModelRuntimeProfile {
         EngineId("android-speech-recognizer"),
         ModelProfileIds.ANDROID_SPEECH_RECOGNIZER_STT,
     )
-    override val displayName = "Android on-device speech recognizer"
     override val capabilities = setOf(AiCapability.SPEECH_TO_TEXT)
     override fun validate(manifest: ModelManifest, directory: File) = RuntimeValidationResult(false, "Android speech recognition is system managed.")
 }

@@ -15,8 +15,6 @@ import java.io.File
 interface ModelRuntimeProfile {
     /** Unique engine/profile key accepted by this runtime. */
     val key: ModelProfileKey
-    /** Human-readable label used when presenting the profile to a user. */
-    val displayName: String
     /** Capabilities granted to models using this profile. */
     val capabilities: Set<AiCapability>
     /** Validates that [manifest] and its installed [directory] satisfy this profile's requirements. */

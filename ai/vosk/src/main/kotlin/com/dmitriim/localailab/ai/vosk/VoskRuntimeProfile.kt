@@ -16,7 +16,6 @@ internal interface VoskProfile : ModelRuntimeProfile
 @Inject
 class VoskRuntimeProfile : VoskProfile {
     override val key = ModelProfileKey(EngineId("vosk"), ModelProfileIds.VOSK_STT)
-    override val displayName = "Vosk model directory"
     override val capabilities = setOf(AiCapability.SPEECH_TO_TEXT)
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
         require(manifest.engineId == key.engineId && manifest.profileType == key.profileId)
