@@ -4,6 +4,7 @@ import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.runtime.ModelArtifactReference
 
+/** Selects an installed speech-synthesis model and optional runtime configuration. */
 data class TextToSpeechLoadRequest(
     val engineId: EngineId,
     val profileType: ModelProfileId,
@@ -13,6 +14,7 @@ data class TextToSpeechLoadRequest(
     val artifacts: List<ModelArtifactReference> = emptyList(),
 )
 
+/** Effective configuration and output metadata returned after a synthesizer has loaded. */
 data class TextToSpeechLoadResult(
     val effectiveThreadCount: Int,
     val loadDurationMs: Long,

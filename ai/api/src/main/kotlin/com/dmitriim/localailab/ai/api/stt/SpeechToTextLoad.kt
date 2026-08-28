@@ -5,6 +5,7 @@ import com.dmitriim.localailab.core.model.manifest.ModelFileRole
 import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.runtime.ModelArtifactReference
 
+/** Selects an installed speech-recognition model and its runtime configuration. */
 data class SpeechToTextLoadRequest(
     val engineId: EngineId,
     val profileType: ModelProfileId,
@@ -31,12 +32,14 @@ data class SpeechToTextLoadRequest(
         threadCount = threadCount,
     )
 
+    /** Legacy file view derived from non-directory [artifacts]. */
     val files: Map<ModelFileRole, String>
         get() = artifacts
             .filterNot(ModelArtifactReference::directory)
             .associate { it.role to it.path }
 }
 
+/** Effective configuration and timing returned after a recognizer has loaded. */
 data class SpeechToTextLoadResult(
     val effectiveThreadCount: Int,
     val loadDurationMs: Long,

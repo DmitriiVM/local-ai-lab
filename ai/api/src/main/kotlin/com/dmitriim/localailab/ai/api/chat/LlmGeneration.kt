@@ -1,5 +1,6 @@
 package com.dmitriim.localailab.ai.api.chat
 
+/** One generation request for a loaded runtime. [prompt] must already use that runtime's format. */
 data class LlmGenerationRequest(
     val prompt: String,
     val options: LlmGenerationOptions = LlmGenerationOptions(),
@@ -19,6 +20,7 @@ data class LlmGenerationOptions(
     }
 }
 
+/** Complete output and runtime-reported timing/token metrics for one generation. All durations are milliseconds. */
 data class LlmGenerationResult(
     val text: String,
     val promptTokenCount: Int?,
@@ -30,8 +32,12 @@ data class LlmGenerationResult(
     val finishReason: LlmFinishReason,
 )
 
+/** Why generation stopped. */
 enum class LlmFinishReason {
+    /** The model emitted its end-of-generation token. */
     STOP_TOKEN,
+    /** The requested output-token limit was reached. */
     MAX_TOKENS,
+    /** Cancellation was observed; [LlmGenerationResult.text] may contain partial output. */
     CANCELLED,
 }

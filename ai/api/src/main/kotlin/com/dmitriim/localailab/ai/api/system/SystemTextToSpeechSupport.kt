@@ -2,7 +2,11 @@ package com.dmitriim.localailab.ai.api.system
 
 import kotlinx.coroutines.flow.StateFlow
 
-/** Discovers on-device voices supplied by Android without coupling features to the platform module. */
+/**
+ * Discovers on-device voices supplied by Android without coupling features to the platform module.
+ *
+ * [voices] is the last successful discovery result and may initially be empty.
+ */
 interface SystemTextToSpeechSupport {
     val voices: StateFlow<List<SystemTextToSpeechVoice>>
 

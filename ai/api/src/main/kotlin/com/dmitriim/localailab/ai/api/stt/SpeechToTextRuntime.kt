@@ -2,7 +2,12 @@ package com.dmitriim.localailab.ai.api.stt
 
 import com.dmitriim.localailab.core.model.engine.EngineId
 
-/** A concrete STT runtime contributed into the application engine set. */
+/**
+ * Concrete speech-to-text runtime contributed to the application engine set.
+ *
+ * [engineId] must be unique among packaged STT runtimes. Implementations own their loaded model
+ * lifetime and must reject requests for a different engine ID.
+ */
 interface SpeechToTextRuntime {
     val engineId: EngineId
     val isLoaded: Boolean
