@@ -8,6 +8,7 @@ import com.dmitriim.localailab.ai.api.tts.TextToSpeechResult
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRuntime
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
+import com.dmitriim.localailab.ai.sherpa.tts.profiles.SherpaTtsProfile
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
