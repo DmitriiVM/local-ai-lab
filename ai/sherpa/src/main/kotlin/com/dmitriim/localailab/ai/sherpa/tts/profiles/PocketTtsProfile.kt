@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.sherpa.tts.profiles
 
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
-import com.dmitriim.localailab.ai.sherpa.tts.profiles.BaseSherpaTtsProfile
+import com.dmitriim.localailab.ai.sherpa.tts.SherpaTtsModel
 import com.dmitriim.localailab.core.model.manifest.ModelFileRole
 import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.runtime.ModelArtifacts
@@ -31,7 +31,7 @@ class PocketTtsProfile :
     BaseSherpaTtsProfile(
         pocketTtsProfileId,
     ) {
-    override fun open(artifacts: ModelArtifacts, threadCount: Int): com.dmitriim.localailab.ai.sherpa.tts.SherpaTtsModel {
+    override fun open(artifacts: ModelArtifacts, threadCount: Int): SherpaTtsModel {
         val runtime = OfflineTts(
             null,
             OfflineTtsConfig().apply {
@@ -52,10 +52,10 @@ class PocketTtsProfile :
                 }
             },
         )
-        return _root_ide_package_.com.dmitriim.localailab.ai.sherpa.tts.SherpaTtsModel(
+        return SherpaTtsModel(
             runtime = runtime,
-            referenceAudio = _root_ide_package_.com.dmitriim.localailab.ai.sherpa.tts.Pcm16Wave.Companion.read(
-                File(artifacts.require(PocketTtsArtifacts.REFERENCE_AUDIO).path)
+            referenceAudio = Pcm16Wave.read(
+                File(artifacts.require(PocketTtsArtifacts.REFERENCE_AUDIO).path),
             ),
         )
     }
@@ -63,7 +63,7 @@ class PocketTtsProfile :
     override fun configureGeneration(
         config: GenerationConfig,
         request: TextToSpeechRequest,
-        model: com.dmitriim.localailab.ai.sherpa.tts.SherpaTtsModel,
+        model: SherpaTtsModel,
     ) {
         val reference = requireNotNull(model.referenceAudio) {
             "Pocket TTS requires the bundled default reference voice."

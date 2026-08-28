@@ -1,5 +1,6 @@
 package com.dmitriim.localailab.ai.sherpa.tts.profiles
 
+import com.dmitriim.localailab.ai.sherpa.tts.SherpaTtsModel
 import com.dmitriim.localailab.core.model.manifest.ModelFileRole
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelProfileId
@@ -22,7 +23,7 @@ class KokoroTtsProfile :
     BaseSherpaTtsProfile(
         kokoroTtsProfileId,
     ) {
-    override fun open(artifacts: ModelArtifacts, threadCount: Int): com.dmitriim.localailab.ai.sherpa.tts.SherpaTtsModel =
+    override fun open(artifacts: ModelArtifacts, threadCount: Int): SherpaTtsModel =
         openSherpaTts(threadCount) {
             kokoro = OfflineTtsKokoroModelConfig().apply {
                 model = artifacts.require(KokoroTtsArtifacts.MODEL).path

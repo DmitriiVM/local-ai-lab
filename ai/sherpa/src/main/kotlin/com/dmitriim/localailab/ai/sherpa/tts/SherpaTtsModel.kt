@@ -1,5 +1,6 @@
 package com.dmitriim.localailab.ai.sherpa.tts
 
+import com.dmitriim.localailab.ai.sherpa.tts.profiles.Pcm16Wave
 import com.k2fsa.sherpa.onnx.OfflineTts
 
 data class SherpaTtsModel(

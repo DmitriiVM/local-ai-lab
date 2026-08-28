@@ -10,7 +10,7 @@ internal fun offlineSherpaSession(
     artifacts: ModelArtifacts,
     threadCount: Int,
     configure: OfflineModelConfig.() -> Unit,
-): SherpaSttSession = SherpaSttSession.Offline(
+): SherpaSttSession = SherpaSttSession.NonStreaming(
     OfflineRecognizer(
         null,
         OfflineRecognizerConfig().apply {

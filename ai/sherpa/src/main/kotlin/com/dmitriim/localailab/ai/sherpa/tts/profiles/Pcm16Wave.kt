@@ -1,9 +1,10 @@
-package com.dmitriim.localailab.ai.sherpa.tts
+package com.dmitriim.localailab.ai.sherpa.tts.profiles
 
 import java.io.File
 import java.io.RandomAccessFile
+import java.lang.Short
 
-data class Pcm16Wave(val sampleRateHz: Int, val samples: FloatArray) {
+class Pcm16Wave(val sampleRateHz: Int, val samples: FloatArray) {
     companion object {
         fun read(file: File): Pcm16Wave = RandomAccessFile(file, "r").use { input ->
             require(readAscii(input, 4) == "RIFF") { "Reference audio is not a RIFF WAV." }
@@ -22,11 +23,11 @@ data class Pcm16Wave(val sampleRateHz: Int, val samples: FloatArray) {
                 when (chunk) {
                     "fmt " -> {
                         require(size >= 16) { "Reference WAV format is invalid." }
-                        val format = java.lang.Short.reverseBytes(input.readShort()).toInt()
-                        channels = java.lang.Short.reverseBytes(input.readShort()).toInt()
+                        val format = Short.reverseBytes(input.readShort()).toInt()
+                        channels = Short.reverseBytes(input.readShort()).toInt()
                         sampleRateHz = Integer.reverseBytes(input.readInt())
                         input.skipBytes(6)
-                        bitsPerSample = java.lang.Short.reverseBytes(input.readShort()).toInt()
+                        bitsPerSample = Short.reverseBytes(input.readShort()).toInt()
                         require(format == 1 && channels == 1 && bitsPerSample == 16) {
                             "Reference audio must be mono PCM16 WAV."
                         }
