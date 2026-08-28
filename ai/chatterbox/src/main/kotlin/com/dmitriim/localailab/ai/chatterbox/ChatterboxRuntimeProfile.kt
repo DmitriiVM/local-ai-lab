@@ -4,7 +4,6 @@ import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.ai.api.model.ModelImportFileDefinition
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -13,15 +12,12 @@ import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
-import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.binding
 import java.io.File
 
 internal interface ChatterboxProfile : ModelRuntimeProfile
 
 @Inject
-@ContributesIntoSet(AppScope::class, binding = binding<ModelRuntimeProfile>())
 class ChatterboxRuntimeProfile : ChatterboxProfile {
     override val key = ModelProfileKey(EngineId("chatterbox-onnx"), ModelProfileIds.CHATTERBOX_TURBO_Q4)
     override val displayName = "Chatterbox Turbo Q4 (English)"

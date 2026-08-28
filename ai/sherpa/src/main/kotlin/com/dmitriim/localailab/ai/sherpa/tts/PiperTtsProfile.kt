@@ -1,17 +1,13 @@
 package com.dmitriim.localailab.ai.sherpa.tts
 
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.runtime.ModelArtifacts
 import com.k2fsa.sherpa.onnx.OfflineTtsVitsModelConfig
-import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.binding
 
 @Inject
-@ContributesIntoSet(AppScope::class, binding = binding<ModelRuntimeProfile>())
 class PiperTtsProfile :
     BaseSherpaTtsProfile(
         ModelProfileIds.PIPER_VITS_TTS,

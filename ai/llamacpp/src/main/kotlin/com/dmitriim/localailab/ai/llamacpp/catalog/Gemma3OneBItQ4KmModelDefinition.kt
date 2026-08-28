@@ -1,14 +1,17 @@
 package com.dmitriim.localailab.ai.llamacpp.catalog
 
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.llamacpp.LlamaCppRuntimeProfile
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class Gemma3OneBItQ4KmModelDefinition : ModelCatalogContribution {
+class Gemma3OneBItQ4KmModelDefinition(
+    override val runtimeProfile: LlamaCppRuntimeProfile,
+) : ModelCatalogContribution {
     override val catalogModel = llamaCppCatalogModel(
         modelId = "gemma-3-1b-it-q4-k-m",
         displayName = "Gemma 3 1B IT Q4_K_M",

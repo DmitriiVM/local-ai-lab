@@ -106,7 +106,7 @@ class ModelFileValidatorTest {
         File(directory, "weights.bin").writeText("abc")
         val manifest = manifest(ModelFileSpec("weights.bin", ModelFileRole("WEIGHTS")))
 
-        val validation = ModelFileValidator(ModelRuntimeProfileRegistry(emptySet())).validate(manifest, directory)
+        val validation = ModelFileValidator(ModelRuntimeProfileRegistry(emptySet(), emptySet())).validate(manifest, directory)
 
         assertEquals(ModelValidationState.INCOMPATIBLE, validation.first)
     }
@@ -122,7 +122,7 @@ class ModelFileValidatorTest {
         assertEquals(SHA_ABC, enriched.sha256)
     }
 
-    private fun validator() = ModelFileValidator(ModelRuntimeProfileRegistry(setOf(FakeProfile)))
+    private fun validator() = ModelFileValidator(ModelRuntimeProfileRegistry(emptySet(), setOf(FakeProfile)))
 
     private fun manifest(vararg files: ModelFileSpec) = ModelManifest(
         modelId = ModelId("test-model"),

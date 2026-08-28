@@ -1,14 +1,17 @@
 package com.dmitriim.localailab.ai.llamacpp.catalog
 
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.llamacpp.LlamaCppRuntimeProfile
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class QwenThreePointFive0Point8bQ4ModelDefinition : ModelCatalogContribution {
+class QwenThreePointFive0Point8bQ4ModelDefinition(
+    override val runtimeProfile: LlamaCppRuntimeProfile,
+) : ModelCatalogContribution {
     override val catalogModel = llamaCppCatalogModel(
         modelId = "qwen3.5-0.8b-q4-0",
         displayName = "Qwen3.5 0.8B Q4_0",

@@ -3,7 +3,8 @@ package com.dmitriim.localailab.ai.vosk.catalog
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogArchiveFormat
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.vosk.VoskRuntimeProfile
 import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.SttRecognitionMode
 import dev.zacsweers.metro.ContributesIntoSet
@@ -12,7 +13,9 @@ import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class VoskSmallRussianModelDefinition : ModelCatalogContribution {
+class VoskSmallRussianModelDefinition(
+    override val runtimeProfile: VoskRuntimeProfile,
+) : ModelCatalogContribution {
     override val catalogModel = archiveSttCatalogModel(
         modelId = "vosk-small-ru-0-22",
         displayName = "Vosk Small Russian",

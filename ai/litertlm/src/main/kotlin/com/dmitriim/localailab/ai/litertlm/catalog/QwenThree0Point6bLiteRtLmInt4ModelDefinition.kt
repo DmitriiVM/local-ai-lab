@@ -5,7 +5,8 @@ import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.litertlm.LiteRtLmRuntimeProfile
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
 import com.dmitriim.localailab.core.model.library.ModelCatalogState
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -21,7 +22,9 @@ import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class QwenThree0Point6bLiteRtLmInt4ModelDefinition : ModelCatalogContribution {
+class QwenThree0Point6bLiteRtLmInt4ModelDefinition(
+    override val runtimeProfile: LiteRtLmRuntimeProfile,
+) : ModelCatalogContribution {
     override val catalogModel = CatalogModel(
         manifest = ModelManifest(
             modelId = ModelId("qwen3-0.6b-litert-lm-int4"),

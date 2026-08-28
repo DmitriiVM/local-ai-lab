@@ -6,7 +6,8 @@ import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogDownloadArchive
 import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.sherpa.tts.PocketTtsProfile
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
 import com.dmitriim.localailab.core.model.library.ModelCatalogState
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -26,7 +27,9 @@ private const val pocketTtsDownloadUrl =
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class PocketTtsInt8EnglishModelDefinition : ModelCatalogContribution {
+class PocketTtsInt8EnglishModelDefinition(
+    override val runtimeProfile: PocketTtsProfile,
+) : ModelCatalogContribution {
     override val catalogModel: CatalogModel = CatalogModel(
         manifest = ModelManifest(
             modelId = ModelId("pocket-tts-int8-en-2026-01-26"),

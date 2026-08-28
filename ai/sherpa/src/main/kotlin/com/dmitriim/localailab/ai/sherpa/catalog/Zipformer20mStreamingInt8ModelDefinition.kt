@@ -1,7 +1,8 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.sherpa.stt.ZipformerSttProfile
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
@@ -12,7 +13,9 @@ import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class Zipformer20mStreamingInt8ModelDefinition : ModelCatalogContribution {
+class Zipformer20mStreamingInt8ModelDefinition(
+    override val runtimeProfile: ZipformerSttProfile,
+) : ModelCatalogContribution {
     override val catalogModel = archiveSttCatalogModel(
         modelId = "zipformer-en-20m-streaming-int8",
         displayName = "Zipformer 20M Streaming INT8",

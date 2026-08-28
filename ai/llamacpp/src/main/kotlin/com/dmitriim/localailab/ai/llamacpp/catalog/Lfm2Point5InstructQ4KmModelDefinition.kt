@@ -1,14 +1,17 @@
 package com.dmitriim.localailab.ai.llamacpp.catalog
 
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.llamacpp.LlamaCppRuntimeProfile
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class Lfm2Point5InstructQ4KmModelDefinition : ModelCatalogContribution {
+class Lfm2Point5InstructQ4KmModelDefinition(
+    override val runtimeProfile: LlamaCppRuntimeProfile,
+) : ModelCatalogContribution {
     override val catalogModel = llamaCppCatalogModel(
         modelId = "lfm2.5-1.2b-instruct-q4-k-m",
         displayName = "LFM2.5 1.2B Instruct Q4_K_M",

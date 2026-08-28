@@ -6,7 +6,8 @@ import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogDownloadArchive
 import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.sherpa.tts.PiperTtsProfile
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
 import com.dmitriim.localailab.core.model.library.ModelCatalogState
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -26,7 +27,9 @@ private const val piperDownloadUrl =
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class PiperLessacMediumModelDefinition : ModelCatalogContribution {
+class PiperLessacMediumModelDefinition(
+    override val runtimeProfile: PiperTtsProfile,
+) : ModelCatalogContribution {
     override val catalogModel: CatalogModel = CatalogModel(
         manifest = ModelManifest(
             modelId = ModelId("piper-en-us-lessac-medium"),

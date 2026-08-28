@@ -1,5 +1,6 @@
 package com.dmitriim.localailab.ai.runtime.model
 
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.manifest.ModelProfileDescriptor
@@ -10,17 +11,37 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 
-/** Resolves exactly one packaged profile for each persisted engine/profile key. */
+/**
+ * Resolves exactly one runtime profile for each persisted engine/profile key.
+ *
+ * Catalog-backed profiles come from [ModelCatalogContribution] so a downloadable model and its
+ * runtime contract are registered together. [standaloneProfiles] is for runtime-provided models
+ * that have no catalog download, such as Android system speech services.
+ */
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class, binding = binding<ModelProfileDirectory>())
 class ModelRuntimeProfileRegistry(
-    profiles: Set<ModelRuntimeProfile>,
+    catalogContributions: Set<ModelCatalogContribution>,
+    standaloneProfiles: Set<ModelRuntimeProfile>,
 ) : ModelProfileDirectory {
+    private val catalogProfilesByKey = catalogContributions
+        .map(ModelCatalogContribution::runtimeProfile)
+        .groupBy(ModelRuntimeProfile::key)
+        .mapValues { (key, profiles) ->
+            require(profiles.map { it::class }.distinct().size == 1) {
+                "More than one runtime profile implementation backs ${key.label}."
+            }
+            profiles.first()
+        }
+
     private val byKey = buildMap {
-        profiles.forEach { profile ->
-            require(put(profile.key, profile) == null) {
-                "More than one packaged runtime profile declares ${profile.key.label}."
+        putAll(catalogProfilesByKey)
+        standaloneProfiles.forEach { profile ->
+            if (profile.key !in catalogProfilesByKey) {
+                require(put(profile.key, profile) == null) {
+                    "More than one packaged runtime profile declares ${profile.key.label}."
+                }
             }
         }
     }

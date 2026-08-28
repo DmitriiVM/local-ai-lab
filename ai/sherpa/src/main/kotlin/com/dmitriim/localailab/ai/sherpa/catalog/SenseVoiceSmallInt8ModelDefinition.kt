@@ -1,7 +1,8 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.sherpa.stt.SenseVoiceSttProfile
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
@@ -11,7 +12,9 @@ import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class SenseVoiceSmallInt8ModelDefinition : ModelCatalogContribution {
+class SenseVoiceSmallInt8ModelDefinition(
+    override val runtimeProfile: SenseVoiceSttProfile,
+) : ModelCatalogContribution {
     override val catalogModel = archiveSttCatalogModel(
         modelId = "sensevoice-small-5lang-int8",
         displayName = "SenseVoice Small INT8",

@@ -1,7 +1,8 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.sherpa.stt.GigaAmCtcSttProfile
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
@@ -11,7 +12,9 @@ import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class GigaAmV2CtcInt8ModelDefinition : ModelCatalogContribution {
+class GigaAmV2CtcInt8ModelDefinition(
+    override val runtimeProfile: GigaAmCtcSttProfile,
+) : ModelCatalogContribution {
     override val catalogModel = archiveSttCatalogModel(
         modelId = "gigaam-v2-ctc-ru-int8",
         displayName = "GigaAM v2 CTC INT8",

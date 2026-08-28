@@ -4,7 +4,6 @@ import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.ai.api.model.ModelImportFileDefinition
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -13,15 +12,12 @@ import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import com.google.ai.edge.litertlm.Capabilities
-import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.binding
 import java.io.File
 
 internal interface LiteRtLmProfile : ModelRuntimeProfile
 
 @Inject
-@ContributesIntoSet(AppScope::class, binding = binding<ModelRuntimeProfile>())
 class LiteRtLmRuntimeProfile : LiteRtLmProfile {
     override val key = ModelProfileKey(EngineId("litert-lm"), ModelProfileIds.LLM)
     override val displayName = "LiteRT-LM chat model"

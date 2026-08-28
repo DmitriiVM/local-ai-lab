@@ -6,7 +6,8 @@ import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogDownloadArchive
 import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.sherpa.stt.MoonshineV1SttProfile
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
 import com.dmitriim.localailab.core.model.library.ModelCatalogState
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -22,7 +23,9 @@ import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class MoonshineTinyEnglishInt8ModelDefinition : ModelCatalogContribution {
+class MoonshineTinyEnglishInt8ModelDefinition(
+    override val runtimeProfile: MoonshineV1SttProfile,
+) : ModelCatalogContribution {
     override val catalogModel = CatalogModel(
         manifest = ModelManifest(
             modelId = ModelId("moonshine-tiny-en-int8"),

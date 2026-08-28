@@ -1,14 +1,17 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.sherpa.stt.WhisperSttProfile
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class WhisperTinyInt8ModelDefinition : ModelCatalogContribution {
+class WhisperTinyInt8ModelDefinition(
+    override val runtimeProfile: WhisperSttProfile,
+) : ModelCatalogContribution {
     override val catalogModel = whisperCatalogModel(
         modelId = "whisper-tiny-int8",
         displayName = "Whisper Tiny INT8",

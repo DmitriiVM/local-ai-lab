@@ -1,14 +1,17 @@
 package com.dmitriim.localailab.ai.llamacpp.catalog
 
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.llamacpp.LlamaCppRuntimeProfile
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class DeepSeekR1DistillQwen1Point5bQ4KmModelDefinition : ModelCatalogContribution {
+class DeepSeekR1DistillQwen1Point5bQ4KmModelDefinition(
+    override val runtimeProfile: LlamaCppRuntimeProfile,
+) : ModelCatalogContribution {
     override val catalogModel = llamaCppCatalogModel(
         modelId = "deepseek-r1-distill-qwen-1.5b-q4-k-m",
         displayName = "DeepSeek R1 Distill Qwen 1.5B Q4_K_M",

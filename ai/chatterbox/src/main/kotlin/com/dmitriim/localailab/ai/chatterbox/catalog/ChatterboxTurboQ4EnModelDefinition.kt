@@ -6,7 +6,8 @@ import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogDownloadFile
 import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.core.model.library.ModelCatalogContribution
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
+import com.dmitriim.localailab.ai.chatterbox.ChatterboxRuntimeProfile
 import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
 import com.dmitriim.localailab.core.model.library.ModelCatalogState
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
@@ -27,7 +28,9 @@ private const val chatterboxRevision = "7232a922b8b11a00f473f0a4d2ec233c2148c905
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
-class ChatterboxTurboQ4EnModelDefinition : ModelCatalogContribution {
+class ChatterboxTurboQ4EnModelDefinition(
+    override val runtimeProfile: ChatterboxRuntimeProfile,
+) : ModelCatalogContribution {
     override val catalogModel: CatalogModel = CatalogModel(
         manifest = ModelManifest(
             modelId = ModelId("chatterbox-turbo-q4-en"),

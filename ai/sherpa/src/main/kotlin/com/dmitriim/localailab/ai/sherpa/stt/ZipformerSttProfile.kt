@@ -2,7 +2,6 @@ package com.dmitriim.localailab.ai.sherpa.stt
 
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadRequest
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.runtime.ModelArtifacts
@@ -10,12 +9,9 @@ import com.k2fsa.sherpa.onnx.OnlineModelConfig
 import com.k2fsa.sherpa.onnx.OnlineRecognizer
 import com.k2fsa.sherpa.onnx.OnlineRecognizerConfig
 import com.k2fsa.sherpa.onnx.OnlineTransducerModelConfig
-import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.binding
 
 @Inject
-@ContributesIntoSet(AppScope::class, binding = binding<ModelRuntimeProfile>())
 class ZipformerSttProfile :
     BaseSherpaSttProfile(
         ModelProfileIds.ZIPFORMER_STT,
