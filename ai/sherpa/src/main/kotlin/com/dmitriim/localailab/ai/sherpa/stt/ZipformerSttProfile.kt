@@ -16,13 +16,6 @@ class ZipformerSttProfile :
     BaseSherpaSttProfile(
         ModelProfileIds.ZIPFORMER_STT,
         "Streaming Zipformer bundle",
-        sherpaSttImport(
-            "Streaming Zipformer bundle",
-            ModelFileRoles.ENCODER to "encoder-epoch-99-avg-1.int8.onnx",
-            ModelFileRoles.DECODER to "decoder-epoch-99-avg-1.int8.onnx",
-            ModelFileRoles.JOINER to "joiner-epoch-99-avg-1.int8.onnx",
-            ModelFileRoles.TOKENS to "tokens.txt",
-        ),
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = SherpaSttSession.Online(
         OnlineRecognizer(

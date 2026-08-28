@@ -13,7 +13,6 @@ class SenseVoiceSttProfile :
     BaseSherpaSttProfile(
         ModelProfileIds.SENSE_VOICE_STT,
         "SenseVoice STT bundle",
-        singleModelCtcImport("SenseVoice STT bundle"),
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = offlineSherpaSession(artifacts, threadCount) {
         senseVoice = OfflineSenseVoiceModelConfig().apply {

@@ -1,7 +1,5 @@
 package com.dmitriim.localailab.ai.litertlm
 
-import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
-import com.dmitriim.localailab.ai.api.model.ModelImportFileDefinition
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.core.model.capability.AiCapability
@@ -22,12 +20,6 @@ class LiteRtLmRuntimeProfile : LiteRtLmProfile {
     override val key = ModelProfileKey(EngineId("litert-lm"), ModelProfileIds.LLM)
     override val displayName = "LiteRT-LM chat model"
     override val capabilities = setOf(AiCapability.CHAT)
-    override val importDefinition = ModelImportDefinition(
-        displayName = displayName,
-        format = ModelFormat.LITERT_LM,
-        files = listOf(ModelImportFileDefinition(ModelFileRoles.PRIMARY_MODEL, extension = ".litertlm")),
-    )
-
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
         require(manifest.engineId == key.engineId && manifest.profileType == key.profileId)
         require(manifest.format == ModelFormat.LITERT_LM)

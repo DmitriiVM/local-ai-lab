@@ -1,7 +1,5 @@
 package com.dmitriim.localailab.ai.llamacpp
 
-import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
-import com.dmitriim.localailab.ai.api.model.ModelImportFileDefinition
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.core.model.capability.AiCapability
@@ -22,12 +20,6 @@ class LlamaCppRuntimeProfile : LlamaCppProfile {
     override val key = ModelProfileKey(EngineId("llama.cpp"), ModelProfileIds.LLM)
     override val displayName = "GGUF chat model"
     override val capabilities = setOf(AiCapability.CHAT)
-    override val importDefinition = ModelImportDefinition(
-        displayName = displayName,
-        format = ModelFormat.GGUF,
-        files = listOf(ModelImportFileDefinition(ModelFileRoles.PRIMARY_MODEL, extension = ".gguf")),
-    )
-
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
         require(manifest.engineId == key.engineId && manifest.profileType == key.profileId)
         val specification = manifest.files.singleOrNull {

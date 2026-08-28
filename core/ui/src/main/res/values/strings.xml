@@ -558,7 +558,6 @@
     <string name="thermal_shutdown">Shutdown</string>
     <string name="ui_unavailable">Unavailable</string>
     <string name="ui_unknown">Unknown</string>
-    <string name="models_imported_profile">Imported %1$s</string>
     <string name="models_profile_gguf_chat">GGUF chat model</string>
     <string name="models_profile_whisper_stt">Whisper STT bundle</string>
     <string name="models_profile_parakeet_stt">Parakeet CTC STT bundle</string>

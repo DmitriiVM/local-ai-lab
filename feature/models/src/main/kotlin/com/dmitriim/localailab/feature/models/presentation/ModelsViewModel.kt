@@ -1,24 +1,19 @@
 package com.dmitriim.localailab.feature.models.presentation
 
-import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.library.CatalogDownloadAuthentication
-import com.dmitriim.localailab.core.model.library.ModelImportRequest
 import com.dmitriim.localailab.core.model.library.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.core.model.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.core.model.service.HuggingFaceCredentialStatus
 import com.dmitriim.localailab.core.model.service.ModelDiagnostics
 import com.dmitriim.localailab.core.model.service.ModelDownloadCredentials
 import com.dmitriim.localailab.core.model.service.ModelLibrary
-import com.dmitriim.localailab.core.model.service.ModelProfileDirectory
 import com.dmitriim.localailab.core.model.service.ModelTransfers
-import com.dmitriim.localailab.core.ui.R as CoreUiR
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -33,12 +28,10 @@ import kotlinx.coroutines.launch
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
 class ModelsViewModel(
-    private val application: Application,
     private val modelLibrary: ModelLibrary,
     private val modelTransfers: ModelTransfers,
     private val modelDiagnostics: ModelDiagnostics,
     private val downloadCredentials: ModelDownloadCredentials,
-    private val profileDirectory: ModelProfileDirectory,
 ) : ViewModel() {
     private val mutableUiState = MutableStateFlow(ModelsUiState())
     val uiState: StateFlow<ModelsUiState> = mutableUiState.asStateFlow()
@@ -64,23 +57,6 @@ class ModelsViewModel(
                 }
             }
         }
-    }
-
-    fun import(profile: ModelProfileKey, uris: List<String>) = launchOperation("import ${profile.profileId.value}") {
-        val descriptor = requireNotNull(profileDirectory.find(profile)) {
-            "This model profile is not packaged in the application."
-        }
-        require(descriptor.importable) { "${descriptor.displayName} does not support imports." }
-        Log.i(TAG, "Models UI import requested: profile=${profile.profileId.value}, documentCount=${uris.size}")
-        val modelId = modelLibrary.import(
-            ModelImportRequest(
-                displayName = application.getString(CoreUiR.string.models_imported_profile, descriptor.displayName),
-                profileKey = profile,
-                documentUris = uris,
-            ),
-        ).getOrThrow()
-        Log.i(TAG, "Models UI import completed: profile=${profile.profileId.value}, modelId=${modelId.value}")
-        "Model imported and validated."
     }
 
     fun selectModel(modelId: ModelId) {

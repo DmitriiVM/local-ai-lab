@@ -12,16 +12,6 @@ class SupertonicTtsProfile :
     BaseSherpaTtsProfile(
         ModelProfileIds.SUPERTONIC_TTS,
         "Supertonic TTS bundle",
-        sherpaTtsImport(
-            "Supertonic TTS bundle",
-            (ModelFileRoles.DURATION_PREDICTOR to "duration_predictor.int8.onnx").file(),
-            (ModelFileRoles.TEXT_ENCODER to "text_encoder.int8.onnx").file(),
-            (ModelFileRoles.VECTOR_ESTIMATOR to "vector_estimator.int8.onnx").file(),
-            (ModelFileRoles.VOCODER to "vocoder.int8.onnx").file(),
-            (ModelFileRoles.CONFIG to "tts.json").file(),
-            (ModelFileRoles.UNICODE_INDEXER to "unicode_indexer.bin").file(),
-            (ModelFileRoles.VOICE_STYLE to "voice.bin").file(),
-        ),
     ) {
     override fun open(artifacts: ModelArtifacts, threadCount: Int) = openSherpaTts(threadCount) {
         supertonic = OfflineTtsSupertonicModelConfig().apply {

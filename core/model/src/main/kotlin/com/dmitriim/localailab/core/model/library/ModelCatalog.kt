@@ -8,7 +8,6 @@ enum class ModelCatalogState {
     PROVISIONAL,
     APPROVED,
     OPTIONAL,
-    IMPORT_ONLY,
     RETIRED,
 }
 

@@ -22,6 +22,5 @@ class AndroidTextToSpeechRuntimeProfile : ModelRuntimeProfile {
     )
     override val displayName = "Android on-device text to speech"
     override val capabilities = setOf(AiCapability.TEXT_TO_SPEECH)
-    override val importDefinition = null
     override fun validate(manifest: ModelManifest, directory: File) = RuntimeValidationResult(false, "Android text to speech is system managed.")
 }

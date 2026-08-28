@@ -11,7 +11,6 @@ class GigaAmCtcSttProfile :
     BaseSherpaSttProfile(
         ModelProfileIds.GIGAAM_CTC_STT,
         "GigaAM STT bundle",
-        singleModelCtcImport("GigaAM STT bundle"),
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = nemoCtcSession(artifacts, threadCount)
 }

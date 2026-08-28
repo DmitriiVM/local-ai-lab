@@ -18,17 +18,6 @@ class PocketTtsProfile :
     BaseSherpaTtsProfile(
         ModelProfileIds.POCKET_TTS,
         "Pocket TTS INT8 (English)",
-        sherpaTtsImport(
-            "Pocket TTS INT8 (English)",
-            (ModelFileRoles.LM_FLOW to "lm_flow.int8.onnx").file(),
-            (ModelFileRoles.LM_MAIN to "lm_main.int8.onnx").file(),
-            (ModelFileRoles.POCKET_ENCODER to "encoder.onnx").file(),
-            (ModelFileRoles.POCKET_DECODER to "decoder.int8.onnx").file(),
-            (ModelFileRoles.TEXT_CONDITIONER to "text_conditioner.onnx").file(),
-            (ModelFileRoles.VOCABULARY to "vocab.json").file(),
-            (ModelFileRoles.TOKEN_SCORES to "token_scores.json").file(),
-            (ModelFileRoles.REFERENCE_AUDIO to "test_wavs/bria.wav").file(),
-        ),
     ) {
     override fun open(artifacts: ModelArtifacts, threadCount: Int): SherpaTtsModel {
         val runtime = OfflineTts(

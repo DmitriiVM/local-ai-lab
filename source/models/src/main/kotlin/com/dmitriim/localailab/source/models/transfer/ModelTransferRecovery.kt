@@ -4,7 +4,7 @@ import android.app.Application
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.source.models.catalog.ModelCatalogRegistry
 import com.dmitriim.localailab.source.models.library.InstalledModelService
-import com.dmitriim.localailab.source.models.library.ModelImportPolicy
+import com.dmitriim.localailab.source.models.library.storageDirectoryName
 import java.io.File
 
 /** Reconciles persisted download state and staging files after process recreation. */
@@ -28,7 +28,7 @@ internal class ModelTransferRecovery(
                 transferState.delete(modelId)
                 return@forEach
             }
-            activeIds += ModelImportPolicy.directoryName(modelId)
+            activeIds += modelId.storageDirectoryName()
             if (transfer.status == PersistedModelTransferStatus.RUNNING) {
                 val retryDelay = ModelDownloadRetryPolicy.delayMillis(transfer.retryAttempt)
                 if (retryDelay == null) {
@@ -56,7 +56,7 @@ internal class ModelTransferRecovery(
 
     private fun stagingRoot(): File = File(application.filesDir, STAGING_DIRECTORY_NAME)
 
-    private fun stagingDirectory(modelId: ModelId): File = File(stagingRoot(), ModelImportPolicy.directoryName(modelId))
+    private fun stagingDirectory(modelId: ModelId): File = File(stagingRoot(), modelId.storageDirectoryName())
 
     private companion object {
         const val STAGING_DIRECTORY_NAME = "model-downloads"

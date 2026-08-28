@@ -11,7 +11,6 @@ class ParakeetCtcSttProfile :
     BaseSherpaSttProfile(
         ModelProfileIds.PARAKEET_CTC_STT,
         "Parakeet STT bundle",
-        singleModelCtcImport("Parakeet STT bundle"),
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = nemoCtcSession(artifacts, threadCount)
 }

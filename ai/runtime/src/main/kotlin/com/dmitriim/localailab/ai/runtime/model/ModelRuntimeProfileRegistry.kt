@@ -3,10 +3,7 @@ package com.dmitriim.localailab.ai.runtime.model
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.manifest.ModelProfileDescriptor
 import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
-import com.dmitriim.localailab.core.model.service.ModelProfileDirectory
-import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
@@ -20,11 +17,10 @@ import dev.zacsweers.metro.binding
  */
 @Inject
 @SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class, binding = binding<ModelProfileDirectory>())
 class ModelRuntimeProfileRegistry(
     catalogContributions: Set<ModelCatalogContribution>,
     standaloneProfiles: Set<ModelRuntimeProfile>,
-) : ModelProfileDirectory {
+) {
     private val catalogProfilesByKey = catalogContributions
         .map(ModelCatalogContribution::runtimeProfile)
         .groupBy(ModelRuntimeProfile::key)
@@ -46,19 +42,6 @@ class ModelRuntimeProfileRegistry(
         }
     }
 
-    override val profiles: List<ModelProfileDescriptor> = byKey.values
-        .map { profile ->
-            ModelProfileDescriptor(
-                key = profile.key,
-                displayName = profile.displayName,
-                capabilities = profile.capabilities,
-                importable = profile.importDefinition != null,
-            )
-        }
-        .sortedWith(compareBy({ it.key.engineId.value }, { it.displayName }))
-
-    override fun find(key: ModelProfileKey): ModelProfileDescriptor? = byKey[key]?.descriptor()
-
     fun runtimeProfile(key: ModelProfileKey): ModelRuntimeProfile? = byKey[key]
 
     fun requireRuntimeProfile(key: ModelProfileKey): ModelRuntimeProfile = requireNotNull(byKey[key]) {
@@ -70,13 +53,6 @@ class ModelRuntimeProfileRegistry(
             "The packaged profile ${key.engineId.value}/${key.profileId.value} " +
                 "is not a ${T::class.simpleName}.",
         )
-
-    private fun ModelRuntimeProfile.descriptor() = ModelProfileDescriptor(
-        key = key,
-        displayName = displayName,
-        capabilities = capabilities,
-        importable = importDefinition != null,
-    )
 
     private val ModelProfileKey.label: String
         get() = "${engineId.value}/${profileId.value}"

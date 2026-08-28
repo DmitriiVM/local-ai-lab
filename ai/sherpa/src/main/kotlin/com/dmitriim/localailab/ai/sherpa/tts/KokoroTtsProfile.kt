@@ -12,19 +12,6 @@ class KokoroTtsProfile :
     BaseSherpaTtsProfile(
         ModelProfileIds.KOKORO_TTS,
         "Kokoro Multi-Lang v1.0",
-        sherpaTtsImport(
-            "Kokoro Multi-Lang v1.0",
-            (ModelFileRoles.KOKORO_MODEL to "model.onnx").file(),
-            (ModelFileRoles.VOICE_EMBEDDINGS to "voices.bin").file(),
-            (ModelFileRoles.TOKENS to "tokens.txt").file(),
-            (ModelFileRoles.LEXICON to "lexicon-us-en.txt").file(),
-            (ModelFileRoles.LEXICON to "lexicon-zh.txt").file(),
-            (ModelFileRoles.TEXT_RULES to "date-zh.fst").file(),
-            (ModelFileRoles.TEXT_RULES to "number-zh.fst").file(),
-            (ModelFileRoles.TEXT_RULES to "phone-zh.fst").file(),
-            (ModelFileRoles.FRONTEND_DATA to "espeak-ng-data") directory true,
-            (ModelFileRoles.DICTIONARY_DATA to "dict") directory true,
-        ),
     ) {
     override fun open(artifacts: ModelArtifacts, threadCount: Int): SherpaTtsModel = openSherpaTts(threadCount) {
         kokoro = OfflineTtsKokoroModelConfig().apply {

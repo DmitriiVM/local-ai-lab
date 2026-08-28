@@ -15,7 +15,7 @@ import com.dmitriim.localailab.source.models.catalog.ModelCatalogRegistry
 import com.dmitriim.localailab.source.models.credentials.HuggingFaceTokenStore
 import com.dmitriim.localailab.source.models.diagnostics.ModelDiagnosticsService
 import com.dmitriim.localailab.source.models.library.InstalledModelService
-import com.dmitriim.localailab.source.models.library.ModelImportPolicy
+import com.dmitriim.localailab.source.models.library.storageDirectoryName
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
@@ -318,7 +318,7 @@ class ModelTransferService(
 
     private fun stagingRoot(): File = File(application.filesDir, STAGING_DIRECTORY_NAME)
 
-    private fun stagingDirectory(modelId: ModelId): File = File(stagingRoot(), ModelImportPolicy.directoryName(modelId))
+    private fun stagingDirectory(modelId: ModelId): File = File(stagingRoot(), modelId.storageDirectoryName())
 
     private fun credentialFor(entry: CatalogModel): String? = when (entry.download.authentication) {
         CatalogDownloadAuthentication.NONE -> null

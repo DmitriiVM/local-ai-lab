@@ -13,14 +13,6 @@ class MoonshineV1SttProfile :
     BaseSherpaSttProfile(
         ModelProfileIds.MOONSHINE_V1_STT,
         "Moonshine v1 STT bundle",
-        sherpaSttImport(
-            "Moonshine v1 STT bundle",
-            ModelFileRoles.PREPROCESSOR to "preprocess.onnx",
-            ModelFileRoles.ENCODER to "encode.int8.onnx",
-            ModelFileRoles.UNCACHED_DECODER to "uncached_decode.int8.onnx",
-            ModelFileRoles.CACHED_DECODER to "cached_decode.int8.onnx",
-            ModelFileRoles.TOKENS to "tokens.txt",
-        ),
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = offlineSherpaSession(artifacts, threadCount) {
         moonshine = OfflineMoonshineModelConfig().apply {

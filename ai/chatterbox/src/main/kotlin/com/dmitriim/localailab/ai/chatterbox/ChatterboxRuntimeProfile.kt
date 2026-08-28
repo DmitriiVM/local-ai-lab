@@ -1,13 +1,10 @@
 package com.dmitriim.localailab.ai.chatterbox
 
-import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
-import com.dmitriim.localailab.ai.api.model.ModelImportFileDefinition
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
-import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.manifest.ModelProfileIds
 import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
@@ -22,12 +19,6 @@ class ChatterboxRuntimeProfile : ChatterboxProfile {
     override val key = ModelProfileKey(EngineId("chatterbox-onnx"), ModelProfileIds.CHATTERBOX_TURBO_Q4)
     override val displayName = "Chatterbox Turbo Q4 (English)"
     override val capabilities = setOf(AiCapability.TEXT_TO_SPEECH)
-    override val importDefinition = ModelImportDefinition(
-        displayName = displayName,
-        format = ModelFormat.ONNX,
-        files = requiredFiles.map { (path, role) -> ModelImportFileDefinition(role, relativePath = path) },
-    )
-
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
         require(manifest.engineId == key.engineId && manifest.profileType == key.profileId)
         require(manifest.sampleRateHz == 24_000) { "Chatterbox Turbo output must be 24 kHz." }

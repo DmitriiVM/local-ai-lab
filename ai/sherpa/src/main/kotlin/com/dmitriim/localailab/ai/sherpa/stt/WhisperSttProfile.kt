@@ -13,12 +13,6 @@ class WhisperSttProfile :
     BaseSherpaSttProfile(
         profileId = ModelProfileIds.WHISPER_STT,
         displayName = "Whisper STT bundle",
-        importDefinition = sherpaSttImport(
-            "Whisper STT bundle",
-            ModelFileRoles.ENCODER to "base-encoder.int8.onnx",
-            ModelFileRoles.DECODER to "base-decoder.int8.onnx",
-            ModelFileRoles.TOKENS to "base-tokens.txt",
-        ),
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = offlineSherpaSession(artifacts, threadCount) {
         whisper = OfflineWhisperModelConfig().apply {

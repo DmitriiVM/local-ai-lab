@@ -1,21 +1,14 @@
 package com.dmitriim.localailab.source.models.library
 
 import android.app.Application
-import android.provider.DocumentsContract
-import android.provider.OpenableColumns
 import android.util.Log
-import androidx.core.net.toUri
-import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
 import com.dmitriim.localailab.core.model.library.InstalledModel
-import com.dmitriim.localailab.core.model.library.ModelImportRequest
 import com.dmitriim.localailab.core.model.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelSource
 import com.dmitriim.localailab.core.model.service.ModelLibrary
 import com.dmitriim.localailab.source.database.InstalledModelEntity
 import com.dmitriim.localailab.source.database.ModelDatabaseProvider
@@ -26,8 +19,6 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import java.io.File
-import java.io.FileOutputStream
-import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -64,44 +55,8 @@ class InstalledModelService(
 
     init {
         rootDirectory.mkdirs()
-        cleanupInterruptedInstallations()
         Log.i(TAG, "Model library initialized: rootDirectory=${rootDirectory.name}")
         applicationScope.launch(Dispatchers.IO) { reconcileInstalledModels() }
-    }
-
-    override suspend fun import(request: ModelImportRequest): Result<ModelId> = runCatching {
-        require(request.documentUris.isNotEmpty() || request.directoryUri != null) { "Select model files or an extracted model directory." }
-        val profile = profiles.requireRuntimeProfile(request.profileKey)
-        val importDefinition = requireNotNull(profile.importDefinition) {
-            "${profile.displayName} does not support importing ${request.profileType.value}."
-        }
-        Log.i(TAG, "Model import started: profile=${request.profileType}, engine=${request.engineId.value}, documentCount=${request.documentUris.size}")
-        withContext(Dispatchers.IO) {
-            val modelId = ModelId("import-${UUID.randomUUID()}")
-            val temporary = temporaryDirectory(modelId)
-            try {
-                val copiedNames = request.documentUris.map { uriString ->
-                    val uri = uriString.toUri()
-                    val name = documentName(uri)
-                    require(ModelImportPolicy.isSafeFileName(name)) { "The document name is not safe to install." }
-                    require(copiedNamesSafe(temporary, name)) { "More than one selected document is named $name." }
-                    application.contentResolver.openInputStream(uri).use { input ->
-                        requireNotNull(input) { "The selected document is no longer readable." }
-                        val destination = ModelImportPolicy.destination(temporary, name)
-                        FileOutputStream(destination).use { output -> input.copyTo(output) }
-                        Log.i(TAG, "Model import file copied: name=$name, bytes=${destination.length()}")
-                    }
-                    name
-                } + request.directoryUri?.let { treeUri -> copyDirectoryTree(treeUri.toUri(), temporary) }.orEmpty()
-                installDirectory(importedManifest(modelId, request, profile, importDefinition, copiedNames), temporary)
-                Log.i(TAG, "Model import completed: modelId=${modelId.value}, files=${copiedNames.size}")
-                modelId
-            } catch (error: Throwable) {
-                Log.e(TAG, "Model import failed: modelId=${modelId.value}, message=${error.message}", error)
-                temporary.deleteRecursively()
-                throw error
-            }
-        }
     }
 
     override suspend fun validate(modelId: ModelId): Result<InstalledModel> = runCatching {
@@ -154,7 +109,7 @@ class InstalledModelService(
         require(validation.first == ModelValidationState.READY) { validation.second ?: "Model validation failed." }
         val enriched = validator.enrichChecksums(manifest, temporary)
         File(temporary, "manifest.json").writeText(json.encodeToString(enriched))
-        val finalDirectory = File(rootDirectory, ModelImportPolicy.directoryName(enriched.modelId))
+        val finalDirectory = File(rootDirectory, enriched.modelId.storageDirectoryName())
         withContext(NonCancellable) {
             require(!finalDirectory.exists()) { "A model with this ID is already installed." }
             require(temporary.renameTo(finalDirectory)) { "Could not complete the model installation transaction." }
@@ -174,7 +129,7 @@ class InstalledModelService(
             if (File(rootDirectory, record.localDirectoryName).isDirectory) return@withContext true
             dao.delete(record.modelId)
         }
-        val directory = File(rootDirectory, ModelImportPolicy.directoryName(modelId))
+        val directory = File(rootDirectory, modelId.storageDirectoryName())
         val manifest = readInstalledManifest(directory) ?: return@withContext false
         if (manifest.modelId != modelId) return@withContext false
         val validation = validator.validate(manifest, directory)
@@ -190,25 +145,6 @@ class InstalledModelService(
             json.decodeFromString<ModelManifest>(File(directory, "manifest.json").readText())
         }.getOrNull()
     }
-
-    private fun importedManifest(
-        modelId: ModelId,
-        request: ModelImportRequest,
-        profile: ModelRuntimeProfile,
-        definition: ModelImportDefinition,
-        copiedNames: List<String>,
-    ) = ModelManifest(
-        modelId = modelId,
-        displayName = request.displayName.ifBlank { definition.displayName },
-        family = "Imported",
-        capabilities = profile.capabilities,
-        engineId = request.engineId,
-        profileType = request.profileType,
-        format = definition.format,
-        files = ModelImportPolicy.roleSpecs(definition, copiedNames),
-        source = ModelSource(null, licenseName = "User supplied", attribution = "Imported from a user-selected document."),
-        installedAtEpochMs = System.currentTimeMillis(),
-    )
 
     private suspend fun reconcileInstalledModels() {
         dao.all().forEach { record ->
@@ -229,28 +165,6 @@ class InstalledModelService(
             if (dao.find(manifest.modelId.value) == null) registerInstalledDirectory(manifest.modelId)
         }
     }
-
-    private fun temporaryDirectory(modelId: ModelId): File = File(
-        rootDirectory.parentFile,
-        "model-installing-${modelId.value}-${UUID.randomUUID()}",
-    ).also { require(it.mkdirs()) { "Could not create the installation staging directory." } }
-
-    private fun cleanupInterruptedInstallations() {
-        rootDirectory.parentFile
-            ?.listFiles { file -> file.isDirectory && file.name.startsWith("model-installing-") }
-            ?.forEach { directory ->
-                if (directory.deleteRecursively()) Log.i(TAG, "Removed interrupted model installation staging directory.")
-            }
-    }
-
-    private fun documentName(uri: android.net.Uri): String = application.contentResolver.query(
-        uri,
-        arrayOf(OpenableColumns.DISPLAY_NAME),
-        null,
-        null,
-        null,
-    )?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
-        ?: uri.lastPathSegment?.substringAfterLast('/') ?: error("The selected document has no name.")
 
     private fun ModelManifest.toEntity(
         directory: File,
@@ -276,52 +190,6 @@ class InstalledModelService(
         )
     }.getOrNull()
 
-    private fun copiedNamesSafe(directory: File, name: String) = !File(directory, name).exists()
-
-    private fun copyDirectoryTree(treeUri: android.net.Uri, destinationRoot: File): List<String> {
-        val rootId = DocumentsContract.getTreeDocumentId(treeUri)
-        val copied = mutableListOf<String>()
-        fun copyChildren(parentId: String, relativeParent: String) {
-            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, parentId)
-            application.contentResolver.query(
-                childrenUri,
-                arrayOf(
-                    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-                    DocumentsContract.Document.COLUMN_MIME_TYPE,
-                ),
-                null,
-                null,
-                null,
-            )?.use { cursor ->
-                val idIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
-                val nameIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
-                val mimeIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
-                while (cursor.moveToNext()) {
-                    val name = cursor.getString(nameIndex)
-                    require(ModelImportPolicy.isSafeFileName(name)) { "The selected directory contains an unsafe path." }
-                    val relative = listOfNotNull(relativeParent.takeIf(String::isNotBlank), name).joinToString(File.separator)
-                    val target = ModelImportPolicy.destination(destinationRoot, relative)
-                    val documentId = cursor.getString(idIndex)
-                    if (cursor.getString(mimeIndex) == DocumentsContract.Document.MIME_TYPE_DIR) {
-                        require(target.mkdirs() || target.isDirectory) { "Could not copy model directory $relative." }
-                        copyChildren(documentId, relative)
-                    } else {
-                        require(target.parentFile?.mkdirs() != false) { "Could not prepare model directory." }
-                        require(!target.exists()) { "The selected directory contains duplicate paths." }
-                        val documentUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, documentId)
-                        application.contentResolver.openInputStream(documentUri).use { input ->
-                            requireNotNull(input) { "A selected model file is no longer readable." }
-                            FileOutputStream(target).use { output -> input.copyTo(output) }
-                        }
-                        copied += relative
-                    }
-                }
-            } ?: error("The selected model directory is no longer readable.")
-        }
-        copyChildren(rootId, "")
-        return copied
-    }
     private companion object {
         const val TAG = "AiP123Models"
     }

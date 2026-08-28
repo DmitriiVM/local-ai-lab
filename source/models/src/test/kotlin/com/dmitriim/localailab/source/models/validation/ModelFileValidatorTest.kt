@@ -1,6 +1,5 @@
 package com.dmitriim.localailab.source.models.validation
 
-import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
@@ -150,7 +149,6 @@ class ModelFileValidatorTest {
         override val key = ModelProfileKey(EngineId("test-engine"), PROFILE)
         override val displayName = "Test profile"
         override val capabilities = setOf(AiCapability.CHAT)
-        override val importDefinition: ModelImportDefinition? = null
         override fun validate(manifest: ModelManifest, directory: File) = RuntimeValidationResult(valid = true)
     }
 

@@ -19,9 +19,6 @@ interface ModelRuntimeProfile {
     val displayName: String
     /** Capabilities granted to models using this profile. */
     val capabilities: Set<AiCapability>
-    /** User-import rules, or null when imports are unsupported for this profile. */
-    val importDefinition: ModelImportDefinition?
-
     /** Validates that [manifest] and its installed [directory] satisfy this profile's requirements. */
     fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult
 }

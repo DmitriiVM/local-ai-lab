@@ -13,7 +13,6 @@ class ParaformerSttProfile :
     BaseSherpaSttProfile(
         ModelProfileIds.PARAFORMER_STT,
         "Paraformer STT bundle",
-        singleModelCtcImport("Paraformer STT bundle"),
     ) {
     override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = offlineSherpaSession(artifacts, threadCount) {
         paraformer = OfflineParaformerModelConfig().apply {

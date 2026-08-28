@@ -1,6 +1,5 @@
 package com.dmitriim.localailab.ai.sherpa.tts
 
-import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId
@@ -12,7 +11,6 @@ import java.io.File
 abstract class BaseSherpaTtsProfile(
     profileId: ModelProfileId,
     final override val displayName: String,
-    final override val importDefinition: ModelImportDefinition,
 ) : SherpaTtsProfile {
     final override val key = ModelProfileKey(EngineId("sherpa-onnx"), profileId)
     final override val capabilities = setOf(AiCapability.TEXT_TO_SPEECH)

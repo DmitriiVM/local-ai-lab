@@ -12,12 +12,6 @@ class PiperTtsProfile :
     BaseSherpaTtsProfile(
         ModelProfileIds.PIPER_VITS_TTS,
         "Piper Lessac Medium (English)",
-        sherpaTtsImport(
-            "Piper Lessac Medium (English)",
-            (ModelFileRoles.VITS_MODEL to "en_US-lessac-medium.onnx").file(),
-            (ModelFileRoles.TOKENS to "tokens.txt").file(),
-            (ModelFileRoles.FRONTEND_DATA to "espeak-ng-data") directory true,
-        ),
     ) {
     override fun open(artifacts: ModelArtifacts, threadCount: Int) = openSherpaTts(threadCount) {
         vits = OfflineTtsVitsModelConfig().apply {
