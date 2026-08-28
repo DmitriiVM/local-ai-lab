@@ -72,7 +72,6 @@ class ChatterboxTurboQ4EnModelDefinition(
                 TtsControl.REFERENCE_VOICE,
                 TtsControl.EXPRESSIVE_TAGS,
             ),
-            // Full synthesis memory is intentionally unset until the S24+ approval run.
             approximateRamBytes = null,
             catalogVersion = ModelCatalogDefaults.VERSION,
             installedAtEpochMs = 0,

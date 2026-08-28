@@ -6,7 +6,6 @@ import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import dev.zacsweers.metro.binding
 
 /**
  * Resolves exactly one runtime profile for each persisted engine/profile key.

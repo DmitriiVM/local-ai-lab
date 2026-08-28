@@ -8,9 +8,9 @@ import com.dmitriim.localailab.ai.api.chat.LlmChatMessage
 import com.dmitriim.localailab.ai.api.chat.LlmChatRole
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
-import com.dmitriim.localailab.ai.runtime.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.ai.api.system.SystemSpeechToTextSupport
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechSupport
+import com.dmitriim.localailab.ai.runtime.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoiceStore
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability

@@ -18,6 +18,7 @@ import com.dmitriim.localailab.core.model.runtime.ChatModelReference
 import com.dmitriim.localailab.core.model.runtime.SpeechToTextModelReference
 import com.dmitriim.localailab.core.model.runtime.TextToSpeechModelReference
 import com.dmitriim.localailab.core.model.service.LocalModelResolver
+import java.io.File
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -25,7 +26,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import java.io.File
 
 class TranscribeAudioTest {
     @get:Rule

@@ -36,8 +36,10 @@ data class LlmGenerationResult(
 enum class LlmFinishReason {
     /** The model emitted its end-of-generation token. */
     STOP_TOKEN,
+
     /** The requested output-token limit was reached. */
     MAX_TOKENS,
+
     /** Cancellation was observed; [LlmGenerationResult.text] may contain partial output. */
     CANCELLED,
 }

@@ -14,6 +14,7 @@ import java.io.File
 interface ModelRuntimeProfile {
     /** Unique engine/profile key accepted by this runtime. */
     val key: ModelProfileKey
+
     /** Validates that [manifest] and its installed [directory] satisfy this profile's requirements. */
     fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult
 }
