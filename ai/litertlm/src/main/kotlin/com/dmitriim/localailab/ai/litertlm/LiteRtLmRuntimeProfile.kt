@@ -2,7 +2,6 @@ package com.dmitriim.localailab.ai.litertlm
 
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
-import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelFormat
@@ -18,9 +17,7 @@ internal interface LiteRtLmProfile : ModelRuntimeProfile
 @Inject
 class LiteRtLmRuntimeProfile : LiteRtLmProfile {
     override val key = ModelProfileKey(EngineId("litert-lm"), ModelProfileIds.LLM)
-    override val capabilities = setOf(AiCapability.CHAT)
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
-        require(manifest.engineId == key.engineId && manifest.profileType == key.profileId)
         require(manifest.format == ModelFormat.LITERT_LM)
         val specification = manifest.files.singleOrNull {
             it.required && it.role == ModelFileRoles.PRIMARY_MODEL && !it.directory

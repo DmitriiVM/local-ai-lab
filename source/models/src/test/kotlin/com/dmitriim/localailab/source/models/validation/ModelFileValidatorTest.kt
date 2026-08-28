@@ -147,7 +147,6 @@ class ModelFileValidatorTest {
 
     private object FakeProfile : ModelRuntimeProfile {
         override val key = ModelProfileKey(EngineId("test-engine"), PROFILE)
-        override val capabilities = setOf(AiCapability.CHAT)
         override fun validate(manifest: ModelManifest, directory: File) = RuntimeValidationResult(valid = true)
     }
 

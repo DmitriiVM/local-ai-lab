@@ -32,9 +32,6 @@ class ModelCatalogRegistry(
                 "Catalog model ${manifest.modelId.value} does not match its runtime profile " +
                     "${profile.key.engineId.value}/${profile.key.profileId.value}."
             }
-            require(manifest.capabilities == profile.capabilities) {
-                "Catalog model ${manifest.modelId.value} capabilities do not match ${manifest.engineId.value}/${manifest.profileType.value}."
-            }
         }
     }
 

@@ -1,7 +1,6 @@
 package com.dmitriim.localailab.ai.sherpa.stt
 
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
-import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.manifest.ModelProfileId
@@ -12,10 +11,8 @@ abstract class BaseSherpaSttProfile(
     profileId: ModelProfileId,
 ) : SherpaSttProfile {
     final override val key = ModelProfileKey(EngineId("sherpa-onnx"), profileId)
-    final override val capabilities = setOf(AiCapability.SPEECH_TO_TEXT)
 
     final override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
-        require(manifest.engineId == key.engineId && manifest.profileType == key.profileId)
         val missing = manifest.files.filter { it.required }
             .map { specification -> specification to File(directory, specification.relativePath) }
             .filterNot { (specification, file) ->

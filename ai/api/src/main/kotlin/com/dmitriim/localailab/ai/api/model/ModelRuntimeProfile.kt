@@ -1,6 +1,5 @@
 package com.dmitriim.localailab.ai.api.model
 
-import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
 import java.io.File
@@ -15,8 +14,6 @@ import java.io.File
 interface ModelRuntimeProfile {
     /** Unique engine/profile key accepted by this runtime. */
     val key: ModelProfileKey
-    /** Capabilities granted to models using this profile. */
-    val capabilities: Set<AiCapability>
     /** Validates that [manifest] and its installed [directory] satisfy this profile's requirements. */
     fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult
 }

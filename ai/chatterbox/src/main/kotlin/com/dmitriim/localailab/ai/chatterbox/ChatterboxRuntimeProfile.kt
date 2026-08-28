@@ -2,7 +2,6 @@ package com.dmitriim.localailab.ai.chatterbox
 
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
-import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
@@ -17,9 +16,7 @@ internal interface ChatterboxProfile : ModelRuntimeProfile
 @Inject
 class ChatterboxRuntimeProfile : ChatterboxProfile {
     override val key = ModelProfileKey(EngineId("chatterbox-onnx"), ModelProfileIds.CHATTERBOX_TURBO_Q4)
-    override val capabilities = setOf(AiCapability.TEXT_TO_SPEECH)
     override fun validate(manifest: ModelManifest, directory: File): RuntimeValidationResult = runCatching {
-        require(manifest.engineId == key.engineId && manifest.profileType == key.profileId)
         require(manifest.sampleRateHz == 24_000) { "Chatterbox Turbo output must be 24 kHz." }
         require(manifest.ttsVoiceMode == TtsVoiceMode.REFERENCE_AUDIO) {
             "Chatterbox Turbo requires reference-audio voice metadata."
