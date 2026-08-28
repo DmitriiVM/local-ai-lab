@@ -2,7 +2,7 @@ package com.dmitriim.localailab.source.models.validation
 
 import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
+import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId

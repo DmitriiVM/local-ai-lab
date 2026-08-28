@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localailab.ai.api.llm.LlmContextManagement
-import com.dmitriim.localailab.ai.api.llm.LlmFinishReason
+import com.dmitriim.localailab.ai.api.chat.LlmContextManagement
+import com.dmitriim.localailab.ai.api.chat.LlmFinishReason
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.assistant.presentation.ChatMetrics
 import com.dmitriim.localailab.feature.assistant.presentation.ContextUsage

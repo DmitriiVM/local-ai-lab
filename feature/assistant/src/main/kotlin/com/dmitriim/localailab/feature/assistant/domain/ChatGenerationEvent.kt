@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.assistant.domain
 
-import com.dmitriim.localailab.ai.api.llm.LlmGenerationResult
-import com.dmitriim.localailab.ai.api.llm.LlmLoadResult
+import com.dmitriim.localailab.ai.api.chat.LlmGenerationResult
+import com.dmitriim.localailab.ai.api.chat.LlmLoadResult
 import com.dmitriim.localailab.core.performance.InferenceTelemetry
 
 internal sealed interface ChatGenerationEvent {

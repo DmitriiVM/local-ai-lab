@@ -9,6 +9,7 @@ android {
 
 dependencies {
     implementation(project(":ai:api"))
+    implementation(project(":ai:runtime"))
     implementation(project(":core:di"))
     implementation(libs.kotlinx.coroutines.android)
 }

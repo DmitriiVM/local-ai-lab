@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.assistant.domain
 
-import com.dmitriim.localailab.ai.api.llm.LlmChatMessage
+import com.dmitriim.localailab.ai.api.chat.LlmChatMessage
 
 /** Feature-owned formatting used when a runtime expects an already formatted prompt. */
 internal fun interface CallerProvidedChatPromptFormatter {

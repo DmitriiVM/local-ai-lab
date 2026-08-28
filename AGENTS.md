@@ -5,7 +5,8 @@ Local AI Lab is a native Android app for running AI models locally.
 ### Application
 
 - `:app` — Android entry points, root Metro graph, app shell, and top-level adaptive navigation.
-- `:ai:api` — engine-neutral LLM, STT, TTS, availability, routing, adapter, and validation contracts.
+- `:ai:api` — engine-neutral LLM, STT, TTS, availability, memory, and model contracts.
+- `:ai:runtime` — engine-neutral routing, availability aggregation, runtime-profile registry, and runtime-memory implementations.
 - `:ai:chatterbox` — Chatterbox TTS adapter, tokenizer, and model validation.
 - `:ai:llamacpp` — llama.cpp GGUF chat adapter, JNI/native code, and validation.
 - `:ai:litertlm` — LiteRT-LM chat runtime, prompt encoding, and validation.
@@ -37,4 +38,3 @@ Write modular code with one clear responsibility per file. Prefer one primary
 top-level declaration; small private helpers and closely related models may stay
 together. Separate contracts from concrete implementations at architectural
 boundaries.
-

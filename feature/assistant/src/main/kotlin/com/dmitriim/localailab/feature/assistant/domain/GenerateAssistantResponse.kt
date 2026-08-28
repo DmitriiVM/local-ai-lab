@@ -1,13 +1,13 @@
 package com.dmitriim.localailab.feature.assistant.domain
 
 import android.util.Log
-import com.dmitriim.localailab.ai.api.llm.ChatEngine
-import com.dmitriim.localailab.ai.api.llm.LlmGenerationOption
-import com.dmitriim.localailab.ai.api.llm.LlmGenerationOptions
-import com.dmitriim.localailab.ai.api.llm.LlmGenerationRequest
-import com.dmitriim.localailab.ai.api.llm.LlmLoadOption
-import com.dmitriim.localailab.ai.api.llm.LlmLoadOptions
-import com.dmitriim.localailab.ai.api.llm.LlmLoadRequest
+import com.dmitriim.localailab.ai.api.chat.ChatEngine
+import com.dmitriim.localailab.ai.api.chat.LlmGenerationOption
+import com.dmitriim.localailab.ai.api.chat.LlmGenerationOptions
+import com.dmitriim.localailab.ai.api.chat.LlmGenerationRequest
+import com.dmitriim.localailab.ai.api.chat.LlmLoadOption
+import com.dmitriim.localailab.ai.api.chat.LlmLoadOptions
+import com.dmitriim.localailab.ai.api.chat.LlmLoadRequest
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.service.LocalModelResolver
 import com.dmitriim.localailab.core.performance.InferencePhase
@@ -109,7 +109,7 @@ class GenerateAssistantResponse(
     private fun generationRequest(
         prompt: String,
         request: ChatGenerationRequest,
-        capabilities: com.dmitriim.localailab.ai.api.llm.LlmEngineCapabilities,
+        capabilities: com.dmitriim.localailab.ai.api.chat.LlmEngineCapabilities,
     ) = LlmGenerationRequest(
         prompt = prompt,
         options = LlmGenerationOptions(

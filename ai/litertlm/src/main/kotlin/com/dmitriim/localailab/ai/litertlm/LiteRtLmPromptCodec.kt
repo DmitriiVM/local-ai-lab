@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.litertlm
 
-import com.dmitriim.localailab.ai.api.llm.LlmChatMessage
-import com.dmitriim.localailab.ai.api.llm.LlmChatRole
+import com.dmitriim.localailab.ai.api.chat.LlmChatMessage
+import com.dmitriim.localailab.ai.api.chat.LlmChatRole
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 

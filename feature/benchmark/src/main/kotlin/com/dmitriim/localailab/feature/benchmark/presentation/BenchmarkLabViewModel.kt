@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
-import com.dmitriim.localailab.ai.api.memory.FeatureRuntimeLeaseController
+import com.dmitriim.localailab.ai.runtime.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.runs.RunKind

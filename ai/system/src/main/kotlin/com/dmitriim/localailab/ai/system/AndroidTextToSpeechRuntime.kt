@@ -8,7 +8,7 @@ import android.os.Looper
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
+import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechVoice
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest

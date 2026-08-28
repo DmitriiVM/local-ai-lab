@@ -1,14 +1,14 @@
 package com.dmitriim.localailab.feature.assistant.domain
 
 import android.util.Log
-import com.dmitriim.localailab.ai.api.llm.ChatEngine
-import com.dmitriim.localailab.ai.api.llm.LlmChatMessage
-import com.dmitriim.localailab.ai.api.llm.LlmChatRole
-import com.dmitriim.localailab.ai.api.llm.LlmChatTemplateHandling
-import com.dmitriim.localailab.ai.api.llm.LlmContextManagement
-import com.dmitriim.localailab.ai.api.llm.LlmEngineCapabilities
-import com.dmitriim.localailab.ai.api.llm.LlmGenerationOption
-import com.dmitriim.localailab.ai.api.llm.LlmLoadOption
+import com.dmitriim.localailab.ai.api.chat.ChatEngine
+import com.dmitriim.localailab.ai.api.chat.LlmChatMessage
+import com.dmitriim.localailab.ai.api.chat.LlmChatRole
+import com.dmitriim.localailab.ai.api.chat.LlmChatTemplateHandling
+import com.dmitriim.localailab.ai.api.chat.LlmContextManagement
+import com.dmitriim.localailab.ai.api.chat.LlmEngineCapabilities
+import com.dmitriim.localailab.ai.api.chat.LlmGenerationOption
+import com.dmitriim.localailab.ai.api.chat.LlmLoadOption
 
 /** Applies the selected runtime's prompt capabilities and exact budgeting when available. */
 internal class ChatPromptPreparer(
@@ -88,7 +88,7 @@ internal class ChatPromptPreparer(
 
     private fun promptBudget(
         capabilities: LlmEngineCapabilities,
-        tokenCounter: com.dmitriim.localailab.ai.api.llm.LlmTokenCounter?,
+        tokenCounter: com.dmitriim.localailab.ai.api.chat.LlmTokenCounter?,
         contextSize: Int?,
         reservedOutputTokens: Int?,
     ): PromptBudget? = when (capabilities.contextManagement) {
@@ -112,7 +112,7 @@ internal class ChatPromptPreparer(
         turns: List<ChatTurn>,
         config: ChatGenerationConfig,
         capabilities: LlmEngineCapabilities,
-        tokenCounter: com.dmitriim.localailab.ai.api.llm.LlmTokenCounter?,
+        tokenCounter: com.dmitriim.localailab.ai.api.chat.LlmTokenCounter?,
         contextSize: Int?,
         reservedOutputTokens: Int?,
     ): PreparedChatPrompt {

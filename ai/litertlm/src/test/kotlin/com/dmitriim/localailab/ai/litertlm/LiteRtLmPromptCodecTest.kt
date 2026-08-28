@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.litertlm
 
-import com.dmitriim.localailab.ai.api.llm.LlmChatMessage
-import com.dmitriim.localailab.ai.api.llm.LlmChatRole
+import com.dmitriim.localailab.ai.api.chat.LlmChatMessage
+import com.dmitriim.localailab.ai.api.chat.LlmChatRole
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test

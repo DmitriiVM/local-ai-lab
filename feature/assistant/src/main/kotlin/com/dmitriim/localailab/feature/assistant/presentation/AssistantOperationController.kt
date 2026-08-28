@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.assistant.presentation
 
 import android.util.Log
-import com.dmitriim.localailab.ai.api.llm.ChatEngine
+import com.dmitriim.localailab.ai.api.chat.ChatEngine
 import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
 import com.dmitriim.localailab.core.model.runs.RunStatus

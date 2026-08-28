@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.sherpa.tts
 
 import android.util.Log
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
+import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadResult
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest

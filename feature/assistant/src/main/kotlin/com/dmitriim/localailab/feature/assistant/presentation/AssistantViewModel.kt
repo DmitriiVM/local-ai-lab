@@ -3,12 +3,12 @@ package com.dmitriim.localailab.feature.assistant.presentation
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dmitriim.localailab.ai.api.llm.ChatEngine
-import com.dmitriim.localailab.ai.api.llm.LlmChatMessage
-import com.dmitriim.localailab.ai.api.llm.LlmChatRole
+import com.dmitriim.localailab.ai.api.chat.ChatEngine
+import com.dmitriim.localailab.ai.api.chat.LlmChatMessage
+import com.dmitriim.localailab.ai.api.chat.LlmChatRole
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
-import com.dmitriim.localailab.ai.api.memory.FeatureRuntimeLeaseController
+import com.dmitriim.localailab.ai.runtime.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.ai.api.system.SystemSpeechToTextSupport
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoiceStore

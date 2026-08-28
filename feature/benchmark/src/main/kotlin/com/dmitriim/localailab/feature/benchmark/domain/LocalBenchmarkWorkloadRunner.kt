@@ -1,13 +1,13 @@
 package com.dmitriim.localailab.feature.benchmark.domain
 
-import com.dmitriim.localailab.ai.api.llm.ChatEngine
-import com.dmitriim.localailab.ai.api.llm.LlmChatMessage
-import com.dmitriim.localailab.ai.api.llm.LlmChatRole
-import com.dmitriim.localailab.ai.api.llm.LlmChatTemplateHandling
-import com.dmitriim.localailab.ai.api.llm.LlmGenerationOptions
-import com.dmitriim.localailab.ai.api.llm.LlmGenerationRequest
-import com.dmitriim.localailab.ai.api.llm.LlmLoadOptions
-import com.dmitriim.localailab.ai.api.llm.LlmLoadRequest
+import com.dmitriim.localailab.ai.api.chat.ChatEngine
+import com.dmitriim.localailab.ai.api.chat.LlmChatMessage
+import com.dmitriim.localailab.ai.api.chat.LlmChatRole
+import com.dmitriim.localailab.ai.api.chat.LlmChatTemplateHandling
+import com.dmitriim.localailab.ai.api.chat.LlmGenerationOptions
+import com.dmitriim.localailab.ai.api.chat.LlmGenerationRequest
+import com.dmitriim.localailab.ai.api.chat.LlmLoadOptions
+import com.dmitriim.localailab.ai.api.chat.LlmLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechEngine
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
@@ -27,7 +27,6 @@ import com.dmitriim.localailab.core.voice.stt.SttTranscriptionSettings
 import com.dmitriim.localailab.core.voice.stt.TranscribeAudio
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
-import kotlinx.coroutines.flow.collect
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -119,8 +118,8 @@ class LocalBenchmarkWorkloadRunner(
         runId: String,
         iteration: Int,
         model: com.dmitriim.localailab.core.model.runtime.ChatModelReference,
-        load: com.dmitriim.localailab.ai.api.llm.LlmLoadResult,
-        generation: com.dmitriim.localailab.ai.api.llm.LlmGenerationResult,
+        load: com.dmitriim.localailab.ai.api.chat.LlmLoadResult,
+        generation: com.dmitriim.localailab.ai.api.chat.LlmGenerationResult,
         telemetry: com.dmitriim.localailab.core.performance.InferenceTelemetry,
     ): BenchmarkWorkloadResult {
         val rate = generation.generatedTokenCount?.takeIf { generation.generationDurationMs > 0 }

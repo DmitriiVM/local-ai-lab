@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":source:runs"))
     implementation(project(":source:models"))
     implementation(project(":ai:api"))
+    implementation(project(":ai:runtime"))
     implementation(project(":core:voice"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)

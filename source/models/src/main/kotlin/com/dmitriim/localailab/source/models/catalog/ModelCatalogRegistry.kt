@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.source.models.catalog
 
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
+import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.library.CatalogModel
 import com.dmitriim.localailab.core.model.library.ModelCatalogContribution

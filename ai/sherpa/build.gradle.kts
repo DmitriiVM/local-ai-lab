@@ -11,6 +11,7 @@ android {
 
 dependencies {
     api(project(":ai:api"))
+    implementation(project(":ai:runtime"))
     implementation(project(":core:di"))
     implementation(libs.sherpa.onnx)
     implementation(libs.kotlinx.coroutines.android)

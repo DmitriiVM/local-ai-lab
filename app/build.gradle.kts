@@ -40,6 +40,7 @@ android {
 
 dependencies {
     implementation(project(":ai:api"))
+    implementation(project(":ai:runtime"))
     implementation(project(":ai:chatterbox"))
     implementation(project(":ai:llamacpp"))
     implementation(project(":ai:litertlm"))

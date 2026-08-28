@@ -7,7 +7,7 @@ import android.util.Log
 import androidx.core.net.toUri
 import com.dmitriim.localailab.ai.api.model.ModelImportDefinition
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
+import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
 import com.dmitriim.localailab.core.model.library.InstalledModel

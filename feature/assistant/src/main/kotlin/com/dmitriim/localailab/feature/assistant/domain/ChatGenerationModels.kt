@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.assistant.domain
 
-import com.dmitriim.localailab.ai.api.llm.LlmContextManagement
+import com.dmitriim.localailab.ai.api.chat.LlmContextManagement
 import com.dmitriim.localailab.core.model.engine.ComputePreference
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import java.util.UUID

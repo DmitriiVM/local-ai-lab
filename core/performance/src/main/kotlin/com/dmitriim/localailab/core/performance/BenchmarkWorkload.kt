@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.core.performance
 
-import com.dmitriim.localailab.ai.api.llm.LlmChatMessage
+import com.dmitriim.localailab.ai.api.chat.LlmChatMessage
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localailab.core.model.engine.ComputePreference

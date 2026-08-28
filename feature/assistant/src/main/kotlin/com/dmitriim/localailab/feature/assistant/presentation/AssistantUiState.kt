@@ -1,9 +1,9 @@
 package com.dmitriim.localailab.feature.assistant.presentation
 
 import androidx.annotation.StringRes
-import com.dmitriim.localailab.ai.api.llm.LlmContextManagement
-import com.dmitriim.localailab.ai.api.llm.LlmEngineCapabilities
-import com.dmitriim.localailab.ai.api.llm.LlmFinishReason
+import com.dmitriim.localailab.ai.api.chat.LlmContextManagement
+import com.dmitriim.localailab.ai.api.chat.LlmEngineCapabilities
+import com.dmitriim.localailab.ai.api.chat.LlmFinishReason
 import com.dmitriim.localailab.core.audio.input.model.AudioLevel
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoice
 import com.dmitriim.localailab.core.model.engine.ComputePreference

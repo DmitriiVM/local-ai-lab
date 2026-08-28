@@ -28,6 +28,7 @@ dependencyResolutionManagement {
 rootProject.name = "LocalAiLab"
 include(":app")
 include(":ai:api")
+include(":ai:runtime")
 include(":ai:chatterbox")
 include(":ai:llamacpp")
 include(":ai:litertlm")

@@ -22,8 +22,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localailab.ai.api.llm.LlmGenerationOption
-import com.dmitriim.localailab.ai.api.llm.LlmLoadOption
+import com.dmitriim.localailab.ai.api.chat.LlmGenerationOption
+import com.dmitriim.localailab.ai.api.chat.LlmLoadOption
 import com.dmitriim.localailab.core.model.engine.ComputePreference
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.ui.R as CoreUiR

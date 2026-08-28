@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.source.models.validation
 
 import android.util.Log
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileRegistry
+import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelManifest

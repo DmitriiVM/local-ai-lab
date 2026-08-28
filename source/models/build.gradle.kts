@@ -37,6 +37,7 @@ android {
 
 dependencies {
     implementation(project(":ai:api"))
+    implementation(project(":ai:runtime"))
     implementation(project(":core:di"))
     implementation(project(":core:model"))
     implementation(project(":source:database"))

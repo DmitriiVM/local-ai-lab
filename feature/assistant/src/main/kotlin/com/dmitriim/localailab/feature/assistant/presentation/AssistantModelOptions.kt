@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.assistant.presentation
 
-import com.dmitriim.localailab.ai.api.llm.LlmEngineCapabilities
+import com.dmitriim.localailab.ai.api.chat.LlmEngineCapabilities
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechVoice
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoice
 import com.dmitriim.localailab.core.model.capability.AiCapability
