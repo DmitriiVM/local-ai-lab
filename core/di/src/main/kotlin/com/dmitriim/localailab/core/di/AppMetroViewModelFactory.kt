@@ -1,7 +1,6 @@
-package com.dmitriim.localailab.di
+package com.dmitriim.localailab.core.di
 
 import androidx.lifecycle.ViewModel
-import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn

@@ -5,4 +5,5 @@ plugins {
 
 dependencies {
     api(libs.metro.runtime)
+    implementation(libs.metrox.viewmodel)
 }
