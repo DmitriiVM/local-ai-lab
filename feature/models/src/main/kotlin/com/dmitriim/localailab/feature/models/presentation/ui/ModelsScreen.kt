@@ -318,7 +318,10 @@ private fun ModelsUiState.toModelListItems(): List<ModelListItem> {
         installed
             .filterNot { it.manifest.modelId in catalogModelIds }
             .forEach { add(ModelListItem.Installed(it)) }
-    }
+    }.sortedWith(
+        compareBy<ModelListItem> { it.manifest.displayName.lowercase() }
+            .thenBy { it.manifest.modelId.value },
+    )
 }
 
 @Composable

@@ -35,8 +35,8 @@ fun InstalledOptionList(
     onOpenAvailableItems: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
-    val installedItems = items.filter(OptionPickerItem::installed)
-    val availableItems = items.filterNot(OptionPickerItem::installed)
+    val installedItems = items.filter(OptionPickerItem::installed).sortedByLabel()
+    val availableItems = items.filterNot(OptionPickerItem::installed).sortedByLabel()
     var showAvailableItems by remember { mutableStateOf(false) }
 
     LazyColumn(
@@ -108,6 +108,11 @@ fun InstalledOptionList(
         }
     }
 }
+
+private fun List<OptionPickerItem>.sortedByLabel(): List<OptionPickerItem> = sortedWith(
+    compareBy<OptionPickerItem> { it.label.lowercase() }
+        .thenBy(OptionPickerItem::id),
+)
 
 @Composable
 private fun InstalledOptionRow(
