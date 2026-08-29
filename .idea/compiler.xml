@@ -3,6 +3,7 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="11">
       <module name="LocalAiLab.core.result" target="21" />
+      <module name="LocalAiLab.core.voice" target="21" />
       <module name="LocalAiLab.source.database" target="21" />
       <module name="LocalAiLab.source.models" target="21" />
       <module name="LocalAiLab.source.runs" target="21" />

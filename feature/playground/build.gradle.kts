@@ -9,6 +9,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":feature:stt:api"))
+    implementation(project(":feature:tts:api"))
     implementation(project(":ai:api"))
     implementation(project(":core:di"))
     implementation(project(":core:model"))

@@ -7,8 +7,8 @@ import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.navigation.AppDestination
 import com.dmitriim.localailab.core.navigation.AppNavigator
 import com.dmitriim.localailab.core.navigation.destination.AssistantDestination
-import com.dmitriim.localailab.core.navigation.destination.SpeechToTextDestination
-import com.dmitriim.localailab.core.navigation.destination.TextToSpeechDestination
+import com.dmitriim.localailab.feature.stt.api.navigation.SpeechToTextDestination
+import com.dmitriim.localailab.feature.tts.api.navigation.TextToSpeechDestination
 import com.dmitriim.localailab.feature.playground.presentation.ui.PlaygroundScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 

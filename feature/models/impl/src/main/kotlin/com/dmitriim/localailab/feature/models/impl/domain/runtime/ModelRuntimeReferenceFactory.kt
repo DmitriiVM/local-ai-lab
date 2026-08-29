@@ -9,8 +9,8 @@ import com.dmitriim.localailab.core.model.manifest.TtsControl
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.core.model.runtime.ChatModelReference
 import com.dmitriim.localailab.core.model.runtime.ModelArtifactReference
-import com.dmitriim.localailab.core.model.runtime.SpeechToTextModelReference
-import com.dmitriim.localailab.core.model.runtime.TextToSpeechModelReference
+import com.dmitriim.localailab.feature.models.api.domain.runtime.SpeechToTextModelReference
+import com.dmitriim.localailab.feature.models.api.domain.runtime.TextToSpeechModelReference
 import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInSpeechToTextModels
 import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInTextToSpeechModels
 

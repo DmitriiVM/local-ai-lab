@@ -4,7 +4,7 @@ import android.app.Application
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationMessageRecord
 import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationRecord
-import com.dmitriim.localailab.core.model.device.StorageUsage
+import com.dmitriim.localailab.feature.runs.api.domain.storage.StorageUsage
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import com.dmitriim.localailab.feature.runs.api.data.RunRepository
 import dev.zacsweers.metro.ContributesBinding

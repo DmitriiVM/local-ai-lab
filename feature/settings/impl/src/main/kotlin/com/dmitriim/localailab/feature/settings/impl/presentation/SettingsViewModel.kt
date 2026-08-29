@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localailab.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.device.StorageUsage
+import com.dmitriim.localailab.feature.runs.api.domain.storage.StorageUsage
 import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
 import com.dmitriim.localailab.feature.models.api.data.ModelDownloadCredentials
 import com.dmitriim.localailab.feature.runs.api.data.RunRepository

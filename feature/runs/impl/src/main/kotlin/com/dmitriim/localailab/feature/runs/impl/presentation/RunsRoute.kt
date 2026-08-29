@@ -9,8 +9,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localailab.core.navigation.AppDestination
 import com.dmitriim.localailab.core.navigation.AppNavigator
 import com.dmitriim.localailab.core.navigation.destination.AssistantDestination
-import com.dmitriim.localailab.core.navigation.destination.SpeechToTextDestination
-import com.dmitriim.localailab.core.navigation.destination.TextToSpeechDestination
+import com.dmitriim.localailab.feature.stt.api.navigation.SpeechToTextDestination
+import com.dmitriim.localailab.feature.tts.api.navigation.TextToSpeechDestination
 import com.dmitriim.localailab.feature.runs.impl.presentation.ui.RunsScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 

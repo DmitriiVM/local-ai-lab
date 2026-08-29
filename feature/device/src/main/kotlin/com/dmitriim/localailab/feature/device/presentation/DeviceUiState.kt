@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.device.presentation
 
-import com.dmitriim.localailab.core.model.device.DeviceDiagnostics
+import com.dmitriim.localailab.feature.models.api.domain.diagnostics.DeviceDiagnostics
 import com.dmitriim.localailab.core.model.engine.EngineAvailability
 
 data class DeviceSnapshot(

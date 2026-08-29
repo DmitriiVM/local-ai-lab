@@ -6,7 +6,7 @@ import android.os.Build
 import android.os.StatFs
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.device.DeviceDiagnostics
+import com.dmitriim.localailab.feature.models.api.domain.diagnostics.DeviceDiagnostics
 import com.dmitriim.localailab.core.model.engine.NativeAbiSupport
 import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelCompatibility
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState

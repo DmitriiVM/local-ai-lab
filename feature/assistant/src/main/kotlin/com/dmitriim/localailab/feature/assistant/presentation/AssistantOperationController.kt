@@ -3,14 +3,8 @@ package com.dmitriim.localailab.feature.assistant.presentation
 import android.util.Log
 import com.dmitriim.localailab.ai.api.chat.ChatEngine
 import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
 import com.dmitriim.localailab.core.operation.ForegroundOperationInterruption
-import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionEvent
-import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionMetrics
-import com.dmitriim.localailab.core.voice.tts.SpeechSynthesisEvent
-import com.dmitriim.localailab.core.voice.tts.SpeechSynthesisMetrics
 import com.dmitriim.localailab.feature.assistant.domain.AssistantAudioRecorder
 import com.dmitriim.localailab.feature.assistant.domain.AssistantRunRecorder
 import com.dmitriim.localailab.feature.assistant.domain.AssistantSpeechOutput
@@ -19,6 +13,12 @@ import com.dmitriim.localailab.feature.assistant.domain.ChatGenerationEvent
 import com.dmitriim.localailab.feature.assistant.domain.ChatGenerationRequest
 import com.dmitriim.localailab.feature.assistant.domain.GenerateAssistantResponse
 import com.dmitriim.localailab.feature.assistant.domain.PersistAssistantTurn
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
+import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionEvent
+import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionMetrics
+import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisEvent
+import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisMetrics
 import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope

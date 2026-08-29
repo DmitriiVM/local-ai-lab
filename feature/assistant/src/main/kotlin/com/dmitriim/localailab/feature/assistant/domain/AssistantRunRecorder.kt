@@ -5,8 +5,8 @@ import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import com.dmitriim.localailab.feature.runs.api.data.RunRepository
-import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionMetrics
-import com.dmitriim.localailab.core.voice.tts.SpeechSynthesisMetrics
+import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionMetrics
+import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisMetrics
 import dev.zacsweers.metro.Inject
 import java.util.UUID
 import kotlinx.serialization.json.Json

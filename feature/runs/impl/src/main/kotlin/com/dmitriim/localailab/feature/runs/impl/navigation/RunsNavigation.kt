@@ -6,7 +6,7 @@ import com.dmitriim.localailab.core.navigation.AppDestination
 import com.dmitriim.localailab.core.navigation.AppNavigator
 import com.dmitriim.localailab.core.navigation.NavigationEntryProvider
 import com.dmitriim.localailab.core.navigation.TopLevelDestination
-import com.dmitriim.localailab.feature.runs.api.presentation.RunsDestination
+import com.dmitriim.localailab.feature.runs.api.navigation.RunsDestination
 import com.dmitriim.localailab.feature.runs.impl.presentation.RunsRoute
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject

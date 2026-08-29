@@ -5,7 +5,7 @@ import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInSpeechTo
 import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInTextToSpeechModels
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.runtime.ModelArtifactReference
-import com.dmitriim.localailab.core.model.service.LocalModelResolver
+import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.feature.models.impl.data.library.InstalledModelService
 import com.dmitriim.localailab.feature.models.impl.domain.runtime.ModelRuntimeReferenceFactory
 import dev.zacsweers.metro.ContributesBinding
