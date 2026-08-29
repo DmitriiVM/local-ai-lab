@@ -19,8 +19,8 @@ import com.dmitriim.localailab.core.model.runs.RunRecord
 import com.dmitriim.localailab.core.model.service.ModelLibrary
 import com.dmitriim.localailab.core.model.service.ModelTransfers
 import com.dmitriim.localailab.core.model.service.RunRepository
-import com.dmitriim.localailab.core.performance.BenchmarkWorkload
-import com.dmitriim.localailab.core.performance.ProfileLaunchCoordinator
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
+import com.dmitriim.localailab.core.performance.launch.ProfileWorkloadStore
 import com.dmitriim.localailab.core.result.ForegroundOperationCoordinator
 import com.dmitriim.localailab.feature.assistant.domain.AssistantAudioRecorder
 import com.dmitriim.localailab.feature.assistant.domain.AssistantRunRecorder
@@ -63,7 +63,7 @@ class AssistantViewModel(
     operationCoordinator: ForegroundOperationCoordinator,
     private val runRepository: RunRepository,
     private val replayStore: RunReplayStore,
-    private val profileLaunchCoordinator: ProfileLaunchCoordinator,
+    private val profileWorkloadStore: ProfileWorkloadStore,
     runtimeLeaseManager: AiRuntimeLeaseManager,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(AssistantUiState())
@@ -202,7 +202,7 @@ class AssistantViewModel(
                 }
             add(LlmChatMessage(LlmChatRole.USER, snapshot.input.trim()))
         }
-        profileLaunchCoordinator.open(
+        profileWorkloadStore.open(
             BenchmarkWorkload.Chat(
                 modelId = model.id,
                 modelDisplayName = model.displayName,

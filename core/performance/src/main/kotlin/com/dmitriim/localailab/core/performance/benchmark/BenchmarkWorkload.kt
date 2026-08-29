@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.performance
+package com.dmitriim.localailab.core.performance.benchmark
 
 import com.dmitriim.localailab.ai.api.chat.LlmChatMessage
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition

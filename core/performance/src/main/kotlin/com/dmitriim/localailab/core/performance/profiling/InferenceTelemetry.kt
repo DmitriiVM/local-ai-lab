@@ -1,13 +1,15 @@
-package com.dmitriim.localailab.core.performance
+package com.dmitriim.localailab.core.performance.profiling
 
 import com.dmitriim.localailab.core.model.capability.AiCapability
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class InferenceTelemetry(
     val runId: String,
     val capability: AiCapability,
-    val traceActive: Boolean,
+    @SerialName("traceActive")
+    val systemTraceEnabled: Boolean,
     val wallDurationMs: Long,
     val phaseDurations: List<InferencePhaseDuration>,
     val resources: InferenceResourceMetrics? = null,

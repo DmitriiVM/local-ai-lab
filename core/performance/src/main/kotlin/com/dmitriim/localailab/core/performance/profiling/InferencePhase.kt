@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.performance
+package com.dmitriim.localailab.core.performance.profiling
 
 import kotlinx.serialization.Serializable
 
@@ -8,12 +8,8 @@ enum class InferencePhase {
     MODEL_RESOLUTION,
     MODEL_LOAD,
     PROMPT_PREPARATION,
-    PREFILL,
     DECODE,
-    AUDIO_SEGMENTATION,
     TRANSCRIPTION,
-    CONDITIONING,
-    TOKEN_GENERATION,
     SYNTHESIS,
     AUDIO_EFFECTS,
     AUDIO_PLAYBACK,

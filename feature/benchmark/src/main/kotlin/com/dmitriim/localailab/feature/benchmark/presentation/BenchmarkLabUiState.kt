@@ -1,9 +1,9 @@
 package com.dmitriim.localailab.feature.benchmark.presentation
 
-import com.dmitriim.localailab.core.performance.BenchmarkIterationResult
-import com.dmitriim.localailab.core.performance.BenchmarkSessionSummary
-import com.dmitriim.localailab.core.performance.BenchmarkStartupMode
-import com.dmitriim.localailab.core.performance.BenchmarkWorkload
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkIterationResult
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkSessionSummary
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkStartupMode
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
 
 data class BenchmarkLabUiState(
     val workload: BenchmarkWorkload? = null,

@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.performance
+package com.dmitriim.localailab.core.performance.benchmark
 
 import com.dmitriim.localailab.core.model.capability.AiCapability
 
@@ -6,5 +6,4 @@ import com.dmitriim.localailab.core.model.capability.AiCapability
 interface BenchmarkWorkloadConfiguration {
     val capability: AiCapability
     val modelId: String
-    val fingerprint: String
 }

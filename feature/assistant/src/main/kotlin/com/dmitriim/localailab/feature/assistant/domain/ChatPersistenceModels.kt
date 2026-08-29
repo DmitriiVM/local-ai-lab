@@ -4,8 +4,8 @@ import com.dmitriim.localailab.core.model.conversation.ConversationMessageRole
 import com.dmitriim.localailab.core.model.engine.ComputePreference
 import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
 import com.dmitriim.localailab.core.model.runs.RunStatus
-import com.dmitriim.localailab.core.performance.InferenceTelemetry
-import com.dmitriim.localailab.core.performance.putInferenceTelemetry
+import com.dmitriim.localailab.core.performance.profiling.InferenceTelemetry
+import com.dmitriim.localailab.core.performance.profiling.serialization.putInferenceTelemetry
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 

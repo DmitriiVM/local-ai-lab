@@ -5,7 +5,7 @@ import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
 import com.dmitriim.localailab.core.model.runs.RunRecord
 import com.dmitriim.localailab.core.model.runs.RunStatus
 import com.dmitriim.localailab.core.model.service.RunRepository
-import com.dmitriim.localailab.core.performance.putInferenceTelemetry
+import com.dmitriim.localailab.core.performance.profiling.serialization.putInferenceTelemetry
 import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionMetrics
 import dev.zacsweers.metro.Inject
 import kotlinx.serialization.json.Json

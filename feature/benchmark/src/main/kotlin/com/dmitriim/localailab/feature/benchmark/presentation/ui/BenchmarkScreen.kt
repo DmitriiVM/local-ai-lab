@@ -27,8 +27,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.performance.BenchmarkWorkload
-import com.dmitriim.localailab.core.performance.InferenceResourceMetrics
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
+import com.dmitriim.localailab.core.performance.profiling.InferenceResourceMetrics
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localailab.feature.benchmark.presentation.BenchmarkLabUiState
@@ -154,7 +154,7 @@ fun BenchmarkScreen(
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
-                        text = if (state.completedIterations.any { it.telemetry.traceActive }) {
+                        text = if (state.completedIterations.any { it.telemetry.systemTraceEnabled }) {
                             stringResource(CoreUiR.string.benchmark_trace_recording)
                         } else {
                             stringResource(CoreUiR.string.benchmark_trace_not_recording)
@@ -282,7 +282,7 @@ private fun BenchmarkLabUiState.resultsCopyText(workload: BenchmarkWorkload): St
             "${startupMode.name.lowercase().replaceFirstChar(Char::titlecase)} startup",
     )
     add(
-        "External trace: " + if (completedIterations.any { it.telemetry.traceActive }) {
+        "External trace: " + if (completedIterations.any { it.telemetry.systemTraceEnabled }) {
             "recording"
         } else {
             "not recording (in-app telemetry collected)"

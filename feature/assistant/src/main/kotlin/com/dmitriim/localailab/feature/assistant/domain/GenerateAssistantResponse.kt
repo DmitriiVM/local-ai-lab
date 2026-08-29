@@ -10,9 +10,9 @@ import com.dmitriim.localailab.ai.api.chat.LlmLoadOptions
 import com.dmitriim.localailab.ai.api.chat.LlmLoadRequest
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.service.LocalModelResolver
-import com.dmitriim.localailab.core.performance.InferencePhase
-import com.dmitriim.localailab.core.performance.InferenceProfiler
-import com.dmitriim.localailab.core.performance.NoOpInferenceProfiler
+import com.dmitriim.localailab.core.performance.profiling.InferencePhase
+import com.dmitriim.localailab.core.performance.profiling.InferenceProfiler
+import com.dmitriim.localailab.core.performance.profiling.LightweightInferenceProfiler
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -26,7 +26,7 @@ private const val CHAT_TAG = "AiP123Chat"
 class GenerateAssistantResponse(
     private val modelResolver: LocalModelResolver,
     private val chatEngine: ChatEngine,
-    private val profiler: InferenceProfiler = NoOpInferenceProfiler,
+    private val profiler: InferenceProfiler = LightweightInferenceProfiler,
 ) {
     private val promptPreparer = ChatPromptPreparer(chatEngine)
 

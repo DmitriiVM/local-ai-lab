@@ -12,7 +12,7 @@ import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelProfileId
 import com.dmitriim.localailab.core.model.manifest.TtsControl
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
-import com.dmitriim.localailab.core.performance.InferenceTelemetry
+import com.dmitriim.localailab.core.performance.profiling.InferenceTelemetry
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import java.util.UUID
 

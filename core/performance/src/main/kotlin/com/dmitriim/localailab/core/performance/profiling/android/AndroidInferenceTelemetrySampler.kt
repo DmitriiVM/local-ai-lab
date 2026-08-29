@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.performance
+package com.dmitriim.localailab.core.performance.profiling.android
 
 import android.app.ActivityManager
 import android.app.Application
@@ -8,12 +8,14 @@ import android.os.Build
 import android.os.PowerManager
 import android.os.Process
 import android.os.SystemClock
+import com.dmitriim.localailab.core.performance.profiling.InferenceDeviceSnapshot
+import com.dmitriim.localailab.core.performance.profiling.InferenceResourceSnapshot
 import dev.zacsweers.metro.Inject
 
 @Inject
-class AndroidInferenceResourceSampler(
+class AndroidInferenceTelemetrySampler(
     private val application: Application,
-) : InferenceResourceSampler {
+) : InferenceTelemetrySampler {
     private val activityManager = application.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     private val batteryManager = application.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
     private val powerManager = application.getSystemService(Context.POWER_SERVICE) as PowerManager

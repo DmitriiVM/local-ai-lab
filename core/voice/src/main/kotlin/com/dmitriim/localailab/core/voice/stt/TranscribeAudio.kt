@@ -8,9 +8,9 @@ import com.dmitriim.localailab.ai.api.stt.SpeechToTextRequest
 import com.dmitriim.localailab.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.service.LocalModelResolver
-import com.dmitriim.localailab.core.performance.InferencePhase
-import com.dmitriim.localailab.core.performance.InferenceProfiler
-import com.dmitriim.localailab.core.performance.NoOpInferenceProfiler
+import com.dmitriim.localailab.core.performance.profiling.InferencePhase
+import com.dmitriim.localailab.core.performance.profiling.InferenceProfiler
+import com.dmitriim.localailab.core.performance.profiling.LightweightInferenceProfiler
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +23,7 @@ class TranscribeAudio(
     private val modelResolver: LocalModelResolver,
     private val speechEngine: SpeechToTextEngine,
     private val audioInputStore: AudioInputStore,
-    private val profiler: InferenceProfiler = NoOpInferenceProfiler,
+    private val profiler: InferenceProfiler = LightweightInferenceProfiler,
 ) {
     fun execute(request: SpeechTranscriptionRequest): Flow<SpeechTranscriptionEvent> = flow {
         val effectiveSettings = request.settings.toEffective()
@@ -37,7 +37,7 @@ class TranscribeAudio(
         val profile = profiler.start(
             request.runId,
             AiCapability.SPEECH_TO_TEXT,
-            extendedTelemetry = request.extendedProfiling,
+            collectResourceTelemetry = request.extendedProfiling,
         )
         try {
             val model = profile.trace(InferencePhase.MODEL_RESOLUTION) {
@@ -107,7 +107,7 @@ class TranscribeAudio(
 
     private suspend fun transcribeSegments(
         request: SpeechTranscriptionRequest,
-        profile: com.dmitriim.localailab.core.performance.InferenceProfileSession,
+        profile: com.dmitriim.localailab.core.performance.profiling.InferenceProfileSession,
     ): TranscribedSegments {
         val transcript = StringBuilder()
         var count = 0

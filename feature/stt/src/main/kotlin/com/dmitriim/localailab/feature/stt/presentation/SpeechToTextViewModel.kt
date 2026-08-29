@@ -18,8 +18,8 @@ import com.dmitriim.localailab.core.model.runs.RunRecord
 import com.dmitriim.localailab.core.model.runs.RunStatus
 import com.dmitriim.localailab.core.model.service.ModelLibrary
 import com.dmitriim.localailab.core.model.service.ModelTransfers
-import com.dmitriim.localailab.core.performance.BenchmarkWorkload
-import com.dmitriim.localailab.core.performance.ProfileLaunchCoordinator
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
+import com.dmitriim.localailab.core.performance.launch.ProfileWorkloadStore
 import com.dmitriim.localailab.core.result.ForegroundOperationCoordinator
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.text.UiText
@@ -64,7 +64,7 @@ class SpeechToTextViewModel(
     private val replayStore: RunReplayStore,
     private val settingsRepository: AppSettingsRepository,
     private val systemSpeechSupport: SystemSpeechToTextSupport,
-    private val profileLaunchCoordinator: ProfileLaunchCoordinator,
+    private val profileWorkloadStore: ProfileWorkloadStore,
     runtimeLeaseManager: AiRuntimeLeaseManager,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(SpeechToTextUiState())
@@ -231,7 +231,7 @@ class SpeechToTextViewModel(
             mutableState.update { it.copy(errorMessage = error) }
             return false
         }
-        profileLaunchCoordinator.open(
+        profileWorkloadStore.open(
             BenchmarkWorkload.SpeechToText(
                 modelId = requireNotNull(model).id,
                 modelDisplayName = model.displayName,

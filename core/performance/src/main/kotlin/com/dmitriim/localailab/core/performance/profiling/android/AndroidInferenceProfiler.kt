@@ -1,10 +1,18 @@
-package com.dmitriim.localailab.core.performance
+package com.dmitriim.localailab.core.performance.profiling.android
 
 import android.os.SystemClock
 import androidx.tracing.Trace
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.core.performance.profiling.InferenceDeviceSnapshot
+import com.dmitriim.localailab.core.performance.profiling.InferencePhase
+import com.dmitriim.localailab.core.performance.profiling.InferencePhaseDuration
+import com.dmitriim.localailab.core.performance.profiling.InferenceProfileSession
+import com.dmitriim.localailab.core.performance.profiling.InferenceProfiler
+import com.dmitriim.localailab.core.performance.profiling.InferenceResourceMetrics
+import com.dmitriim.localailab.core.performance.profiling.InferenceResourceSnapshot
+import com.dmitriim.localailab.core.performance.profiling.InferenceTelemetry
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
@@ -19,17 +27,17 @@ import kotlinx.coroutines.launch
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
 class AndroidInferenceProfiler(
-    private val sampler: AndroidInferenceResourceSampler,
+    private val sampler: AndroidInferenceTelemetrySampler,
     @ApplicationCoroutineScope private val applicationScope: CoroutineScope,
 ) : InferenceProfiler {
     override fun start(
         runId: String,
         capability: AiCapability,
-        extendedTelemetry: Boolean,
+        collectResourceTelemetry: Boolean,
     ): InferenceProfileSession = Session(
         runId = runId,
         capability = capability,
-        resourceSamplingEnabled = extendedTelemetry,
+        resourceSamplingEnabled = collectResourceTelemetry,
         sampler = sampler,
         scope = applicationScope,
     )
@@ -38,7 +46,7 @@ class AndroidInferenceProfiler(
         private val runId: String,
         private val capability: AiCapability,
         private val resourceSamplingEnabled: Boolean,
-        private val sampler: InferenceResourceSampler,
+        private val sampler: InferenceTelemetrySampler,
         scope: CoroutineScope,
     ) : InferenceProfileSession {
         private val outerCookie = runId.hashCode()
@@ -83,7 +91,7 @@ class AndroidInferenceProfiler(
             InferenceTelemetry(
                 runId = runId,
                 capability = capability,
-                traceActive = Trace.isEnabled(),
+                systemTraceEnabled = Trace.isEnabled(),
                 wallDurationMs = end.elapsedRealtimeMs - start.elapsedRealtimeMs,
                 phaseDurations = phaseDurations.toList(),
                 resources = if (resourceSamplingEnabled) resourceMetrics(start, end, samples) else null,

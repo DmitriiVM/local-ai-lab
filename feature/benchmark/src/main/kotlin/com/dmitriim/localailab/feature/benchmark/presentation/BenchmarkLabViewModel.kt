@@ -12,11 +12,11 @@ import com.dmitriim.localailab.core.model.runs.RunKind
 import com.dmitriim.localailab.core.model.runs.RunRecord
 import com.dmitriim.localailab.core.model.runs.RunStatus
 import com.dmitriim.localailab.core.model.service.RunRepository
-import com.dmitriim.localailab.core.performance.BenchmarkPlan
-import com.dmitriim.localailab.core.performance.BenchmarkSessionSummary
-import com.dmitriim.localailab.core.performance.BenchmarkStartupMode
-import com.dmitriim.localailab.core.performance.BenchmarkWorkload
-import com.dmitriim.localailab.core.performance.ProfileLaunchCoordinator
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkPlan
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkSessionSummary
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkStartupMode
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
+import com.dmitriim.localailab.core.performance.launch.ProfileWorkloadStore
 import com.dmitriim.localailab.feature.benchmark.domain.BenchmarkWorkloadResult
 import com.dmitriim.localailab.feature.benchmark.domain.LocalBenchmarkWorkloadRunner
 import dev.zacsweers.metro.ContributesIntoMap
@@ -40,12 +40,12 @@ import kotlinx.serialization.json.Json
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
 class BenchmarkLabViewModel(
-    private val launchCoordinator: ProfileLaunchCoordinator,
+    private val profileWorkloadStore: ProfileWorkloadStore,
     private val runner: LocalBenchmarkWorkloadRunner,
     private val runRepository: RunRepository,
     runtimeLeaseManager: AiRuntimeLeaseManager,
 ) : ViewModel() {
-    private val mutableState = MutableStateFlow(BenchmarkLabUiState(workload = launchCoordinator.workload.value))
+    private val mutableState = MutableStateFlow(BenchmarkLabUiState(workload = profileWorkloadStore.workload.value))
     val state: StateFlow<BenchmarkLabUiState> = mutableState.asStateFlow()
     private var benchmarkJob: Job? = null
     internal val runtimeLeaseController = FeatureRuntimeLeaseController(
@@ -56,7 +56,7 @@ class BenchmarkLabViewModel(
 
     init {
         viewModelScope.launch {
-            launchCoordinator.workload.collectLatest { workload ->
+            profileWorkloadStore.workload.collectLatest { workload ->
                 mutableState.update { it.copy(workload = workload, completedIterations = emptyList(), summary = null, message = null) }
             }
         }

@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.performance
+package com.dmitriim.localailab.core.performance.profiling
 
 data class InferenceResourceSnapshot(
     val elapsedRealtimeMs: Long,

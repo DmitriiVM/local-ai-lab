@@ -1,14 +1,14 @@
-package com.dmitriim.localailab.core.performance
+package com.dmitriim.localailab.core.performance.profiling
 
 import android.os.SystemClock
 import com.dmitriim.localailab.core.model.capability.AiCapability
 
 /** Lightweight fallback for direct construction outside the Android dependency graph. */
-object NoOpInferenceProfiler : InferenceProfiler {
+object LightweightInferenceProfiler : InferenceProfiler {
     override fun start(
         runId: String,
         capability: AiCapability,
-        extendedTelemetry: Boolean,
+        collectResourceTelemetry: Boolean,
     ): InferenceProfileSession = Session(runId, capability)
 
     private class Session(
@@ -34,7 +34,7 @@ object NoOpInferenceProfiler : InferenceProfiler {
         override fun finish(): InferenceTelemetry = telemetry ?: InferenceTelemetry(
             runId = runId,
             capability = capability,
-            traceActive = false,
+            systemTraceEnabled = false,
             wallDurationMs = SystemClock.elapsedRealtime() - startedAt,
             phaseDurations = phaseDurations.toList(),
         ).also { telemetry = it }

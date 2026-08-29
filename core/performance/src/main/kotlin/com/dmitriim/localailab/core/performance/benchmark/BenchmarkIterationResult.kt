@@ -1,5 +1,6 @@
-package com.dmitriim.localailab.core.performance
+package com.dmitriim.localailab.core.performance.benchmark
 
+import com.dmitriim.localailab.core.performance.profiling.InferenceTelemetry
 import kotlinx.serialization.Serializable
 
 @Serializable

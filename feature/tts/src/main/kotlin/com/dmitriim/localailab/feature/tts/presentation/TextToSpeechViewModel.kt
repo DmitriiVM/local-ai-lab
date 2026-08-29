@@ -20,8 +20,8 @@ import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.core.model.runs.RunRecord
 import com.dmitriim.localailab.core.model.service.ModelLibrary
 import com.dmitriim.localailab.core.model.service.ModelTransfers
-import com.dmitriim.localailab.core.performance.BenchmarkWorkload
-import com.dmitriim.localailab.core.performance.ProfileLaunchCoordinator
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
+import com.dmitriim.localailab.core.performance.launch.ProfileWorkloadStore
 import com.dmitriim.localailab.core.result.ForegroundOperationCoordinator
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.text.UiText
@@ -59,7 +59,7 @@ class TextToSpeechViewModel(
     private val settingsRepository: AppSettingsRepository,
     private val referenceVoiceStore: ReferenceVoiceStore,
     private val systemTextToSpeechSupport: SystemTextToSpeechSupport,
-    private val profileLaunchCoordinator: ProfileLaunchCoordinator,
+    private val profileWorkloadStore: ProfileWorkloadStore,
     runtimeLeaseManager: AiRuntimeLeaseManager,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(TextToSpeechUiState())
@@ -280,7 +280,7 @@ class TextToSpeechViewModel(
             mutableState.update { it.copy(errorMessage = cause.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.tts_error_settings_invalid)) }
             return false
         }
-        profileLaunchCoordinator.open(
+        profileWorkloadStore.open(
             BenchmarkWorkload.TextToSpeech(
                 modelId = requireNotNull(model).id,
                 modelDisplayName = model.displayName,

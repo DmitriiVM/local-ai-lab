@@ -15,12 +15,12 @@ import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
 import com.dmitriim.localailab.core.model.service.LocalModelResolver
-import com.dmitriim.localailab.core.performance.BenchmarkIterationResult
-import com.dmitriim.localailab.core.performance.BenchmarkStartupMode
-import com.dmitriim.localailab.core.performance.BenchmarkWorkload
-import com.dmitriim.localailab.core.performance.InferencePhase
-import com.dmitriim.localailab.core.performance.InferenceProfiler
-import com.dmitriim.localailab.core.performance.putInferenceTelemetry
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkIterationResult
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkStartupMode
+import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
+import com.dmitriim.localailab.core.performance.profiling.InferencePhase
+import com.dmitriim.localailab.core.performance.profiling.InferenceProfiler
+import com.dmitriim.localailab.core.performance.profiling.serialization.putInferenceTelemetry
 import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionEvent
 import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionRequest
 import com.dmitriim.localailab.core.voice.stt.SttTranscriptionSettings
@@ -64,7 +64,7 @@ class LocalBenchmarkWorkloadRunner(
         startupMode: BenchmarkStartupMode,
     ): BenchmarkWorkloadResult {
         if (startupMode == BenchmarkStartupMode.COLD) chatEngine.unload()
-        val profile = profiler.start(runId, AiCapability.CHAT, extendedTelemetry = true)
+        val profile = profiler.start(runId, AiCapability.CHAT, collectResourceTelemetry = true)
         try {
             val model = profile.trace(InferencePhase.MODEL_RESOLUTION) {
                 modelResolver.resolveChatModel(workload.modelId).getOrThrow()
@@ -120,7 +120,7 @@ class LocalBenchmarkWorkloadRunner(
         model: com.dmitriim.localailab.core.model.runtime.ChatModelReference,
         load: com.dmitriim.localailab.ai.api.chat.LlmLoadResult,
         generation: com.dmitriim.localailab.ai.api.chat.LlmGenerationResult,
-        telemetry: com.dmitriim.localailab.core.performance.InferenceTelemetry,
+        telemetry: com.dmitriim.localailab.core.performance.profiling.InferenceTelemetry,
     ): BenchmarkWorkloadResult {
         val rate = generation.generatedTokenCount?.takeIf { generation.generationDurationMs > 0 }
             ?.toDouble()?.times(1_000.0 / generation.generationDurationMs)
@@ -222,7 +222,7 @@ class LocalBenchmarkWorkloadRunner(
         startupMode: BenchmarkStartupMode,
     ): BenchmarkWorkloadResult {
         if (startupMode == BenchmarkStartupMode.COLD) textToSpeechEngine.unload()
-        val profile = profiler.start(runId, AiCapability.TEXT_TO_SPEECH, extendedTelemetry = true)
+        val profile = profiler.start(runId, AiCapability.TEXT_TO_SPEECH, collectResourceTelemetry = true)
         try {
             val model = profile.trace(InferencePhase.MODEL_RESOLUTION) {
                 modelResolver.resolveTextToSpeechModel(workload.modelId).getOrThrow()

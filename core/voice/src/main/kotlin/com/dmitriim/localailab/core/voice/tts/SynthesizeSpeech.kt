@@ -10,9 +10,9 @@ import com.dmitriim.localailab.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffectsProcessor
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.service.LocalModelResolver
-import com.dmitriim.localailab.core.performance.InferencePhase
-import com.dmitriim.localailab.core.performance.InferenceProfiler
-import com.dmitriim.localailab.core.performance.NoOpInferenceProfiler
+import com.dmitriim.localailab.core.performance.profiling.InferencePhase
+import com.dmitriim.localailab.core.performance.profiling.InferenceProfiler
+import com.dmitriim.localailab.core.performance.profiling.LightweightInferenceProfiler
 import dev.zacsweers.metro.Inject
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -35,7 +35,7 @@ class SynthesizeSpeech(
     private val player: StreamingSpeechPlayer,
     private val generatedAudioStore: GeneratedAudioStore,
     private val audioEffectsProcessor: SpeechAudioEffectsProcessor,
-    private val profiler: InferenceProfiler = NoOpInferenceProfiler,
+    private val profiler: InferenceProfiler = LightweightInferenceProfiler,
 ) {
     private val cancelled = AtomicBoolean(false)
 

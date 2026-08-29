@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.core.voice.stt
 
-import com.dmitriim.localailab.core.performance.InferenceTelemetry
+import com.dmitriim.localailab.core.performance.profiling.InferenceTelemetry
 
 sealed interface SpeechTranscriptionEvent {
     data class Prepared(
