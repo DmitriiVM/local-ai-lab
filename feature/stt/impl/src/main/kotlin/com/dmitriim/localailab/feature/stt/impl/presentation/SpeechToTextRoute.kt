@@ -8,7 +8,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localailab.core.navigation.AppNavigator
-import com.dmitriim.localailab.core.navigation.destination.BenchmarkDestination
+import com.dmitriim.localailab.feature.benchmark.api.navigation.BenchmarkDestination
 import com.dmitriim.localailab.feature.stt.impl.presentation.ui.SpeechToTextScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 

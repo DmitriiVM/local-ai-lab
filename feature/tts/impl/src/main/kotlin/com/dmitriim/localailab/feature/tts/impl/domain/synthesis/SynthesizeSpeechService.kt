@@ -10,9 +10,9 @@ import com.dmitriim.localailab.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffectsProcessor
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
-import com.dmitriim.localailab.core.performance.profiling.InferencePhase
-import com.dmitriim.localailab.core.performance.profiling.InferenceProfiler
-import com.dmitriim.localailab.core.performance.profiling.LightweightInferenceProfiler
+import com.dmitriim.localailab.ai.api.profiling.InferencePhase
+import com.dmitriim.localailab.ai.api.profiling.InferenceProfiler
+import com.dmitriim.localailab.ai.performance.profiling.LightweightInferenceProfiler
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisEvent
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisMetrics

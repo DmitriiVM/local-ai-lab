@@ -14,14 +14,15 @@ android {
 
 dependencies {
     implementation(project(":ai:api"))
+    implementation(project(":ai:performance"))
     implementation(project(":ai:runtime"))
     implementation(project(":core:audio"))
     implementation(project(":core:di"))
-    implementation(project(":core:performance"))
     implementation(project(":core:navigation"))
     implementation(project(":core:operation"))
     implementation(project(":core:ui"))
     implementation(project(":feature:tts:api"))
+    implementation(project(":feature:benchmark:api"))
     implementation(project(":feature:runs:api"))
     implementation(project(":feature:settings:api"))
     implementation(project(":feature:models:api"))

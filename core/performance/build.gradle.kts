@@ -1,6 +1,5 @@
 plugins {
     id("local-ai.android.library")
-    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.metro)
 }
 
@@ -9,13 +8,6 @@ android {
 }
 
 dependencies {
-    api(project(":ai:api"))
-    api(project(":core:audio"))
     implementation(project(":core:di"))
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.tracing)
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kotlinx.serialization.core)
-    implementation(libs.kotlinx.serialization.json)
     implementation(libs.metro.runtime)
 }

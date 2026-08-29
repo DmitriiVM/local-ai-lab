@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.tts.api.domain
 
 import com.dmitriim.localailab.core.audio.output.model.GeneratedAudioFile
-import com.dmitriim.localailab.core.performance.profiling.InferenceTelemetry
+import com.dmitriim.localailab.ai.api.profiling.InferenceTelemetry
 
 sealed interface SpeechSynthesisEvent {
     data class Prepared(

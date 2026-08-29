@@ -18,8 +18,8 @@ import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
 import com.dmitriim.localailab.feature.models.api.data.ModelTransfers
-import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
-import com.dmitriim.localailab.core.performance.launch.ProfileWorkloadStore
+import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkWorkload
+import com.dmitriim.localailab.feature.benchmark.api.launch.ProfileWorkloadStore
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.text.UiText

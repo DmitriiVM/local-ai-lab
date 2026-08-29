@@ -40,6 +40,7 @@ android {
 
 dependencies {
     implementation(project(":ai:api"))
+    implementation(project(":ai:performance"))
     implementation(project(":ai:runtime"))
     implementation(project(":ai:chatterbox"))
     implementation(project(":ai:llamacpp"))
@@ -54,7 +55,8 @@ dependencies {
     implementation(project(":core:operation"))
     implementation(project(":core:ui"))
     implementation(project(":feature:assistant"))
-    implementation(project(":feature:benchmark"))
+    implementation(project(":feature:benchmark:api"))
+    implementation(project(":feature:benchmark:impl"))
     implementation(project(":feature:device"))
     implementation(project(":feature:models:api"))
     implementation(project(":feature:models:impl"))

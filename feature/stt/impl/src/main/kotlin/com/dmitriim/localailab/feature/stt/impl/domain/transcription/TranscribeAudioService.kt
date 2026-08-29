@@ -8,9 +8,9 @@ import com.dmitriim.localailab.ai.api.stt.SpeechToTextRequest
 import com.dmitriim.localailab.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
-import com.dmitriim.localailab.core.performance.profiling.InferencePhase
-import com.dmitriim.localailab.core.performance.profiling.InferenceProfiler
-import com.dmitriim.localailab.core.performance.profiling.LightweightInferenceProfiler
+import com.dmitriim.localailab.ai.api.profiling.InferencePhase
+import com.dmitriim.localailab.ai.api.profiling.InferenceProfiler
+import com.dmitriim.localailab.ai.performance.profiling.LightweightInferenceProfiler
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionEvent
 import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionMetrics
@@ -117,7 +117,7 @@ class TranscribeAudioService(
 
     private suspend fun transcribeSegments(
         request: SpeechTranscriptionRequest,
-        profile: com.dmitriim.localailab.core.performance.profiling.InferenceProfileSession,
+        profile: com.dmitriim.localailab.ai.api.profiling.InferenceProfileSession,
     ): TranscribedSegments {
         val transcript = StringBuilder()
         var count = 0

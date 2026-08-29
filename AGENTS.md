@@ -5,7 +5,8 @@ Local AI Lab is a native Android app for running AI models locally.
 ### Application
 
 - `:app` — Android entry points, root Metro graph, app shell, and top-level adaptive navigation.
-- `:ai:api` — engine-neutral LLM, STT, TTS, availability, memory, engine, model-manifest, catalog, and runtime contracts.
+- `:ai:api` — engine-neutral LLM, STT, TTS, availability, memory, engine, model-manifest, catalog, runtime, and inference-profiling contracts.
+- `:ai:performance` — inference-profiling implementation and AI telemetry aggregation.
 - `:ai:runtime` — engine-neutral routing, availability aggregation, runtime-profile registry, and runtime-memory implementations.
 - `:ai:chatterbox` — Chatterbox TTS adapter, tokenizer, and model validation.
 - `:ai:llamacpp` — llama.cpp GGUF chat adapter, JNI/native code, and validation.
@@ -16,9 +17,12 @@ Local AI Lab is a native Android app for running AI models locally.
 - `:core:audio` — audio capture/decoding, storage, playback, and effects processing.
 - `:core:di` — application Metro scope and ViewModel integration.
 - `:core:navigation` — Navigation 3 state, contracts, host, and feature registry.
+- `:core:performance` — generic Android CPU, memory, battery, thermal, and device telemetry.
 - `:core:operation` — foreground-operation coordination and interruption handling.
 - `:core:ui` — application Compose theme and typography.
 - `:feature:assistant` — local chat and voice-assistant workflow and UI.
+- `:feature:benchmark:api` — benchmark workloads, launch handoff, and navigation destination.
+- `:feature:benchmark:impl` — benchmark execution, presentation, and navigation entry provider.
 - `:feature:device` — device and engine diagnostics and UI.
 - `:feature:models:api` — model-library, transfer, model-install diagnostics, and model-navigation contracts.
 - `:feature:models:impl` — catalog, model Room persistence, validation, downloads, transfers, and models UI.
