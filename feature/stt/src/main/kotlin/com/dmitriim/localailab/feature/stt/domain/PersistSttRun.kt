@@ -1,10 +1,10 @@
 package com.dmitriim.localailab.feature.stt.domain
 
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
-import com.dmitriim.localailab.core.model.runs.RunRecord
-import com.dmitriim.localailab.core.model.runs.RunStatus
-import com.dmitriim.localailab.core.model.service.RunRepository
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
+import com.dmitriim.localailab.feature.runs.api.data.RunRepository
 import com.dmitriim.localailab.core.performance.profiling.serialization.putInferenceTelemetry
 import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionMetrics
 import dev.zacsweers.metro.Inject

@@ -3,8 +3,8 @@ package com.dmitriim.localailab.feature.assistant.presentation
 import android.util.Log
 import com.dmitriim.localailab.ai.api.chat.ChatEngine
 import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
-import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
-import com.dmitriim.localailab.core.model.runs.RunStatus
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
 import com.dmitriim.localailab.core.operation.ForegroundOperationInterruption
 import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionEvent

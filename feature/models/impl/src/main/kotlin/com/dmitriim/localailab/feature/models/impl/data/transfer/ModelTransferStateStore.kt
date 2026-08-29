@@ -4,9 +4,9 @@ import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.source.database.ModelDatabaseProvider
-import com.dmitriim.localailab.source.database.ModelTransferEntity
-import com.dmitriim.localailab.source.database.ModelTransferFileEntity
+import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelsDatabaseProvider
+import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelTransferEntity
+import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelTransferFileEntity
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.map
 @Inject
 @SingleIn(AppScope::class)
 class ModelTransferStateStore(
-    databaseProvider: ModelDatabaseProvider,
+    databaseProvider: ModelsDatabaseProvider,
 ) {
     private val dao = databaseProvider.database.modelTransferDao()
     private val fileDao = databaseProvider.database.modelTransferFileDao()

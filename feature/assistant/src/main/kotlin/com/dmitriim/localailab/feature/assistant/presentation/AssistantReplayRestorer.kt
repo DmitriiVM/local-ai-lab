@@ -3,7 +3,7 @@ package com.dmitriim.localailab.feature.assistant.presentation
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.ComputePreference
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.runs.RunRecord
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject

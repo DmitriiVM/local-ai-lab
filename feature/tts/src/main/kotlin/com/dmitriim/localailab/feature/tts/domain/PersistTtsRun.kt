@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.feature.tts.domain
 
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.runs.RunRecord
-import com.dmitriim.localailab.core.model.service.RunRepository
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
+import com.dmitriim.localailab.feature.runs.api.data.RunRepository
 import com.dmitriim.localailab.core.performance.profiling.serialization.putInferenceTelemetry
 import dev.zacsweers.metro.Inject
 import kotlinx.serialization.json.Json

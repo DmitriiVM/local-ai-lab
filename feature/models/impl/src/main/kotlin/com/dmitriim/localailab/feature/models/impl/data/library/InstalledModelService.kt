@@ -10,8 +10,8 @@ import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidation
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
-import com.dmitriim.localailab.source.database.InstalledModelEntity
-import com.dmitriim.localailab.source.database.ModelDatabaseProvider
+import com.dmitriim.localailab.feature.models.impl.data.persistence.InstalledModelEntity
+import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelsDatabaseProvider
 import com.dmitriim.localailab.feature.models.impl.data.transfer.ModelTransferStateStore
 import com.dmitriim.localailab.feature.models.impl.data.validation.FileSystemModelValidator
 import com.dmitriim.localailab.feature.models.impl.data.validation.totalFileBytes
@@ -34,7 +34,7 @@ import kotlinx.serialization.json.Json
 @ContributesBinding(AppScope::class)
 class InstalledModelService(
     private val application: Application,
-    private val databaseProvider: ModelDatabaseProvider,
+    private val databaseProvider: ModelsDatabaseProvider,
     private val profiles: ModelRuntimeProfileRegistry,
     private val validator: FileSystemModelValidator,
     private val transferState: ModelTransferStateStore,

@@ -13,7 +13,7 @@ import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
 import com.dmitriim.localailab.core.model.service.LocalModelResolver
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkIterationResult
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkStartupMode

@@ -17,7 +17,7 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:operation"))
     implementation(project(":core:ui"))
-    implementation(project(":source:runs"))
+    implementation(project(":feature:runs:api"))
     implementation(libs.androidx.datastore.preferences)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)

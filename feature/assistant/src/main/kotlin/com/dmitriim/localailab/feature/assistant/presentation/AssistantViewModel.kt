@@ -15,10 +15,10 @@ import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoiceStore
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.runs.RunRecord
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
 import com.dmitriim.localailab.feature.models.api.data.ModelTransfers
-import com.dmitriim.localailab.core.model.service.RunRepository
+import com.dmitriim.localailab.feature.runs.api.data.RunRepository
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
 import com.dmitriim.localailab.core.performance.launch.ProfileWorkloadStore
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
@@ -28,7 +28,7 @@ import com.dmitriim.localailab.feature.assistant.domain.AssistantSpeechOutput
 import com.dmitriim.localailab.feature.assistant.domain.AssistantTranscriber
 import com.dmitriim.localailab.feature.assistant.domain.GenerateAssistantResponse
 import com.dmitriim.localailab.feature.assistant.domain.PersistAssistantTurn
-import com.dmitriim.localailab.source.runs.RunReplayStore
+import com.dmitriim.localailab.feature.runs.api.domain.replay.RunReplay
 import com.dmitriim.localailab.feature.settings.api.data.AssistantPreferencesRepository
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -62,7 +62,7 @@ class AssistantViewModel(
     private val preferencesRepository: AssistantPreferencesRepository,
     operationCoordinator: ForegroundOperationCoordinator,
     private val runRepository: RunRepository,
-    private val replayStore: RunReplayStore,
+    private val replayStore: RunReplay,
     private val profileWorkloadStore: ProfileWorkloadStore,
     runtimeLeaseManager: AiRuntimeLeaseManager,
 ) : ViewModel() {

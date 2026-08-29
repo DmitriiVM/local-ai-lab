@@ -17,7 +17,7 @@ import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
-import com.dmitriim.localailab.core.model.runs.RunRecord
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
 import com.dmitriim.localailab.feature.models.api.data.ModelTransfers
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
@@ -28,7 +28,7 @@ import com.dmitriim.localailab.core.ui.text.UiText
 import com.dmitriim.localailab.core.voice.tts.PreviewSpeech
 import com.dmitriim.localailab.core.voice.tts.SynthesizeSpeech
 import com.dmitriim.localailab.feature.tts.domain.PersistTtsRun
-import com.dmitriim.localailab.source.runs.RunReplayStore
+import com.dmitriim.localailab.feature.runs.api.domain.replay.RunReplay
 import com.dmitriim.localailab.feature.settings.api.data.AppSettingsRepository
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -55,7 +55,7 @@ class TextToSpeechViewModel(
     private val generatedAudioStore: GeneratedAudioStore,
     operationCoordinator: ForegroundOperationCoordinator,
     persistTtsRun: PersistTtsRun,
-    private val replayStore: RunReplayStore,
+    private val replayStore: RunReplay,
     private val settingsRepository: AppSettingsRepository,
     private val referenceVoiceStore: ReferenceVoiceStore,
     private val systemTextToSpeechSupport: SystemTextToSpeechSupport,

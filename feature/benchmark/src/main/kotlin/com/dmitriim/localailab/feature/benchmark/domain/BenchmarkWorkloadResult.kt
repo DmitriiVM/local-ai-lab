@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.benchmark.domain
 
-import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkIterationResult
 
 data class BenchmarkWorkloadResult(

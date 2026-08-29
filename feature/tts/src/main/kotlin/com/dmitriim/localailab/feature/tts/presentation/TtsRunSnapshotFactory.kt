@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.tts.presentation
 
-import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
-import com.dmitriim.localailab.core.model.runs.RunStatus
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import com.dmitriim.localailab.core.voice.tts.SpeechSynthesisMetrics
 import com.dmitriim.localailab.feature.tts.domain.TtsRunSnapshot
 

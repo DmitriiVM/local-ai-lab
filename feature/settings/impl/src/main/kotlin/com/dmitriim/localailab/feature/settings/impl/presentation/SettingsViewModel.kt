@@ -8,7 +8,7 @@ import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.device.StorageUsage
 import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
 import com.dmitriim.localailab.feature.models.api.data.ModelDownloadCredentials
-import com.dmitriim.localailab.core.model.service.RunRepository
+import com.dmitriim.localailab.feature.runs.api.data.RunRepository
 import com.dmitriim.localailab.feature.settings.api.data.AppSettingsRepository
 import com.dmitriim.localailab.feature.settings.api.domain.AppSettings
 import dev.zacsweers.metro.ContributesIntoMap

@@ -10,7 +10,7 @@ import com.dmitriim.localailab.core.navigation.AppDestination
 import com.dmitriim.localailab.core.navigation.TopLevelDestination
 import com.dmitriim.localailab.feature.models.api.navigation.ModelsDestination
 import com.dmitriim.localailab.core.navigation.destination.PlaygroundDestination
-import com.dmitriim.localailab.core.navigation.destination.RunsDestination
+import com.dmitriim.localailab.feature.runs.api.presentation.RunsDestination
 import com.dmitriim.localailab.feature.settings.api.navigation.SettingsDestination
 
 internal enum class TopLevelItem(

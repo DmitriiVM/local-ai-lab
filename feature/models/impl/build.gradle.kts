@@ -2,6 +2,7 @@ import java.util.Properties
 
 plugins {
     id("local-ai.android.compose-library")
+    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.metro)
 }
@@ -35,6 +36,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation(project(":feature:models:api"))
     implementation(project(":ai:api"))
@@ -43,10 +48,10 @@ dependencies {
     implementation(project(":core:di"))
     implementation(project(":core:navigation"))
     implementation(project(":core:ui"))
-    implementation(project(":source:database"))
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
     implementation(libs.commons.compress)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -62,5 +67,6 @@ dependencies {
     implementation(libs.metro.runtime)
     implementation(libs.metrox.viewmodel)
     implementation(libs.metrox.viewmodel.compose)
+    ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
 }

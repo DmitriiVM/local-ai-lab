@@ -15,18 +15,17 @@ Local AI Lab is a native Android app for running AI models locally.
 - `:ai:vosk` — Vosk STT adapter and model validation.
 - `:core:audio` — audio capture/decoding, storage, playback, and effects processing.
 - `:core:di` — application Metro scope and ViewModel integration.
-- `:core:model` — shared domain models and service contracts for models, engines, conversations, and runs.
+- `:core:model` — shared domain models and service contracts for models, engines, devices, and runtime behavior.
 - `:core:navigation` — Navigation 3 state, contracts, host, and feature registry.
 - `:core:operation` — foreground-operation coordination and interruption handling.
 - `:core:ui` — application Compose theme and typography.
-- `:source:database` — Room database, entities, DAOs, and database provider.
-- `:source:runs` — run persistence, mapping, export, and replay storage.
 - `:feature:assistant` — local chat and voice-assistant workflow and UI.
 - `:feature:device` — device and engine diagnostics and UI.
 - `:feature:models:api` — model-library, transfer, diagnostics, and model-navigation contracts.
-- `:feature:models:impl` — catalog, installed-model library, validation, downloads, transfers, and models UI.
+- `:feature:models:impl` — catalog, model Room persistence, validation, downloads, transfers, and models UI.
 - `:feature:playground` — capability dashboard, readiness, and workflow entry points.
-- `:feature:runs` — run-history navigation and UI.
+- `:feature:runs:api` — run history, conversation, replay, repository, and navigation contracts.
+- `:feature:runs:impl` — run-history Room persistence, export, replay storage, and UI.
 - `:feature:settings:api` — settings contracts and navigation destinations.
 - `:feature:settings:impl` — DataStore-backed settings and settings UI.
 - `:feature:stt` — transcription workflow, persistence, navigation, and UI.

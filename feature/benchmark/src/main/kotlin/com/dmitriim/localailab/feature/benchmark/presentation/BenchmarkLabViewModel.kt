@@ -8,10 +8,10 @@ import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
 import com.dmitriim.localailab.ai.runtime.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.runs.RunKind
-import com.dmitriim.localailab.core.model.runs.RunRecord
-import com.dmitriim.localailab.core.model.runs.RunStatus
-import com.dmitriim.localailab.core.model.service.RunRepository
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunKind
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
+import com.dmitriim.localailab.feature.runs.api.data.RunRepository
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkPlan
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkSessionSummary
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkStartupMode

@@ -1,12 +1,12 @@
 package com.dmitriim.localailab.feature.assistant.domain
 
 import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.conversation.ConversationKind
-import com.dmitriim.localailab.core.model.conversation.ConversationMessageRecord
-import com.dmitriim.localailab.core.model.conversation.ConversationMessageRole
-import com.dmitriim.localailab.core.model.conversation.ConversationRecord
-import com.dmitriim.localailab.core.model.runs.RunRecord
-import com.dmitriim.localailab.core.model.service.RunRepository
+import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationKind
+import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationMessageRecord
+import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationMessageRole
+import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationRecord
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
+import com.dmitriim.localailab.feature.runs.api.data.RunRepository
 import dev.zacsweers.metro.Inject
 import kotlinx.serialization.json.Json
 

@@ -16,7 +16,7 @@ dependencies {
     implementation(project(":core:operation"))
     implementation(project(":core:ui"))
     implementation(project(":feature:models:api"))
-    implementation(project(":source:runs"))
+    implementation(project(":feature:runs:api"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)

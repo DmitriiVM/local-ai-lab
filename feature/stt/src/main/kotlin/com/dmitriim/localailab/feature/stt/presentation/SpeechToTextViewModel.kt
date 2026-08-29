@@ -13,9 +13,9 @@ import com.dmitriim.localailab.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
-import com.dmitriim.localailab.core.model.runs.RunRecord
-import com.dmitriim.localailab.core.model.runs.RunStatus
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
 import com.dmitriim.localailab.feature.models.api.data.ModelTransfers
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
@@ -30,7 +30,7 @@ import com.dmitriim.localailab.core.voice.stt.SttTranscriptionSettings
 import com.dmitriim.localailab.core.voice.stt.TranscribeAudio
 import com.dmitriim.localailab.feature.stt.domain.PersistSttRun
 import com.dmitriim.localailab.feature.stt.domain.SttRunSnapshot
-import com.dmitriim.localailab.source.runs.RunReplayStore
+import com.dmitriim.localailab.feature.runs.api.domain.replay.RunReplay
 import com.dmitriim.localailab.feature.settings.api.data.AppSettingsRepository
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
@@ -61,7 +61,7 @@ class SpeechToTextViewModel(
     private val transcribeAudio: TranscribeAudio,
     private val operationCoordinator: ForegroundOperationCoordinator,
     private val persistSttRun: PersistSttRun,
-    private val replayStore: RunReplayStore,
+    private val replayStore: RunReplay,
     private val settingsRepository: AppSettingsRepository,
     private val systemSpeechSupport: SystemSpeechToTextSupport,
     private val profileWorkloadStore: ProfileWorkloadStore,
