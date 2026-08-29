@@ -5,8 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.navigation.AppNavigator
-import com.dmitriim.localailab.core.navigation.TopLevelDestination
-import com.dmitriim.localailab.feature.models.navigation.ModelDetailsKey
+import com.dmitriim.localailab.core.navigation.destination.ModelDetailsDestination
 import com.dmitriim.localailab.feature.models.presentation.ui.ModelDetailsScreen
 import com.dmitriim.localailab.feature.models.presentation.ui.ModelsScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
@@ -27,7 +26,7 @@ fun ModelsRoute(
         onConfirmDelete = viewModel::confirmDelete,
         onCancelDelete = viewModel::cancelDelete,
         onOpenDetails = { modelId ->
-            navigator.navigate(ModelDetailsKey(modelId), TopLevelDestination.MODELS)
+            navigator.navigate(ModelDetailsDestination(modelId))
         },
     )
 }

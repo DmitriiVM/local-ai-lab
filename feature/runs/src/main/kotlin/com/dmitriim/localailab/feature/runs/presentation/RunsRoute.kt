@@ -6,8 +6,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dmitriim.localailab.core.navigation.AppDestination
 import com.dmitriim.localailab.core.navigation.AppNavigator
-import com.dmitriim.localailab.core.navigation.NavigationTarget
+import com.dmitriim.localailab.core.navigation.destination.AssistantDestination
+import com.dmitriim.localailab.core.navigation.destination.SpeechToTextDestination
+import com.dmitriim.localailab.core.navigation.destination.TextToSpeechDestination
 import com.dmitriim.localailab.feature.runs.presentation.ui.RunsScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
@@ -43,15 +46,15 @@ fun RunsRoute(navigator: AppNavigator, viewModel: RunsViewModel = metroViewModel
         onClearRunHistory = viewModel::clearRunHistory,
         onShare = viewModel::prepareShare,
         onRepeat = {
-            viewModel.repeatSelected()?.let { run -> navigator.navigate(run.capability.replayTarget) }
+            viewModel.repeatSelected()?.let { run -> navigator.navigate(run.capability.replayDestination) }
         },
     )
 }
 
-private val com.dmitriim.localailab.core.model.capability.AiCapability.replayTarget get() = when (this) {
-    com.dmitriim.localailab.core.model.capability.AiCapability.CHAT -> NavigationTarget.ASSISTANT
-    com.dmitriim.localailab.core.model.capability.AiCapability.SPEECH_TO_TEXT -> NavigationTarget.SPEECH_TO_TEXT
-    com.dmitriim.localailab.core.model.capability.AiCapability.TEXT_TO_SPEECH -> NavigationTarget.TEXT_TO_SPEECH
-    com.dmitriim.localailab.core.model.capability.AiCapability.VOICE_ACTIVITY_DETECTION -> NavigationTarget.SPEECH_TO_TEXT
-    com.dmitriim.localailab.core.model.capability.AiCapability.VOICE_ASSISTANT -> NavigationTarget.ASSISTANT
+private val com.dmitriim.localailab.core.model.capability.AiCapability.replayDestination: AppDestination get() = when (this) {
+    com.dmitriim.localailab.core.model.capability.AiCapability.CHAT -> AssistantDestination
+    com.dmitriim.localailab.core.model.capability.AiCapability.SPEECH_TO_TEXT -> SpeechToTextDestination
+    com.dmitriim.localailab.core.model.capability.AiCapability.TEXT_TO_SPEECH -> TextToSpeechDestination
+    com.dmitriim.localailab.core.model.capability.AiCapability.VOICE_ACTIVITY_DETECTION -> SpeechToTextDestination
+    com.dmitriim.localailab.core.model.capability.AiCapability.VOICE_ASSISTANT -> AssistantDestination
 }

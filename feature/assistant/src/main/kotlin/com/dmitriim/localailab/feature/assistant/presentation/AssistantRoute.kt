@@ -8,7 +8,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localailab.core.navigation.AppNavigator
-import com.dmitriim.localailab.core.navigation.NavigationTarget
+import com.dmitriim.localailab.core.navigation.destination.BenchmarkDestination
+import com.dmitriim.localailab.core.navigation.destination.ModelsDestination
 import com.dmitriim.localailab.feature.assistant.presentation.ui.AssistantScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
@@ -35,7 +36,7 @@ fun AssistantRoute(
         onStopRecording = viewModel::stopRecording,
         onSend = viewModel::send,
         onProfile = {
-            if (viewModel.prepareProfile()) navigator.navigate(NavigationTarget.BENCHMARK)
+            if (viewModel.prepareProfile()) navigator.navigate(BenchmarkDestination)
         },
         onCancel = viewModel::cancel,
         onRegenerate = viewModel::regenerate,
@@ -47,6 +48,6 @@ fun AssistantRoute(
         onApplySpeechOutputSettings = viewModel::applySpeechOutputSettings,
         onPreviewVoice = viewModel::previewVoice,
         onUnloadChatModel = viewModel::unloadChatModel,
-        onOpenModels = { navigator.navigate(NavigationTarget.MODELS) },
+        onOpenModels = { navigator.navigate(ModelsDestination) },
     )
 }

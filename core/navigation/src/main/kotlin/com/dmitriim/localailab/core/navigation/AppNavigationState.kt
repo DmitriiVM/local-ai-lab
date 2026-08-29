@@ -18,16 +18,16 @@ fun rememberAppNavigationState(
 ): AppNavigationState {
     val registry = remember(providers) { NavigationRegistry(providers) }
     val playgroundStack = rememberNavBackStack(
-        registry.startKey(TopLevelDestination.PLAYGROUND),
+        registry.rootDestination(TopLevelDestination.PLAYGROUND),
     )
     val modelsStack = rememberNavBackStack(
-        registry.startKey(TopLevelDestination.MODELS),
+        registry.rootDestination(TopLevelDestination.MODELS),
     )
     val runsStack = rememberNavBackStack(
-        registry.startKey(TopLevelDestination.RUNS),
+        registry.rootDestination(TopLevelDestination.RUNS),
     )
     val settingsStack = rememberNavBackStack(
-        registry.startKey(TopLevelDestination.SETTINGS),
+        registry.rootDestination(TopLevelDestination.SETTINGS),
     )
     val stacks = remember(playgroundStack, modelsStack, runsStack, settingsStack) {
         TopLevelBackStacks(
@@ -73,26 +73,12 @@ class AppNavigationState internal constructor(
         selectedDestination = destination
     }
 
-    override fun navigate(target: NavigationTarget) {
-        val provider = registry.provider(target)
-        provider.topLevelDestination?.let { destination ->
-            selectedDestination = destination
-            return
-        }
-
-        val host = provider.hostDestination ?: selectedDestination
-        selectedDestination = host
-        val stack = stacks[host]
-        if (stack.lastOrNull() != provider.startKey) {
-            stack.add(provider.startKey)
-        }
-    }
-
-    override fun navigate(key: NavKey, host: TopLevelDestination) {
-        selectedDestination = host
-        val stack = stacks[host]
-        if (stack.lastOrNull() != key) {
-            stack.add(key)
+    override fun navigate(destination: AppDestination) {
+        val hostDestination = registry.hostDestinationFor(destination)
+        selectedDestination = hostDestination
+        val stack = stacks[hostDestination]
+        if (stack.lastOrNull() != destination) {
+            stack.add(destination)
         }
     }
 

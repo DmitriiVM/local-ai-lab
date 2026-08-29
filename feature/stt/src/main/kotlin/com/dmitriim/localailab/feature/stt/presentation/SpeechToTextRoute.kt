@@ -8,7 +8,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localailab.core.navigation.AppNavigator
-import com.dmitriim.localailab.core.navigation.NavigationTarget
+import com.dmitriim.localailab.core.navigation.destination.BenchmarkDestination
 import com.dmitriim.localailab.feature.stt.presentation.ui.SpeechToTextScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
@@ -38,7 +38,7 @@ fun SpeechToTextRoute(
         onImportAudio = { audioPicker.launch(arrayOf("audio/*")) },
         onRepeat = viewModel::repeatTranscription,
         onProfile = {
-            if (viewModel.prepareProfile()) navigator.navigate(NavigationTarget.BENCHMARK)
+            if (viewModel.prepareProfile()) navigator.navigate(BenchmarkDestination)
         },
         onCancel = viewModel::cancel,
         onClear = viewModel::clear,

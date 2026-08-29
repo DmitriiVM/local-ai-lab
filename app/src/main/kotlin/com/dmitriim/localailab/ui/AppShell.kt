@@ -10,11 +10,11 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dmitriim.localailab.R
 import com.dmitriim.localailab.core.navigation.AppNavHost
+import com.dmitriim.localailab.core.navigation.destination.SpeechToTextDestination
+import com.dmitriim.localailab.core.navigation.destination.TextToSpeechDestination
 import com.dmitriim.localailab.core.navigation.rememberAppNavigationState
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.di.AppGraph
-import com.dmitriim.localailab.feature.stt.navigation.SpeechToTextKey
-import com.dmitriim.localailab.feature.tts.navigation.TextToSpeechKey
 import com.dmitriim.localailab.ui.navigation.AdaptiveNavigationScaffold
 
 @Composable
@@ -39,8 +39,8 @@ fun LocalAiLabApp(graph: AppGraph) {
     )
 
     val toolbarTitle = when (navigationState.activeStack.lastOrNull()) {
-        SpeechToTextKey -> stringResource(CoreUiR.string.stt_speech_to_text_screen_131)
-        TextToSpeechKey -> stringResource(CoreUiR.string.tts_text_to_speech_screen_177)
+        SpeechToTextDestination -> stringResource(CoreUiR.string.stt_speech_to_text_screen_131)
+        TextToSpeechDestination -> stringResource(CoreUiR.string.tts_text_to_speech_screen_177)
         else -> null
     }
 

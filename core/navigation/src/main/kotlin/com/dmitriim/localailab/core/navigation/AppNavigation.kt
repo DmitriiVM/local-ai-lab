@@ -1,7 +1,8 @@
 package com.dmitriim.localailab.core.navigation
 
-import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
+import androidx.compose.runtime.Composable
+import kotlin.reflect.KClass
 
 enum class TopLevelDestination {
     PLAYGROUND,
@@ -10,31 +11,17 @@ enum class TopLevelDestination {
     SETTINGS,
 }
 
-enum class NavigationTarget {
-    PLAYGROUND,
-    MODELS,
-    RUNS,
-    DEVICE,
-    BENCHMARK,
-    SETTINGS,
-    ASSISTANT,
-    SPEECH_TO_TEXT,
-    TEXT_TO_SPEECH,
-}
-
 interface AppNavigator {
-    fun navigate(target: NavigationTarget)
-    fun navigate(key: NavKey, host: TopLevelDestination)
+    fun navigate(destination: AppDestination)
     fun navigateBack()
 }
 
 interface NavigationEntryProvider {
-    val target: NavigationTarget
-    val topLevelDestination: TopLevelDestination?
+    val destinationType: KClass<out AppDestination>
+    val hostDestination: TopLevelDestination
+    val rootDestination: AppDestination?
         get() = null
-    val hostDestination: TopLevelDestination?
-        get() = topLevelDestination
-    val startKey: NavKey
 
-    fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>?
+    @Composable
+    fun Content(destination: AppDestination, navigator: AppNavigator)
 }
