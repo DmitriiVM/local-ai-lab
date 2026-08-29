@@ -16,7 +16,7 @@ import dev.zacsweers.metro.binding
 class PlaygroundNavigationEntryProvider : NavigationEntryProvider {
     override val destinationType = PlaygroundDestination::class
     override val hostDestination = TopLevelDestination.PLAYGROUND
-    override val rootDestination: AppDestination = PlaygroundDestination
+    override val isRootDestination = true
 
     @Composable
     override fun Content(destination: AppDestination, navigator: AppNavigator) {

@@ -7,14 +7,11 @@ internal class NavigationRegistry(
     providers: Set<NavigationEntryProvider>,
 ) {
     private val providersByDestinationType = providers.associateBy { it.destinationType }
-    private val rootDestinationsByTopLevel: Map<TopLevelDestination, AppDestination> = buildMap {
+    private val rootProvidersByHost: Map<TopLevelDestination, NavigationEntryProvider> = buildMap {
         providers.forEach { provider ->
-            val rootDestination = provider.rootDestination ?: return@forEach
-            check(provider.destinationType.isInstance(rootDestination)) {
-                "Root destination $rootDestination must match ${provider.destinationType}."
-            }
-            check(put(provider.hostDestination, rootDestination) == null) {
-                "Top-level destination ${provider.hostDestination} must have exactly one root destination."
+            if (!provider.isRootDestination) return@forEach
+            check(put(provider.hostDestination, provider) == null) {
+                "Top-level host ${provider.hostDestination} must have exactly one root provider."
             }
         }
     }
@@ -23,19 +20,19 @@ internal class NavigationRegistry(
         check(providersByDestinationType.size == providers.size) {
             "Every destination type must have exactly one navigation entry provider."
         }
-        check(rootDestinationsByTopLevel.size == TopLevelDestination.entries.size) {
-            "Every top-level destination must have exactly one root destination."
+        check(rootProvidersByHost.size == TopLevelDestination.entries.size) {
+            "Every top-level host must have exactly one root provider."
         }
-        TopLevelDestination.entries.forEach { destination ->
-            checkNotNull(rootDestinationsByTopLevel[destination]) {
-                "Missing root destination for $destination"
+        TopLevelDestination.entries.forEach { hostDestination ->
+            checkNotNull(rootProvidersByHost[hostDestination]) {
+                "Missing root provider for $hostDestination"
             }
         }
     }
 
-    fun rootDestination(destination: TopLevelDestination): AppDestination = checkNotNull(rootDestinationsByTopLevel[destination])
-
     fun hostDestinationFor(destination: AppDestination): TopLevelDestination = providerFor(destination).hostDestination
+
+    fun isRootDestination(destination: AppDestination): Boolean = providerFor(destination).isRootDestination
 
     fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? = (key as? AppDestination)?.let { destination ->
         val provider = providerFor(destination)

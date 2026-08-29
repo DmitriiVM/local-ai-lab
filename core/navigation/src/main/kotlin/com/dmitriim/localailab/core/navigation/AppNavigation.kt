@@ -1,6 +1,5 @@
 package com.dmitriim.localailab.core.navigation
 
-import androidx.navigation3.runtime.NavKey
 import androidx.compose.runtime.Composable
 import kotlin.reflect.KClass
 
@@ -19,8 +18,8 @@ interface AppNavigator {
 interface NavigationEntryProvider {
     val destinationType: KClass<out AppDestination>
     val hostDestination: TopLevelDestination
-    val rootDestination: AppDestination?
-        get() = null
+    val isRootDestination: Boolean
+        get() = false
 
     @Composable
     fun Content(destination: AppDestination, navigator: AppNavigator)

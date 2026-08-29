@@ -1,5 +1,9 @@
 package com.dmitriim.localailab.core.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -22,6 +26,18 @@ fun AppNavHost(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator(),
         ),
+        transitionSpec = {
+            fadeIn(animationSpec = tween(NavigationTransitionDurationMillis)) togetherWith
+                fadeOut(animationSpec = tween(NavigationTransitionDurationMillis))
+        },
+        popTransitionSpec = {
+            fadeIn(animationSpec = tween(NavigationTransitionDurationMillis)) togetherWith
+                fadeOut(animationSpec = tween(NavigationTransitionDurationMillis))
+        },
+        predictivePopTransitionSpec = { _ ->
+            fadeIn(animationSpec = tween(NavigationTransitionDurationMillis)) togetherWith
+                fadeOut(animationSpec = tween(NavigationTransitionDurationMillis))
+        },
         entryProvider = { key ->
             state.entryFor(key) ?: NavEntry(key) {
                 unavailableDestination(key)
@@ -29,3 +45,5 @@ fun AppNavHost(
         },
     )
 }
+
+private const val NavigationTransitionDurationMillis = 180

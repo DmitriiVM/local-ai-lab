@@ -47,7 +47,7 @@ fun LocalAiLabApp(graph: AppGraph) {
     AdaptiveNavigationScaffold(
         selectedDestination = navigationState.selectedDestination,
         showTopLevelNavigation = !navigationState.canNavigateUp,
-        onSelectDestination = navigationState::selectTopLevelDestination,
+        onSelectDestination = navigationState::navigate,
         onNavigateUp = if (navigationState.canNavigateUp) navigationState::navigateBack else null,
         toolbarTitle = toolbarTitle,
     ) { modifier ->

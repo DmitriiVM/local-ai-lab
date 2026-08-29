@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.dmitriim.localailab.core.navigation.AppDestination
 import com.dmitriim.localailab.core.navigation.TopLevelDestination
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localailab.core.ui.style.AppSurfaceStyle
@@ -31,7 +32,7 @@ import com.dmitriim.localailab.core.ui.style.AppSurfaceStyle
 fun AdaptiveNavigationScaffold(
     selectedDestination: TopLevelDestination,
     showTopLevelNavigation: Boolean,
-    onSelectDestination: (TopLevelDestination) -> Unit,
+    onSelectDestination: (AppDestination) -> Unit,
     onNavigateUp: (() -> Unit)?,
     toolbarTitle: String?,
     content: @Composable (Modifier) -> Unit,
@@ -49,7 +50,7 @@ fun AdaptiveNavigationScaffold(
                     NavigationRail {
                         TopLevelItem.entries.forEach { item ->
                             NavigationRailItem(
-                                selected = selectedDestination == item.destination,
+                                selected = selectedDestination == item.hostDestination,
                                 onClick = { onSelectDestination(item.destination) },
                                 icon = { Icon(item.icon, contentDescription = item.label) },
                                 label = { Text(item.label) },

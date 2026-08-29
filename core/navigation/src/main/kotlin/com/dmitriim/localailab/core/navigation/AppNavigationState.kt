@@ -10,24 +10,37 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
+import com.dmitriim.localailab.core.navigation.destination.PlaygroundDestination
 
 @Composable
 fun rememberAppNavigationState(
     providers: Set<NavigationEntryProvider>,
-    startDestination: TopLevelDestination = TopLevelDestination.PLAYGROUND,
+    startDestination: AppDestination = PlaygroundDestination,
 ): AppNavigationState {
     val registry = remember(providers) { NavigationRegistry(providers) }
-    val playgroundStack = rememberNavBackStack(
-        registry.rootDestination(TopLevelDestination.PLAYGROUND),
+    check(registry.isRootDestination(startDestination)) {
+        "Start destination $startDestination must be a root destination."
+    }
+    val startHostDestination = registry.hostDestinationFor(startDestination)
+    val playgroundStack = rememberHostBackStack(
+        TopLevelDestination.PLAYGROUND,
+        startHostDestination,
+        startDestination,
     )
-    val modelsStack = rememberNavBackStack(
-        registry.rootDestination(TopLevelDestination.MODELS),
+    val modelsStack = rememberHostBackStack(
+        TopLevelDestination.MODELS,
+        startHostDestination,
+        startDestination,
     )
-    val runsStack = rememberNavBackStack(
-        registry.rootDestination(TopLevelDestination.RUNS),
+    val runsStack = rememberHostBackStack(
+        TopLevelDestination.RUNS,
+        startHostDestination,
+        startDestination,
     )
-    val settingsStack = rememberNavBackStack(
-        registry.rootDestination(TopLevelDestination.SETTINGS),
+    val settingsStack = rememberHostBackStack(
+        TopLevelDestination.SETTINGS,
+        startHostDestination,
+        startDestination,
     )
     val stacks = remember(playgroundStack, modelsStack, runsStack, settingsStack) {
         TopLevelBackStacks(
@@ -37,25 +50,38 @@ fun rememberAppNavigationState(
             settings = settingsStack,
         )
     }
-    val selectedDestination = rememberSaveable {
-        androidx.compose.runtime.mutableStateOf(startDestination)
+    val selectedDestination = rememberSaveable(startHostDestination) {
+        androidx.compose.runtime.mutableStateOf(startHostDestination)
     }
 
-    return remember(registry, stacks, selectedDestination, startDestination) {
+    return remember(registry, stacks, selectedDestination, startHostDestination) {
         AppNavigationState(
             registry = registry,
             stacks = stacks,
             selectedDestinationState = selectedDestination,
-            startDestination = startDestination,
+            startHostDestination = startHostDestination,
         )
     }
 }
+
+@Composable
+private fun rememberHostBackStack(
+    hostDestination: TopLevelDestination,
+    startHostDestination: TopLevelDestination,
+    startDestination: AppDestination,
+): NavBackStack<NavKey> = rememberNavBackStack(
+    *if (hostDestination == startHostDestination) {
+        arrayOf(startDestination)
+    } else {
+        emptyArray()
+    },
+)
 
 class AppNavigationState internal constructor(
     private val registry: NavigationRegistry,
     private val stacks: TopLevelBackStacks,
     private val selectedDestinationState: MutableState<TopLevelDestination>,
-    private val startDestination: TopLevelDestination,
+    private val startHostDestination: TopLevelDestination,
 ) : AppNavigator {
     var selectedDestination by selectedDestinationState
         private set
@@ -64,29 +90,29 @@ class AppNavigationState internal constructor(
         get() = stacks[selectedDestination]
 
     val shouldHandleSystemBack: Boolean
-        get() = activeStack.size == 1 && selectedDestination != startDestination
+        get() = activeStack.size == 1 && selectedDestination != startHostDestination
 
     val canNavigateUp: Boolean
         get() = activeStack.size > 1
 
-    fun selectTopLevelDestination(destination: TopLevelDestination) {
-        selectedDestination = destination
-    }
-
     override fun navigate(destination: AppDestination) {
         val hostDestination = registry.hostDestinationFor(destination)
-        selectedDestination = hostDestination
         val stack = stacks[hostDestination]
-        if (stack.lastOrNull() != destination) {
+        val isRootDestination = registry.isRootDestination(destination)
+        check(stack.isNotEmpty() || isRootDestination) {
+            "Cannot navigate to child destination $destination before initializing host $hostDestination."
+        }
+        if (stack.isEmpty() || (!isRootDestination && stack.lastOrNull() != destination)) {
             stack.add(destination)
         }
+        selectedDestination = hostDestination
     }
 
     override fun navigateBack() {
         if (activeStack.size > 1) {
             activeStack.removeLastOrNull()
-        } else if (selectedDestination != startDestination) {
-            selectedDestination = startDestination
+        } else if (selectedDestination != startHostDestination) {
+            selectedDestination = startHostDestination
         }
     }
 

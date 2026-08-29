@@ -1,6 +1,7 @@
 package com.dmitriim.localailab.feature.models.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localailab.core.model.manifest.ModelId
@@ -38,12 +39,12 @@ fun ModelDetailsRoute(
     viewModel: ModelsViewModel = metroViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    androidx.compose.runtime.LaunchedEffect(modelId) {
+    LaunchedEffect(modelId) {
         viewModel.selectModel(modelId)
     }
     val manifest = uiState.catalog.firstOrNull { it.manifest.modelId == modelId }?.manifest
         ?: uiState.installed.firstOrNull { it.manifest.modelId == modelId }?.manifest
-    androidx.compose.runtime.LaunchedEffect(manifest) {
+    LaunchedEffect(manifest) {
         manifest?.let(viewModel::checkCompatibility)
     }
     ModelDetailsScreen(

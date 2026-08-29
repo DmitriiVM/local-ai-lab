@@ -34,12 +34,13 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dmitriim.localailab.core.navigation.AppDestination
 import com.dmitriim.localailab.core.navigation.TopLevelDestination
 
 @Composable
 internal fun LiquidGlassNavigationBar(
     selectedDestination: TopLevelDestination,
-    onSelectDestination: (TopLevelDestination) -> Unit,
+    onSelectDestination: (AppDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val barShape = RoundedCornerShape(32.dp)
@@ -84,7 +85,7 @@ internal fun LiquidGlassNavigationBar(
             TopLevelItem.entries.forEach { item ->
                 LiquidGlassNavigationItem(
                     item = item,
-                    selected = selectedDestination == item.destination,
+                    selected = selectedDestination == item.hostDestination,
                     onClick = { onSelectDestination(item.destination) },
                     modifier = Modifier.weight(1f),
                 )
