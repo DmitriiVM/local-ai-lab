@@ -36,8 +36,8 @@ import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.manifest.SttRecognitionMode
 import com.dmitriim.localailab.core.model.manifest.TtsControl
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
-import com.dmitriim.localailab.core.result.StatusMessage
 import com.dmitriim.localailab.core.ui.R as CoreUiR
+import com.dmitriim.localailab.core.ui.component.StatusMessage
 import com.dmitriim.localailab.feature.models.presentation.ModelValidationFeedback
 import com.dmitriim.localailab.feature.models.presentation.ModelsUiState
 import java.text.DateFormat

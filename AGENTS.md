@@ -17,7 +17,7 @@ Local AI Lab is a native Android app for running AI models locally.
 - `:core:di` — application Metro scope and ViewModel integration.
 - `:core:model` — shared domain models and service contracts for models, engines, conversations, and runs.
 - `:core:navigation` — Navigation 3 state, contracts, host, and feature registry.
-- `:core:result` — shared errors, operation state, foreground coordination, and status presentation.
+- `:core:operation` — foreground-operation coordination and interruption handling.
 - `:core:ui` — application Compose theme and typography.
 - `:source:database` — Room database, entities, DAOs, and database provider.
 - `:source:models` — catalog, installed-model library, resolution, validation, downloads, and transfers.

@@ -12,7 +12,6 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:di"))
     implementation(project(":core:navigation"))
-    implementation(project(":core:result"))
     implementation(project(":core:ui"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

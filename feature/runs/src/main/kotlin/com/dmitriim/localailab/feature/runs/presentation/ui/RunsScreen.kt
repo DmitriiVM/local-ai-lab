@@ -35,7 +35,7 @@ import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.runs.RunKind
 import com.dmitriim.localailab.core.model.runs.RunRecord
 import com.dmitriim.localailab.core.model.runs.RunStatus
-import com.dmitriim.localailab.core.result.StatusMessage
+import com.dmitriim.localailab.core.ui.component.StatusMessage
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.component.AppSurfaceCard
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions

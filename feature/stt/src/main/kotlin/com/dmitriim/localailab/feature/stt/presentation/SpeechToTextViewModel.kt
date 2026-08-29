@@ -20,7 +20,7 @@ import com.dmitriim.localailab.core.model.service.ModelLibrary
 import com.dmitriim.localailab.core.model.service.ModelTransfers
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
 import com.dmitriim.localailab.core.performance.launch.ProfileWorkloadStore
-import com.dmitriim.localailab.core.result.ForegroundOperationCoordinator
+import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.text.UiText
 import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionEvent

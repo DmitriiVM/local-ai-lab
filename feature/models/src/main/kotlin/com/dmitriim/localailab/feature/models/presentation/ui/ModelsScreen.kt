@@ -44,8 +44,8 @@ import com.dmitriim.localailab.core.model.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.service.HuggingFaceCredentialStatus
-import com.dmitriim.localailab.core.result.StatusMessage
 import com.dmitriim.localailab.core.ui.R as CoreUiR
+import com.dmitriim.localailab.core.ui.component.StatusMessage
 import com.dmitriim.localailab.core.ui.component.AppSurfaceCard
 import com.dmitriim.localailab.core.ui.component.AppSurfaceTone
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions

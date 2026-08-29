@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.result
+package com.dmitriim.localailab.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.result
+package com.dmitriim.localailab.core.operation
 
 enum class ForegroundOperationInterruption {
     APP_BACKGROUNDED,

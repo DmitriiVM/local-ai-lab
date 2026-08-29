@@ -2,7 +2,7 @@ package com.dmitriim.localailab
 
 import android.app.Application
 import android.os.Build
-import com.dmitriim.localailab.core.result.ForegroundOperationInterruption
+import com.dmitriim.localailab.core.operation.ForegroundOperationInterruption
 import com.dmitriim.localailab.di.AppGraph
 import dev.zacsweers.metro.createGraphFactory
 import kotlinx.coroutines.CoroutineScope

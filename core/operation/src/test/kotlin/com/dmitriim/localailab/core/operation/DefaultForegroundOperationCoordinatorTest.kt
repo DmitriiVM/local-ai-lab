@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.result
+package com.dmitriim.localailab.core.operation
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

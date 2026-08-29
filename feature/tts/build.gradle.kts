@@ -20,7 +20,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:performance"))
     implementation(project(":core:navigation"))
-    implementation(project(":core:result"))
+    implementation(project(":core:operation"))
     implementation(project(":core:ui"))
     implementation(project(":core:voice"))
     implementation(project(":source:runs"))

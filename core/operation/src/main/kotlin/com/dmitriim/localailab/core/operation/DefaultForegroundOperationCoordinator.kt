@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.result
+package com.dmitriim.localailab.core.operation
 
 import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.ContributesBinding

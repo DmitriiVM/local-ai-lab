@@ -5,10 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.ai.api.availability.EngineAvailabilitySource
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.service.ModelLibrary
-import com.dmitriim.localailab.core.result.DomainError
-import com.dmitriim.localailab.core.result.DomainErrorCategory
-import com.dmitriim.localailab.core.result.ForegroundOperationCoordinator
-import com.dmitriim.localailab.core.result.OperationState
+import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
+import com.dmitriim.localailab.feature.playground.presentation.state.DomainError
+import com.dmitriim.localailab.feature.playground.presentation.state.OperationState
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -67,7 +66,6 @@ class PlaygroundViewModel(
                     it.copy(
                         operation = OperationState.Error(
                             DomainError(
-                                category = DomainErrorCategory.CANCELLED,
                                 title = "Availability check interrupted",
                                 explanation = "The check stopped when the app left the foreground.",
                                 suggestedAction = "Return to the app and retry.",
@@ -81,7 +79,6 @@ class PlaygroundViewModel(
                     it.copy(
                         operation = OperationState.Error(
                             DomainError(
-                                category = DomainErrorCategory.UNEXPECTED,
                                 title = "Availability check failed",
                                 explanation = "The bundled engine status could not be read.",
                                 technicalDetails = error.message,

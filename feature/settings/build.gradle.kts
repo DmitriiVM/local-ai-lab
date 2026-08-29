@@ -13,7 +13,7 @@ dependencies {
     implementation(project(":core:di"))
     implementation(project(":core:model"))
     implementation(project(":core:navigation"))
-    implementation(project(":core:result"))
+    implementation(project(":core:operation"))
     implementation(project(":core:ui"))
     implementation(project(":source:runs"))
     implementation(project(":source:settings"))

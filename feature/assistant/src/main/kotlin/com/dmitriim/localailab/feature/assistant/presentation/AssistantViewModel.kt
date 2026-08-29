@@ -21,7 +21,7 @@ import com.dmitriim.localailab.core.model.service.ModelTransfers
 import com.dmitriim.localailab.core.model.service.RunRepository
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
 import com.dmitriim.localailab.core.performance.launch.ProfileWorkloadStore
-import com.dmitriim.localailab.core.result.ForegroundOperationCoordinator
+import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
 import com.dmitriim.localailab.feature.assistant.domain.AssistantAudioRecorder
 import com.dmitriim.localailab.feature.assistant.domain.AssistantRunRecorder
 import com.dmitriim.localailab.feature.assistant.domain.AssistantSpeechOutput

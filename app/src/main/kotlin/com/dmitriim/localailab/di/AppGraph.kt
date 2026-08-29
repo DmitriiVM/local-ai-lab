@@ -6,7 +6,7 @@ import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
 import com.dmitriim.localailab.core.model.service.ModelTransferStartup
 import com.dmitriim.localailab.core.navigation.NavigationEntryProvider
-import com.dmitriim.localailab.core.result.ForegroundOperationCoordinator
+import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
 import com.dmitriim.localailab.source.settings.AppSettingsRepository
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides

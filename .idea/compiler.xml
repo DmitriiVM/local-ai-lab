@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="11">
+      <module name="LocalAiLab.core.result" target="21" />
       <module name="LocalAiPlayground.ai.chatterbox" target="21" />
       <module name="LocalAiPlayground.ai.litertlm" target="21" />
       <module name="LocalAiPlayground.ai.llamacpp" target="21" />

@@ -5,8 +5,8 @@ import com.dmitriim.localailab.ai.api.chat.ChatEngine
 import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localailab.core.model.runs.RunModelSnapshot
 import com.dmitriim.localailab.core.model.runs.RunStatus
-import com.dmitriim.localailab.core.result.ForegroundOperationCoordinator
-import com.dmitriim.localailab.core.result.ForegroundOperationInterruption
+import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
+import com.dmitriim.localailab.core.operation.ForegroundOperationInterruption
 import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionEvent
 import com.dmitriim.localailab.core.voice.stt.SpeechTranscriptionMetrics
 import com.dmitriim.localailab.core.voice.tts.SpeechSynthesisEvent
