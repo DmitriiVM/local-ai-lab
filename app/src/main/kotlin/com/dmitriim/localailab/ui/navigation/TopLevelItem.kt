@@ -11,7 +11,7 @@ import com.dmitriim.localailab.core.navigation.TopLevelDestination
 import com.dmitriim.localailab.core.navigation.destination.ModelsDestination
 import com.dmitriim.localailab.core.navigation.destination.PlaygroundDestination
 import com.dmitriim.localailab.core.navigation.destination.RunsDestination
-import com.dmitriim.localailab.core.navigation.destination.SettingsDestination
+import com.dmitriim.localailab.feature.settings.api.navigation.SettingsDestination
 
 internal enum class TopLevelItem(
     val hostDestination: TopLevelDestination,

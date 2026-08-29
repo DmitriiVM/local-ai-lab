@@ -13,7 +13,7 @@ class FeatureBoundaryConventionPlugin : Plugin<Project> {
 
         val verifyFeatureBoundaries = tasks.register("verifyFeatureBoundaries") {
             group = "verification"
-            description = "Verifies that feature modules do not depend on other feature modules."
+            description = "Verifies that feature modules depend on other features only through their API modules."
         }
 
         gradle.projectsEvaluated {
@@ -25,14 +25,18 @@ class FeatureBoundaryConventionPlugin : Plugin<Project> {
                             .withType(ProjectDependency::class.java)
                             .mapNotNull { dependency ->
                                 dependency.path
-                                    .takeIf { it.startsWith(FEATURE_PATH_PREFIX) && it != project.path }
+                                    .takeIf {
+                                        it.startsWith(FEATURE_PATH_PREFIX) &&
+                                            !isFeatureApiModule(it) &&
+                                            it != project.path
+                                    }
                                     ?.let { targetPath -> "${project.path}:${configuration.name} -> $targetPath" }
                             }
                     }
                 }
             if (violations.isNotEmpty()) {
                 throw GradleException(
-                    "Feature modules must not depend on other feature modules:\n${violations.joinToString("\n")}",
+                    "Feature modules may depend on other features only through their API modules:\n${violations.joinToString("\n")}",
                 )
             }
             allprojects
@@ -46,5 +50,8 @@ class FeatureBoundaryConventionPlugin : Plugin<Project> {
 
     private companion object {
         const val FEATURE_PATH_PREFIX = ":feature:"
+        const val FEATURE_API_SUFFIX = ":api"
+
+        fun isFeatureApiModule(path: String): Boolean = path.endsWith(FEATURE_API_SUFFIX)
     }
 }

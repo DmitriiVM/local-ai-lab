@@ -13,7 +13,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localailab.core.ui.theme.LocalAiLabTheme
-import com.dmitriim.localailab.source.settings.AppSettings
+import com.dmitriim.localailab.feature.settings.api.domain.AppSettings
 import com.dmitriim.localailab.ui.LocalAiLabApp
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 

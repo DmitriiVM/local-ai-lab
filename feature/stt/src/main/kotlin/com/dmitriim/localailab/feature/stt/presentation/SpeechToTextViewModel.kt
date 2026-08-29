@@ -31,7 +31,7 @@ import com.dmitriim.localailab.core.voice.stt.TranscribeAudio
 import com.dmitriim.localailab.feature.stt.domain.PersistSttRun
 import com.dmitriim.localailab.feature.stt.domain.SttRunSnapshot
 import com.dmitriim.localailab.source.runs.RunReplayStore
-import com.dmitriim.localailab.source.settings.AppSettingsRepository
+import com.dmitriim.localailab.feature.settings.api.data.AppSettingsRepository
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey

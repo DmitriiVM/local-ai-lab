@@ -23,7 +23,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:voice"))
     implementation(project(":source:runs"))
-    implementation(project(":source:settings"))
+    implementation(project(":feature:settings:api"))
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)

@@ -1,10 +1,10 @@
 package com.dmitriim.localailab.feature.assistant.presentation
 
 import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.source.settings.AssistantChatPreferences
-import com.dmitriim.localailab.source.settings.AssistantPreferences
-import com.dmitriim.localailab.source.settings.AssistantSpeechInputPreferences
-import com.dmitriim.localailab.source.settings.AssistantSpeechOutputPreferences
+import com.dmitriim.localailab.feature.settings.api.domain.AssistantChatPreferences
+import com.dmitriim.localailab.feature.settings.api.domain.AssistantPreferences
+import com.dmitriim.localailab.feature.settings.api.domain.AssistantSpeechInputPreferences
+import com.dmitriim.localailab.feature.settings.api.domain.AssistantSpeechOutputPreferences
 
 internal data class AssistantModelOptions(
     val chat: List<ChatModelOption>,
