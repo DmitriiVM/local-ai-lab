@@ -5,29 +5,40 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localailab.feature.playground"
+    namespace = "com.dmitriim.localailab.feature.assistant.impl"
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
-    implementation(project(":feature:assistant:api"))
-    implementation(project(":feature:stt:api"))
-    implementation(project(":feature:tts:api"))
     implementation(project(":ai:api"))
+    implementation(project(":ai:performance"))
+    implementation(project(":ai:runtime"))
+    implementation(project(":core:audio"))
     implementation(project(":core:di"))
     implementation(project(":core:navigation"))
     implementation(project(":core:operation"))
     implementation(project(":core:ui"))
+    implementation(project(":feature:assistant:api"))
+    implementation(project(":feature:benchmark:api"))
     implementation(project(":feature:models:api"))
     implementation(project(":feature:runs:api"))
+    implementation(project(":feature:settings:api"))
+    implementation(project(":feature:stt:api"))
+    implementation(project(":feature:tts:api"))
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.metrox.viewmodel)
     implementation(libs.metrox.viewmodel.compose)
+    testImplementation(libs.junit)
 }

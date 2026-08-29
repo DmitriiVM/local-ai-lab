@@ -20,7 +20,8 @@ Local AI Lab is a native Android app for running AI models locally.
 - `:core:performance` — generic Android CPU, memory, battery, thermal, and device telemetry.
 - `:core:operation` — foreground-operation coordination and interruption handling.
 - `:core:ui` — application Compose theme and typography.
-- `:feature:assistant` — local chat and voice-assistant workflow and UI.
+- `:feature:assistant:api` — assistant navigation destination.
+- `:feature:assistant:impl` — local chat and voice-assistant workflow and UI.
 - `:feature:benchmark:api` — benchmark workloads, launch handoff, and navigation destination.
 - `:feature:benchmark:impl` — benchmark execution, presentation, and navigation entry provider.
 - `:feature:device` — device and engine diagnostics and UI.
