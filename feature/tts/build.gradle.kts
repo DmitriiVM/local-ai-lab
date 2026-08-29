@@ -25,6 +25,7 @@ dependencies {
     implementation(project(":core:voice"))
     implementation(project(":source:runs"))
     implementation(project(":feature:settings:api"))
+    implementation(project(":feature:models:api"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material.icons.extended)

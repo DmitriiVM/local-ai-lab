@@ -8,7 +8,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.dmitriim.localailab.core.navigation.AppDestination
 import com.dmitriim.localailab.core.navigation.TopLevelDestination
-import com.dmitriim.localailab.core.navigation.destination.ModelsDestination
+import com.dmitriim.localailab.feature.models.api.navigation.ModelsDestination
 import com.dmitriim.localailab.core.navigation.destination.PlaygroundDestination
 import com.dmitriim.localailab.core.navigation.destination.RunsDestination
 import com.dmitriim.localailab.feature.settings.api.navigation.SettingsDestination

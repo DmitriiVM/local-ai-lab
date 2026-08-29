@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.ai.api.availability.EngineAvailabilitySource
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.service.ModelLibrary
+import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
 import com.dmitriim.localailab.feature.playground.presentation.state.DomainError
 import com.dmitriim.localailab.feature.playground.presentation.state.OperationState

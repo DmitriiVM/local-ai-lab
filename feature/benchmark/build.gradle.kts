@@ -17,7 +17,6 @@ dependencies {
     implementation(project(":core:operation"))
     implementation(project(":core:ui"))
     implementation(project(":source:runs"))
-    implementation(project(":source:models"))
     implementation(project(":ai:api"))
     implementation(project(":ai:runtime"))
     implementation(project(":core:voice"))

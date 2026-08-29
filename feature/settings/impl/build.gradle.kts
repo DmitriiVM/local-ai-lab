@@ -10,6 +10,7 @@ android {
 
 dependencies {
     implementation(project(":feature:settings:api"))
+    implementation(project(":feature:models:api"))
     implementation(project(":core:audio"))
     implementation(project(":core:di"))
     implementation(project(":core:model"))

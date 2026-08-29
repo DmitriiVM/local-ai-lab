@@ -6,8 +6,8 @@ import com.dmitriim.localailab.core.audio.input.storage.AudioInputStore
 import com.dmitriim.localailab.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.model.device.StorageUsage
-import com.dmitriim.localailab.core.model.service.HuggingFaceCredentialStatus
-import com.dmitriim.localailab.core.model.service.ModelDownloadCredentials
+import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
+import com.dmitriim.localailab.feature.models.api.data.ModelDownloadCredentials
 import com.dmitriim.localailab.core.model.service.RunRepository
 import com.dmitriim.localailab.feature.settings.api.data.AppSettingsRepository
 import com.dmitriim.localailab.feature.settings.api.domain.AppSettings

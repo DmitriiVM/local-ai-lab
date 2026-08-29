@@ -4,8 +4,8 @@ import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.capability.CapabilityReadiness
 import com.dmitriim.localailab.core.model.capability.CapabilityReadinessState
 import com.dmitriim.localailab.core.model.engine.EngineAvailability
-import com.dmitriim.localailab.core.model.library.InstalledModel
-import com.dmitriim.localailab.core.model.library.ModelValidationState
+import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
+import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
 
 internal fun buildCapabilityReadiness(
     availability: List<EngineAvailability>,

@@ -6,11 +6,11 @@ import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechVoice
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoice
 import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.library.BuiltInSpeechToTextModels
-import com.dmitriim.localailab.core.model.library.BuiltInTextToSpeechModels
+import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInSpeechToTextModels
+import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInTextToSpeechModels
 import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.core.model.library.InstalledModel
-import com.dmitriim.localailab.core.model.library.ModelValidationState
+import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
+import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.model.manifest.TtsControl
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceDescriptor

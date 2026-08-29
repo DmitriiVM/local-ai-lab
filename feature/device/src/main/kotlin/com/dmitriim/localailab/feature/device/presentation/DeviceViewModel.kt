@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.ai.api.availability.EngineAvailabilitySource
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.service.ModelDiagnostics
+import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelDiagnostics
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject

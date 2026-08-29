@@ -18,8 +18,8 @@ import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.core.model.runs.RunRecord
-import com.dmitriim.localailab.core.model.service.ModelLibrary
-import com.dmitriim.localailab.core.model.service.ModelTransfers
+import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
+import com.dmitriim.localailab.feature.models.api.data.ModelTransfers
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
 import com.dmitriim.localailab.core.performance.launch.ProfileWorkloadStore
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator

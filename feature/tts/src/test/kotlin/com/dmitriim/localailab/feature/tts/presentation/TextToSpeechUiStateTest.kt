@@ -5,9 +5,9 @@ import com.dmitriim.localailab.core.model.capability.AiCapability
 import com.dmitriim.localailab.core.model.engine.EngineId
 import com.dmitriim.localailab.core.model.library.CatalogDownload
 import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.core.model.library.InstalledModel
+import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
 import com.dmitriim.localailab.core.model.library.ModelCatalogState
-import com.dmitriim.localailab.core.model.library.ModelValidationState
+import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
 import com.dmitriim.localailab.core.model.manifest.ModelFormat
 import com.dmitriim.localailab.core.model.manifest.ModelId
 import com.dmitriim.localailab.core.model.manifest.ModelManifest
