@@ -13,12 +13,11 @@ import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import com.dmitriim.localailab.core.navigation.destination.PlaygroundDestination
 
 @Composable
 fun rememberAppNavigationState(
     providers: Set<NavigationEntryProvider>,
-    startDestination: AppDestination = PlaygroundDestination,
+    startDestination: AppDestination,
 ): AppNavigationState {
     val registry = remember(providers) { NavigationRegistry(providers) }
     check(registry.isRootDestination(startDestination)) {

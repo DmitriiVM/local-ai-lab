@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.playground.presentation
+package com.dmitriim.localailab.feature.playground.impl.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -9,7 +9,7 @@ import com.dmitriim.localailab.core.navigation.AppNavigator
 import com.dmitriim.localailab.feature.assistant.api.navigation.AssistantDestination
 import com.dmitriim.localailab.feature.stt.api.navigation.SpeechToTextDestination
 import com.dmitriim.localailab.feature.tts.api.navigation.TextToSpeechDestination
-import com.dmitriim.localailab.feature.playground.presentation.ui.PlaygroundScreen
+import com.dmitriim.localailab.feature.playground.impl.presentation.ui.PlaygroundScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 @Composable

@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.playground.presentation.state
+package com.dmitriim.localailab.feature.playground.impl.presentation.state
 
 import com.dmitriim.localailab.ai.api.engine.EngineId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId

@@ -5,23 +5,24 @@ plugins {
 }
 
 android {
-    namespace = "com.dmitriim.localailab.feature.playground"
+    namespace = "com.dmitriim.localailab.feature.playground.impl"
 }
 
 dependencies {
-    implementation(project(":feature:assistant:api"))
-    implementation(project(":feature:stt:api"))
-    implementation(project(":feature:tts:api"))
     implementation(project(":ai:api"))
     implementation(project(":core:di"))
     implementation(project(":core:navigation"))
     implementation(project(":core:operation"))
     implementation(project(":core:ui"))
+    implementation(project(":feature:assistant:api"))
     implementation(project(":feature:models:api"))
+    implementation(project(":feature:playground:api"))
     implementation(project(":feature:runs:api"))
+    implementation(project(":feature:stt:api"))
+    implementation(project(":feature:tts:api"))
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel)

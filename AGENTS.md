@@ -20,23 +20,15 @@ Local AI Lab is a native Android app for running AI models locally.
 - `:core:performance` — generic Android CPU, memory, battery, thermal, and device telemetry.
 - `:core:operation` — foreground-operation coordination and interruption handling.
 - `:core:ui` — application Compose theme and typography.
-- `:feature:assistant:api` — assistant navigation destination.
-- `:feature:assistant:impl` — local chat and voice-assistant workflow and UI.
-- `:feature:benchmark:api` — benchmark workloads, launch handoff, and navigation destination.
-- `:feature:benchmark:impl` — benchmark execution, presentation, and navigation entry provider.
-- `:feature:device:api` — device diagnostics navigation destination.
-- `:feature:device:impl` — device and engine diagnostics UI.
-- `:feature:models:api` — model-library, transfer, model-install diagnostics, and model-navigation contracts.
-- `:feature:models:impl` — catalog, model Room persistence, validation, downloads, transfers, and models UI.
-- `:feature:playground` — capability dashboard, readiness, and workflow entry points.
-- `:feature:runs:api` — run history, conversation, replay, storage, repository, and navigation contracts.
-- `:feature:runs:impl` — run-history Room persistence, export, replay storage, and UI.
-- `:feature:settings:api` — settings contracts and navigation destinations.
-- `:feature:settings:impl` — DataStore-backed settings and settings UI.
-- `:feature:stt:api` — STT request/event models, transcription operation contract, and navigation destination.
-- `:feature:stt:impl` — STT engine orchestration, persistence, navigation, and UI.
-- `:feature:tts:api` — TTS request/event models, synthesis/preview operation contracts, and navigation destination.
-- `:feature:tts:impl` — TTS engine orchestration, preview/playback, persistence, navigation, and UI.
+- `:feature:assistant` — local chat and voice-assistant workflow, UI, and navigation.
+- `:feature:benchmark` — benchmark workloads, execution, presentation, and navigation.
+- `:feature:device` — device and engine diagnostics UI and navigation.
+- `:feature:models` — model library, transfers, diagnostics, Room persistence, and navigation.
+- `:feature:playground` — capability dashboard, readiness, workflow entry points, and navigation.
+- `:feature:runs` — run history, conversation/replay storage, Room persistence, export, and navigation.
+- `:feature:settings` — settings contracts, DataStore persistence, UI, and navigation.
+- `:feature:stt` — STT request/event models, engine orchestration, persistence, UI, and navigation.
+- `:feature:tts` — TTS request/event models, engine orchestration, preview/playback, persistence, UI, and navigation.
 
 ## Code organization
 

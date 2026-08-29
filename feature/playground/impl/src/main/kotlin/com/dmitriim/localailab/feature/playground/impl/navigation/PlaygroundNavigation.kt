@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.playground.navigation
+package com.dmitriim.localailab.feature.playground.impl.navigation
 
 import androidx.compose.runtime.Composable
 import com.dmitriim.localailab.core.di.AppScope
@@ -6,8 +6,8 @@ import com.dmitriim.localailab.core.navigation.AppNavigator
 import com.dmitriim.localailab.core.navigation.AppDestination
 import com.dmitriim.localailab.core.navigation.NavigationEntryProvider
 import com.dmitriim.localailab.core.navigation.TopLevelDestination
-import com.dmitriim.localailab.core.navigation.destination.PlaygroundDestination
-import com.dmitriim.localailab.feature.playground.presentation.PlaygroundRoute
+import com.dmitriim.localailab.feature.playground.api.navigation.PlaygroundDestination
+import com.dmitriim.localailab.feature.playground.impl.presentation.PlaygroundRoute
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding

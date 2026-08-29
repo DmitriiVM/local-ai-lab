@@ -10,6 +10,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dmitriim.localailab.R
 import com.dmitriim.localailab.core.navigation.AppNavHost
+import com.dmitriim.localailab.feature.playground.api.navigation.PlaygroundDestination
 import com.dmitriim.localailab.feature.stt.api.navigation.SpeechToTextDestination
 import com.dmitriim.localailab.feature.tts.api.navigation.TextToSpeechDestination
 import com.dmitriim.localailab.core.navigation.rememberAppNavigationState
@@ -19,7 +20,10 @@ import com.dmitriim.localailab.ui.navigation.AdaptiveNavigationScaffold
 
 @Composable
 fun LocalAiLabApp(graph: AppGraph) {
-    val navigationState = rememberAppNavigationState(graph.navigationEntryProviders)
+    val navigationState = rememberAppNavigationState(
+        providers = graph.navigationEntryProviders,
+        startDestination = PlaygroundDestination,
+    )
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner, graph.foregroundOperationCoordinator) {

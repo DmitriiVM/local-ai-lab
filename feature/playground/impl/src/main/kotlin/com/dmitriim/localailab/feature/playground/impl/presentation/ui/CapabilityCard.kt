@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.playground.presentation.ui
+package com.dmitriim.localailab.feature.playground.impl.presentation.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background

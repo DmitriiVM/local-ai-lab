@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.playground.presentation
+package com.dmitriim.localailab.feature.playground.impl.presentation
 
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.capability.CapabilityReadiness

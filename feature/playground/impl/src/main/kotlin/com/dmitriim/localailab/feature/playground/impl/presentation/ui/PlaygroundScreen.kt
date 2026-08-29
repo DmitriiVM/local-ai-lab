@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.playground.presentation.ui
+package com.dmitriim.localailab.feature.playground.impl.presentation.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
-import com.dmitriim.localailab.feature.playground.R
-import com.dmitriim.localailab.feature.playground.presentation.PlaygroundUiState
-import com.dmitriim.localailab.feature.playground.presentation.state.OperationState
+import com.dmitriim.localailab.feature.playground.impl.R
+import com.dmitriim.localailab.feature.playground.impl.presentation.PlaygroundUiState
+import com.dmitriim.localailab.feature.playground.impl.presentation.state.OperationState
 
 @Composable
 fun PlaygroundScreen(

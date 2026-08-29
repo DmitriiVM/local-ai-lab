@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.playground.presentation.state
+package com.dmitriim.localailab.feature.playground.impl.presentation.state
 
 sealed interface OperationState<out T> {
     data class Preparing(val message: String) : OperationState<Nothing>
