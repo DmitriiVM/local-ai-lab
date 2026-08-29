@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.ai.api.system
 
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
 
 /** Runtime profile keys for models provided by Android rather than installed model artifacts. */
 object SystemModelProfileKeys {

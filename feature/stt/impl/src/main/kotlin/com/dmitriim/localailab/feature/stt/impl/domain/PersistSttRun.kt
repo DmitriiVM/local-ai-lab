@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.stt.impl.domain
 
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus

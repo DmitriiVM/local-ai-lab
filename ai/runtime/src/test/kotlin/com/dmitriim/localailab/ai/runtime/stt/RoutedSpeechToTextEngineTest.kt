@@ -5,8 +5,8 @@ import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadResult
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextRequest
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextResult
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextRuntime
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

@@ -1,11 +1,11 @@
 package com.dmitriim.localailab.feature.models.impl.data.transfer
 
-import com.dmitriim.localailab.core.model.library.CatalogArchiveFormat
-import com.dmitriim.localailab.core.model.library.CatalogDownloadArchive
-import com.dmitriim.localailab.core.model.library.CatalogDownloadFile
-import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.library.CatalogArchiveFormat
+import com.dmitriim.localailab.ai.api.model.library.CatalogDownloadArchive
+import com.dmitriim.localailab.ai.api.model.library.CatalogDownloadFile
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileSpec
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.feature.models.impl.data.library.InstalledModelService
 import java.io.File
 import kotlinx.coroutines.CancellationException

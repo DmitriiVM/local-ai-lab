@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.model.manifest
+package com.dmitriim.localailab.ai.api.model.manifest
 
 import kotlinx.serialization.Serializable
 

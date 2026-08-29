@@ -9,7 +9,7 @@ android {
 
 dependencies {
     api(libs.androidx.navigation3.runtime)
-    api(project(":core:model"))
+    api(project(":ai:api"))
     api(libs.kotlinx.serialization.core)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

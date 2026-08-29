@@ -10,11 +10,11 @@ import com.dmitriim.localailab.ai.api.chat.LlmGenerationResult
 import com.dmitriim.localailab.ai.api.chat.LlmLoadOptions
 import com.dmitriim.localailab.ai.api.chat.LlmLoadRequest
 import com.dmitriim.localailab.ai.api.chat.LlmLoadResult
-import com.dmitriim.localailab.core.model.engine.ComputePreference
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.runtime.ChatModelReference
+import com.dmitriim.localailab.ai.api.engine.ComputePreference
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

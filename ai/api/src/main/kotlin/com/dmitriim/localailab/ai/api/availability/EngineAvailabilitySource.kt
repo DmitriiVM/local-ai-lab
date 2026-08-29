@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.api.availability
 
-import com.dmitriim.localailab.core.model.engine.EngineAvailability
+import com.dmitriim.localailab.ai.api.engine.EngineAvailability
 import kotlinx.coroutines.flow.StateFlow
 
 /**

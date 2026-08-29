@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.core.performance.profiling
 
 import android.os.SystemClock
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 
 /** Lightweight fallback for direct construction outside the Android dependency graph. */
 object LightweightInferenceProfiler : InferenceProfiler {

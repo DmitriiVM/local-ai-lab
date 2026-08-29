@@ -11,7 +11,6 @@ android {
 dependencies {
     api(project(":ai:api"))
     api(project(":core:audio"))
-    api(project(":core:model"))
     implementation(project(":core:di"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.tracing)

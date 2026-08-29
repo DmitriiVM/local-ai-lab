@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.models.impl.domain.transfer
 
-import com.dmitriim.localailab.core.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
 
 /** The app-private storage required to download and install one catalog model from an empty staging area. */
 data class ModelDownloadStorageEstimate(

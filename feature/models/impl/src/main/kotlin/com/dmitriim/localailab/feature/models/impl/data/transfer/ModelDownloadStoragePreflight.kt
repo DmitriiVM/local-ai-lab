@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.feature.models.impl.data.transfer
 
 import android.os.StatFs
-import com.dmitriim.localailab.core.model.library.CatalogArchiveFormat
-import com.dmitriim.localailab.core.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.model.library.CatalogArchiveFormat
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
 import com.dmitriim.localailab.feature.models.impl.domain.transfer.ModelDownloadStorageRequirement
 import java.io.File
 import java.util.Locale

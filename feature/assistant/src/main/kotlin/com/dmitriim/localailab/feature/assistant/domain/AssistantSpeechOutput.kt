@@ -2,7 +2,7 @@ package com.dmitriim.localailab.feature.assistant.domain
 
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffects
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.feature.tts.api.domain.PreviewSpeech
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechPreviewRequest
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisEvent

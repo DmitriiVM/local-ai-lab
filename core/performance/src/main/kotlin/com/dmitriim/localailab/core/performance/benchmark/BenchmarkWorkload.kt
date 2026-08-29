@@ -3,8 +3,8 @@ package com.dmitriim.localailab.core.performance.benchmark
 import com.dmitriim.localailab.ai.api.chat.LlmChatMessage
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
-import com.dmitriim.localailab.core.model.engine.ComputePreference
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.engine.ComputePreference
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 
 sealed interface BenchmarkWorkload {
     val modelId: ModelId

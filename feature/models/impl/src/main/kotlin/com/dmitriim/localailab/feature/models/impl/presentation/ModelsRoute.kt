@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.navigation.AppNavigator
 import com.dmitriim.localailab.feature.models.api.navigation.ModelDetailsDestination
 import com.dmitriim.localailab.feature.models.impl.presentation.ui.ModelDetailsScreen

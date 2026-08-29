@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.models.api.domain.diagnostics
 
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 
 data class DeviceDiagnostics(
     val modelDirectoryWritable: Boolean,

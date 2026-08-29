@@ -2,7 +2,7 @@ package com.dmitriim.localailab.feature.tts.api.domain
 
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffects
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import java.util.UUID
 
 data class SpeechSynthesisRequest(

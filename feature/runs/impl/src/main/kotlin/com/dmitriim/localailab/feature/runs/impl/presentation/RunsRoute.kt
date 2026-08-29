@@ -51,10 +51,10 @@ fun RunsRoute(navigator: AppNavigator, viewModel: RunsViewModel = metroViewModel
     )
 }
 
-private val com.dmitriim.localailab.core.model.capability.AiCapability.replayDestination: AppDestination get() = when (this) {
-    com.dmitriim.localailab.core.model.capability.AiCapability.CHAT -> AssistantDestination
-    com.dmitriim.localailab.core.model.capability.AiCapability.SPEECH_TO_TEXT -> SpeechToTextDestination
-    com.dmitriim.localailab.core.model.capability.AiCapability.TEXT_TO_SPEECH -> TextToSpeechDestination
-    com.dmitriim.localailab.core.model.capability.AiCapability.VOICE_ACTIVITY_DETECTION -> SpeechToTextDestination
-    com.dmitriim.localailab.core.model.capability.AiCapability.VOICE_ASSISTANT -> AssistantDestination
+private val com.dmitriim.localailab.ai.api.capability.AiCapability.replayDestination: AppDestination get() = when (this) {
+    com.dmitriim.localailab.ai.api.capability.AiCapability.CHAT -> AssistantDestination
+    com.dmitriim.localailab.ai.api.capability.AiCapability.SPEECH_TO_TEXT -> SpeechToTextDestination
+    com.dmitriim.localailab.ai.api.capability.AiCapability.TEXT_TO_SPEECH -> TextToSpeechDestination
+    com.dmitriim.localailab.ai.api.capability.AiCapability.VOICE_ACTIVITY_DETECTION -> SpeechToTextDestination
+    com.dmitriim.localailab.ai.api.capability.AiCapability.VOICE_ASSISTANT -> AssistantDestination
 }

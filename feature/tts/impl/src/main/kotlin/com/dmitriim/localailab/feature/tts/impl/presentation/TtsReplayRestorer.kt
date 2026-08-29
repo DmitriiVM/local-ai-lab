@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.tts.impl.presentation
 
-import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.text.UiText

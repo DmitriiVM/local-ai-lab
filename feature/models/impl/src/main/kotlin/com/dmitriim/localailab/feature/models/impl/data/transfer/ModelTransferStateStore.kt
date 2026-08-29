@@ -3,7 +3,7 @@ package com.dmitriim.localailab.feature.models.impl.data.transfer
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelsDatabaseProvider
 import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelTransferEntity
 import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelTransferFileEntity

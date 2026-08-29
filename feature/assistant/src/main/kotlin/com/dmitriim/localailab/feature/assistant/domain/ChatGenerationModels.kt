@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.feature.assistant.domain
 
 import com.dmitriim.localailab.ai.api.chat.LlmContextManagement
-import com.dmitriim.localailab.core.model.engine.ComputePreference
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.engine.ComputePreference
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import java.util.UUID
 
 internal data class ChatGenerationRequest(

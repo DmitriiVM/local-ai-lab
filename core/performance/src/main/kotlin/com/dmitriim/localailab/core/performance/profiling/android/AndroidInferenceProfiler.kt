@@ -4,7 +4,7 @@ import android.os.SystemClock
 import androidx.tracing.Trace
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.core.performance.profiling.InferenceDeviceSnapshot
 import com.dmitriim.localailab.core.performance.profiling.InferencePhase
 import com.dmitriim.localailab.core.performance.profiling.InferencePhaseDuration

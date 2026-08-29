@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.api.chat
 
-import com.dmitriim.localailab.core.model.engine.EngineId
+import com.dmitriim.localailab.ai.api.engine.EngineId
 
 /**
  * Concrete local-chat runtime contributed to the application engine set.

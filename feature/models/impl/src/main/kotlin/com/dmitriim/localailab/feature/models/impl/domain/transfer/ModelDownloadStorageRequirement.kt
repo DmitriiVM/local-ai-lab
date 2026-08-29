@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.models.impl.domain.transfer
 
-import com.dmitriim.localailab.core.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
 
 /** Calculates the additional free space required to finish a model download and installation. */
 internal object ModelDownloadStorageRequirement {

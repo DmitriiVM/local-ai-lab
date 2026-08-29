@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.playground.presentation.state
 
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 
 data class DomainError(
     val title: String,

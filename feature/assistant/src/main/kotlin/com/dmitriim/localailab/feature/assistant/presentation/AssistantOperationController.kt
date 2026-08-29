@@ -118,7 +118,7 @@ internal class AssistantOperationController(
         }
     }
 
-    fun previewVoice(modelId: com.dmitriim.localailab.core.model.manifest.ModelId, voiceId: String, settings: SpeechOutputSettings): String? {
+    fun previewVoice(modelId: com.dmitriim.localailab.ai.api.model.manifest.ModelId, voiceId: String, settings: SpeechOutputSettings): String? {
         val snapshot = state.value
         if (!snapshot.isIdle) return "Wait for the current operation to finish."
         val model = snapshot.voiceModels.firstOrNull { it.id == modelId && it.installed }

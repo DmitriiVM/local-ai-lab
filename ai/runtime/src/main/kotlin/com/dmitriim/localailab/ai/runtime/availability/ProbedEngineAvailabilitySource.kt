@@ -3,7 +3,7 @@ package com.dmitriim.localailab.ai.runtime.availability
 import com.dmitriim.localailab.ai.api.availability.EngineAvailabilityProbe
 import com.dmitriim.localailab.ai.api.availability.EngineAvailabilitySource
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.engine.EngineAvailability
+import com.dmitriim.localailab.ai.api.engine.EngineAvailability
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn

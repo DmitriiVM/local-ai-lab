@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.sherpa.catalog
 
-import com.dmitriim.localailab.core.model.library.CatalogDownloadFile
+import com.dmitriim.localailab.ai.api.model.library.CatalogDownloadFile
 
 internal fun huggingFaceFiles(
     repository: String,

@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.assistant.domain
 
 import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionEvent
 import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionRequest
 import com.dmitriim.localailab.feature.stt.api.domain.SttTranscriptionSettings

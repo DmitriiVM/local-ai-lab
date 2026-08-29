@@ -1,14 +1,14 @@
 package com.dmitriim.localailab.feature.models.impl.domain.runtime
 
 import com.dmitriim.localailab.ai.api.system.SystemModelProfileKeys
-import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
-import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.SttRecognitionMode
-import com.dmitriim.localailab.core.model.manifest.TtsControl
-import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
-import com.dmitriim.localailab.core.model.runtime.ChatModelReference
-import com.dmitriim.localailab.core.model.runtime.ModelArtifactReference
+import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRoles
+import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
+import com.dmitriim.localailab.ai.api.model.manifest.SttRecognitionMode
+import com.dmitriim.localailab.ai.api.model.manifest.TtsControl
+import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
+import com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference
+import com.dmitriim.localailab.ai.api.model.runtime.ModelArtifactReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.SpeechToTextModelReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.TextToSpeechModelReference
 import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInSpeechToTextModels

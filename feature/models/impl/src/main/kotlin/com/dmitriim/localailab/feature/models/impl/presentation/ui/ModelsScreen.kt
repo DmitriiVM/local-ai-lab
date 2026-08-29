@@ -34,15 +34,15 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.library.CatalogDownloadAuthentication
-import com.dmitriim.localailab.core.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.library.CatalogDownloadAuthentication
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
 import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
-import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelManifest
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.component.StatusMessage

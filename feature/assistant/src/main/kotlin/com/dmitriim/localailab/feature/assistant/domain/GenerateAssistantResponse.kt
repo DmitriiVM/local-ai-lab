@@ -8,7 +8,7 @@ import com.dmitriim.localailab.ai.api.chat.LlmGenerationRequest
 import com.dmitriim.localailab.ai.api.chat.LlmLoadOption
 import com.dmitriim.localailab.ai.api.chat.LlmLoadOptions
 import com.dmitriim.localailab.ai.api.chat.LlmLoadRequest
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.core.performance.profiling.InferencePhase
 import com.dmitriim.localailab.core.performance.profiling.InferenceProfiler

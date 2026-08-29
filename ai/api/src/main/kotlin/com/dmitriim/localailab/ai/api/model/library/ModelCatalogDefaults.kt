@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.model.library
+package com.dmitriim.localailab.ai.api.model.library
 
 object ModelCatalogDefaults {
     const val VERSION = 4

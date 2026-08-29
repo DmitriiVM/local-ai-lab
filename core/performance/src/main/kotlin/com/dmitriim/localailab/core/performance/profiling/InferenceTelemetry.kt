@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.core.performance.profiling
 
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

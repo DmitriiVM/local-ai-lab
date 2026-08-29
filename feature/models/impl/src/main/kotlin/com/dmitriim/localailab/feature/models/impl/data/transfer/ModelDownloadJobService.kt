@@ -3,7 +3,7 @@ package com.dmitriim.localailab.feature.models.impl.data.transfer
 import android.app.job.JobParameters
 import android.app.job.JobService
 import android.os.Build
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

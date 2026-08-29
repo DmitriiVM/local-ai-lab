@@ -15,9 +15,9 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
-import com.dmitriim.localailab.core.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import java.util.concurrent.TimeUnit
 
 /** Selects one persisted scheduling mechanism; both invoke the same transactional installer. */

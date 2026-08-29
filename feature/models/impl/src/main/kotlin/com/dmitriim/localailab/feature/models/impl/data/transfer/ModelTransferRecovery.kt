@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.models.impl.data.transfer
 
 import android.app.Application
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.feature.models.impl.data.catalog.ModelCatalogRegistry
 import com.dmitriim.localailab.feature.models.impl.data.library.InstalledModelService
 import com.dmitriim.localailab.feature.models.impl.data.library.storageDirectoryName

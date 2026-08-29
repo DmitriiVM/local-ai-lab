@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.api.chat
 
-import com.dmitriim.localailab.core.model.engine.ComputePreference
-import com.dmitriim.localailab.core.model.runtime.ChatModelReference
+import com.dmitriim.localailab.ai.api.engine.ComputePreference
+import com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference
 
 /** Selects a local model and optional runtime configuration for [ChatExecution.load]. */
 data class LlmLoadRequest(

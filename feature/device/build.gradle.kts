@@ -11,7 +11,6 @@ android {
 dependencies {
     implementation(project(":ai:api"))
     implementation(project(":core:di"))
-    implementation(project(":core:model"))
     implementation(project(":core:navigation"))
     implementation(project(":core:operation"))
     implementation(project(":core:ui"))

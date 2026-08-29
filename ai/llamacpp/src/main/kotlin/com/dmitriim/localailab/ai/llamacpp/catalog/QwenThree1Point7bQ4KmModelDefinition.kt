@@ -3,7 +3,7 @@ package com.dmitriim.localailab.ai.llamacpp.catalog
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.llamacpp.LlamaCppRuntimeProfile
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.ModelCatalogState
+import com.dmitriim.localailab.ai.api.model.library.ModelCatalogState
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding

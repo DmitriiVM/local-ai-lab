@@ -28,7 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.component.AppSectionCard
 import com.dmitriim.localailab.core.ui.component.AppSurfaceTone
@@ -85,7 +85,7 @@ fun SpeechToTextScreen(
             SttRunMetricsCard(
                 metrics = metrics,
                 streamingModel = state.selectedModel?.recognitionMode ==
-                    com.dmitriim.localailab.core.model.manifest.SttRecognitionMode.STREAMING,
+                    com.dmitriim.localailab.ai.api.model.manifest.SttRecognitionMode.STREAMING,
             )
         }
     }

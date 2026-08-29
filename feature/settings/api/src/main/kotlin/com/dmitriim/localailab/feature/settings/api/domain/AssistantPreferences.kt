@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.settings.api.domain
 
-import com.dmitriim.localailab.core.model.engine.ComputePreference
+import com.dmitriim.localailab.ai.api.engine.ComputePreference
 
 data class AssistantPreferences(
     val chat: AssistantChatPreferences = AssistantChatPreferences(),

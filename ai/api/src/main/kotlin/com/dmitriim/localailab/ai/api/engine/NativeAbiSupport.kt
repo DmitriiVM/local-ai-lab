@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.core.model.engine
+package com.dmitriim.localailab.ai.api.engine
 
 /** Native ABIs for which the app packages its local inference runtimes. */
 object NativeAbiSupport {

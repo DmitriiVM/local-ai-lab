@@ -1,11 +1,11 @@
 package com.dmitriim.localailab.feature.models.api.domain.runtime
 
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelFileRole
-import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.manifest.SttRecognitionMode
-import com.dmitriim.localailab.core.model.runtime.ModelArtifactReference
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRole
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.manifest.SttRecognitionMode
+import com.dmitriim.localailab.ai.api.model.runtime.ModelArtifactReference
 
 /** A validated STT model location and configuration resolved for use by an STT feature. */
 data class SpeechToTextModelReference(

@@ -3,8 +3,8 @@ package com.dmitriim.localailab.ai.sherpa.catalog.stt
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.sherpa.stt.profiles.WeNetCtcSttProfile
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
-import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRoles
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileSpec
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding

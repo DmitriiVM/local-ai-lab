@@ -1,19 +1,19 @@
 package com.dmitriim.localailab.feature.tts.impl.presentation
 
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechVoice
-import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.library.CatalogDownload
-import com.dmitriim.localailab.core.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.library.CatalogDownload
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
 import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
-import com.dmitriim.localailab.core.model.library.ModelCatalogState
+import com.dmitriim.localailab.ai.api.model.library.ModelCatalogState
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
-import com.dmitriim.localailab.core.model.manifest.ModelFormat
-import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.manifest.ModelSource
-import com.dmitriim.localailab.core.model.manifest.TtsVoiceDescriptor
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFormat
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelSource
+import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceDescriptor
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -28,7 +28,7 @@ class TextToSpeechUiStateTest {
             profileType = ModelProfileId("PIPER_VITS_TTS"),
             languages = setOf("en-US", "ru"),
             speakerCount = 2,
-            voiceMode = com.dmitriim.localailab.core.model.manifest.TtsVoiceMode.SPEAKER_ID,
+            voiceMode = com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode.SPEAKER_ID,
             supportedControls = emptySet(),
             voices = listOf(
                 voice("english", setOf("en_GB")),

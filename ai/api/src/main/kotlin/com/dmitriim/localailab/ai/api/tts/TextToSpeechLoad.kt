@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.ai.api.tts
 
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.runtime.ModelArtifactReference
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.runtime.ModelArtifactReference
 
 /** Selects an installed speech-synthesis model and optional runtime configuration. */
 data class TextToSpeechLoadRequest(

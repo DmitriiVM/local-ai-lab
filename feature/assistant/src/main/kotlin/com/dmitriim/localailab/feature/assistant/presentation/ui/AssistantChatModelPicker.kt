@@ -2,7 +2,7 @@ package com.dmitriim.localailab.feature.assistant.presentation.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.component.OptionPickerItem
 import com.dmitriim.localailab.feature.assistant.presentation.ChatModelOption

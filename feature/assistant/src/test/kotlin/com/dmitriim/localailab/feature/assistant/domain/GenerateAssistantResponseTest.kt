@@ -14,11 +14,11 @@ import com.dmitriim.localailab.ai.api.chat.LlmLoadRequest
 import com.dmitriim.localailab.ai.api.chat.LlmLoadResult
 import com.dmitriim.localailab.ai.api.chat.LlmRuntimeDiagnostics
 import com.dmitriim.localailab.ai.api.chat.LlmTokenCounter
-import com.dmitriim.localailab.core.model.engine.ComputePreference
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.runtime.ChatModelReference
+import com.dmitriim.localailab.ai.api.engine.ComputePreference
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.SpeechToTextModelReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.TextToSpeechModelReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver

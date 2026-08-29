@@ -4,12 +4,12 @@ import android.app.Application
 import android.os.SystemClock
 import android.util.Log
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.CatalogDownloadAuthentication
-import com.dmitriim.localailab.core.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.model.library.CatalogDownloadAuthentication
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
 import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelCompatibilityState
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.feature.models.api.data.ModelTransfers
 import com.dmitriim.localailab.feature.models.impl.data.catalog.ModelCatalogRegistry
 import com.dmitriim.localailab.feature.models.impl.data.credentials.HuggingFaceTokenStore

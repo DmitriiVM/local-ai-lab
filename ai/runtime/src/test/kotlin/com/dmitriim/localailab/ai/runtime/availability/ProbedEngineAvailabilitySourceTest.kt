@@ -1,12 +1,12 @@
 package com.dmitriim.localailab.ai.runtime.availability
 
 import com.dmitriim.localailab.ai.api.availability.EngineAvailabilityProbe
-import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.ComputePreference
-import com.dmitriim.localailab.core.model.engine.EngineAvailability
-import com.dmitriim.localailab.core.model.engine.EngineDescriptor
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.engine.EngineKind
+import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.ai.api.engine.ComputePreference
+import com.dmitriim.localailab.ai.api.engine.EngineAvailability
+import com.dmitriim.localailab.ai.api.engine.EngineDescriptor
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.engine.EngineKind
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking

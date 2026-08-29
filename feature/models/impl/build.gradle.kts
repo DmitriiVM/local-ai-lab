@@ -44,7 +44,6 @@ dependencies {
     implementation(project(":feature:models:api"))
     implementation(project(":ai:api"))
     implementation(project(":ai:runtime"))
-    implementation(project(":core:model"))
     implementation(project(":core:di"))
     implementation(project(":core:navigation"))
     implementation(project(":core:ui"))

@@ -1,6 +1,6 @@
-package com.dmitriim.localailab.core.model.runtime
+package com.dmitriim.localailab.ai.api.model.runtime
 
-import com.dmitriim.localailab.core.model.manifest.ModelFileRole
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRole
 
 /** An app-visible artifact resolved for use by a model runtime. */
 data class ModelArtifactReference(

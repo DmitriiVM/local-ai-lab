@@ -4,11 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.CatalogDownloadAuthentication
+import com.dmitriim.localailab.ai.api.model.library.CatalogDownloadAuthentication
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
-import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelManifest
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
 import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelDiagnostics
 import com.dmitriim.localailab.feature.models.api.data.ModelDownloadCredentials
@@ -304,7 +304,7 @@ class ModelsViewModel(
 
 private data class ModelData(
     val installed: List<com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel>,
-    val catalog: List<com.dmitriim.localailab.core.model.library.CatalogModel>,
+    val catalog: List<com.dmitriim.localailab.ai.api.model.library.CatalogModel>,
     val transfers: Map<ModelId, com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState>,
     val credentialStatus: com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus,
 )

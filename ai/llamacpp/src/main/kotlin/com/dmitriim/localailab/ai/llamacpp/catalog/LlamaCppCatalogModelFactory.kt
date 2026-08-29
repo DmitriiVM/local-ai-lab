@@ -1,17 +1,17 @@
 package com.dmitriim.localailab.ai.llamacpp.catalog
 
-import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.library.CatalogDownload
-import com.dmitriim.localailab.core.model.library.CatalogModel
-import com.dmitriim.localailab.core.model.library.ModelCatalogDefaults
-import com.dmitriim.localailab.core.model.library.ModelCatalogState
-import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
-import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
-import com.dmitriim.localailab.core.model.manifest.ModelFormat
-import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
-import com.dmitriim.localailab.core.model.manifest.ModelSource
+import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.ai.api.model.library.CatalogDownload
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.model.library.ModelCatalogDefaults
+import com.dmitriim.localailab.ai.api.model.library.ModelCatalogState
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRoles
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileSpec
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFormat
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
+import com.dmitriim.localailab.ai.api.model.manifest.ModelSource
 
 internal fun llamaCppCatalogModel(
     modelId: String,

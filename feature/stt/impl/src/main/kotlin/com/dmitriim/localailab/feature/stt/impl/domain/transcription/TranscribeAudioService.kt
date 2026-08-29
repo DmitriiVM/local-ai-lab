@@ -6,7 +6,7 @@ import com.dmitriim.localailab.ai.api.stt.SpeechToTextEngine
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadRequest
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextRequest
 import com.dmitriim.localailab.core.audio.input.storage.AudioInputStore
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.core.performance.profiling.InferencePhase
 import com.dmitriim.localailab.core.performance.profiling.InferenceProfiler

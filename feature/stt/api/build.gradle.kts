@@ -9,7 +9,7 @@ android {
 
 dependencies {
     api(project(":core:audio"))
-    api(project(":core:model"))
+    api(project(":ai:api"))
     api(project(":core:navigation"))
     api(project(":core:performance"))
     api(libs.kotlinx.coroutines.core)

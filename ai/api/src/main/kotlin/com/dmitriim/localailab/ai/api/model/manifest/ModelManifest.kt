@@ -1,7 +1,7 @@
-package com.dmitriim.localailab.core.model.manifest
+package com.dmitriim.localailab.ai.api.model.manifest
 
-import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.engine.EngineId
+import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.ai.api.engine.EngineId
 import kotlinx.serialization.Serializable
 
 @Serializable

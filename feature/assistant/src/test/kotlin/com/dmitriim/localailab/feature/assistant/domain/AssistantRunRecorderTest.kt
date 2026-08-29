@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.assistant.domain
 
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationMessageRecord
 import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationRecord
 import com.dmitriim.localailab.feature.runs.api.domain.storage.StorageUsage

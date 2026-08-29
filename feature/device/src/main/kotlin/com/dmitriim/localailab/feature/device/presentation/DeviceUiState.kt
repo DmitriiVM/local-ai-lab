@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.device.presentation
 
 import com.dmitriim.localailab.feature.models.api.domain.diagnostics.DeviceDiagnostics
-import com.dmitriim.localailab.core.model.engine.EngineAvailability
+import com.dmitriim.localailab.ai.api.engine.EngineAvailability
 
 data class DeviceSnapshot(
     val deviceName: String,

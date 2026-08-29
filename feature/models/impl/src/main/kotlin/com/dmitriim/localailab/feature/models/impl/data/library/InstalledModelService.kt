@@ -7,8 +7,8 @@ import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
 import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
-import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelManifest
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
 import com.dmitriim.localailab.feature.models.impl.data.persistence.InstalledModelEntity
 import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelsDatabaseProvider

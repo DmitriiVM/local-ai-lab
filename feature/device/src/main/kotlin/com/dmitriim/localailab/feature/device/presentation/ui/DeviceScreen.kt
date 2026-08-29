@@ -14,7 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localailab.core.model.engine.EngineAvailability
+import com.dmitriim.localailab.ai.api.engine.EngineAvailability
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localailab.feature.device.presentation.DeviceUiState

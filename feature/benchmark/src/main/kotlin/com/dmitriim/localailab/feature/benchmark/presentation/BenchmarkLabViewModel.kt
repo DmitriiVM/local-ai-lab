@@ -7,7 +7,7 @@ import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
 import com.dmitriim.localailab.ai.runtime.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunKind
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus

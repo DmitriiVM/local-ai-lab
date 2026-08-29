@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.api.tts
 
-import com.dmitriim.localailab.core.model.engine.EngineId
+import com.dmitriim.localailab.ai.api.engine.EngineId
 
 /**
  * Concrete text-to-speech runtime contributed to the application engine set.

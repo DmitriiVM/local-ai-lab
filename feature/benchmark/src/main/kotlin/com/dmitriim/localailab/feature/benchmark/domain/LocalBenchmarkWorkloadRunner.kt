@@ -12,7 +12,7 @@ import com.dmitriim.localailab.ai.api.tts.TextToSpeechEngine
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
 import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkIterationResult
@@ -117,7 +117,7 @@ class LocalBenchmarkWorkloadRunner(
         workload: BenchmarkWorkload.Chat,
         runId: String,
         iteration: Int,
-        model: com.dmitriim.localailab.core.model.runtime.ChatModelReference,
+        model: com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference,
         load: com.dmitriim.localailab.ai.api.chat.LlmLoadResult,
         generation: com.dmitriim.localailab.ai.api.chat.LlmGenerationResult,
         telemetry: com.dmitriim.localailab.core.performance.profiling.InferenceTelemetry,

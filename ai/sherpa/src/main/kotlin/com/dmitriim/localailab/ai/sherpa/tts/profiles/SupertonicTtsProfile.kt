@@ -1,9 +1,9 @@
 package com.dmitriim.localailab.ai.sherpa.tts.profiles
 
-import com.dmitriim.localailab.core.model.manifest.ModelFileRole
-import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.runtime.ModelArtifacts
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRole
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRoles
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.runtime.ModelArtifacts
 import com.k2fsa.sherpa.onnx.OfflineTtsSupertonicModelConfig
 import dev.zacsweers.metro.Inject
 

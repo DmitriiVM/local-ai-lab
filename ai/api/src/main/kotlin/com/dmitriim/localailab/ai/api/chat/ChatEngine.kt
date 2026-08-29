@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.api.chat
 
-import com.dmitriim.localailab.core.model.engine.EngineId
+import com.dmitriim.localailab.ai.api.engine.EngineId
 
 /**
  * Application-facing local-chat facade that routes work to the runtime selected by a model.

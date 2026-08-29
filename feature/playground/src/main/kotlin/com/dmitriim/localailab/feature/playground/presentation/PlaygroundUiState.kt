@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.playground.presentation
 
-import com.dmitriim.localailab.core.model.capability.CapabilityReadiness
+import com.dmitriim.localailab.ai.api.capability.CapabilityReadiness
 import com.dmitriim.localailab.feature.playground.presentation.state.OperationState
 
 data class PlaygroundUiState(

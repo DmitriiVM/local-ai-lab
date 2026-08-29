@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.api.chat
 
-import com.dmitriim.localailab.core.model.engine.ComputePreference
+import com.dmitriim.localailab.ai.api.engine.ComputePreference
 
 /**
  * Immutable declaration of the features supported by one chat runtime.

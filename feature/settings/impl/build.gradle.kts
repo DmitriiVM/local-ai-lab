@@ -13,7 +13,7 @@ dependencies {
     implementation(project(":feature:models:api"))
     implementation(project(":core:audio"))
     implementation(project(":core:di"))
-    implementation(project(":core:model"))
+    implementation(project(":ai:api"))
     implementation(project(":core:navigation"))
     implementation(project(":core:operation"))
     implementation(project(":core:ui"))

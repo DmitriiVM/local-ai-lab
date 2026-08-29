@@ -2,13 +2,13 @@ package com.dmitriim.localailab.ai.chatterbox
 
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelFileRole
-import com.dmitriim.localailab.core.model.manifest.ModelFileRoles
-import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
-import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRole
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRoles
+import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
+import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
 import dev.zacsweers.metro.Inject
 import java.io.File
 

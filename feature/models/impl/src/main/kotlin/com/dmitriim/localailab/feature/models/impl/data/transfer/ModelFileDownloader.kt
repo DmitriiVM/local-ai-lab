@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.models.impl.data.transfer
 
 import android.util.Log
-import com.dmitriim.localailab.core.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelTransferFileEntity
 import com.dmitriim.localailab.feature.models.impl.data.validation.sha256
 import com.dmitriim.localailab.feature.models.impl.domain.transfer.ModelDownloadFailure

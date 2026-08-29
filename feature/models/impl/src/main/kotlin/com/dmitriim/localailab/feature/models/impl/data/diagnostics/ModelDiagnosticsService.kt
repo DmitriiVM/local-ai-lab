@@ -5,12 +5,12 @@ import android.app.Application
 import android.os.Build
 import android.os.StatFs
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.models.api.domain.diagnostics.DeviceDiagnostics
-import com.dmitriim.localailab.core.model.engine.NativeAbiSupport
+import com.dmitriim.localailab.ai.api.engine.NativeAbiSupport
 import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelCompatibility
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
-import com.dmitriim.localailab.core.model.manifest.ModelManifest
+import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelDiagnostics
 import com.dmitriim.localailab.feature.models.impl.data.library.InstalledModelService
 import com.dmitriim.localailab.feature.models.impl.data.validation.FileSystemModelValidator

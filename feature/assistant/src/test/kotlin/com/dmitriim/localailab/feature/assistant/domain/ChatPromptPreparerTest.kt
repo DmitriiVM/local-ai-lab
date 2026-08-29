@@ -14,8 +14,8 @@ import com.dmitriim.localailab.ai.api.chat.LlmLoadRequest
 import com.dmitriim.localailab.ai.api.chat.LlmLoadResult
 import com.dmitriim.localailab.ai.api.chat.LlmRuntimeDiagnostics
 import com.dmitriim.localailab.ai.api.chat.LlmTokenCounter
-import com.dmitriim.localailab.core.model.engine.ComputePreference
-import com.dmitriim.localailab.core.model.engine.EngineId
+import com.dmitriim.localailab.ai.api.engine.ComputePreference
+import com.dmitriim.localailab.ai.api.engine.EngineId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

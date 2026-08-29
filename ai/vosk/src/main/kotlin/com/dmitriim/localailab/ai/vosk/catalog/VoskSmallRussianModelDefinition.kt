@@ -3,8 +3,8 @@ package com.dmitriim.localailab.ai.vosk.catalog
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.vosk.VoskRuntimeProfile
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.CatalogArchiveFormat
-import com.dmitriim.localailab.core.model.manifest.SttRecognitionMode
+import com.dmitriim.localailab.ai.api.model.library.CatalogArchiveFormat
+import com.dmitriim.localailab.ai.api.model.manifest.SttRecognitionMode
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding

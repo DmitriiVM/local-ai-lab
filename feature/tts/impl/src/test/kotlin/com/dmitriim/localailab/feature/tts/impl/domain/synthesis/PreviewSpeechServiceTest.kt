@@ -11,11 +11,11 @@ import com.dmitriim.localailab.core.audio.output.api.StreamingSpeechPlayer
 import com.dmitriim.localailab.core.audio.output.model.SpeechPlaybackMetrics
 import com.dmitriim.localailab.core.audio.output.model.SpeechPlaybackState
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffectsProcessor
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.manifest.TtsVoiceMode
-import com.dmitriim.localailab.core.model.runtime.ChatModelReference
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
+import com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.SpeechToTextModelReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.TextToSpeechModelReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver

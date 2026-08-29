@@ -26,7 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.core.performance.benchmark.BenchmarkWorkload
 import com.dmitriim.localailab.core.performance.profiling.InferenceResourceMetrics
 import com.dmitriim.localailab.core.ui.R as CoreUiR

@@ -8,7 +8,7 @@ import com.dmitriim.localailab.core.audio.output.api.StreamingSpeechPlayer
 import com.dmitriim.localailab.core.audio.output.model.GeneratedAudioFile
 import com.dmitriim.localailab.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffectsProcessor
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.core.performance.profiling.InferencePhase
 import com.dmitriim.localailab.core.performance.profiling.InferenceProfiler

@@ -2,9 +2,9 @@ package com.dmitriim.localailab.ai.sherpa.tts.profiles
 
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
 import com.dmitriim.localailab.ai.sherpa.tts.SherpaTtsModel
-import com.dmitriim.localailab.core.model.manifest.ModelFileRole
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
-import com.dmitriim.localailab.core.model.runtime.ModelArtifacts
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRole
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.runtime.ModelArtifacts
 import com.k2fsa.sherpa.onnx.GenerationConfig
 import com.k2fsa.sherpa.onnx.OfflineTts
 import com.k2fsa.sherpa.onnx.OfflineTtsConfig

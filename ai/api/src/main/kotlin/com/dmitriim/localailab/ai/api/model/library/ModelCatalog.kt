@@ -1,6 +1,6 @@
-package com.dmitriim.localailab.core.model.library
+package com.dmitriim.localailab.ai.api.model.library
 
-import com.dmitriim.localailab.core.model.manifest.ModelManifest
+import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import kotlinx.serialization.Serializable
 
 @Serializable

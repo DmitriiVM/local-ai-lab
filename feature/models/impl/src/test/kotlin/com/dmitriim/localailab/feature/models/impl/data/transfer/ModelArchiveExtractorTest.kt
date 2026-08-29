@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.models.impl.data.transfer
 
-import com.dmitriim.localailab.core.model.library.CatalogArchiveFormat
+import com.dmitriim.localailab.ai.api.model.library.CatalogArchiveFormat
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files

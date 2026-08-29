@@ -1,8 +1,8 @@
-package com.dmitriim.localailab.core.model.runtime
+package com.dmitriim.localailab.ai.api.model.runtime
 
-import com.dmitriim.localailab.core.model.engine.EngineId
-import com.dmitriim.localailab.core.model.manifest.ModelId
-import com.dmitriim.localailab.core.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
 
 /** A chat model reference that does not assume app-visible model files. */
 sealed interface ChatModelReference {

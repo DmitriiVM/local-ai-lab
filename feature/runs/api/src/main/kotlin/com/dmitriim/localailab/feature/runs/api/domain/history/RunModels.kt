@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.runs.api.domain.history
 
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import kotlinx.serialization.Serializable
 
 @Serializable

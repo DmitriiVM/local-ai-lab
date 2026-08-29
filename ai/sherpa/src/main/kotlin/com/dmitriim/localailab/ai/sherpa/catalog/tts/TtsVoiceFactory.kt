@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.sherpa.catalog.tts
 
-import com.dmitriim.localailab.core.model.manifest.TtsVoiceDescriptor
+import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceDescriptor
 
 internal fun ttsVoice(
     id: String,

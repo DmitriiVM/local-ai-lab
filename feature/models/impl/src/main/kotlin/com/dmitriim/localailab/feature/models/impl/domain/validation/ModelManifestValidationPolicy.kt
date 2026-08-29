@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.models.impl.domain.validation
 
-import com.dmitriim.localailab.core.model.manifest.ModelFileSpec
+import com.dmitriim.localailab.ai.api.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
 
 /** Pure rules that classify installed-model validation outcomes. */

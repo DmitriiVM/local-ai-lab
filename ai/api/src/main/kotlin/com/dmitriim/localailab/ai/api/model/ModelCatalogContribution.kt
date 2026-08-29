@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.ai.api.model
 
-import com.dmitriim.localailab.core.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
 
 /**
  * One app-bundled catalog model and the runtime profile required to install and execute it.

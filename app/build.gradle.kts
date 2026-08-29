@@ -49,7 +49,6 @@ dependencies {
     implementation(project(":ai:system"))
     implementation(project(":core:audio"))
     implementation(project(":core:di"))
-    implementation(project(":core:model"))
     implementation(project(":core:navigation"))
     implementation(project(":core:performance"))
     implementation(project(":core:operation"))

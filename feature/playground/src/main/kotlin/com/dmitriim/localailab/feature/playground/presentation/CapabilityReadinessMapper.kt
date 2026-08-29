@@ -1,9 +1,9 @@
 package com.dmitriim.localailab.feature.playground.presentation
 
-import com.dmitriim.localailab.core.model.capability.AiCapability
-import com.dmitriim.localailab.core.model.capability.CapabilityReadiness
-import com.dmitriim.localailab.core.model.capability.CapabilityReadinessState
-import com.dmitriim.localailab.core.model.engine.EngineAvailability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.CapabilityReadiness
+import com.dmitriim.localailab.ai.api.capability.CapabilityReadinessState
+import com.dmitriim.localailab.ai.api.engine.EngineAvailability
 import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
 

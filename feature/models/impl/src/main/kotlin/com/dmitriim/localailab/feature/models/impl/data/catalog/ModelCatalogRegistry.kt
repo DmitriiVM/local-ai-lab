@@ -2,7 +2,7 @@ package com.dmitriim.localailab.feature.models.impl.data.catalog
 
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 
@@ -35,5 +35,5 @@ class ModelCatalogRegistry(
         }
     }
 
-    fun find(modelId: com.dmitriim.localailab.core.model.manifest.ModelId): CatalogModel? = byId[modelId]
+    fun find(modelId: com.dmitriim.localailab.ai.api.model.manifest.ModelId): CatalogModel? = byId[modelId]
 }

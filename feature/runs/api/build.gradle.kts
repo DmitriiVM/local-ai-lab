@@ -8,7 +8,7 @@ android {
 }
 
 dependencies {
-    api(project(":core:model"))
+    api(project(":ai:api"))
     api(project(":core:navigation"))
     api(libs.kotlinx.coroutines.core)
 }

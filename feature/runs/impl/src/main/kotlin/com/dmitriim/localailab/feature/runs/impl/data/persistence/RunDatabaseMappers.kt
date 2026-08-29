@@ -1,6 +1,6 @@
 package com.dmitriim.localailab.feature.runs.impl.data.persistence
 
-import com.dmitriim.localailab.core.model.capability.AiCapability
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationKind
 import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationMessageRecord
 import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationMessageRole

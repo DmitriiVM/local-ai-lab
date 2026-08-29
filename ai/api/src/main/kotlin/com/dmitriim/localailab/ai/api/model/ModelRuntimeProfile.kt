@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.api.model
 
-import com.dmitriim.localailab.core.model.manifest.ModelManifest
-import com.dmitriim.localailab.core.model.manifest.ModelProfileKey
+import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
 import java.io.File
 
 /**
