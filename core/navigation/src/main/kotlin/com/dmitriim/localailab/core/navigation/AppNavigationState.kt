@@ -6,10 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import com.dmitriim.localailab.core.navigation.destination.PlaygroundDestination
 
 @Composable
@@ -42,6 +45,10 @@ fun rememberAppNavigationState(
         startHostDestination,
         startDestination,
     )
+    val playgroundEntryDecorators = rememberHostEntryDecorators()
+    val modelsEntryDecorators = rememberHostEntryDecorators()
+    val runsEntryDecorators = rememberHostEntryDecorators()
+    val settingsEntryDecorators = rememberHostEntryDecorators()
     val stacks = remember(playgroundStack, modelsStack, runsStack, settingsStack) {
         TopLevelBackStacks(
             playground = playgroundStack,
@@ -50,14 +57,28 @@ fun rememberAppNavigationState(
             settings = settingsStack,
         )
     }
+    val entryDecorators = remember(
+        playgroundEntryDecorators,
+        modelsEntryDecorators,
+        runsEntryDecorators,
+        settingsEntryDecorators,
+    ) {
+        TopLevelEntryDecorators(
+            playground = playgroundEntryDecorators,
+            models = modelsEntryDecorators,
+            runs = runsEntryDecorators,
+            settings = settingsEntryDecorators,
+        )
+    }
     val selectedDestination = rememberSaveable(startHostDestination) {
         androidx.compose.runtime.mutableStateOf(startHostDestination)
     }
 
-    return remember(registry, stacks, selectedDestination, startHostDestination) {
+    return remember(registry, stacks, entryDecorators, selectedDestination, startHostDestination) {
         AppNavigationState(
             registry = registry,
             stacks = stacks,
+            entryDecorators = entryDecorators,
             selectedDestinationState = selectedDestination,
             startHostDestination = startHostDestination,
         )
@@ -77,9 +98,16 @@ private fun rememberHostBackStack(
     },
 )
 
+@Composable
+private fun rememberHostEntryDecorators(): List<NavEntryDecorator<NavKey>> = listOf(
+    rememberSaveableStateHolderNavEntryDecorator(),
+    rememberViewModelStoreNavEntryDecorator(),
+)
+
 class AppNavigationState internal constructor(
     private val registry: NavigationRegistry,
     private val stacks: TopLevelBackStacks,
+    private val entryDecorators: TopLevelEntryDecorators,
     private val selectedDestinationState: MutableState<TopLevelDestination>,
     private val startHostDestination: TopLevelDestination,
 ) : AppNavigator {
@@ -88,6 +116,11 @@ class AppNavigationState internal constructor(
 
     val activeStack: NavBackStack<NavKey>
         get() = stacks[selectedDestination]
+
+    internal fun stackFor(destination: TopLevelDestination): NavBackStack<NavKey> = stacks[destination]
+
+    internal fun entryDecoratorsFor(destination: TopLevelDestination): List<NavEntryDecorator<NavKey>> =
+        entryDecorators[destination]
 
     val shouldHandleSystemBack: Boolean
         get() = activeStack.size == 1 && selectedDestination != startHostDestination
