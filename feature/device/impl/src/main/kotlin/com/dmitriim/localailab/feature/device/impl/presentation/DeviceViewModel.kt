@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.device.presentation
+package com.dmitriim.localailab.feature.device.impl.presentation
 
 import android.app.Application
 import androidx.lifecycle.ViewModel

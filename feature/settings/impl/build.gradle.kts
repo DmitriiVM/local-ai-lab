@@ -9,6 +9,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":feature:device:api"))
     implementation(project(":feature:settings:api"))
     implementation(project(":feature:models:api"))
     implementation(project(":core:audio"))

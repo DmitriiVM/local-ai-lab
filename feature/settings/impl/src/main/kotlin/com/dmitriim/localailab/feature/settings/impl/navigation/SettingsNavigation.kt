@@ -6,7 +6,7 @@ import com.dmitriim.localailab.core.navigation.AppDestination
 import com.dmitriim.localailab.core.navigation.AppNavigator
 import com.dmitriim.localailab.core.navigation.NavigationEntryProvider
 import com.dmitriim.localailab.core.navigation.TopLevelDestination
-import com.dmitriim.localailab.core.navigation.destination.DeviceDestination
+import com.dmitriim.localailab.feature.device.api.navigation.DeviceDestination
 import com.dmitriim.localailab.feature.settings.api.navigation.SettingsDestination
 import com.dmitriim.localailab.feature.settings.impl.presentation.SettingsRoute
 import dev.zacsweers.metro.ContributesIntoSet

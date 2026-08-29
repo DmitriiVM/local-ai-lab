@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.device.presentation.ui
+package com.dmitriim.localailab.feature.device.impl.presentation.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.ai.api.engine.EngineAvailability
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
-import com.dmitriim.localailab.feature.device.presentation.DeviceUiState
+import com.dmitriim.localailab.feature.device.impl.presentation.DeviceUiState
 
 @Composable
 fun DeviceScreen(

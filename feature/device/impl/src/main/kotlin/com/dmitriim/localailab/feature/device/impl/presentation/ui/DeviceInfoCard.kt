@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.device.presentation.ui
+package com.dmitriim.localailab.feature.device.impl.presentation.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

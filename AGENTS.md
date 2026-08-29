@@ -24,7 +24,8 @@ Local AI Lab is a native Android app for running AI models locally.
 - `:feature:assistant:impl` — local chat and voice-assistant workflow and UI.
 - `:feature:benchmark:api` — benchmark workloads, launch handoff, and navigation destination.
 - `:feature:benchmark:impl` — benchmark execution, presentation, and navigation entry provider.
-- `:feature:device` — device and engine diagnostics and UI.
+- `:feature:device:api` — device diagnostics navigation destination.
+- `:feature:device:impl` — device and engine diagnostics UI.
 - `:feature:models:api` — model-library, transfer, model-install diagnostics, and model-navigation contracts.
 - `:feature:models:impl` — catalog, model Room persistence, validation, downloads, transfers, and models UI.
 - `:feature:playground` — capability dashboard, readiness, and workflow entry points.
