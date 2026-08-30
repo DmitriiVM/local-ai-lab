@@ -12,12 +12,12 @@ import com.dmitriim.localailab.feature.models.api.domain.diagnostics.DeviceDiagn
 import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelCompatibility
 import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelDiagnostics
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
-import com.dmitriim.localailab.feature.models.impl.models.data.library.InstalledModelService
-import com.dmitriim.localailab.feature.models.impl.models.data.validation.FileSystemModelValidator
-import com.dmitriim.localailab.feature.models.impl.models.data.validation.toReadableBytes
 import com.dmitriim.localailab.feature.models.impl.details.domain.diagnostics.ModelCompatibilityIssue
 import com.dmitriim.localailab.feature.models.impl.details.domain.diagnostics.ModelCompatibilityIssueSeverity
 import com.dmitriim.localailab.feature.models.impl.details.domain.diagnostics.ModelCompatibilityPolicy
+import com.dmitriim.localailab.feature.models.impl.models.data.library.InstalledModelService
+import com.dmitriim.localailab.feature.models.impl.models.data.validation.FileSystemModelValidator
+import com.dmitriim.localailab.feature.models.impl.models.data.validation.toReadableBytes
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn

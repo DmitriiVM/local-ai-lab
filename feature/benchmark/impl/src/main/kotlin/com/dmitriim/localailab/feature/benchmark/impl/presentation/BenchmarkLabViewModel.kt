@@ -84,6 +84,7 @@ class BenchmarkLabViewModel(
         )
     }
 
+    @Suppress("LongMethod") // Coordinates one benchmark session and its persisted lifecycle.
     fun start() {
         if (benchmarkJob?.isActive == true) return
         val initial = state.value

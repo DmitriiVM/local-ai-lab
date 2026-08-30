@@ -99,6 +99,7 @@ internal class AssistantTtsController(
         return null
     }
 
+    @Suppress("LongMethod") // Coordinates playback, telemetry persistence, and cancellation cleanup.
     suspend fun speakInternal(text: String, messageId: String): SpeechOutcome {
         val snapshot = host.state.value
         val model = snapshot.selectedVoiceModel

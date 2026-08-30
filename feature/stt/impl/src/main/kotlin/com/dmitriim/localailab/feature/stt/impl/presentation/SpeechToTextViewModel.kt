@@ -54,6 +54,7 @@ import kotlinx.serialization.json.jsonPrimitive
 @Inject
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
+@Suppress("LargeClass") // Owns the STT screen state and its complete recording/replay workflow.
 class SpeechToTextViewModel(
     private val modelLibrary: ModelLibrary,
     private val modelTransfers: ModelTransfers,
@@ -323,6 +324,7 @@ class SpeechToTextViewModel(
         it.copy(errorMessage = UiText.Resource(CoreUiR.string.stt_error_microphone_permission_denied))
     }
 
+    @Suppress("LongMethod") // Coordinates transcription, telemetry persistence, and UI state cleanup.
     private fun transcribe(input: PcmAudioInput) {
         val snapshot = mutableState.value
         val modelId = snapshot.selectedModelId ?: return

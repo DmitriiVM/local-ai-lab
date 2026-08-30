@@ -11,9 +11,9 @@ import com.dmitriim.localailab.feature.models.api.data.ModelTransfers
 import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelCompatibilityState
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
-import com.dmitriim.localailab.feature.models.impl.models.data.catalog.ModelCatalogRegistry
 import com.dmitriim.localailab.feature.models.impl.details.data.credentials.HuggingFaceTokenStore
 import com.dmitriim.localailab.feature.models.impl.details.data.diagnostics.ModelDiagnosticsService
+import com.dmitriim.localailab.feature.models.impl.models.data.catalog.ModelCatalogRegistry
 import com.dmitriim.localailab.feature.models.impl.models.data.library.InstalledModelService
 import com.dmitriim.localailab.feature.models.impl.models.data.library.storageDirectoryName
 import com.dmitriim.localailab.feature.models.impl.models.domain.transfer.ModelDownloadFailure

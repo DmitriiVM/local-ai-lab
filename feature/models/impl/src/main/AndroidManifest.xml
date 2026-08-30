@@ -12,7 +12,7 @@
 
     <application>
         <service
-            android:name=".data.transfer.ModelDownloadJobService"
+            android:name=".models.data.transfer.ModelDownloadJobService"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service

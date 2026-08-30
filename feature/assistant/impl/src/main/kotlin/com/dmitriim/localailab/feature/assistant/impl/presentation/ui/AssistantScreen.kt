@@ -59,63 +59,27 @@ fun AssistantScreen(
     onOpenModels: () -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
+    val clipboard = LocalClipboardManager.current
     var activeSheet by remember { mutableStateOf<AssistantSettingsSheet?>(null) }
     var showClearConfirmation by remember { mutableStateOf(false) }
-    val clipboard = LocalClipboardManager.current
-    val systemNavigationPadding = if (dimensions.bottomNavigationOverlayClearance == 0.dp) {
-        Modifier.navigationBarsPadding()
-    } else {
-        Modifier
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(systemNavigationPadding)
-                .imePadding()
-                .padding(
-                    start = dimensions.screenPadding,
-                    top = dimensions.topBarOverlayClearance + 44.dp,
-                    end = dimensions.screenPadding,
-                    bottom = dimensions.bottomNavigationOverlayClearance + 8.dp,
-                ),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            AssistantConfigurationBar(
-                state = uiState,
-                onOpenChat = { activeSheet = AssistantSettingsSheet.CHAT },
-                onOpenListen = { activeSheet = AssistantSettingsSheet.LISTEN },
-                onOpenSpeak = { activeSheet = AssistantSettingsSheet.SPEAK },
-            )
-            AssistantConversation(
-                messages = uiState.messages,
-                modifier = Modifier.weight(1f),
-                onCopy = { clipboard.setText(AnnotatedString(it)) },
-                onEdit = onEditAndRetry,
-                onRegenerate = onRegenerate,
-                onSpeak = onSpeakMessage,
-                canSpeak = uiState.isIdle && uiState.selectedVoice != null,
-                canRegenerate = uiState.isIdle,
-                header = {
-                    val message = uiState.errorMessage
-                        ?: uiState.voiceConfigurationError?.let { stringResource(it) }
-                    message?.let {
-                        StatusMessage(stringResource(CoreUiR.string.assistant_needs_attention), it)
-                    }
-                },
-                footer = { uiState.metrics?.let { metrics -> ChatMetricsCard(metrics, uiState.contextUsage) } },
-            )
-            AssistantComposer(
-                state = uiState,
-                onInput = onUpdateInput,
-                onStartRecording = onStartRecording,
-                onStopRecording = onStopRecording,
-                onSend = onSend,
-                onProfile = onProfile,
-                onCancel = onCancel,
-            )
-        }
+        AssistantWorkspace(
+            uiState = uiState,
+            onOpenChat = { activeSheet = AssistantSettingsSheet.CHAT },
+            onOpenListen = { activeSheet = AssistantSettingsSheet.LISTEN },
+            onOpenSpeak = { activeSheet = AssistantSettingsSheet.SPEAK },
+            onCopy = { clipboard.setText(AnnotatedString(it)) },
+            onUpdateInput = onUpdateInput,
+            onStartRecording = onStartRecording,
+            onStopRecording = onStopRecording,
+            onSend = onSend,
+            onProfile = onProfile,
+            onCancel = onCancel,
+            onEditAndRetry = onEditAndRetry,
+            onRegenerate = onRegenerate,
+            onSpeakMessage = onSpeakMessage,
+        )
         AssistantToolbarActions(
             state = uiState,
             onClearConversation = { showClearConfirmation = true },
@@ -144,6 +108,78 @@ fun AssistantScreen(
     ) {
         onClearConversation()
         showClearConfirmation = false
+    }
+}
+
+@Composable
+private fun AssistantWorkspace(
+    uiState: AssistantUiState,
+    onOpenChat: () -> Unit,
+    onOpenListen: () -> Unit,
+    onOpenSpeak: () -> Unit,
+    onCopy: (String) -> Unit,
+    onUpdateInput: (String) -> Unit,
+    onStartRecording: () -> Unit,
+    onStopRecording: () -> Unit,
+    onSend: () -> Unit,
+    onProfile: () -> Unit,
+    onCancel: () -> Unit,
+    onEditAndRetry: (String) -> Unit,
+    onRegenerate: () -> Unit,
+    onSpeakMessage: (String) -> Unit,
+) {
+    val dimensions = LocalAppDimensions.current
+    val systemNavigationPadding = if (dimensions.bottomNavigationOverlayClearance == 0.dp) {
+        Modifier.navigationBarsPadding()
+    } else {
+        Modifier
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .then(systemNavigationPadding)
+            .imePadding()
+            .padding(
+                start = dimensions.screenPadding,
+                top = dimensions.topBarOverlayClearance + 44.dp,
+                end = dimensions.screenPadding,
+                bottom = dimensions.bottomNavigationOverlayClearance + 8.dp,
+            ),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        AssistantConfigurationBar(
+            state = uiState,
+            onOpenChat = onOpenChat,
+            onOpenListen = onOpenListen,
+            onOpenSpeak = onOpenSpeak,
+        )
+        AssistantConversation(
+            messages = uiState.messages,
+            modifier = Modifier.weight(1f),
+            onCopy = onCopy,
+            onEdit = onEditAndRetry,
+            onRegenerate = onRegenerate,
+            onSpeak = onSpeakMessage,
+            canSpeak = uiState.isIdle && uiState.selectedVoice != null,
+            canRegenerate = uiState.isIdle,
+            header = {
+                val message = uiState.errorMessage
+                    ?: uiState.voiceConfigurationError?.let { stringResource(it) }
+                message?.let {
+                    StatusMessage(stringResource(CoreUiR.string.assistant_needs_attention), it)
+                }
+            },
+            footer = { uiState.metrics?.let { metrics -> ChatMetricsCard(metrics, uiState.contextUsage) } },
+        )
+        AssistantComposer(
+            state = uiState,
+            onInput = onUpdateInput,
+            onStartRecording = onStartRecording,
+            onStopRecording = onStopRecording,
+            onSend = onSend,
+            onProfile = onProfile,
+            onCancel = onCancel,
+        )
     }
 }
 

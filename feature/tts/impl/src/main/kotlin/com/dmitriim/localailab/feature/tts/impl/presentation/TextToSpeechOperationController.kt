@@ -138,6 +138,7 @@ internal class TextToSpeechOperationController(
         }.also(::registerForegroundCancellation)
     }
 
+    @Suppress("LongMethod") // Coordinates preview validation, synthesis, playback, and cleanup.
     fun previewVoice(voiceId: String) {
         val snapshot = state.value
         val activeJob = operationJob?.takeIf(Job::isActive)
@@ -232,6 +233,7 @@ internal class TextToSpeechOperationController(
         }.also(::registerForegroundCancellation)
     }
 
+    @Suppress("LongMethod") // Coordinates synthesis validation, persistence, playback, and cleanup.
     fun synthesize() {
         if (isActive()) {
             Log.w(TAG, "Ignoring synthesis request because a TTS operation is already active.")

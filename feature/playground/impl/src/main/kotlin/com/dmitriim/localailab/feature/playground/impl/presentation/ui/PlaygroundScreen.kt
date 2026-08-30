@@ -27,6 +27,7 @@ import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localailab.feature.playground.impl.R
 import com.dmitriim.localailab.feature.playground.impl.presentation.PlaygroundUiState
+import com.dmitriim.localailab.feature.playground.impl.presentation.state.DomainError
 import com.dmitriim.localailab.feature.playground.impl.presentation.state.OperationState
 
 @Composable
@@ -52,58 +53,14 @@ fun PlaygroundScreen(
         verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
         item {
-            Column(
-                modifier = Modifier.padding(top = 0.dp, bottom = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_playground_brand_mark),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(68.dp)
-                        .padding(bottom = 12.dp),
-                    colorFilter = ColorFilter.tint(AssistantPurple),
-                )
-                Text(
-                    text = stringResource(CoreUiR.string.playground_playground_screen_88),
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-                Text(
-                    stringResource(CoreUiR.string.playground_privacy_description),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
-                )
-            }
+            PlaygroundHeader()
         }
         if (state.operation is OperationState.Preparing) {
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CircularProgressIndicator()
-                    Text(stringResource(CoreUiR.string.playground_playground_screen_90))
-                }
-            }
+            item { PlaygroundPreparingState() }
         }
         if (state.operation is OperationState.Error) {
             val error = state.operation.error
-            item {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                    ),
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Text(error.title, style = MaterialTheme.typography.titleMedium)
-                        Text(error.explanation)
-                        OutlinedButton(onClick = onRefresh) {
-                            Text(stringResource(CoreUiR.string.playground_playground_screen_91))
-                        }
-                    }
-                }
-            }
+            item { PlaygroundErrorState(error = error, onRefresh = onRefresh) }
         }
         items(
             count = visibleCapabilities.size,
@@ -114,6 +71,64 @@ fun PlaygroundScreen(
                 capability = capability.capability,
                 onClick = { onOpenCapability(capability.capability) },
             )
+        }
+    }
+}
+
+@Composable
+private fun PlaygroundHeader() {
+    Column(
+        modifier = Modifier.padding(top = 0.dp, bottom = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Image(
+            painter = painterResource(R.drawable.ic_playground_brand_mark),
+            contentDescription = null,
+            modifier = Modifier
+                .size(68.dp)
+                .padding(bottom = 12.dp),
+            colorFilter = ColorFilter.tint(AssistantPurple),
+        )
+        Text(
+            text = stringResource(CoreUiR.string.playground_playground_screen_88),
+            style = MaterialTheme.typography.headlineMedium,
+        )
+        Text(
+            stringResource(CoreUiR.string.playground_privacy_description),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
+        )
+    }
+}
+
+@Composable
+private fun PlaygroundPreparingState() {
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        CircularProgressIndicator()
+        Text(stringResource(CoreUiR.string.playground_playground_screen_90))
+    }
+}
+
+@Composable
+private fun PlaygroundErrorState(
+    error: DomainError,
+    onRefresh: () -> Unit,
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(error.title, style = MaterialTheme.typography.titleMedium)
+            Text(error.explanation)
+            OutlinedButton(onClick = onRefresh) {
+                Text(stringResource(CoreUiR.string.playground_playground_screen_91))
+            }
         }
     }
 }

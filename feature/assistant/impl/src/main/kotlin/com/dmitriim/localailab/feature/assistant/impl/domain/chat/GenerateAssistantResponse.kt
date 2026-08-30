@@ -30,6 +30,7 @@ class GenerateAssistantResponse(
 ) {
     private val promptPreparer = ChatPromptPreparer(chatEngine)
 
+    @Suppress("LongMethod") // Owns the complete model-load, generation, telemetry, and cleanup flow.
     internal fun execute(request: ChatGenerationRequest): Flow<ChatGenerationEvent> = channelFlow {
         Log.i(
             CHAT_TAG,

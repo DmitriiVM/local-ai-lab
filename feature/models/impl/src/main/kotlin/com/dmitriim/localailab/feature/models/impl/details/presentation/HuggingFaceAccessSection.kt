@@ -16,7 +16,7 @@ fun HuggingFaceAccessSection(
 ) {
     val uriHandler = LocalUriHandler.current
     DetailsSection(
-        stringResource(CoreUiR.string.models_hugging_face_access)
+        stringResource(CoreUiR.string.models_hugging_face_access),
     ) {
         Text(stringResource(CoreUiR.string.models_hugging_face_access_section_37))
         Text(huggingFaceCredentialStatusLabel(credentialStatus))

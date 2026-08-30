@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
-import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
 import com.dmitriim.localailab.feature.models.impl.models.presentation.ModelDownloadButton
 
@@ -52,39 +51,7 @@ internal fun ModelActionBar(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (installedModel != null) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedButton(
-                        onClick = onValidate,
-                        enabled = !validating,
-                        modifier = Modifier.weight(1f),
-                        border = BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.58f),
-                        ),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.tertiary,
-                        ),
-                    ) {
-                        Text(
-                            stringResource(
-                                if (validating) {
-                                    CoreUiR.string.models_validating
-                                } else {
-                                    CoreUiR.string.models_validate
-                                },
-                            ),
-                        )
-                    }
-                    OutlinedButton(
-                        onClick = onDelete,
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error,
-                        ),
-                    ) {
-                        Text(stringResource(CoreUiR.string.models_model_details_screen_50))
-                    }
-                }
+                InstalledModelActions(validating, onValidate, onDelete)
             } else {
                 when (transfer) {
                     is ModelTransferState.Queued -> TransferQueuedActions(
@@ -128,19 +95,80 @@ internal fun ModelActionBar(
             }
         }
     }
+    TransferConfirmationDialogs(
+        confirmAnyNetwork = confirmAnyNetwork,
+        confirmCancel = confirmCancel,
+        onDismissAnyNetwork = { confirmAnyNetwork = false },
+        onConfirmAnyNetwork = {
+            confirmAnyNetwork = false
+            onResumeOnAnyNetwork()
+        },
+        onDismissCancel = { confirmCancel = false },
+        onConfirmCancel = {
+            confirmCancel = false
+            onCancelTransfer()
+        },
+    )
+}
+
+@Composable
+private fun InstalledModelActions(
+    validating: Boolean,
+    onValidate: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        OutlinedButton(
+            onClick = onValidate,
+            enabled = !validating,
+            modifier = Modifier.weight(1f),
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.58f),
+            ),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.tertiary,
+            ),
+        ) {
+            Text(
+                stringResource(
+                    if (validating) CoreUiR.string.models_validating else CoreUiR.string.models_validate,
+                ),
+            )
+        }
+        OutlinedButton(
+            onClick = onDelete,
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.error,
+            ),
+        ) {
+            Text(stringResource(CoreUiR.string.models_model_details_screen_50))
+        }
+    }
+}
+
+@Composable
+private fun TransferConfirmationDialogs(
+    confirmAnyNetwork: Boolean,
+    confirmCancel: Boolean,
+    onDismissAnyNetwork: () -> Unit,
+    onConfirmAnyNetwork: () -> Unit,
+    onDismissCancel: () -> Unit,
+    onConfirmCancel: () -> Unit,
+) {
     if (confirmAnyNetwork) {
         AlertDialog(
-            onDismissRequest = { confirmAnyNetwork = false },
+            onDismissRequest = onDismissAnyNetwork,
             title = { Text(stringResource(CoreUiR.string.models_model_details_screen_60)) },
             text = { Text(stringResource(CoreUiR.string.models_model_details_screen_61)) },
             confirmButton = {
-                Button(onClick = {
-                    confirmAnyNetwork = false
-                    onResumeOnAnyNetwork()
-                }) { Text(stringResource(CoreUiR.string.models_model_details_screen_62)) }
+                Button(onClick = onConfirmAnyNetwork) {
+                    Text(stringResource(CoreUiR.string.models_model_details_screen_62))
+                }
             },
             dismissButton = {
-                OutlinedButton(onClick = { confirmAnyNetwork = false }) {
+                OutlinedButton(onClick = onDismissAnyNetwork) {
                     Text(stringResource(CoreUiR.string.models_model_details_screen_63))
                 }
             },
@@ -148,130 +176,19 @@ internal fun ModelActionBar(
     }
     if (confirmCancel) {
         AlertDialog(
-            onDismissRequest = { confirmCancel = false },
+            onDismissRequest = onDismissCancel,
             title = { Text(stringResource(CoreUiR.string.models_model_details_screen_64)) },
             text = { Text(stringResource(CoreUiR.string.models_model_details_screen_65)) },
             confirmButton = {
-                Button(onClick = {
-                    confirmCancel = false
-                    onCancelTransfer()
-                }) { Text(stringResource(CoreUiR.string.models_model_details_screen_66)) }
+                Button(onClick = onConfirmCancel) {
+                    Text(stringResource(CoreUiR.string.models_model_details_screen_66))
+                }
             },
             dismissButton = {
-                OutlinedButton(onClick = { confirmCancel = false }) {
+                OutlinedButton(onClick = onDismissCancel) {
                     Text(stringResource(CoreUiR.string.models_model_details_screen_67))
                 }
             },
         )
     }
 }
-
-@Composable
-private fun TransferQueuedActions(
-    transfer: ModelTransferState.Queued,
-    onPause: () -> Unit,
-    onCancel: () -> Unit,
-    onUseAnyNetwork: () -> Unit,
-) {
-    Text(
-        stringResource(
-            CoreUiR.string.models_model_details_screen_format_7,
-            transfer.networkPolicy.detailsNetworkLabel(),
-        ),
-    )
-    Text(
-        stringResource(CoreUiR.string.models_model_download_battery_requirement),
-        style = MaterialTheme.typography.bodySmall,
-    )
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        OutlinedButton(onClick = onPause, modifier = Modifier.weight(1f)) {
-            Text(stringResource(CoreUiR.string.models_model_details_screen_51))
-        }
-        OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
-            Text(stringResource(CoreUiR.string.models_model_details_screen_52))
-        }
-    }
-    if (transfer.networkPolicy == ModelTransferNetworkPolicy.WIFI_ONLY) {
-        OutlinedButton(onClick = onUseAnyNetwork, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(CoreUiR.string.models_model_details_screen_53))
-        }
-    }
-}
-
-@Composable
-private fun TransferRunningActions(
-    transfer: ModelTransferState.Running,
-    onPause: () -> Unit,
-    onCancel: () -> Unit,
-) {
-    Text(
-        stringResource(
-            CoreUiR.string.models_model_details_screen_format_8,
-            transfer.completedBytes.toDetailsReadableBytes(),
-            transfer.totalBytes.toDetailsReadableBytes(),
-        ),
-    )
-    transfer.bytesPerSecond?.takeIf { it > 0L }?.let { bytesPerSecond ->
-        val remaining = transfer.estimatedRemainingMillis?.toDetailsRemainingDuration() ?: return@let
-        Text(
-            stringResource(
-                CoreUiR.string.models_model_transfer_speed_eta,
-                bytesPerSecond.toDetailsReadableBytes(),
-                remaining,
-            ),
-            style = MaterialTheme.typography.bodySmall,
-        )
-    }
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        OutlinedButton(onClick = onPause, modifier = Modifier.weight(1f)) {
-            Text(stringResource(CoreUiR.string.models_model_details_screen_54))
-        }
-        OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
-            Text(stringResource(CoreUiR.string.models_model_details_screen_55))
-        }
-    }
-}
-
-private fun Long.toDetailsRemainingDuration(): String {
-    val remainingSeconds = (coerceAtLeast(0L) + 999L) / 1_000L
-    return when {
-        remainingSeconds < 60L -> "< 1 min"
-        remainingSeconds < 3_600L -> "${(remainingSeconds + 59L) / 60L} min"
-        else -> {
-            val hours = remainingSeconds / 3_600L
-            val minutes = (remainingSeconds % 3_600L + 59L) / 60L
-            if (minutes == 60L) "${hours + 1L} h" else "$hours h $minutes min"
-        }
-    }
-}
-
-@Composable
-private fun TransferPausedActions(
-    transfer: ModelTransferState.Paused,
-    onResume: () -> Unit,
-    onCancel: () -> Unit,
-) {
-    Text(
-        stringResource(
-            CoreUiR.string.models_model_details_screen_format_9,
-            transfer.completedBytes.toDetailsReadableBytes(),
-            transfer.totalBytes.toDetailsReadableBytes(),
-        ),
-    )
-    transfer.reason?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-    Button(onClick = onResume, modifier = Modifier.fillMaxWidth()) {
-        Text(stringResource(CoreUiR.string.models_model_details_screen_56))
-    }
-    OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) {
-        Text(stringResource(CoreUiR.string.models_model_details_screen_57))
-    }
-}
-
-@Composable
-private fun ModelTransferNetworkPolicy.detailsNetworkLabel(): String = stringResource(
-    if (this == ModelTransferNetworkPolicy.WIFI_ONLY) {
-        CoreUiR.string.models_network_wifi_only
-    } else {
-        CoreUiR.string.models_network_any
-    },
-)

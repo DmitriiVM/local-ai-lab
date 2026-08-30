@@ -37,7 +37,6 @@ import com.dmitriim.localailab.core.ui.component.AppSurfaceCard
 import com.dmitriim.localailab.core.ui.component.StatusMessage
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localailab.core.ui.style.AppFilterChipDefaults
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunKind
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import com.dmitriim.localailab.feature.runs.impl.presentation.RunsUiState
@@ -129,9 +128,7 @@ private fun ClearRunHistoryDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(CoreUiR.string.runs_runs_screen_93)) },
-        text = {
-            Text(stringResource(CoreUiR.string.runs_clear_history_explanation))
-        },
+        text = { Text(stringResource(CoreUiR.string.runs_clear_history_explanation)) },
         confirmButton = {
             OutlinedButton(onClick = onConfirm) {
                 Text(stringResource(CoreUiR.string.runs_runs_screen_95))
@@ -230,8 +227,15 @@ private val runFilterCapabilities = listOf(
 
 @Composable
 private fun RunRow(run: RunRecord, onSelect: (String) -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().clickable { onSelect(run.id) }) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSelect(run.id) },
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
             Text(
                 text = stringResource(
                     CoreUiR.string.runs_row_summary,
@@ -259,152 +263,3 @@ private fun RunRow(run: RunRecord, onSelect: (String) -> Unit) {
         }
     }
 }
-
-@Composable
-private fun RunDetails(
-    run: RunRecord,
-    onClose: () -> Unit,
-    onShare: () -> Unit,
-    onRepeat: () -> Unit,
-) {
-    val dimensions = LocalAppDimensions.current
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = dimensions.screenPadding),
-        contentPadding = PaddingValues(
-            top = dimensions.topBarOverlayClearance + 20.dp,
-            bottom = 24.dp + dimensions.bottomNavigationOverlayClearance,
-        ),
-        verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
-    ) {
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onClose) {
-                    Text(stringResource(CoreUiR.string.runs_runs_screen_100))
-                }
-                OutlinedButton(onClick = onRepeat) {
-                    Text(stringResource(CoreUiR.string.runs_runs_screen_101))
-                }
-                OutlinedButton(onClick = onShare) {
-                    Text(stringResource(CoreUiR.string.runs_runs_screen_102))
-                }
-            }
-        }
-        item {
-            Text(
-                text = stringResource(
-                    CoreUiR.string.runs_kind_and_capability,
-                    run.kind.label(),
-                    run.capability.label(),
-                ),
-                style = MaterialTheme.typography.headlineMedium,
-            )
-        }
-        item {
-            Text(
-                text = stringResource(
-                    CoreUiR.string.runs_status_and_model,
-                    run.status.label(),
-                    run.model?.displayName ?: stringResource(CoreUiR.string.runs_model_removed),
-                ),
-            )
-        }
-        item {
-            DetailCard(
-                title = stringResource(CoreUiR.string.runs_input),
-                body = run.input ?: stringResource(CoreUiR.string.runs_not_retained),
-            )
-        }
-        item {
-            DetailCard(
-                title = stringResource(CoreUiR.string.runs_output),
-                body = run.output ?: stringResource(CoreUiR.string.runs_not_available),
-            )
-        }
-        item {
-            DetailCard(
-                title = stringResource(CoreUiR.string.runs_effective_parameters),
-                body = run.parametersJson,
-            )
-        }
-        item {
-            DetailCard(
-                title = stringResource(CoreUiR.string.runs_metrics),
-                body = run.metricsJson,
-            )
-        }
-        run.errorMessage?.let { error ->
-            item {
-                DetailCard(
-                    title = stringResource(CoreUiR.string.runs_error),
-                    body = error,
-                )
-            }
-        }
-        if (run.linkedRunIds.isNotEmpty()) {
-            item {
-                DetailCard(
-                    title = stringResource(CoreUiR.string.runs_linked_pipeline_runs),
-                    body = run.linkedRunIds.joinToString(),
-                )
-            }
-        }
-        item {
-            Text(
-                text = stringResource(CoreUiR.string.runs_export_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-@Composable
-private fun DetailCard(title: String, body: String) {
-    Card(Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            Text(title, style = MaterialTheme.typography.titleSmall)
-            Text(body, style = MaterialTheme.typography.bodyMedium)
-        }
-    }
-}
-
-@Composable
-private fun AiCapability.label(): String = stringResource(
-    when (this) {
-        AiCapability.CHAT -> CoreUiR.string.runs_capability_chat
-        AiCapability.SPEECH_TO_TEXT -> CoreUiR.string.runs_capability_speech_to_text
-        AiCapability.TEXT_TO_SPEECH -> CoreUiR.string.runs_capability_text_to_speech
-        AiCapability.VOICE_ACTIVITY_DETECTION -> CoreUiR.string.runs_capability_voice_activity_detection
-        AiCapability.VOICE_ASSISTANT -> CoreUiR.string.runs_capability_voice_assistant
-    },
-)
-
-@Composable
-private fun AiCapability.filterLabel(): String = stringResource(
-    when (this) {
-        AiCapability.SPEECH_TO_TEXT -> CoreUiR.string.runs_filter_stt
-        AiCapability.TEXT_TO_SPEECH -> CoreUiR.string.runs_filter_tts
-        AiCapability.VOICE_ASSISTANT -> CoreUiR.string.runs_filter_assistant
-        else -> return label()
-    },
-)
-
-@Composable
-private fun RunStatus.label(): String = stringResource(
-    when (this) {
-        RunStatus.SUCCEEDED -> CoreUiR.string.runs_status_succeeded
-        RunStatus.CANCELLED -> CoreUiR.string.runs_status_cancelled
-        RunStatus.FAILED -> CoreUiR.string.runs_status_failed
-    },
-)
-
-@Composable
-private fun RunKind.label(): String = stringResource(
-    when (this) {
-        RunKind.INFERENCE -> CoreUiR.string.runs_kind_inference
-        RunKind.BENCHMARK_SESSION -> CoreUiR.string.runs_kind_benchmark_session
-    },
-)

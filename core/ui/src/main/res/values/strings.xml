@@ -556,7 +556,7 @@
     <string name="assistant_error_select_recognition_model">Select an installed recognition model.</string>
     <string name="assistant_model_android_speech_recognizer">Android On-device SpeechRecognizer</string>
     <string name="assistant_model_speaker">Speaker %1$d</string>
-    <string name="assistant_reference_voice_duration">%1$s s · %2$s</string>
+    <string name="assistant_reference_voice_duration">%1$.1f s · %2$s</string>
     <string name="assistant_model_android_text_to_speech">Android On-device TextToSpeech</string>
     <string name="assistant_settings_model">Model</string>
     <string name="assistant_settings_recognition">Recognition</string>

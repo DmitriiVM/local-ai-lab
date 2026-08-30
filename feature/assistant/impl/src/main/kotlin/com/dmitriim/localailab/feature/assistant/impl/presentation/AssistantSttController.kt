@@ -62,6 +62,7 @@ internal class AssistantSttController(
         audioRecorder.stop()
     }
 
+    @Suppress("LongMethod") // Coordinates recording, transcription, persistence, and cancellation cleanup.
     suspend fun recordAndTranscribe(initial: AssistantUiState, speechModel: SpeechModelOption) {
         val startedAt = System.currentTimeMillis()
         var input: PcmAudioInput? = null
