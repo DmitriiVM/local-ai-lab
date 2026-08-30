@@ -4,12 +4,21 @@ import dev.detekt.gradle.Detekt
 import dev.detekt.gradle.extensions.DetektExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 
 class DetektConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("dev.detekt")
+
+        val composeRules = extensions
+            .getByType(VersionCatalogsExtension::class.java)
+            .named("libs")
+            .findLibrary("compose-rules-detekt")
+            .get()
+
+        dependencies.add("detektPlugins", composeRules)
 
         extensions.configure<DetektExtension> {
             basePath.set(rootProject.layout.projectDirectory)

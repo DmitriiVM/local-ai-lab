@@ -24,6 +24,7 @@ vosk = "0.3.75"
 litertLm = "0.15.0"
 detekt = "2.0.0-alpha.5"
 ktlint = "14.2.0"
+composeRules = "0.6.3"
 
 [libraries]
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -69,6 +70,7 @@ vosk-android = { group = "com.alphacephei", name = "vosk-android", version.ref =
 litertlm-android = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertLm" }
 detekt-gradle-plugin = { group = "dev.detekt", name = "dev.detekt.gradle.plugin", version.ref = "detekt" }
 ktlint-gradle-plugin = { group = "org.jlleitschuh.gradle", name = "ktlint-gradle", version.ref = "ktlint" }
+compose-rules-detekt = { group = "io.nlopez.compose.rules", name = "detekt", version.ref = "composeRules" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
