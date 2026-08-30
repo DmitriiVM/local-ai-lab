@@ -5,9 +5,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dmitriim.localailab.core.navigation.AppNavigator
+import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.benchmark.api.navigation.BenchmarkDestination
 import com.dmitriim.localailab.feature.stt.impl.presentation.ui.SpeechToTextScreen
 import dev.zacsweers.metrox.viewmodel.metroViewModel
@@ -17,6 +20,10 @@ fun SpeechToTextRoute(
     navigator: AppNavigator,
     viewModel: SpeechToTextViewModel = metroViewModel(),
 ) {
+    val title = stringResource(CoreUiR.string.stt_speech_to_text_screen_131)
+    LaunchedEffect(navigator, title) {
+        navigator.setToolbarTitle(title)
+    }
     DisposableEffect(viewModel) {
         viewModel.runtimeLeaseController.onVisible()
         onDispose(viewModel.runtimeLeaseController::onHidden)

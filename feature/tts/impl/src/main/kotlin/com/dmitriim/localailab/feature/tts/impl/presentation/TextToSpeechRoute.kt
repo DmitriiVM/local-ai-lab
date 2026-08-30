@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +30,10 @@ fun TextToSpeechRoute(
     navigator: AppNavigator,
     viewModel: TextToSpeechViewModel = metroViewModel(),
 ) {
+    val title = stringResource(CoreUiR.string.tts_text_to_speech_screen_177)
+    LaunchedEffect(navigator, title) {
+        navigator.setToolbarTitle(title)
+    }
     DisposableEffect(viewModel) {
         viewModel.runtimeLeaseController.onVisible()
         onDispose(viewModel.runtimeLeaseController::onHidden)

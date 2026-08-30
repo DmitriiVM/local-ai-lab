@@ -3,6 +3,7 @@ package com.dmitriim.localailab.core.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -113,6 +114,11 @@ class AppNavigationState internal constructor(
     var selectedDestination by selectedDestinationState
         private set
 
+    private var mutableToolbarTitle by mutableStateOf<String?>(null)
+
+    val toolbarTitle: String?
+        get() = mutableToolbarTitle
+
     val activeStack: NavBackStack<NavKey>
         get() = stacks[selectedDestination]
 
@@ -128,6 +134,7 @@ class AppNavigationState internal constructor(
         get() = activeStack.size > 1
 
     override fun navigate(destination: AppDestination) {
+        mutableToolbarTitle = null
         val hostDestination = registry.hostDestinationFor(destination)
         val stack = stacks[hostDestination]
         val isRootDestination = registry.isRootDestination(destination)
@@ -141,11 +148,16 @@ class AppNavigationState internal constructor(
     }
 
     override fun navigateBack() {
+        mutableToolbarTitle = null
         if (activeStack.size > 1) {
             activeStack.removeLastOrNull()
         } else if (selectedDestination != startHostDestination) {
             selectedDestination = startHostDestination
         }
+    }
+
+    override fun setToolbarTitle(title: String?) {
+        mutableToolbarTitle = title
     }
 
     internal fun entryFor(key: NavKey): NavEntry<NavKey>? = registry.entryFor(key, this)

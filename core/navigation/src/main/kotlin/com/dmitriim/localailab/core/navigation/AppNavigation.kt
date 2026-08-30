@@ -13,6 +13,7 @@ enum class TopLevelDestination {
 interface AppNavigator {
     fun navigate(destination: AppDestination)
     fun navigateBack()
+    fun setToolbarTitle(title: String?)
 }
 
 interface NavigationEntryProvider {
