@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.assistant.impl.domain
+package com.dmitriim.localailab.feature.assistant.impl.domain.chat
 
 import android.util.Log
 import com.dmitriim.localailab.ai.api.capability.AiCapability

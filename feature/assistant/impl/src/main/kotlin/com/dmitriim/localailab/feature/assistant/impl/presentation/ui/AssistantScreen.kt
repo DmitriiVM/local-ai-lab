@@ -31,6 +31,11 @@ import com.dmitriim.localailab.feature.assistant.impl.presentation.state.Assista
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatSettings
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechInputSettings
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechOutputSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.ui.chat.AssistantChatSettingsSheet
+import com.dmitriim.localailab.feature.assistant.impl.presentation.ui.chat.AssistantConversation
+import com.dmitriim.localailab.feature.assistant.impl.presentation.ui.chat.ChatMetricsCard
+import com.dmitriim.localailab.feature.assistant.impl.presentation.ui.stt.AssistantListenSettingsSheet
+import com.dmitriim.localailab.feature.assistant.impl.presentation.ui.tts.AssistantSpeakSettingsSheet
 
 @Composable
 fun AssistantScreen(

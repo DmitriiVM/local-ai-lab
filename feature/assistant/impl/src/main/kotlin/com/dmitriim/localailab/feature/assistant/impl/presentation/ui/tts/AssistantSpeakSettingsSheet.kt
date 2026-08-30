@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.assistant.impl.presentation.ui
+package com.dmitriim.localailab.feature.assistant.impl.presentation.ui.tts
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +32,10 @@ import com.dmitriim.localailab.core.ui.component.OptionPickerItem
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechOutputSettings
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.TtsModelOption
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.normalizeLanguageCode
+import com.dmitriim.localailab.feature.assistant.impl.presentation.ui.AssistantInSheetModelPicker
+import com.dmitriim.localailab.feature.assistant.impl.presentation.ui.AssistantInSheetModelSelection
+import com.dmitriim.localailab.feature.assistant.impl.presentation.ui.AssistantSettingsSection
+import com.dmitriim.localailab.feature.assistant.impl.presentation.ui.AssistantSettingsSheetHeader
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

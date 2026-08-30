@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.assistant.impl.presentation.ui
+package com.dmitriim.localailab.feature.assistant.impl.presentation.ui.chat
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,6 +29,8 @@ import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatModelOption
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.ui.AssistantSettingsSection
+import com.dmitriim.localailab.feature.assistant.impl.presentation.ui.AssistantSettingsSheetHeader
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

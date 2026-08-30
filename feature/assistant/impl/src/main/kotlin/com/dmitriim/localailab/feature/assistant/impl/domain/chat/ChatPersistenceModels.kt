@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.assistant.impl.domain
+package com.dmitriim.localailab.feature.assistant.impl.domain.chat
 
 import com.dmitriim.localailab.ai.api.engine.ComputePreference
 import com.dmitriim.localailab.ai.api.profiling.InferenceTelemetry

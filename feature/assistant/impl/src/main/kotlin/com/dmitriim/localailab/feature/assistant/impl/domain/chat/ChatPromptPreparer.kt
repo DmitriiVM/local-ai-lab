@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.assistant.impl.domain
+package com.dmitriim.localailab.feature.assistant.impl.domain.chat
 
 import android.util.Log
 import com.dmitriim.localailab.ai.api.chat.ChatEngine
@@ -86,6 +86,7 @@ internal class ChatPromptPreparer(
         LlmChatTemplateHandling.ENGINE_FORMATS_MESSAGES -> requireNotNull(chatEngine.activeChatFormatter()) {
             "The active LLM runtime does not provide its declared chat formatter."
         }::format
+
         LlmChatTemplateHandling.CALLER_PROVIDES_PROMPT -> callerFormatter::format
     }
 
@@ -115,6 +116,7 @@ internal class ChatPromptPreparer(
                 "Exact caller context budgeting requires a maximum-output control."
             },
         )
+
         LlmContextManagement.ESTIMATED_CALLER_BUDGET -> PromptBudget(
             countTokens = tokenEstimator::estimate,
             estimated = true,
@@ -125,6 +127,7 @@ internal class ChatPromptPreparer(
                 "Estimated caller context budgeting requires a maximum-output control."
             },
         )
+
         LlmContextManagement.RUNTIME_MANAGED -> null
     }
 

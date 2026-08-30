@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.assistant.impl.domain
+package com.dmitriim.localailab.feature.assistant.impl.domain.chat
 
 /** Estimates prompt tokens when a runtime requires caller budgeting without exposing tokenization. */
 internal fun interface PromptTokenEstimator {

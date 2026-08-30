@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.assistant.impl.domain
+package com.dmitriim.localailab.feature.assistant.impl.domain.chat
 
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.feature.runs.api.data.RunRepository

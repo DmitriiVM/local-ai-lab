@@ -16,12 +16,12 @@ import com.dmitriim.localailab.ai.runtime.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoiceStore
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
-import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantAudioRecorder
 import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantRunRecorder
-import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantSpeechOutput
-import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantTranscriber
-import com.dmitriim.localailab.feature.assistant.impl.domain.GenerateAssistantResponse
-import com.dmitriim.localailab.feature.assistant.impl.domain.PersistAssistantTurn
+import com.dmitriim.localailab.feature.assistant.impl.domain.chat.GenerateAssistantResponse
+import com.dmitriim.localailab.feature.assistant.impl.domain.chat.PersistAssistantTurn
+import com.dmitriim.localailab.feature.assistant.impl.domain.stt.AssistantAudioRecorder
+import com.dmitriim.localailab.feature.assistant.impl.domain.stt.AssistantTranscriber
+import com.dmitriim.localailab.feature.assistant.impl.domain.tts.AssistantSpeechOutput
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantInputMode
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantUiState
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMessageRole

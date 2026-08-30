@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.assistant.impl.domain
+package com.dmitriim.localailab.feature.assistant.impl.domain.chat
 
 import com.dmitriim.localailab.ai.api.chat.ChatEngine
 import com.dmitriim.localailab.ai.api.chat.LlmChatFormatter
@@ -168,6 +168,7 @@ class ChatPromptPreparerTest {
             coldStart = false,
             diagnostics = LlmRuntimeDiagnostics(),
         )
+
         override fun generate(request: LlmGenerationRequest, onToken: (String) -> Unit) = LlmGenerationResult(
             text = "",
             promptTokenCount = null,
@@ -178,6 +179,7 @@ class ChatPromptPreparerTest {
             totalDurationMs = 0,
             finishReason = LlmFinishReason.STOP_TOKEN,
         )
+
         override fun cancel() = Unit
         override fun unload() = Unit
     }

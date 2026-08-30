@@ -1,9 +1,9 @@
 package com.dmitriim.localailab.feature.assistant.impl.presentation
 
-import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantConversationSnapshot
-import com.dmitriim.localailab.feature.assistant.impl.domain.ChatPersistenceSnapshot
-import com.dmitriim.localailab.feature.assistant.impl.domain.ChatRunMetrics
-import com.dmitriim.localailab.feature.assistant.impl.domain.ChatRunSettings
+import com.dmitriim.localailab.feature.assistant.impl.domain.chat.AssistantConversationSnapshot
+import com.dmitriim.localailab.feature.assistant.impl.domain.chat.ChatPersistenceSnapshot
+import com.dmitriim.localailab.feature.assistant.impl.domain.chat.ChatRunMetrics
+import com.dmitriim.localailab.feature.assistant.impl.domain.chat.ChatRunSettings
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMessage
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMessageRole
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMetrics

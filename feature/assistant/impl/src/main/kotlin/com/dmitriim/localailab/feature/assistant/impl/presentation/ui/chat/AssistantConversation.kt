@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.assistant.impl.presentation.ui
+package com.dmitriim.localailab.feature.assistant.impl.presentation.ui.chat
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
