@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.ai.sherpa.stt.profiles
 
-import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey

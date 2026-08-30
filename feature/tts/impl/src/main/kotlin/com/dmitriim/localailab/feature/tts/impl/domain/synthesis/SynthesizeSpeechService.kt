@@ -1,19 +1,19 @@
 package com.dmitriim.localailab.feature.tts.impl.domain.synthesis
 
 import android.util.Log
+import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.ai.api.profiling.InferencePhase
+import com.dmitriim.localailab.ai.api.profiling.InferenceProfiler
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechEngine
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
+import com.dmitriim.localailab.ai.performance.profiling.LightweightInferenceProfiler
 import com.dmitriim.localailab.core.audio.output.api.StreamingSpeechPlayer
 import com.dmitriim.localailab.core.audio.output.model.GeneratedAudioFile
 import com.dmitriim.localailab.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffectsProcessor
-import com.dmitriim.localailab.ai.api.capability.AiCapability
-import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
-import com.dmitriim.localailab.ai.api.profiling.InferencePhase
-import com.dmitriim.localailab.ai.api.profiling.InferenceProfiler
-import com.dmitriim.localailab.ai.performance.profiling.LightweightInferenceProfiler
 import com.dmitriim.localailab.core.di.AppScope
+import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisEvent
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisMetrics
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisRequest

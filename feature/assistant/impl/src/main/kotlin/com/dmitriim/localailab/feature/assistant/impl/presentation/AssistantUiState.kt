@@ -4,8 +4,6 @@ import androidx.annotation.StringRes
 import com.dmitriim.localailab.ai.api.chat.LlmContextManagement
 import com.dmitriim.localailab.ai.api.chat.LlmEngineCapabilities
 import com.dmitriim.localailab.ai.api.chat.LlmFinishReason
-import com.dmitriim.localailab.core.audio.input.model.AudioLevel
-import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoice
 import com.dmitriim.localailab.ai.api.engine.ComputePreference
 import com.dmitriim.localailab.ai.api.engine.EngineId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
@@ -13,6 +11,8 @@ import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
 import com.dmitriim.localailab.ai.api.model.manifest.TtsControl
 import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.ai.api.profiling.InferenceTelemetry
+import com.dmitriim.localailab.core.audio.input.model.AudioLevel
+import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoice
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import java.util.UUID
 

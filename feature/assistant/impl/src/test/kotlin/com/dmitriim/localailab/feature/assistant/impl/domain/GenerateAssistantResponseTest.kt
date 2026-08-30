@@ -19,9 +19,9 @@ import com.dmitriim.localailab.ai.api.engine.EngineId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
 import com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference
+import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.feature.models.api.domain.runtime.SpeechToTextModelReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.TextToSpeechModelReference
-import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals

@@ -21,10 +21,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
-import com.dmitriim.localailab.core.ui.R as CoreUiR
 
 @Composable
 internal fun ModelActionBar(

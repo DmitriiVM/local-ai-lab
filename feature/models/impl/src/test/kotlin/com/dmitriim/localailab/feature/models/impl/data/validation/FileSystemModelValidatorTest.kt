@@ -1,11 +1,9 @@
 package com.dmitriim.localailab.feature.models.impl.data.validation
 
-import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
-import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
-import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.engine.EngineId
-import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
+import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRole
 import com.dmitriim.localailab.ai.api.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.ai.api.model.manifest.ModelFormat
@@ -14,6 +12,8 @@ import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.ai.api.model.manifest.ModelSource
+import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
+import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
 import java.io.File
 import java.nio.file.Files
 import org.junit.Assert.assertEquals

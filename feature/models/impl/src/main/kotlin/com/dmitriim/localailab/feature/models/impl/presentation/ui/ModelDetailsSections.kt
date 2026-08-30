@@ -26,10 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.model.library.CatalogModel
-import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelCompatibilityState
-import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
-import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
-import com.dmitriim.localailab.feature.models.impl.domain.transfer.downloadStorageEstimate
 import com.dmitriim.localailab.ai.api.model.manifest.ModelFileSpec
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
@@ -38,6 +34,10 @@ import com.dmitriim.localailab.ai.api.model.manifest.TtsControl
 import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.component.StatusMessage
+import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelCompatibilityState
+import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
+import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
+import com.dmitriim.localailab.feature.models.impl.domain.transfer.downloadStorageEstimate
 import com.dmitriim.localailab.feature.models.impl.presentation.ModelValidationFeedback
 import com.dmitriim.localailab.feature.models.impl.presentation.ModelsUiState
 import java.text.DateFormat

@@ -32,14 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.core.ui.R as CoreUiR
+import com.dmitriim.localailab.core.ui.component.AppSurfaceCard
+import com.dmitriim.localailab.core.ui.component.StatusMessage
+import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
+import com.dmitriim.localailab.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunKind
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
-import com.dmitriim.localailab.core.ui.component.StatusMessage
-import com.dmitriim.localailab.core.ui.R as CoreUiR
-import com.dmitriim.localailab.core.ui.component.AppSurfaceCard
-import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
-import com.dmitriim.localailab.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localailab.feature.runs.impl.presentation.RunsUiState
 import java.text.DateFormat
 import java.util.Date

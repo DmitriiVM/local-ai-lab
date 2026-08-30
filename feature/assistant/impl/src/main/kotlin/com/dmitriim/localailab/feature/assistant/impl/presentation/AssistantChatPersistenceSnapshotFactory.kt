@@ -1,12 +1,12 @@
 package com.dmitriim.localailab.feature.assistant.impl.presentation
 
-import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationMessageRole
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantConversationSnapshot
 import com.dmitriim.localailab.feature.assistant.impl.domain.ChatPersistenceSnapshot
 import com.dmitriim.localailab.feature.assistant.impl.domain.ChatRunMetrics
 import com.dmitriim.localailab.feature.assistant.impl.domain.ChatRunSettings
+import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationMessageRole
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 
 internal object AssistantChatPersistenceSnapshotFactory {
     fun create(

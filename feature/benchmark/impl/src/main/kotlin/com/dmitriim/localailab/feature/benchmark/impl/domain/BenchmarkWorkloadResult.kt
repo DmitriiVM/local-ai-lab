@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.benchmark.impl.domain
 
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkIterationResult
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
 
 data class BenchmarkWorkloadResult(
     val iteration: BenchmarkIterationResult,

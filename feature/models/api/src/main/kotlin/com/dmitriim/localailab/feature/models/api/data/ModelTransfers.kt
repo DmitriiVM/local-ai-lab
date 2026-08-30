@@ -1,9 +1,9 @@
 package com.dmitriim.localailab.feature.models.api.data
 
 import com.dmitriim.localailab.ai.api.model.library.CatalogModel
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
-import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import kotlinx.coroutines.flow.Flow
 
 /** Exposes the bundled catalog and its persisted download operations. */

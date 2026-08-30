@@ -3,15 +3,11 @@ package com.dmitriim.localailab.feature.benchmark.impl.presentation
 import android.os.PowerManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
 import com.dmitriim.localailab.ai.runtime.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.ai.api.capability.AiCapability
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunKind
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
-import com.dmitriim.localailab.feature.runs.api.data.RunRepository
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkPlan
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkSessionSummary
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkStartupMode
@@ -19,6 +15,10 @@ import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkWorkload
 import com.dmitriim.localailab.feature.benchmark.api.launch.ProfileWorkloadStore
 import com.dmitriim.localailab.feature.benchmark.impl.domain.BenchmarkWorkloadResult
 import com.dmitriim.localailab.feature.benchmark.impl.domain.LocalBenchmarkWorkloadRunner
+import com.dmitriim.localailab.feature.runs.api.data.RunRepository
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunKind
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey

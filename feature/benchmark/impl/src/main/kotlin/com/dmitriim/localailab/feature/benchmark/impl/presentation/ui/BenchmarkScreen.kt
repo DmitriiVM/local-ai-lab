@@ -27,10 +27,10 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.ai.api.capability.AiCapability
-import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkWorkload
 import com.dmitriim.localailab.ai.api.profiling.InferenceResourceMetrics
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
+import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkWorkload
 import com.dmitriim.localailab.feature.benchmark.impl.presentation.BenchmarkLabUiState
 
 @Composable

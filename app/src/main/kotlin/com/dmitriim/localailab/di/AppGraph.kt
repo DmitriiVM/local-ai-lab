@@ -4,9 +4,9 @@ import android.app.Application
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
-import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferStartup
 import com.dmitriim.localailab.core.navigation.NavigationEntryProvider
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
+import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferStartup
 import com.dmitriim.localailab.feature.settings.api.data.AppSettingsRepository
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides

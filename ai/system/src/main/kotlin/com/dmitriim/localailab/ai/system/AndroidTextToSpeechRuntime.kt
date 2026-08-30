@@ -8,6 +8,8 @@ import android.os.Looper
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechVoice
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
@@ -18,8 +20,6 @@ import com.dmitriim.localailab.ai.api.tts.TextToSpeechRuntime
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.ai.api.engine.EngineId
-import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject

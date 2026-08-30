@@ -12,8 +12,8 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.engine.ComputePreference
+import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.feature.settings.api.data.AssistantPreferencesRepository
 import com.dmitriim.localailab.feature.settings.api.domain.AssistantChatPreferences
 import com.dmitriim.localailab.feature.settings.api.domain.AssistantPreferences

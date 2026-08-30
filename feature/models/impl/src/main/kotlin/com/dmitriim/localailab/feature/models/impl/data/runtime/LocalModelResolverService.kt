@@ -1,10 +1,10 @@
 package com.dmitriim.localailab.feature.models.impl.data.runtime
 
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.runtime.ModelArtifactReference
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInSpeechToTextModels
 import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInTextToSpeechModels
-import com.dmitriim.localailab.ai.api.model.manifest.ModelId
-import com.dmitriim.localailab.ai.api.model.runtime.ModelArtifactReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.feature.models.impl.data.library.InstalledModelService
 import com.dmitriim.localailab.feature.models.impl.domain.runtime.ModelRuntimeReferenceFactory

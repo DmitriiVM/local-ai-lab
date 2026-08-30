@@ -1,6 +1,5 @@
 package com.dmitriim.localailab.ai.sherpa.catalog.stt
 
-import com.dmitriim.localailab.ai.sherpa.catalog.huggingFaceFiles
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.model.library.CatalogDownload
 import com.dmitriim.localailab.ai.api.model.library.CatalogModel
@@ -13,6 +12,7 @@ import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.ai.api.model.manifest.ModelSource
+import com.dmitriim.localailab.ai.sherpa.catalog.huggingFaceFiles
 
 internal fun whisperCatalogModel(
     modelId: String,

@@ -2,9 +2,9 @@ package com.dmitriim.localailab.ai.system
 
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
+import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.ai.api.system.SystemModelProfileKeys
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding

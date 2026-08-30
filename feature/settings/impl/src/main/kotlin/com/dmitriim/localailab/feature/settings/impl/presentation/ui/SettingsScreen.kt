@@ -28,13 +28,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.component.AppSectionCard
 import com.dmitriim.localailab.core.ui.component.AppSurfaceCard
 import com.dmitriim.localailab.core.ui.component.AppSurfaceTone
 import com.dmitriim.localailab.core.ui.component.HuggingFaceTokenDialog
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
+import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
 import com.dmitriim.localailab.feature.settings.api.domain.AppSettings
 import com.dmitriim.localailab.feature.settings.api.domain.MetricDetail
 import com.dmitriim.localailab.feature.settings.api.domain.ModelUnloadPolicy

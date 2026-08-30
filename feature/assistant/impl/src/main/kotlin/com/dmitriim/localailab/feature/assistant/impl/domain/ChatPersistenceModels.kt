@@ -1,11 +1,11 @@
 package com.dmitriim.localailab.feature.assistant.impl.domain
 
-import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationMessageRole
 import com.dmitriim.localailab.ai.api.engine.ComputePreference
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import com.dmitriim.localailab.ai.api.profiling.InferenceTelemetry
 import com.dmitriim.localailab.ai.api.profiling.serialization.putInferenceTelemetry
+import com.dmitriim.localailab.feature.runs.api.domain.conversation.ConversationMessageRole
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 

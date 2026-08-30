@@ -1,6 +1,11 @@
 package com.dmitriim.localailab.feature.tts.impl.domain.synthesis
 
 import android.app.Application
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
+import com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechEngine
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadResult
@@ -13,14 +18,9 @@ import com.dmitriim.localailab.core.audio.output.model.SpeechPlaybackMetrics
 import com.dmitriim.localailab.core.audio.output.model.SpeechPlaybackState
 import com.dmitriim.localailab.core.audio.output.storage.GeneratedAudioStore
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffectsProcessor
-import com.dmitriim.localailab.ai.api.engine.EngineId
-import com.dmitriim.localailab.ai.api.model.manifest.ModelId
-import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
-import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
-import com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference
+import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.feature.models.api.domain.runtime.SpeechToTextModelReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.TextToSpeechModelReference
-import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisEvent
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisRequest
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisSettings

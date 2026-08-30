@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.feature.models.impl.data.catalog
 
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.model.library.CatalogModel
+import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 

@@ -5,8 +5,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
 import com.dmitriim.localailab.core.ui.R as CoreUiR
+import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
 
 @Composable
 fun HuggingFaceAccessSection(

@@ -1,7 +1,7 @@
 package com.dmitriim.localailab.feature.tts.impl.presentation
 
-import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoice
 import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
+import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoice
 
 internal object TtsVoiceResolver {
     fun forModel(

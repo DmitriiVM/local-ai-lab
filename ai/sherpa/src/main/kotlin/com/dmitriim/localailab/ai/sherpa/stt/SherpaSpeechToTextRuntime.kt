@@ -1,6 +1,9 @@
 package com.dmitriim.localailab.ai.sherpa.stt
 
 import android.util.Log
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
+import com.dmitriim.localailab.ai.api.model.runtime.ModelArtifacts
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadRequest
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadResult
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextRequest
@@ -9,9 +12,6 @@ import com.dmitriim.localailab.ai.api.stt.SpeechToTextRuntime
 import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.ai.sherpa.stt.profiles.SherpaSttProfile
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.ai.api.engine.EngineId
-import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
-import com.dmitriim.localailab.ai.api.model.runtime.ModelArtifacts
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn

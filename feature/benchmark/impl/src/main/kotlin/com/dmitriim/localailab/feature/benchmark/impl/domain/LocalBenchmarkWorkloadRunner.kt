@@ -1,5 +1,6 @@
 package com.dmitriim.localailab.feature.benchmark.impl.domain
 
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.chat.ChatEngine
 import com.dmitriim.localailab.ai.api.chat.LlmChatMessage
 import com.dmitriim.localailab.ai.api.chat.LlmChatRole
@@ -8,19 +9,18 @@ import com.dmitriim.localailab.ai.api.chat.LlmGenerationOptions
 import com.dmitriim.localailab.ai.api.chat.LlmGenerationRequest
 import com.dmitriim.localailab.ai.api.chat.LlmLoadOptions
 import com.dmitriim.localailab.ai.api.chat.LlmLoadRequest
+import com.dmitriim.localailab.ai.api.profiling.InferencePhase
+import com.dmitriim.localailab.ai.api.profiling.InferenceProfiler
+import com.dmitriim.localailab.ai.api.profiling.serialization.putInferenceTelemetry
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechEngine
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
 import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.ai.api.capability.AiCapability
-import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
-import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkIterationResult
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkStartupMode
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkWorkload
-import com.dmitriim.localailab.ai.api.profiling.InferencePhase
-import com.dmitriim.localailab.ai.api.profiling.InferenceProfiler
-import com.dmitriim.localailab.ai.api.profiling.serialization.putInferenceTelemetry
+import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
+import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
 import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionEvent
 import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionRequest
 import com.dmitriim.localailab.feature.stt.api.domain.SttTranscriptionSettings

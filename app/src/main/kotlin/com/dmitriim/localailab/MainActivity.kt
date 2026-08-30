@@ -1,7 +1,6 @@
 package com.dmitriim.localailab
 
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity

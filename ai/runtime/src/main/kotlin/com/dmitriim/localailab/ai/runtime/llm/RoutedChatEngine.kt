@@ -13,8 +13,8 @@ import com.dmitriim.localailab.ai.api.chat.LlmLoadOption
 import com.dmitriim.localailab.ai.api.chat.LlmLoadRequest
 import com.dmitriim.localailab.ai.api.chat.LlmLoadResult
 import com.dmitriim.localailab.ai.api.chat.LlmTokenCounter
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn

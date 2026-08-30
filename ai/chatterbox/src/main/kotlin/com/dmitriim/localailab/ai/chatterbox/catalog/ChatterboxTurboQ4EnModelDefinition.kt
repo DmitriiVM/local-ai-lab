@@ -1,10 +1,7 @@
 package com.dmitriim.localailab.ai.chatterbox.catalog
 
-import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
-import com.dmitriim.localailab.ai.chatterbox.ChatterboxRuntimeProfile
-import com.dmitriim.localailab.ai.chatterbox.ChatterboxTtsArtifacts
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.api.model.library.CatalogDownload
 import com.dmitriim.localailab.ai.api.model.library.CatalogDownloadFile
 import com.dmitriim.localailab.ai.api.model.library.CatalogModel
@@ -18,6 +15,9 @@ import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.ai.api.model.manifest.ModelSource
 import com.dmitriim.localailab.ai.api.model.manifest.TtsControl
 import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
+import com.dmitriim.localailab.ai.chatterbox.ChatterboxRuntimeProfile
+import com.dmitriim.localailab.ai.chatterbox.ChatterboxTtsArtifacts
+import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding

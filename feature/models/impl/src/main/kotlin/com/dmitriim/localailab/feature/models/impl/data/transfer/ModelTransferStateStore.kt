@@ -1,12 +1,12 @@
 package com.dmitriim.localailab.feature.models.impl.data.transfer
 
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
-import com.dmitriim.localailab.ai.api.model.manifest.ModelId
-import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelsDatabaseProvider
 import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelTransferEntity
 import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelTransferFileEntity
+import com.dmitriim.localailab.feature.models.impl.data.persistence.ModelsDatabaseProvider
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow

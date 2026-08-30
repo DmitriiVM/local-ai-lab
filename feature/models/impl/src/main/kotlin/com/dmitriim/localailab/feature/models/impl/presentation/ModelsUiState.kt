@@ -1,11 +1,11 @@
 package com.dmitriim.localailab.feature.models.impl.presentation
 
 import com.dmitriim.localailab.ai.api.model.library.CatalogModel
-import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
-import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelCompatibility
-import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
+import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelCompatibility
+import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
+import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
 
 data class ModelsUiState(
     val isModelDataLoaded: Boolean = false,

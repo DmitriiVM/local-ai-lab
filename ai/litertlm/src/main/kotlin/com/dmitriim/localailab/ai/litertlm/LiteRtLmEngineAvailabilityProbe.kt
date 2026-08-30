@@ -2,7 +2,6 @@ package com.dmitriim.localailab.ai.litertlm
 
 import android.os.Build
 import com.dmitriim.localailab.ai.api.availability.EngineAvailabilityProbe
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.engine.ComputePreference
 import com.dmitriim.localailab.ai.api.engine.EngineAvailability
@@ -10,6 +9,7 @@ import com.dmitriim.localailab.ai.api.engine.EngineDescriptor
 import com.dmitriim.localailab.ai.api.engine.EngineId
 import com.dmitriim.localailab.ai.api.engine.EngineKind
 import com.dmitriim.localailab.ai.api.engine.NativeAbiSupport
+import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers

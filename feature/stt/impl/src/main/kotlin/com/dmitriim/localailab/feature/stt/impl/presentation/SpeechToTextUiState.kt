@@ -1,16 +1,16 @@
 package com.dmitriim.localailab.feature.stt.impl.presentation
 
-import com.dmitriim.localailab.core.audio.input.model.AudioLevel
-import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.engine.EngineId
-import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInSpeechToTextModels
 import com.dmitriim.localailab.ai.api.model.library.CatalogModel
-import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
-import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.ai.api.model.manifest.SttRecognitionMode
+import com.dmitriim.localailab.core.audio.input.model.AudioLevel
+import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localailab.core.ui.text.UiText
+import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInSpeechToTextModels
+import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
+import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
 import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionMetrics
 
 data class SpeechToTextUiState(

@@ -9,9 +9,6 @@ import com.dmitriim.localailab.feature.runs.api.domain.history.RunKind
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
-import com.dmitriim.localailab.feature.runs.impl.data.persistence.ConversationEntity
-import com.dmitriim.localailab.feature.runs.impl.data.persistence.ConversationMessageEntity
-import com.dmitriim.localailab.feature.runs.impl.data.persistence.RunEntity
 import kotlinx.serialization.json.Json
 
 internal fun RunEntity.toDomain(json: Json) = RunRecord(

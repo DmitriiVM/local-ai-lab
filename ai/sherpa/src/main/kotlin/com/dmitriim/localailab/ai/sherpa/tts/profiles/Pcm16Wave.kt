@@ -3,6 +3,13 @@ package com.dmitriim.localailab.ai.sherpa.tts.profiles
 import java.io.File
 import java.io.RandomAccessFile
 import java.lang.Short
+import kotlin.ByteArray
+import kotlin.FloatArray
+import kotlin.Int
+import kotlin.also
+import kotlin.require
+import kotlin.requireNotNull
+import kotlin.text.Charsets
 
 class Pcm16Wave(val sampleRateHz: Int, val samples: FloatArray) {
     companion object {

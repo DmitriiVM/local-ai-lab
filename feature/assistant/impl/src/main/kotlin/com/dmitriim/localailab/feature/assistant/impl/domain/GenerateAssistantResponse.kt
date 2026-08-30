@@ -1,6 +1,7 @@
 package com.dmitriim.localailab.feature.assistant.impl.domain
 
 import android.util.Log
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.chat.ChatEngine
 import com.dmitriim.localailab.ai.api.chat.LlmGenerationOption
 import com.dmitriim.localailab.ai.api.chat.LlmGenerationOptions
@@ -8,11 +9,10 @@ import com.dmitriim.localailab.ai.api.chat.LlmGenerationRequest
 import com.dmitriim.localailab.ai.api.chat.LlmLoadOption
 import com.dmitriim.localailab.ai.api.chat.LlmLoadOptions
 import com.dmitriim.localailab.ai.api.chat.LlmLoadRequest
-import com.dmitriim.localailab.ai.api.capability.AiCapability
-import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.ai.api.profiling.InferencePhase
 import com.dmitriim.localailab.ai.api.profiling.InferenceProfiler
 import com.dmitriim.localailab.ai.performance.profiling.LightweightInferenceProfiler
+import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow

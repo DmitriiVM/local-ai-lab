@@ -1,9 +1,9 @@
 package com.dmitriim.localailab.ai.sherpa.tts.profiles
 
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
+import com.dmitriim.localailab.ai.api.model.runtime.ModelArtifacts
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
 import com.dmitriim.localailab.ai.sherpa.tts.SherpaTtsModel
-import com.dmitriim.localailab.ai.api.model.runtime.ModelArtifacts
 import com.k2fsa.sherpa.onnx.GenerationConfig
 
 interface SherpaTtsProfile : ModelRuntimeProfile {

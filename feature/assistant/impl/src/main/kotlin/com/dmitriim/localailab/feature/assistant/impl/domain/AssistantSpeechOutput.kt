@@ -1,17 +1,17 @@
 package com.dmitriim.localailab.feature.assistant.impl.domain
 
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffects
-import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.feature.assistant.impl.presentation.SpeechOutputSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.TtsModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.TtsVoiceOption
 import com.dmitriim.localailab.feature.tts.api.domain.PreviewSpeech
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechPreviewRequest
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisEvent
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisRequest
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisSettings
 import com.dmitriim.localailab.feature.tts.api.domain.SynthesizeSpeech
-import com.dmitriim.localailab.feature.assistant.impl.presentation.SpeechOutputSettings
-import com.dmitriim.localailab.feature.assistant.impl.presentation.TtsModelOption
-import com.dmitriim.localailab.feature.assistant.impl.presentation.TtsVoiceOption
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 

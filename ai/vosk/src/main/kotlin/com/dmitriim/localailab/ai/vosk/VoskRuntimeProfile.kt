@@ -1,8 +1,8 @@
 package com.dmitriim.localailab.ai.vosk
 
+import com.dmitriim.localailab.ai.api.engine.EngineId
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
-import com.dmitriim.localailab.ai.api.engine.EngineId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey

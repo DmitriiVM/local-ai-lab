@@ -10,12 +10,12 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dmitriim.localailab.R
 import com.dmitriim.localailab.core.navigation.AppNavHost
-import com.dmitriim.localailab.feature.playground.api.navigation.PlaygroundDestination
-import com.dmitriim.localailab.feature.stt.api.navigation.SpeechToTextDestination
-import com.dmitriim.localailab.feature.tts.api.navigation.TextToSpeechDestination
 import com.dmitriim.localailab.core.navigation.rememberAppNavigationState
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.di.AppGraph
+import com.dmitriim.localailab.feature.playground.api.navigation.PlaygroundDestination
+import com.dmitriim.localailab.feature.stt.api.navigation.SpeechToTextDestination
+import com.dmitriim.localailab.feature.tts.api.navigation.TextToSpeechDestination
 import com.dmitriim.localailab.ui.navigation.AdaptiveNavigationScaffold
 
 @Composable

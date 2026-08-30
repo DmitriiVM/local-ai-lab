@@ -1,6 +1,11 @@
 package com.dmitriim.localailab.feature.stt.impl.domain.transcription
 
 import android.app.Application
+import com.dmitriim.localailab.ai.api.engine.EngineId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
+import com.dmitriim.localailab.ai.api.model.manifest.SttRecognitionMode
+import com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextEngine
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadRequest
 import com.dmitriim.localailab.ai.api.stt.SpeechToTextLoadResult
@@ -10,14 +15,9 @@ import com.dmitriim.localailab.core.audio.input.android.MicrophoneCapture
 import com.dmitriim.localailab.core.audio.input.android.PlatformAudioDecoder
 import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localailab.core.audio.input.storage.AudioInputStore
-import com.dmitriim.localailab.ai.api.engine.EngineId
-import com.dmitriim.localailab.ai.api.model.manifest.ModelId
-import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
-import com.dmitriim.localailab.ai.api.model.manifest.SttRecognitionMode
-import com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference
+import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.feature.models.api.domain.runtime.SpeechToTextModelReference
 import com.dmitriim.localailab.feature.models.api.domain.runtime.TextToSpeechModelReference
-import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionEvent
 import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionRequest
 import com.dmitriim.localailab.feature.stt.api.domain.SttTranscriptionSettings

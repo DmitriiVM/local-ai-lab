@@ -17,13 +17,13 @@ import com.dmitriim.localailab.ai.api.chat.LlmLoadRequest
 import com.dmitriim.localailab.ai.api.chat.LlmLoadResult
 import com.dmitriim.localailab.ai.api.chat.LlmRuntimeDiagnostics
 import com.dmitriim.localailab.ai.api.chat.LlmTokenCounter
-import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.engine.ComputePreference
 import com.dmitriim.localailab.ai.api.engine.EngineId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRoles
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.ai.api.model.runtime.ChatModelReference
+import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
+import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn

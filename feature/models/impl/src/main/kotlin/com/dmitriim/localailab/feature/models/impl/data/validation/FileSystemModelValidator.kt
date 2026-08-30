@@ -1,10 +1,10 @@
 package com.dmitriim.localailab.feature.models.impl.data.validation
 
 import android.util.Log
-import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
+import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
+import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.feature.models.impl.domain.validation.ModelManifestValidationPolicy
 import com.dmitriim.localailab.feature.models.impl.domain.validation.ModelValidationResult
 import dev.zacsweers.metro.Inject

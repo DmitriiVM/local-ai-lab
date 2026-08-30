@@ -1,10 +1,7 @@
 package com.dmitriim.localailab.ai.sherpa.catalog.tts
 
-import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
-import com.dmitriim.localailab.ai.sherpa.tts.profiles.KittenTtsArtifacts
-import com.dmitriim.localailab.ai.sherpa.tts.profiles.KittenTtsProfile
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.api.model.library.CatalogDownload
 import com.dmitriim.localailab.ai.api.model.library.CatalogDownloadArchive
 import com.dmitriim.localailab.ai.api.model.library.CatalogModel
@@ -16,6 +13,9 @@ import com.dmitriim.localailab.ai.api.model.manifest.ModelFormat
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.ai.api.model.manifest.ModelSource
+import com.dmitriim.localailab.ai.sherpa.tts.profiles.KittenTtsArtifacts
+import com.dmitriim.localailab.ai.sherpa.tts.profiles.KittenTtsProfile
+import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding

@@ -2,8 +2,8 @@ package com.dmitriim.localailab.ai.runtime.model
 
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
-import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
+import com.dmitriim.localailab.core.di.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 

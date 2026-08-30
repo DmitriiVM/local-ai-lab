@@ -6,8 +6,8 @@ import com.dmitriim.localailab.ai.api.tts.TextToSpeechLoadRequest
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechRequest
 import com.dmitriim.localailab.core.audio.output.api.StreamingSpeechPlayer
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffectsProcessor
-import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.core.di.AppScope
+import com.dmitriim.localailab.feature.models.api.domain.runtime.LocalModelResolver
 import com.dmitriim.localailab.feature.tts.api.domain.PreviewSpeech
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechPreviewRequest
 import dev.zacsweers.metro.ContributesBinding

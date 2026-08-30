@@ -2,8 +2,6 @@ package com.dmitriim.localailab.ai.performance.profiling.android
 
 import android.os.SystemClock
 import androidx.tracing.Trace
-import com.dmitriim.localailab.core.di.AppScope
-import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.profiling.InferenceDeviceSnapshot
 import com.dmitriim.localailab.ai.api.profiling.InferencePhase
@@ -12,6 +10,8 @@ import com.dmitriim.localailab.ai.api.profiling.InferenceProfileSession
 import com.dmitriim.localailab.ai.api.profiling.InferenceProfiler
 import com.dmitriim.localailab.ai.api.profiling.InferenceResourceMetrics
 import com.dmitriim.localailab.ai.api.profiling.InferenceTelemetry
+import com.dmitriim.localailab.core.di.AppScope
+import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
 import com.dmitriim.localailab.core.performance.resource.DevicePerformanceProfile
 import com.dmitriim.localailab.core.performance.resource.PerformanceResourceSnapshot
 import com.dmitriim.localailab.core.performance.resource.ResourceTelemetrySampler
