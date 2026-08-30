@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
-import com.dmitriim.localailab.ai.runtime.memory.FeatureRuntimeLeaseController
+import com.dmitriim.localailab.ai.api.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkPlan
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkSessionSummary

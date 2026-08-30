@@ -2,10 +2,13 @@ package com.dmitriim.localailab.ai.runtime.model
 
 import com.dmitriim.localailab.ai.api.model.ModelCatalogContribution
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileResolver
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.core.di.AppScope
+import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import dev.zacsweers.metro.binding
 
 /**
  * Resolves exactly one runtime profile for each persisted engine/profile key.
@@ -16,10 +19,11 @@ import dev.zacsweers.metro.SingleIn
  */
 @Inject
 @SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class, binding = binding<ModelRuntimeProfileResolver>())
 class ModelRuntimeProfileRegistry(
     catalogContributions: Set<ModelCatalogContribution>,
     standaloneProfiles: Set<ModelRuntimeProfile>,
-) {
+) : ModelRuntimeProfileResolver {
     private val catalogProfilesByKey = catalogContributions
         .map(ModelCatalogContribution::runtimeProfile)
         .groupBy(ModelRuntimeProfile::key)
@@ -41,9 +45,9 @@ class ModelRuntimeProfileRegistry(
         }
     }
 
-    fun runtimeProfile(key: ModelProfileKey): ModelRuntimeProfile? = byKey[key]
+    override fun runtimeProfile(key: ModelProfileKey): ModelRuntimeProfile? = byKey[key]
 
-    fun requireRuntimeProfile(key: ModelProfileKey): ModelRuntimeProfile = requireNotNull(byKey[key]) {
+    override fun requireRuntimeProfile(key: ModelProfileKey): ModelRuntimeProfile = requireNotNull(byKey[key]) {
         "No packaged runtime profile supports ${key.label}."
     }
 

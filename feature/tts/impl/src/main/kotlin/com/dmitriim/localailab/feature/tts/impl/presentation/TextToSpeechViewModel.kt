@@ -7,10 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
+import com.dmitriim.localailab.ai.api.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechSupport
-import com.dmitriim.localailab.ai.runtime.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoiceStore
 import com.dmitriim.localailab.core.audio.output.api.StreamingSpeechPlayer
 import com.dmitriim.localailab.core.audio.output.model.SpeechPlaybackStatus

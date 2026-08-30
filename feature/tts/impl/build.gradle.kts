@@ -15,7 +15,6 @@ android {
 dependencies {
     implementation(project(":ai:api"))
     implementation(project(":ai:performance"))
-    implementation(project(":ai:runtime"))
     implementation(project(":core:audio"))
     implementation(project(":core:di"))
     implementation(project(":core:navigation"))

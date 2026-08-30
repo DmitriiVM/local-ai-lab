@@ -1,7 +1,4 @@
-package com.dmitriim.localailab.ai.runtime.memory
-
-import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
-import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
+package com.dmitriim.localailab.ai.api.memory
 
 /** Connects one feature's visible lifecycle to its runtime-memory lease. */
 class FeatureRuntimeLeaseController(

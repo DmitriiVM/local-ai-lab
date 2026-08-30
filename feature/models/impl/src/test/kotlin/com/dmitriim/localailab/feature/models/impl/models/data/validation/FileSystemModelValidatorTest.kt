@@ -3,6 +3,7 @@ package com.dmitriim.localailab.feature.models.impl.models.data.validation
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.engine.EngineId
 import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfile
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileResolver
 import com.dmitriim.localailab.ai.api.model.RuntimeValidationResult
 import com.dmitriim.localailab.ai.api.model.manifest.ModelFileRole
 import com.dmitriim.localailab.ai.api.model.manifest.ModelFileSpec
@@ -12,7 +13,6 @@ import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
 import com.dmitriim.localailab.ai.api.model.manifest.ModelSource
-import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
 import java.io.File
 import java.nio.file.Files
@@ -105,7 +105,7 @@ class FileSystemModelValidatorTest {
         File(directory, "weights.bin").writeText("abc")
         val manifest = manifest(ModelFileSpec("weights.bin", ModelFileRole("WEIGHTS")))
 
-        val profiles = ModelRuntimeProfileRegistry(emptySet(), emptySet())
+        val profiles = profileResolver()
         val validation = FileSystemModelValidator(profiles).validate(manifest, directory)
 
         assertEquals(ModelValidationState.INCOMPATIBLE, validation.state)
@@ -122,7 +122,13 @@ class FileSystemModelValidatorTest {
         assertEquals(SHA_ABC, enriched.sha256)
     }
 
-    private fun validator() = FileSystemModelValidator(ModelRuntimeProfileRegistry(emptySet(), setOf(FakeProfile)))
+    private fun validator() = FileSystemModelValidator(profileResolver(FakeProfile))
+
+    private fun profileResolver(
+        vararg profiles: ModelRuntimeProfile,
+    ): ModelRuntimeProfileResolver = ModelRuntimeProfileResolver { key ->
+        profiles.firstOrNull { it.key == key }
+    }
 
     private fun manifest(vararg files: ModelFileSpec) = ModelManifest(
         modelId = ModelId("test-model"),

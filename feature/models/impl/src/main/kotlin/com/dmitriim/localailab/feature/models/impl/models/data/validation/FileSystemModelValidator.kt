@@ -3,7 +3,7 @@ package com.dmitriim.localailab.feature.models.impl.models.data.validation
 import android.util.Log
 import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.ai.api.model.manifest.ModelProfileKey
-import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
+import com.dmitriim.localailab.ai.api.model.ModelRuntimeProfileResolver
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.feature.models.impl.models.domain.validation.ModelManifestValidationPolicy
 import com.dmitriim.localailab.feature.models.impl.models.domain.validation.ModelValidationResult
@@ -15,7 +15,7 @@ import java.io.File
 @Inject
 @SingleIn(AppScope::class)
 class FileSystemModelValidator(
-    private val profiles: ModelRuntimeProfileRegistry,
+    private val profiles: ModelRuntimeProfileResolver,
 ) {
     fun validate(
         manifest: ModelManifest,

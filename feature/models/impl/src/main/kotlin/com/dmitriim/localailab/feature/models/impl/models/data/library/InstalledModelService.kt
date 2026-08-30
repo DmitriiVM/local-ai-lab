@@ -4,7 +4,6 @@ import android.app.Application
 import android.util.Log
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
-import com.dmitriim.localailab.ai.runtime.model.ModelRuntimeProfileRegistry
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.di.ApplicationCoroutineScope
 import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
@@ -35,7 +34,6 @@ import kotlinx.serialization.json.Json
 class InstalledModelService(
     private val application: Application,
     private val databaseProvider: ModelsDatabaseProvider,
-    private val profiles: ModelRuntimeProfileRegistry,
     private val validator: FileSystemModelValidator,
     private val transferState: ModelTransferStateStore,
     @param:ApplicationCoroutineScope private val applicationScope: CoroutineScope,
