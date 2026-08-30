@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "5f2d11a27e606d8c2fd79cd71f70ef92",
+    "identityHash": "931ffa0210e098fd30fc0e64e9377808",
     "entities": [
       {
         "tableName": "runs",
@@ -118,42 +118,6 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_runs_completedAtEpochMs` ON `${TABLE_NAME}` (`completedAtEpochMs`)"
-          },
-          {
-            "name": "index_runs_capability",
-            "unique": false,
-            "columnNames": [
-              "capability"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_runs_capability` ON `${TABLE_NAME}` (`capability`)"
-          },
-          {
-            "name": "index_runs_status",
-            "unique": false,
-            "columnNames": [
-              "status"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_runs_status` ON `${TABLE_NAME}` (`status`)"
-          },
-          {
-            "name": "index_runs_modelId",
-            "unique": false,
-            "columnNames": [
-              "modelId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_runs_modelId` ON `${TABLE_NAME}` (`modelId`)"
-          },
-          {
-            "name": "index_runs_benchmarkSessionId",
-            "unique": false,
-            "columnNames": [
-              "benchmarkSessionId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_runs_benchmarkSessionId` ON `${TABLE_NAME}` (`benchmarkSessionId`)"
           }
         ]
       },
@@ -259,22 +223,14 @@
         },
         "indices": [
           {
-            "name": "index_conversation_messages_conversationId",
+            "name": "index_conversation_messages_conversationId_createdAtEpochMs",
             "unique": false,
             "columnNames": [
-              "conversationId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_conversation_messages_conversationId` ON `${TABLE_NAME}` (`conversationId`)"
-          },
-          {
-            "name": "index_conversation_messages_createdAtEpochMs",
-            "unique": false,
-            "columnNames": [
+              "conversationId",
               "createdAtEpochMs"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_conversation_messages_createdAtEpochMs` ON `${TABLE_NAME}` (`createdAtEpochMs`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_conversation_messages_conversationId_createdAtEpochMs` ON `${TABLE_NAME}` (`conversationId`, `createdAtEpochMs`)"
           }
         ],
         "foreignKeys": [
@@ -294,7 +250,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5f2d11a27e606d8c2fd79cd71f70ef92')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '931ffa0210e098fd30fc0e64e9377808')"
     ]
   }
 }

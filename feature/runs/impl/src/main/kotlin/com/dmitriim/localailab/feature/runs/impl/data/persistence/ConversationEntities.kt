@@ -24,7 +24,7 @@ data class ConversationEntity(
             onDelete = ForeignKey.CASCADE,
         ),
     ],
-    indices = [Index("conversationId"), Index("createdAtEpochMs")],
+    indices = [Index(value = ["conversationId", "createdAtEpochMs"])],
 )
 data class ConversationMessageEntity(
     @PrimaryKey val id: String,

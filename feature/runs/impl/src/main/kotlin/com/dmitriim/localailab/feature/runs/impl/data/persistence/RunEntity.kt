@@ -8,10 +8,6 @@ import androidx.room.PrimaryKey
     tableName = "runs",
     indices = [
         Index("completedAtEpochMs"),
-        Index("capability"),
-        Index("status"),
-        Index("modelId"),
-        Index("benchmarkSessionId"),
     ],
 )
 data class RunEntity(
