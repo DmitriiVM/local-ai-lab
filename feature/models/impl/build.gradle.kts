@@ -46,6 +46,7 @@ dependencies {
     implementation(project(":ai:runtime"))
     implementation(project(":core:di"))
     implementation(project(":core:navigation"))
+    implementation(project(":core:security"))
     implementation(project(":core:ui"))
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.core.ktx)
