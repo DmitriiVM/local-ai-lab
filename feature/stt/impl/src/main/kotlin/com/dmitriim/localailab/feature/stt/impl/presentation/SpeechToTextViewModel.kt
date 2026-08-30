@@ -80,7 +80,11 @@ class SpeechToTextViewModel(
     init {
         viewModelScope.launch {
             savedModelId = settingsRepository.sttSelectedModel.first()?.let(::ModelId)
-            combine(modelLibrary.installedModels, modelTransfers.catalog, ::Pair).collectLatest { (installed, catalog) ->
+            combine(
+                modelLibrary.installedModels,
+                modelTransfers.catalog,
+                ::Pair,
+            ).collectLatest { (installed, catalog) ->
                 val installedById = installed.filter { it.isReadySpeechModel() }.associateBy { it.manifest.modelId }
                 val catalogSpeechModels = catalog.filter {
                     AiCapability.SPEECH_TO_TEXT in it.manifest.capabilities
@@ -145,7 +149,12 @@ class SpeechToTextViewModel(
         if (language in it.availableLanguages) it.copy(language = language, errorMessage = null) else it
     }
 
-    fun updateThreadCount(value: String) = mutableState.update { it.copy(threadCount = value.filter(Char::isDigit), errorMessage = null) }
+    fun updateThreadCount(value: String) = mutableState.update {
+        it.copy(
+            threadCount = value.filter(Char::isDigit),
+            errorMessage = null,
+        )
+    }
 
     fun startRecording() {
         if (operationJob?.isActive == true) {
@@ -153,14 +162,30 @@ class SpeechToTextViewModel(
             return
         }
         if (!requireModel()) return
-        Log.i(TAG, "STT UI recording started: language=${mutableState.value.language.whisperCode}, threads=${mutableState.value.threadCount}")
-        mutableState.update { it.copy(operation = SttOperation.RECORDING, transcript = "", metrics = null, errorMessage = null, level = null) }
+        Log.i(
+            TAG,
+            "STT UI recording started: language=${mutableState.value.language.whisperCode}, " +
+                "threads=${mutableState.value.threadCount}",
+        )
+        mutableState.update {
+            it.copy(
+                operation = SttOperation.RECORDING,
+                transcript = "",
+                metrics = null,
+                errorMessage = null,
+                level = null,
+            )
+        }
         operationJob = viewModelScope.launch(Dispatchers.Default) {
             try {
                 val input = audioInputStore.capture { level ->
                     mutableState.update { it.copy(level = level) }
                 }
-                Log.i(TAG, "STT UI recording captured: durationMs=${input.durationMs}, sampleRateHz=${input.sampleRateHz}")
+                Log.i(
+                    TAG,
+                    "STT UI recording captured: durationMs=${input.durationMs}, " +
+                        "sampleRateHz=${input.sampleRateHz}",
+                )
                 replaceInput(input)
                 mutableState.update { it.copy(level = null, operation = SttOperation.IDLE) }
                 transcribe(input)
@@ -169,7 +194,14 @@ class SpeechToTextViewModel(
                 mutableState.update { it.copy(operation = SttOperation.IDLE, level = null) }
             } catch (error: Throwable) {
                 Log.e(TAG, "STT UI recording failed: ${error.message}", error)
-                mutableState.update { it.copy(operation = SttOperation.IDLE, level = null, errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.stt_error_microphone_capture)) }
+                mutableState.update {
+                    it.copy(
+                        operation = SttOperation.IDLE,
+                        level = null,
+                        errorMessage = error.message?.let(UiText::Dynamic)
+                            ?: UiText.Resource(CoreUiR.string.stt_error_microphone_capture),
+                    )
+                }
             }
         }.also(::registerForegroundCancellation)
     }
@@ -188,11 +220,22 @@ class SpeechToTextViewModel(
         }
         if (!requireModel()) return
         Log.i(TAG, "STT UI import started: uriScheme=${uri.scheme}")
-        mutableState.update { it.copy(operation = SttOperation.IMPORTING, transcript = "", metrics = null, errorMessage = null) }
+        mutableState.update {
+            it.copy(
+                operation = SttOperation.IMPORTING,
+                transcript = "",
+                metrics = null,
+                errorMessage = null,
+            )
+        }
         operationJob = viewModelScope.launch(Dispatchers.Default) {
             try {
                 val input = audioInputStore.importAudio(uri)
-                Log.i(TAG, "STT UI import completed: durationMs=${input.durationMs}, sampleRateHz=${input.sampleRateHz}")
+                Log.i(
+                    TAG,
+                    "STT UI import completed: durationMs=${input.durationMs}, " +
+                        "sampleRateHz=${input.sampleRateHz}",
+                )
                 replaceInput(input)
                 mutableState.update { it.copy(operation = SttOperation.IDLE) }
                 transcribe(input)
@@ -201,7 +244,13 @@ class SpeechToTextViewModel(
                 mutableState.update { it.copy(operation = SttOperation.IDLE) }
             } catch (error: Throwable) {
                 Log.e(TAG, "STT UI import failed: ${error.message}", error)
-                mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.stt_error_audio_import)) }
+                mutableState.update {
+                    it.copy(
+                        operation = SttOperation.IDLE,
+                        errorMessage = error.message?.let(UiText::Dynamic)
+                            ?: UiText.Resource(CoreUiR.string.stt_error_audio_import),
+                    )
+                }
             }
         }.also(::registerForegroundCancellation)
     }
@@ -257,7 +306,16 @@ class SpeechToTextViewModel(
         if (operationJob?.isActive == true) cancel()
         val input = mutableState.value.input
         audioInputStore.clear(input)
-        mutableState.update { it.copy(input = null, transcript = "", metrics = null, level = null, errorMessage = null, operation = SttOperation.IDLE) }
+        mutableState.update {
+            it.copy(
+                input = null,
+                transcript = "",
+                metrics = null,
+                level = null,
+                errorMessage = null,
+                operation = SttOperation.IDLE,
+            )
+        }
     }
 
     fun microphonePermissionDenied() = mutableState.update {
@@ -274,9 +332,17 @@ class SpeechToTextViewModel(
         Log.i(
             TAG,
             "STT UI transcription started: model=${model?.displayName}, durationMs=${input.durationMs}, " +
-                "sampleRateHz=${input.sampleRateHz}, language=${snapshot.language.whisperCode}, threads=${snapshot.threadCount}",
+                "sampleRateHz=${input.sampleRateHz}, " +
+                "language=${snapshot.language.whisperCode}, threads=${snapshot.threadCount}",
         )
-        mutableState.update { it.copy(operation = SttOperation.TRANSCRIBING, transcript = "", metrics = null, errorMessage = null) }
+        mutableState.update {
+            it.copy(
+                operation = SttOperation.TRANSCRIBING,
+                transcript = "",
+                metrics = null,
+                errorMessage = null,
+            )
+        }
         operationJob = viewModelScope.launch(Dispatchers.Default) {
             try {
                 transcribeAudio.execute(
@@ -293,7 +359,9 @@ class SpeechToTextViewModel(
                     when (event) {
                         is SpeechTranscriptionEvent.Prepared -> Log.i(
                             TAG,
-                            "STT UI received prepared event: model=${event.modelName}, loadMs=${event.loadDurationMs}, threads=${event.effectiveThreadCount}",
+                            "STT UI received prepared event: model=${event.modelName}, " +
+                                "loadMs=${event.loadDurationMs}, " +
+                                "threads=${event.effectiveThreadCount}",
                         )
                         is SpeechTranscriptionEvent.Completed -> mutableState.update {
                             it.copy(
@@ -305,19 +373,74 @@ class SpeechToTextViewModel(
                                 },
                             )
                         }.also {
-                            Log.i(TAG, "STT UI received completed event: transcriptLength=${event.transcript.length}, segments=${event.metrics.segmentCount}, totalMs=${event.metrics.timeToFinalMs}")
-                            persistSttRun(snapshotForPersistence(runId, RunStatus.SUCCEEDED, startedAt, model, input, event.transcript, snapshot, event.metrics, null))
+                            Log.i(
+                                TAG,
+                                "STT UI received completed event: " +
+                                    "transcriptLength=${event.transcript.length}, " +
+                                    "segments=${event.metrics.segmentCount}, " +
+                                    "totalMs=${event.metrics.timeToFinalMs}",
+                            )
+                            persistSttRun(
+                                snapshotForPersistence(
+                                    runId = runId,
+                                    status = RunStatus.SUCCEEDED,
+                                    startedAt = startedAt,
+                                    model = model,
+                                    input = input,
+                                    transcript = event.transcript,
+                                    state = snapshot,
+                                    metrics = event.metrics,
+                                    error = null,
+                                ),
+                            )
                         }
                     }
                 }
             } catch (_: CancellationException) {
                 Log.i(TAG, "STT UI transcription cancelled.")
-                mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = UiText.Resource(CoreUiR.string.stt_error_transcription_cancelled)) }
-                persistSttRun(snapshotForPersistence(runId, RunStatus.CANCELLED, startedAt, model, input, null, snapshot, null, "Transcription cancelled."))
+                mutableState.update {
+                    it.copy(
+                        operation = SttOperation.IDLE,
+                        errorMessage = UiText.Resource(
+                            CoreUiR.string.stt_error_transcription_cancelled,
+                        ),
+                    )
+                }
+                persistSttRun(
+                    snapshotForPersistence(
+                        runId = runId,
+                        status = RunStatus.CANCELLED,
+                        startedAt = startedAt,
+                        model = model,
+                        input = input,
+                        transcript = null,
+                        state = snapshot,
+                        metrics = null,
+                        error = "Transcription cancelled.",
+                    ),
+                )
             } catch (error: Throwable) {
                 Log.e(TAG, "STT UI transcription failed: ${error.message}", error)
-                mutableState.update { it.copy(operation = SttOperation.IDLE, errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.stt_error_transcription_failed)) }
-                persistSttRun(snapshotForPersistence(runId, RunStatus.FAILED, startedAt, model, input, null, snapshot, null, error.message ?: "Local transcription failed."))
+                mutableState.update {
+                    it.copy(
+                        operation = SttOperation.IDLE,
+                        errorMessage = error.message?.let(UiText::Dynamic)
+                            ?: UiText.Resource(CoreUiR.string.stt_error_transcription_failed),
+                    )
+                }
+                persistSttRun(
+                    snapshotForPersistence(
+                        runId = runId,
+                        status = RunStatus.FAILED,
+                        startedAt = startedAt,
+                        model = model,
+                        input = input,
+                        transcript = null,
+                        state = snapshot,
+                        metrics = null,
+                        error = error.message ?: "Local transcription failed.",
+                    ),
+                )
             }
         }.also(::registerForegroundCancellation)
     }
@@ -362,10 +485,19 @@ class SpeechToTextViewModel(
         mutableState.update { state ->
             state.copy(
                 selectedModelId = selected ?: state.selectedModelId,
-                language = parameters?.get("language")?.jsonPrimitive?.content?.let { code -> SttLanguage.entries.firstOrNull { it.whisperCode == code } } ?: state.language,
+                language = parameters?.get("language")
+                    ?.jsonPrimitive
+                    ?.content
+                    ?.let { code ->
+                        SttLanguage.entries.firstOrNull { it.whisperCode == code }
+                    }
+                    ?: state.language,
                 threadCount = parameters?.get("threadCount")?.jsonPrimitive?.content ?: state.threadCount,
                 errorMessage = when {
-                    modelId != null && selected == null -> UiText.Resource(CoreUiR.string.stt_error_saved_model_missing, listOf(run.model?.displayName.orEmpty()))
+                    modelId != null && selected == null -> UiText.Resource(
+                        CoreUiR.string.stt_error_saved_model_missing,
+                        listOf(run.model?.displayName.orEmpty()),
+                    )
                     else -> UiText.Resource(CoreUiR.string.stt_status_configuration_restored)
                 },
             )

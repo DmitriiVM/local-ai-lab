@@ -71,9 +71,13 @@ class PreviewSpeechServiceTest {
     )
 
     private object FakeModelResolver : LocalModelResolver {
-        override suspend fun resolveChatModel(modelId: ModelId): Result<ChatModelReference> = error("Not used by a speech preview")
+        override suspend fun resolveChatModel(
+            modelId: ModelId,
+        ): Result<ChatModelReference> = error("Not used by a speech preview")
 
-        override suspend fun resolveSpeechToTextModel(modelId: ModelId): Result<SpeechToTextModelReference> = error("Not used by a speech preview")
+        override suspend fun resolveSpeechToTextModel(
+            modelId: ModelId,
+        ): Result<SpeechToTextModelReference> = error("Not used by a speech preview")
 
         override suspend fun resolveTextToSpeechModel(modelId: ModelId) = Result.success(
             TextToSpeechModelReference(

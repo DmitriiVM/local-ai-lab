@@ -2,6 +2,7 @@ package com.dmitriim.localailab.feature.assistant.impl.presentation
 
 import android.util.Log
 import com.dmitriim.localailab.ai.api.chat.ChatEngine
+import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
 import com.dmitriim.localailab.core.operation.ForegroundOperationInterruption
@@ -13,6 +14,16 @@ import com.dmitriim.localailab.feature.assistant.impl.domain.ChatGenerationEvent
 import com.dmitriim.localailab.feature.assistant.impl.domain.ChatGenerationRequest
 import com.dmitriim.localailab.feature.assistant.impl.domain.GenerateAssistantResponse
 import com.dmitriim.localailab.feature.assistant.impl.domain.PersistAssistantTurn
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantInputMode
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantOperation
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantUiState
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMessage
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMessageRole
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMetrics
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechOutputSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.TtsModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.replaceAssistantText
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunModelSnapshot
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunStatus
 import com.dmitriim.localailab.feature.stt.api.domain.SpeechTranscriptionEvent
@@ -101,7 +112,11 @@ internal class AssistantOperationController(
     fun stopRecording() {
         if (state.value.operation != AssistantOperation.Recording) return
         state.update {
-            it.copy(operation = AssistantOperation.Transcribing, level = null, statusMessage = "Finalizing recorded speech…")
+            it.copy(
+                operation = AssistantOperation.Transcribing,
+                level = null,
+                statusMessage = "Finalizing recorded speech…",
+            )
         }
         audioRecorder.stop()
     }
@@ -118,7 +133,11 @@ internal class AssistantOperationController(
         }
     }
 
-    fun previewVoice(modelId: com.dmitriim.localailab.ai.api.model.manifest.ModelId, voiceId: String, settings: SpeechOutputSettings): String? {
+    fun previewVoice(
+        modelId: ModelId,
+        voiceId: String,
+        settings: SpeechOutputSettings,
+    ): String? {
         val snapshot = state.value
         if (!snapshot.isIdle) return "Wait for the current operation to finish."
         val model = snapshot.voiceModels.firstOrNull { it.id == modelId && it.installed }
@@ -137,12 +156,25 @@ internal class AssistantOperationController(
                     )
                 }
                 speechOutput.preview(model.id, model, voice, snapshot.speechOutputSettings)
-                state.update { it.copy(operation = AssistantOperation.Idle, statusMessage = "Voice preview completed.") }
+                state.update {
+                    it.copy(
+                        operation = AssistantOperation.Idle,
+                        statusMessage = "Voice preview completed.",
+                    )
+                }
             } catch (_: CancellationException) {
-                state.update { it.copy(operation = AssistantOperation.Idle, statusMessage = "Voice preview stopped.") }
+                state.update {
+                    it.copy(
+                        operation = AssistantOperation.Idle,
+                        statusMessage = "Voice preview stopped.",
+                    )
+                }
             } catch (error: Throwable) {
                 state.update {
-                    it.copy(operation = AssistantOperation.Idle, errorMessage = error.message ?: "Could not preview this voice.")
+                    it.copy(
+                        operation = AssistantOperation.Idle,
+                        errorMessage = error.message ?: "Could not preview this voice.",
+                    )
                 }
             }
         }
@@ -192,11 +224,20 @@ internal class AssistantOperationController(
         activeLinkedRunIds.clear()
         try {
             state.update {
-                it.copy(operation = AssistantOperation.Recording, level = null, statusMessage = "Listening…", errorMessage = null)
+                it.copy(
+                    operation = AssistantOperation.Recording,
+                    level = null,
+                    statusMessage = "Listening…",
+                    errorMessage = null,
+                )
             }
             input = audioRecorder.record(speechModel.sampleRateHz) { level -> state.update { it.copy(level = level) } }
             state.update {
-                it.copy(operation = AssistantOperation.Transcribing, level = null, statusMessage = "Transcribing locally…")
+                it.copy(
+                    operation = AssistantOperation.Transcribing,
+                    level = null,
+                    statusMessage = "Transcribing locally…",
+                )
             }
             transcriber.transcribe(
                 modelId = speechModel.id,
@@ -229,7 +270,12 @@ internal class AssistantOperationController(
                     )
                 }
             } else {
-                val response = generateInternal(initial.messages, requireNotNull(transcript), appendUser = true, speakAfter = true)
+                val response = generateInternal(
+                    base = initial.messages,
+                    userText = requireNotNull(transcript),
+                    appendUser = true,
+                    speakAfter = true,
+                )
                 runRecorder.recordVoiceTurn(
                     status = if (response.speechSucceeded) RunStatus.SUCCEEDED else RunStatus.FAILED,
                     startedAtEpochMs = startedAt,
@@ -240,12 +286,39 @@ internal class AssistantOperationController(
                 )
             }
         } catch (_: CancellationException) {
-            withContext(NonCancellable) { recordVoiceInputFailure(RunStatus.CANCELLED, startedAt, speechModel, transcript, initial, metrics, "Voice input cancelled.", "Voice turn cancelled.") }
+            withContext(NonCancellable) {
+                recordVoiceInputFailure(
+                    status = RunStatus.CANCELLED,
+                    startedAt = startedAt,
+                    speechModel = speechModel,
+                    transcript = transcript,
+                    initial = initial,
+                    metrics = metrics,
+                    inputError = "Voice input cancelled.",
+                    turnError = "Voice turn cancelled.",
+                )
+            }
             state.update {
-                it.copy(operation = AssistantOperation.Idle, level = null, speakingMessageId = null, statusMessage = "Voice operation stopped.")
+                it.copy(
+                    operation = AssistantOperation.Idle,
+                    level = null,
+                    speakingMessageId = null,
+                    statusMessage = "Voice operation stopped.",
+                )
             }
         } catch (error: Throwable) {
-            withContext(NonCancellable) { recordVoiceInputFailure(RunStatus.FAILED, startedAt, speechModel, transcript, initial, metrics, error.message, error.message) }
+            withContext(NonCancellable) {
+                recordVoiceInputFailure(
+                    status = RunStatus.FAILED,
+                    startedAt = startedAt,
+                    speechModel = speechModel,
+                    transcript = transcript,
+                    initial = initial,
+                    metrics = metrics,
+                    inputError = error.message,
+                    turnError = error.message,
+                )
+            }
             handleOperationFailure(error)
         } finally {
             audioRecorder.clear(input)
@@ -275,12 +348,24 @@ internal class AssistantOperationController(
             )
         }
         if (initial.inputMode == AssistantInputMode.VOICE) {
-            runRecorder.recordVoiceTurn(status, startedAt, transcript, null, activeLinkedRunIds.toList(), turnError)
+            runRecorder.recordVoiceTurn(
+                status = status,
+                startedAtEpochMs = startedAt,
+                transcript = transcript,
+                response = null,
+                linkedRunIds = activeLinkedRunIds.toList(),
+                error = turnError,
+            )
         }
     }
 
     @Suppress("LongMethod") // This serializes the state transitions of a single assistant operation.
-    private suspend fun generateInternal(base: List<ChatMessage>, userText: String, appendUser: Boolean, speakAfter: Boolean): GenerationOutcome {
+    private suspend fun generateInternal(
+        base: List<ChatMessage>,
+        userText: String,
+        appendUser: Boolean,
+        speakAfter: Boolean,
+    ): GenerationOutcome {
         val snapshot = state.value
         val selectedId = snapshot.selectedChatModelId ?: error("Select an installed chat model first.")
         val settings = snapshot.chatSettings.toEffective()
@@ -302,7 +387,12 @@ internal class AssistantOperationController(
             }
             var completedText = ""
             generateResponse.execute(
-                ChatGenerationRequest(selectedId, visibleMessages.map(ChatMessage::toDomain), settings.toDomain(), runId),
+                ChatGenerationRequest(
+                    modelId = selectedId,
+                    turns = visibleMessages.map(ChatMessage::toDomain),
+                    config = settings.toDomain(),
+                    runId = runId,
+                ),
             ).collect { event ->
                 when (event) {
                     is ChatGenerationEvent.Prepared -> {
@@ -312,13 +402,23 @@ internal class AssistantOperationController(
                                 operation = AssistantOperation.Generating,
                                 statusMessage = "Generating locally…",
                                 contextUsage = event.contextUsage.toUi(),
-                                messages = visibleMessages + ChatMessage.assistant(requireNotNull(assistantId), "", true),
+                                messages = visibleMessages + ChatMessage.assistant(
+                                    id = requireNotNull(assistantId),
+                                    content = "",
+                                    streaming = true,
+                                ),
                             )
                         }
                     }
-                    is ChatGenerationEvent.Token -> assistantId?.let { id -> state.update { it.replaceAssistantText(id, event.text, append = true) } }
+                    is ChatGenerationEvent.Token -> assistantId?.let { id ->
+                        state.update {
+                            it.replaceAssistantText(id, event.text, append = true)
+                        }
+                    }
                     is ChatGenerationEvent.Completed -> {
-                        val id = requireNotNull(assistantId) { "The chat engine completed without preparing a response." }
+                        val id = requireNotNull(assistantId) {
+                            "The chat engine completed without preparing a response."
+                        }
                         val result = event.generation
                         completedText = result.text
                         val metrics = ChatMetrics(
@@ -345,14 +445,27 @@ internal class AssistantOperationController(
                         }
                         activeLinkedRunIds += persistAssistantTurn(
                             AssistantChatPersistenceSnapshotFactory.create(
-                                runId, conversationId(), RunStatus.SUCCEEDED, startedAt, model, userText, result.text, settings, metrics,
-                                null, state.value.messages,
+                                runId = runId,
+                                conversationId = conversationId(),
+                                status = RunStatus.SUCCEEDED,
+                                startedAt = startedAt,
+                                model = model,
+                                input = userText,
+                                output = result.text,
+                                settings = settings,
+                                metrics = metrics,
+                                error = null,
+                                messages = state.value.messages,
                             ),
                         )
                     }
                 }
             }
-            val speech = if (speakAfter) speakInternal(completedText, requireNotNull(assistantId)) else SpeechOutcome()
+            val speech = if (speakAfter) {
+                speakInternal(completedText, requireNotNull(assistantId))
+            } else {
+                SpeechOutcome()
+            }
             return GenerationOutcome(completedText, speech.succeeded, speech.error)
         } catch (cancelled: CancellationException) {
             state.update { current ->
@@ -360,15 +473,31 @@ internal class AssistantOperationController(
                     operation = AssistantOperation.Idle,
                     speakingMessageId = null,
                     statusMessage = "Generation stopped.",
-                    messages = current.messages.map { if (it.streaming) it.copy(streaming = false, failed = true) else it },
+                    messages = current.messages.map { message ->
+                        if (message.streaming) {
+                            message.copy(streaming = false, failed = true)
+                        } else {
+                            message
+                        }
+                    },
                 )
             }
             val partial = state.value.messages.lastOrNull { it.role == ChatMessageRole.ASSISTANT }?.content
             withContext(NonCancellable) {
                 activeLinkedRunIds += persistAssistantTurn(
                     AssistantChatPersistenceSnapshotFactory.create(
-                        runId, conversationId(), RunStatus.CANCELLED, startedAt, model, userText, partial, settings, null,
-                        "Generation cancelled.", state.value.messages, incompleteAssistant = true,
+                        runId = runId,
+                        conversationId = conversationId(),
+                        status = RunStatus.CANCELLED,
+                        startedAt = startedAt,
+                        model = model,
+                        input = userText,
+                        output = partial,
+                        settings = settings,
+                        metrics = null,
+                        error = "Generation cancelled.",
+                        messages = state.value.messages,
+                        incompleteAssistant = true,
                     ),
                 )
             }
@@ -380,14 +509,30 @@ internal class AssistantOperationController(
                     operation = AssistantOperation.Idle,
                     speakingMessageId = null,
                     errorMessage = message,
-                    messages = current.messages.map { if (it.streaming) it.copy(streaming = false, failed = true) else it },
+                    messages = current.messages.map { message ->
+                        if (message.streaming) {
+                            message.copy(streaming = false, failed = true)
+                        } else {
+                            message
+                        }
+                    },
                 )
             }
             withContext(NonCancellable) {
                 activeLinkedRunIds += persistAssistantTurn(
                     AssistantChatPersistenceSnapshotFactory.create(
-                        runId, conversationId(), RunStatus.FAILED, startedAt, model, userText, null, settings, null,
-                        message, state.value.messages, incompleteAssistant = true,
+                        runId = runId,
+                        conversationId = conversationId(),
+                        status = RunStatus.FAILED,
+                        startedAt = startedAt,
+                        model = model,
+                        input = userText,
+                        output = null,
+                        settings = settings,
+                        metrics = null,
+                        error = message,
+                        messages = state.value.messages,
+                        incompleteAssistant = true,
                     ),
                 )
             }
@@ -426,7 +571,13 @@ internal class AssistantOperationController(
                 metrics = metrics,
                 error = null,
             )
-            state.update { it.copy(operation = AssistantOperation.Idle, speakingMessageId = null, statusMessage = null) }
+            state.update {
+                it.copy(
+                    operation = AssistantOperation.Idle,
+                    speakingMessageId = null,
+                    statusMessage = null,
+                )
+            }
             SpeechOutcome(succeeded = true)
         } catch (cancelled: CancellationException) {
             withContext(NonCancellable) {
@@ -441,7 +592,13 @@ internal class AssistantOperationController(
                     error = "Speech playback cancelled.",
                 )
             }
-            state.update { it.copy(operation = AssistantOperation.Idle, speakingMessageId = null, statusMessage = "Speech stopped.") }
+            state.update {
+                it.copy(
+                    operation = AssistantOperation.Idle,
+                    speakingMessageId = null,
+                    statusMessage = "Speech stopped.",
+                )
+            }
             throw cancelled
         } catch (error: Throwable) {
             val message = error.message ?: "Could not speak this response."
@@ -457,7 +614,14 @@ internal class AssistantOperationController(
                     error = message,
                 )
             }
-            state.update { it.copy(operation = AssistantOperation.Idle, speakingMessageId = null, errorMessage = message, statusMessage = null) }
+            state.update {
+                it.copy(
+                    operation = AssistantOperation.Idle,
+                    speakingMessageId = null,
+                    errorMessage = message,
+                    statusMessage = null,
+                )
+            }
             SpeechOutcome(succeeded = false, error = message)
         }
     }

@@ -23,16 +23,15 @@ class KokoroTtsProfile :
     BaseSherpaTtsProfile(
         kokoroTtsProfileId,
     ) {
-    override fun open(artifacts: ModelArtifacts, threadCount: Int): SherpaTtsModel =
-        openSherpaTts(threadCount) {
-            kokoro = OfflineTtsKokoroModelConfig().apply {
-                model = artifacts.require(KokoroTtsArtifacts.MODEL).path
-                voices = artifacts.require(KokoroTtsArtifacts.VOICES).path
-                tokens = artifacts.require(ModelFileRoles.TOKENS).path
-                dataDir = artifacts.require(ModelFileRoles.FRONTEND_DATA).path
-                lexicon = listOf("lexicon-us-en.txt", "lexicon-zh.txt")
-                    .joinToString(",") { artifacts.requirePath(it).path }
-                dictDir = artifacts.require(KokoroTtsArtifacts.DICTIONARY).path
-            }
+    override fun open(artifacts: ModelArtifacts, threadCount: Int): SherpaTtsModel = openSherpaTts(threadCount) {
+        kokoro = OfflineTtsKokoroModelConfig().apply {
+            model = artifacts.require(KokoroTtsArtifacts.MODEL).path
+            voices = artifacts.require(KokoroTtsArtifacts.VOICES).path
+            tokens = artifacts.require(ModelFileRoles.TOKENS).path
+            dataDir = artifacts.require(ModelFileRoles.FRONTEND_DATA).path
+            lexicon = listOf("lexicon-us-en.txt", "lexicon-zh.txt")
+                .joinToString(",") { artifacts.requirePath(it).path }
+            dictDir = artifacts.require(KokoroTtsArtifacts.DICTIONARY).path
         }
+    }
 }

@@ -66,7 +66,12 @@ fun RunsScreen(
         )
     }
     if (selected != null) {
-        RunDetails(selected, onCloseDetails, onShare, onRepeat)
+        RunDetails(
+            run = selected,
+            onClose = onCloseDetails,
+            onShare = onShare,
+            onRepeat = onRepeat,
+        )
         return
     }
     LazyColumn(
@@ -84,7 +89,10 @@ fun RunsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(stringResource(CoreUiR.string.runs_runs_screen_92), style = MaterialTheme.typography.headlineMedium)
+                Text(
+                    text = stringResource(CoreUiR.string.runs_runs_screen_92),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
                 RunsOverflowMenu(
                     hasRuns = state.runs.isNotEmpty(),
                     onClearRunHistory = onRequestClearRunHistory,
@@ -125,10 +133,14 @@ private fun ClearRunHistoryDialog(
             Text(stringResource(CoreUiR.string.runs_clear_history_explanation))
         },
         confirmButton = {
-            OutlinedButton(onClick = onConfirm) { Text(stringResource(CoreUiR.string.runs_runs_screen_95)) }
+            OutlinedButton(onClick = onConfirm) {
+                Text(stringResource(CoreUiR.string.runs_runs_screen_95))
+            }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.runs_runs_screen_96)) }
+            OutlinedButton(onClick = onDismiss) {
+                Text(stringResource(CoreUiR.string.runs_runs_screen_96))
+            }
         },
     )
 }
@@ -266,14 +278,24 @@ private fun RunDetails(
     ) {
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onClose) { Text(stringResource(CoreUiR.string.runs_runs_screen_100)) }
-                OutlinedButton(onClick = onRepeat) { Text(stringResource(CoreUiR.string.runs_runs_screen_101)) }
-                OutlinedButton(onClick = onShare) { Text(stringResource(CoreUiR.string.runs_runs_screen_102)) }
+                OutlinedButton(onClick = onClose) {
+                    Text(stringResource(CoreUiR.string.runs_runs_screen_100))
+                }
+                OutlinedButton(onClick = onRepeat) {
+                    Text(stringResource(CoreUiR.string.runs_runs_screen_101))
+                }
+                OutlinedButton(onClick = onShare) {
+                    Text(stringResource(CoreUiR.string.runs_runs_screen_102))
+                }
             }
         }
         item {
             Text(
-                text = stringResource(CoreUiR.string.runs_kind_and_capability, run.kind.label(), run.capability.label()),
+                text = stringResource(
+                    CoreUiR.string.runs_kind_and_capability,
+                    run.kind.label(),
+                    run.capability.label(),
+                ),
                 style = MaterialTheme.typography.headlineMedium,
             )
         }
@@ -286,16 +308,44 @@ private fun RunDetails(
                 ),
             )
         }
-        item { DetailCard(stringResource(CoreUiR.string.runs_input), run.input ?: stringResource(CoreUiR.string.runs_not_retained)) }
-        item { DetailCard(stringResource(CoreUiR.string.runs_output), run.output ?: stringResource(CoreUiR.string.runs_not_available)) }
-        item { DetailCard(stringResource(CoreUiR.string.runs_effective_parameters), run.parametersJson) }
-        item { DetailCard(stringResource(CoreUiR.string.runs_metrics), run.metricsJson) }
+        item {
+            DetailCard(
+                title = stringResource(CoreUiR.string.runs_input),
+                body = run.input ?: stringResource(CoreUiR.string.runs_not_retained),
+            )
+        }
+        item {
+            DetailCard(
+                title = stringResource(CoreUiR.string.runs_output),
+                body = run.output ?: stringResource(CoreUiR.string.runs_not_available),
+            )
+        }
+        item {
+            DetailCard(
+                title = stringResource(CoreUiR.string.runs_effective_parameters),
+                body = run.parametersJson,
+            )
+        }
+        item {
+            DetailCard(
+                title = stringResource(CoreUiR.string.runs_metrics),
+                body = run.metricsJson,
+            )
+        }
         run.errorMessage?.let { error ->
-            item { DetailCard(stringResource(CoreUiR.string.runs_error), error) }
+            item {
+                DetailCard(
+                    title = stringResource(CoreUiR.string.runs_error),
+                    body = error,
+                )
+            }
         }
         if (run.linkedRunIds.isNotEmpty()) {
             item {
-                DetailCard(stringResource(CoreUiR.string.runs_linked_pipeline_runs), run.linkedRunIds.joinToString())
+                DetailCard(
+                    title = stringResource(CoreUiR.string.runs_linked_pipeline_runs),
+                    body = run.linkedRunIds.joinToString(),
+                )
             }
         }
         item {

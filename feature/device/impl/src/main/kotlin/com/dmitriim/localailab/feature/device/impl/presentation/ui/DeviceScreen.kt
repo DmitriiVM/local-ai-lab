@@ -134,7 +134,11 @@ private fun LazyListScope.engineCards(state: DeviceUiState) {
                 engine.statusLine(),
                 "Capabilities: ${engine.descriptor.capabilities.joinToString()}",
                 engine.runtimeLine(),
-                if (engine.descriptor.bundledRuntime) "Runtime is bundled with the app." else "Runtime is supplied by the system.",
+                if (engine.descriptor.bundledRuntime) {
+                    "Runtime is bundled with the app."
+                } else {
+                    "Runtime is supplied by the system."
+                },
             ),
             isError = engine !is EngineAvailability.Available,
         )
@@ -164,7 +168,8 @@ private fun LazyListScope.diagnosticsCard(state: DeviceUiState) {
                     "Model storage writable: ${diagnostics.modelDirectoryWritable}",
                     "Temporary storage: ${diagnostics.availableTemporaryBytes / 1024 / 1024} MiB available",
                     "Installed files valid: ${diagnostics.installedFilesValid}",
-                    "Offline-ready capabilities: ${diagnostics.offlineReadyCapabilities.joinToString().ifBlank { "None" }}",
+                    "Offline-ready capabilities: " +
+                        diagnostics.offlineReadyCapabilities.joinToString().ifBlank { "None" },
                 ) + diagnostics.detail,
                 isError = !diagnostics.modelDirectoryWritable || !diagnostics.installedFilesValid,
             )

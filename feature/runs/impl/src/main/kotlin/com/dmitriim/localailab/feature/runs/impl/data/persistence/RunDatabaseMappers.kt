@@ -19,7 +19,14 @@ internal fun RunEntity.toDomain(json: Json) = RunRecord(
     status = RunStatus.valueOf(status),
     startedAtEpochMs = startedAtEpochMs,
     completedAtEpochMs = completedAtEpochMs,
-    model = modelId?.let { RunModelSnapshot(it, modelDisplayName.orEmpty(), engineId.orEmpty(), modelRevision) },
+    model = modelId?.let { modelId ->
+        RunModelSnapshot(
+            modelId = modelId,
+            displayName = modelDisplayName.orEmpty(),
+            engineId = engineId.orEmpty(),
+            revision = modelRevision,
+        )
+    },
     input = input,
     output = output,
     parametersJson = parametersJson,
@@ -48,9 +55,21 @@ internal fun RunRecord.toEntity(json: Json) = RunEntity(
     linkedRunIdsJson = json.encodeToString(linkedRunIds),
 )
 
-internal fun ConversationEntity.toDomain() = ConversationRecord(id, ConversationKind.valueOf(kind), title, createdAtEpochMs, updatedAtEpochMs)
+internal fun ConversationEntity.toDomain() = ConversationRecord(
+    id = id,
+    kind = ConversationKind.valueOf(kind),
+    title = title,
+    createdAtEpochMs = createdAtEpochMs,
+    updatedAtEpochMs = updatedAtEpochMs,
+)
 
-internal fun ConversationRecord.toEntity() = ConversationEntity(id, kind.name, title, createdAtEpochMs, updatedAtEpochMs)
+internal fun ConversationRecord.toEntity() = ConversationEntity(
+    id = id,
+    kind = kind.name,
+    title = title,
+    createdAtEpochMs = createdAtEpochMs,
+    updatedAtEpochMs = updatedAtEpochMs,
+)
 
 internal fun ConversationMessageEntity.toDomain() = ConversationMessageRecord(
     id,

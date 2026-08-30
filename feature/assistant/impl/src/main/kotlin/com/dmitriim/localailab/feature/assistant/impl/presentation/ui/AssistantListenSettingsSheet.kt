@@ -26,9 +26,9 @@ import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.component.OptionPickerItem
-import com.dmitriim.localailab.feature.assistant.impl.presentation.SpeechInputSettings
-import com.dmitriim.localailab.feature.assistant.impl.presentation.SpeechModelOption
-import com.dmitriim.localailab.feature.assistant.impl.presentation.normalizeLanguageCode
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechInputSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.normalizeLanguageCode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,7 +155,10 @@ private fun ListenLanguageSettings(
     onDraftChange: (SpeechInputSettings) -> Unit,
 ) {
     AssistantSettingsSection("Recognition")
-    Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_12), style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
+    Text(
+        text = stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_12),
+        style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
+    )
     languages.chunked(3).forEach { row ->
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             row.forEach { language ->
@@ -171,12 +174,31 @@ private fun ListenLanguageSettings(
 }
 
 @Composable
-private fun ListenPerformanceSettings(draft: SpeechInputSettings, enabled: Boolean, error: String?, onDraftChange: (SpeechInputSettings) -> Unit) {
+private fun ListenPerformanceSettings(
+    draft: SpeechInputSettings,
+    enabled: Boolean,
+    error: String?,
+    onDraftChange: (SpeechInputSettings) -> Unit,
+) {
     AssistantSettingsSection("Performance")
-    OutlinedTextField(draft.threadCount, { onDraftChange(draft.copy(threadCount = it.filter(Char::isDigit))) }, label = { Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_13)) }, modifier = Modifier.fillMaxWidth(), singleLine = true, enabled = enabled)
+    OutlinedTextField(
+        value = draft.threadCount,
+        onValueChange = { onDraftChange(draft.copy(threadCount = it.filter(Char::isDigit))) },
+        label = {
+            Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_13))
+        },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        enabled = enabled,
+    )
     error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextButton(onClick = { onDraftChange(SpeechInputSettings()) }, enabled = enabled) { Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_14)) }
+        TextButton(
+            onClick = { onDraftChange(SpeechInputSettings()) },
+            enabled = enabled,
+        ) {
+            Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_14))
+        }
     }
 }
 

@@ -57,7 +57,13 @@ fun SettingsScreen(
 ) {
     val dimensions = LocalAppDimensions.current
     val settings = state.settings
-    SettingsDialogs(state, onDismissClearRunHistory, onClearRunHistory, onSaveHuggingFaceToken, onDismissHuggingFaceToken)
+    SettingsDialogs(
+        state = state,
+        onDismissHistory = onDismissClearRunHistory,
+        onClearHistory = onClearRunHistory,
+        onSaveToken = onSaveHuggingFaceToken,
+        onDismissToken = onDismissHuggingFaceToken,
+    )
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -70,42 +76,130 @@ fun SettingsScreen(
             ),
         verticalArrangement = Arrangement.spacedBy(dimensions.sectionSpacing),
     ) {
-        Text(stringResource(CoreUiR.string.settings_settings_screen_111), style = MaterialTheme.typography.headlineMedium)
-        DeviceAndRuntimeCard(onOpenDeviceAndRuntimes)
+        Text(
+            text = stringResource(CoreUiR.string.settings_settings_screen_111),
+            style = MaterialTheme.typography.headlineMedium,
+        )
+        DeviceAndRuntimeCard(onClick = onOpenDeviceAndRuntimes)
         if (settings.showAdvancedControls) {
             SettingsCard("Performance defaults", styled = false) {
-                EnumRadioGroup("Thread policy", settings.threadCountPolicy, ThreadCountPolicy.entries, ThreadCountPolicy::label) { value -> onUpdate { it.copy(threadCountPolicy = value) } }
-                EnumRadioGroup("Unload models", settings.modelUnloadPolicy, ModelUnloadPolicy.entries, ModelUnloadPolicy::label) { value -> onUpdate { it.copy(modelUnloadPolicy = value) } }
-                Toggle("Warm up selected model", settings.warmUpSelectedModel) { value -> onUpdate { it.copy(warmUpSelectedModel = value) } }
-                EnumSelector("Metric detail", settings.metricDetail, MetricDetail.entries, MetricDetail::label) { value -> onUpdate { it.copy(metricDetail = value) } }
+                EnumRadioGroup(
+                    label = "Thread policy",
+                    selected = settings.threadCountPolicy,
+                    values = ThreadCountPolicy.entries,
+                    text = ThreadCountPolicy::label,
+                ) { value ->
+                    onUpdate { it.copy(threadCountPolicy = value) }
+                }
+                EnumRadioGroup(
+                    label = "Unload models",
+                    selected = settings.modelUnloadPolicy,
+                    values = ModelUnloadPolicy.entries,
+                    text = ModelUnloadPolicy::label,
+                ) { value ->
+                    onUpdate { it.copy(modelUnloadPolicy = value) }
+                }
+                Toggle(
+                    label = "Warm up selected model",
+                    checked = settings.warmUpSelectedModel,
+                ) { value ->
+                    onUpdate { it.copy(warmUpSelectedModel = value) }
+                }
+                EnumSelector(
+                    label = "Metric detail",
+                    selected = settings.metricDetail,
+                    values = MetricDetail.entries,
+                    text = MetricDetail::label,
+                ) { value ->
+                    onUpdate { it.copy(metricDetail = value) }
+                }
             }
         }
         SettingsCard("Appearance", styled = false) {
-            Toggle("Keep screen awake during active inference", settings.keepScreenAwake) { value -> onUpdate { it.copy(keepScreenAwake = value) } }
-            Toggle("Confirm before deleting history", settings.confirmDestructiveActions) { value -> onUpdate { it.copy(confirmDestructiveActions = value) } }
-            Toggle("Show advanced controls", settings.showAdvancedControls) { value -> onUpdate { it.copy(showAdvancedControls = value) } }
+            Toggle(
+                label = "Keep screen awake during active inference",
+                checked = settings.keepScreenAwake,
+            ) { value ->
+                onUpdate { it.copy(keepScreenAwake = value) }
+            }
+            Toggle(
+                label = "Confirm before deleting history",
+                checked = settings.confirmDestructiveActions,
+            ) { value ->
+                onUpdate { it.copy(confirmDestructiveActions = value) }
+            }
+            Toggle(
+                label = "Show advanced controls",
+                checked = settings.showAdvancedControls,
+            ) { value ->
+                onUpdate { it.copy(showAdvancedControls = value) }
+            }
         }
         SettingsCard("Retention", purpleTonal = true) {
-            Text(stringResource(CoreUiR.string.settings_settings_screen_115), style = MaterialTheme.typography.titleSmall)
-            Text(stringResource(CoreUiR.string.settings_settings_screen_116), style = MaterialTheme.typography.bodySmall)
-            Text(stringResource(CoreUiR.string.settings_settings_screen_117), style = MaterialTheme.typography.titleSmall)
-            Text(stringResource(CoreUiR.string.settings_settings_screen_118), style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = stringResource(CoreUiR.string.settings_settings_screen_115),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Text(
+                text = stringResource(CoreUiR.string.settings_settings_screen_116),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(
+                text = stringResource(CoreUiR.string.settings_settings_screen_117),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Text(
+                text = stringResource(CoreUiR.string.settings_settings_screen_118),
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
         SettingsCard("Model downloads", purpleTonal = true) {
-            Text(stringResource(CoreUiR.string.settings_settings_screen_119), style = MaterialTheme.typography.titleSmall)
+            Text(
+                text = stringResource(CoreUiR.string.settings_settings_screen_119),
+                style = MaterialTheme.typography.titleSmall,
+            )
             when (state.huggingFaceCredentialStatus) {
                 HuggingFaceCredentialStatus.MISSING -> {
-                    Text(stringResource(CoreUiR.string.settings_settings_screen_120), style = MaterialTheme.typography.bodySmall)
-                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text(stringResource(CoreUiR.string.settings_settings_screen_121)) }
+                    Text(
+                        text = stringResource(CoreUiR.string.settings_settings_screen_120),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    OutlinedButton(
+                        onClick = onRequestHuggingFaceToken,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(CoreUiR.string.settings_settings_screen_121))
+                    }
                 }
                 HuggingFaceCredentialStatus.USER_CONFIGURED -> {
-                    Text(stringResource(CoreUiR.string.settings_settings_screen_122), style = MaterialTheme.typography.bodySmall)
-                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text(stringResource(CoreUiR.string.settings_settings_screen_123)) }
-                    OutlinedButton(onClick = onClearHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text(stringResource(CoreUiR.string.settings_settings_screen_124)) }
+                    Text(
+                        text = stringResource(CoreUiR.string.settings_settings_screen_122),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    OutlinedButton(
+                        onClick = onRequestHuggingFaceToken,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(CoreUiR.string.settings_settings_screen_123))
+                    }
+                    OutlinedButton(
+                        onClick = onClearHuggingFaceToken,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(CoreUiR.string.settings_settings_screen_124))
+                    }
                 }
                 HuggingFaceCredentialStatus.DEBUG_CONFIGURED -> {
-                    Text(stringResource(CoreUiR.string.settings_settings_screen_125), style = MaterialTheme.typography.bodySmall)
-                    OutlinedButton(onClick = onRequestHuggingFaceToken, modifier = Modifier.fillMaxWidth()) { Text(stringResource(CoreUiR.string.settings_settings_screen_126)) }
+                    Text(
+                        text = stringResource(CoreUiR.string.settings_settings_screen_125),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    OutlinedButton(
+                        onClick = onRequestHuggingFaceToken,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(CoreUiR.string.settings_settings_screen_126))
+                    }
                 }
             }
         }
@@ -114,7 +208,12 @@ fun SettingsScreen(
             StorageLine("Temporary recordings", state.storage.recordingsBytes)
             StorageLine("Generated audio", state.storage.generatedAudioBytes)
             StorageLine("History", state.storage.historyBytes)
-            OutlinedButton(onClick = onClearTemporaryMedia, modifier = Modifier.fillMaxWidth()) { Text(stringResource(CoreUiR.string.settings_settings_screen_127)) }
+            OutlinedButton(
+                onClick = onClearTemporaryMedia,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(CoreUiR.string.settings_settings_screen_127))
+            }
             OutlinedButton(
                 onClick = {
                     if (settings.confirmDestructiveActions) {
@@ -124,8 +223,13 @@ fun SettingsScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text(stringResource(CoreUiR.string.settings_settings_screen_128)) }
-            Text(stringResource(CoreUiR.string.settings_settings_screen_129), style = MaterialTheme.typography.bodySmall)
+            ) {
+                Text(stringResource(CoreUiR.string.settings_settings_screen_128))
+            }
+            Text(
+                text = stringResource(CoreUiR.string.settings_settings_screen_129),
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
     }
 }
@@ -143,8 +247,16 @@ private fun SettingsDialogs(
             onDismissRequest = onDismissHistory,
             title = { Text(stringResource(CoreUiR.string.settings_settings_screen_107)) },
             text = { Text(stringResource(CoreUiR.string.settings_settings_screen_108)) },
-            confirmButton = { OutlinedButton(onClick = onClearHistory) { Text(stringResource(CoreUiR.string.settings_settings_screen_109)) } },
-            dismissButton = { OutlinedButton(onClick = onDismissHistory) { Text(stringResource(CoreUiR.string.settings_settings_screen_110)) } },
+            confirmButton = {
+                OutlinedButton(onClick = onClearHistory) {
+                    Text(stringResource(CoreUiR.string.settings_settings_screen_109))
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = onDismissHistory) {
+                    Text(stringResource(CoreUiR.string.settings_settings_screen_110))
+                }
+            },
         )
     }
     if (state.showHuggingFaceTokenDialog) {
@@ -162,12 +274,27 @@ private fun SettingsDialogs(
 @Composable
 private fun DeviceAndRuntimeCard(onClick: () -> Unit) {
     SettingsSurfaceCard(onClick = onClick) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(stringResource(CoreUiR.string.settings_settings_screen_112), style = MaterialTheme.typography.titleMedium)
-                Text(stringResource(CoreUiR.string.settings_settings_screen_113), style = MaterialTheme.typography.bodySmall)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(
+                    text = stringResource(CoreUiR.string.settings_settings_screen_112),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = stringResource(CoreUiR.string.settings_settings_screen_113),
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
-            Text(stringResource(CoreUiR.string.settings_settings_screen_114), style = MaterialTheme.typography.headlineSmall)
+            Text(
+                text = stringResource(CoreUiR.string.settings_settings_screen_114),
+                style = MaterialTheme.typography.headlineSmall,
+            )
         }
     }
 }
@@ -239,7 +366,13 @@ private fun Toggle(
 }
 
 @Composable
-private fun <T> EnumSelector(label: String, selected: T, values: Iterable<T>, text: (T) -> String, onSelected: (T) -> Unit) {
+private fun <T> EnumSelector(
+    label: String,
+    selected: T,
+    values: Iterable<T>,
+    text: (T) -> String,
+    onSelected: (T) -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(label, style = MaterialTheme.typography.titleSmall)
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -318,9 +451,14 @@ private fun <T> EnumRadioGroup(
 }
 
 @Composable
-private fun StorageLine(label: String, bytes: Long) = Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-    Text(label)
-    Text(bytes.readable())
+private fun StorageLine(label: String, bytes: Long) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(label)
+        Text(bytes.readable())
+    }
 }
 
 private fun Long.readable(): String = when {

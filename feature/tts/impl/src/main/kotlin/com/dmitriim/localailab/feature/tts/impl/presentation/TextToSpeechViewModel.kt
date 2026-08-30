@@ -277,7 +277,12 @@ class TextToSpeechViewModel(
         val settings = runCatching {
             TtsSpeechSettingsFactory.create(snapshot, requireNotNull(voice), requireNotNull(threads))
         }.getOrElse { cause ->
-            mutableState.update { it.copy(errorMessage = cause.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.tts_error_settings_invalid)) }
+            mutableState.update {
+                it.copy(
+                    errorMessage = cause.message?.let(UiText::Dynamic)
+                        ?: UiText.Resource(CoreUiR.string.tts_error_settings_invalid),
+                )
+            }
             return false
         }
         profileWorkloadStore.open(
@@ -310,11 +315,21 @@ class TextToSpeechViewModel(
             runCatching { generatedAudioStore.export(output, destination) }
                 .onSuccess {
                     Log.i(TAG, "TTS UI export completed.")
-                    mutableState.update { it.copy(statusMessage = UiText.Resource(CoreUiR.string.tts_status_wav_exported), errorMessage = null) }
+                    mutableState.update {
+                        it.copy(
+                            statusMessage = UiText.Resource(CoreUiR.string.tts_status_wav_exported),
+                            errorMessage = null,
+                        )
+                    }
                 }
                 .onFailure { error ->
                     Log.e(TAG, "TTS UI export failed: ${error.message}", error)
-                    mutableState.update { it.copy(errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.tts_error_export_wav)) }
+                    mutableState.update {
+                        it.copy(
+                            errorMessage = error.message?.let(UiText::Dynamic)
+                                ?: UiText.Resource(CoreUiR.string.tts_error_export_wav),
+                        )
+                    }
                 }
         }
     }

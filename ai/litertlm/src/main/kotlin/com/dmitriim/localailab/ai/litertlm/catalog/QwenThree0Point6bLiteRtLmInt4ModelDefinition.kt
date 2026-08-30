@@ -18,6 +18,10 @@ import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 
+private const val qwenRepository = "litert-community/Qwen3-0.6B"
+private const val qwenRevision = "dd97997951bb15a2a71f539ba17f604707c0b11a"
+private const val qwenFileName = "qwen3_0_6b_mixed_int4.litertlm"
+
 @Inject
 @ContributesIntoSet(AppScope::class, binding = binding<ModelCatalogContribution>())
 class QwenThree0Point6bLiteRtLmInt4ModelDefinition(
@@ -28,25 +32,27 @@ class QwenThree0Point6bLiteRtLmInt4ModelDefinition(
             modelId = ModelId("qwen3-0.6b-litert-lm-int4"),
             displayName = "Qwen3 0.6B LiteRT-LM INT4",
             family = "Qwen3",
-            description = "A compact Qwen3 chat model in LiteRT-LM format with mixed INT4 weights for CPU or GPU inference.",
+            description =
+            "A compact Qwen3 chat model in LiteRT-LM format with mixed INT4 weights for CPU " +
+                "or GPU inference.",
             capabilities = setOf(AiCapability.CHAT),
             engineId = runtimeProfile.key.engineId,
             profileType = runtimeProfile.key.profileId,
             format = ModelFormat.LITERT_LM,
             quantization = "Mixed INT4",
             architecture = "Qwen3",
-            revision = "dd97997951bb15a2a71f539ba17f604707c0b11a",
+            revision = qwenRevision,
             files = listOf(
                 ModelFileSpec(
-                    relativePath = "qwen3_0_6b_mixed_int4.litertlm",
+                    relativePath = qwenFileName,
                     role = ModelFileRoles.PRIMARY_MODEL,
                     expectedBytes = 497_664_000L,
                     sha256 = "b1baab462f6be49d70eada79d715c2c52cd9ece0cad00bddf6a2c097d23498e9",
                 ),
             ),
             source = ModelSource(
-                url = "https://huggingface.co/litert-community/Qwen3-0.6B/tree/dd97997951bb15a2a71f539ba17f604707c0b11a",
-                revision = "dd97997951bb15a2a71f539ba17f604707c0b11a",
+                url = "https://huggingface.co/$qwenRepository/tree/$qwenRevision",
+                revision = qwenRevision,
                 licenseName = "Apache-2.0",
                 attribution = ModelCatalogDefaults.APACHE_ATTRIBUTION,
             ),
@@ -58,7 +64,7 @@ class QwenThree0Point6bLiteRtLmInt4ModelDefinition(
         ),
         state = ModelCatalogState.OPTIONAL,
         download = CatalogDownload(
-            url = "https://huggingface.co/litert-community/Qwen3-0.6B/resolve/dd97997951bb15a2a71f539ba17f604707c0b11a/qwen3_0_6b_mixed_int4.litertlm",
+            url = "https://huggingface.co/$qwenRepository/resolve/$qwenRevision/$qwenFileName",
             expectedBytes = 497_664_000L,
             sha256 = "b1baab462f6be49d70eada79d715c2c52cd9ece0cad00bddf6a2c097d23498e9",
         ),

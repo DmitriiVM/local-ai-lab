@@ -4,6 +4,10 @@ import com.dmitriim.localailab.feature.assistant.impl.domain.ChatContextUsage
 import com.dmitriim.localailab.feature.assistant.impl.domain.ChatGenerationConfig
 import com.dmitriim.localailab.feature.assistant.impl.domain.ChatTurn
 import com.dmitriim.localailab.feature.assistant.impl.domain.ChatTurnRole
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMessage
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMessageRole
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ContextUsage
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.EffectiveChatSettings
 
 internal fun EffectiveChatSettings.toDomain() = ChatGenerationConfig(
     computePreference = computePreference,

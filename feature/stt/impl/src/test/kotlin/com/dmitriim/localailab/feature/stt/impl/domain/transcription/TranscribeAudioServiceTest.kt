@@ -107,7 +107,9 @@ class TranscribeAudioServiceTest {
             ),
         )
 
-        override suspend fun resolveTextToSpeechModel(modelId: ModelId): Result<TextToSpeechModelReference> = error("Not used by STT")
+        override suspend fun resolveTextToSpeechModel(
+            modelId: ModelId,
+        ): Result<TextToSpeechModelReference> = error("Not used by STT")
     }
 
     private class FakeSpeechToTextEngine(

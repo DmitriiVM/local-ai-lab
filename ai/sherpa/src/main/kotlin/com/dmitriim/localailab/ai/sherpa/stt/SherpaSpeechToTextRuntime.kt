@@ -66,7 +66,8 @@ class SherpaSpeechToTextRuntime(
         unloadLocked()
         Log.i(
             TAG,
-            "Sherpa STT load requested: profile=${request.profileType.value}, language=${request.languageCode}, threads=$threads",
+            "Sherpa STT load requested: profile=${request.profileType.value}, " +
+                "language=${request.languageCode}, threads=$threads",
         )
         val duration = try {
             measureTimeMillis {

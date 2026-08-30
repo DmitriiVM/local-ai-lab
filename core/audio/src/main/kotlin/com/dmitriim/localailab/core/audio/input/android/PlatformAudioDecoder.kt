@@ -86,10 +86,21 @@ class PlatformAudioDecoder(private val application: Application) {
         while (!outputEnded) {
             inputEnded = inputEnded || queueDecoderInput(extractor, codec)
             when (val index = codec.dequeueOutputBuffer(info, CODEC_TIMEOUT_US)) {
-                MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> writer = PcmResamplingWriter(stream, codec.outputFormat, targetRateHz)
+                MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
+                    writer = PcmResamplingWriter(stream, codec.outputFormat, targetRateHz)
+                }
                 MediaCodec.INFO_TRY_AGAIN_LATER -> Unit
                 else -> if (index >= 0) {
-                    if (info.size > 0) writeDecodedBuffer(codec, index, info, requireNotNull(writer) { "Audio decoder produced samples before its output format." })
+                    if (info.size > 0) {
+                        writeDecodedBuffer(
+                            codec,
+                            index,
+                            info,
+                            requireNotNull(writer) {
+                                "Audio decoder produced samples before its output format."
+                            },
+                        )
+                    }
                     codec.releaseOutputBuffer(index, false)
                     outputEnded = info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0
                 }
@@ -112,7 +123,12 @@ class PlatformAudioDecoder(private val application: Application) {
         return false
     }
 
-    private fun writeDecodedBuffer(codec: MediaCodec, index: Int, info: MediaCodec.BufferInfo, writer: PcmResamplingWriter) {
+    private fun writeDecodedBuffer(
+        codec: MediaCodec,
+        index: Int,
+        info: MediaCodec.BufferInfo,
+        writer: PcmResamplingWriter,
+    ) {
         val buffer = requireNotNull(codec.getOutputBuffer(index)).duplicate().apply {
             position(info.offset)
             limit(info.offset + info.size)

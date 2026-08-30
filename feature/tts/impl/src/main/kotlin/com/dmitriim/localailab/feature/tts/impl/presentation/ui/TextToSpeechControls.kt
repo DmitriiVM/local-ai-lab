@@ -68,7 +68,10 @@ internal fun TextToSpeechVoiceSelector(
     var sheetVisible by remember { mutableStateOf(false) }
     val selected = voices.firstOrNull { it.id == selectedId }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_155), style = MaterialTheme.typography.labelLarge)
+        Text(
+            text = stringResource(CoreUiR.string.tts_text_to_speech_controls_155),
+            style = MaterialTheme.typography.labelLarge,
+        )
         OutlinedButton(
             onClick = { sheetVisible = true },
             enabled = enabled && selected != null,
@@ -105,14 +108,33 @@ private fun TextToSpeechVoicePickerSheet(
         onDismiss()
     }) {
         Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 24.dp)) {
-            Text(stringResource(CoreUiR.string.ui_copy_78), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp))
-            Text(stringResource(CoreUiR.string.ui_copy_79), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 24.dp, top = 4.dp, end = 24.dp))
-            Text(stringResource(CoreUiR.string.ui_copy_80), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 24.dp, top = 20.dp, end = 24.dp, bottom = 8.dp))
+            Text(
+                stringResource(CoreUiR.string.ui_copy_78),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+            Text(
+                stringResource(CoreUiR.string.ui_copy_79),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(start = 24.dp, top = 4.dp, end = 24.dp),
+            )
+            Text(
+                stringResource(CoreUiR.string.ui_copy_80),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 24.dp, top = 20.dp, end = 24.dp, bottom = 8.dp),
+            )
             LazyColumn(Modifier.fillMaxWidth().heightIn(max = 560.dp)) {
                 items(voices, key = TtsVoiceOption::id) { voice ->
                     TextToSpeechVoiceOption(
-                        voice, selectedId == voice.id, previewVoiceId == voice.id && operation in setOf(TtsOperation.PREVIEWING, TtsOperation.CANCELLING),
-                        enabled, hasPreviewText && operation !in setOf(TtsOperation.SYNTHESIZING, TtsOperation.CANCELLING),
+                        voice, selectedId == voice.id,
+                        previewVoiceId == voice.id &&
+                            operation in setOf(
+                                TtsOperation.PREVIEWING,
+                                TtsOperation.CANCELLING,
+                            ),
+                        enabled,
+                        hasPreviewText && operation !in setOf(TtsOperation.SYNTHESIZING, TtsOperation.CANCELLING),
                         onSelect, onPreview, onStopPreview, onDismiss,
                     )
                 }
@@ -140,22 +162,70 @@ private fun TextToSpeechVoiceOption(
             onDismiss()
         },
         shape = RoundedCornerShape(16.dp),
-        color = if (selected) colors.tertiaryContainer.copy(alpha = 0.38f) else colors.surfaceContainerHigh.copy(alpha = 0.44f),
-        border = BorderStroke(1.dp, if (selected) colors.tertiary.copy(alpha = 0.58f) else colors.outlineVariant.copy(alpha = 0.30f)),
+        color = if (selected) {
+            colors.tertiaryContainer.copy(alpha = 0.38f)
+        } else {
+            colors.surfaceContainerHigh.copy(alpha = 0.44f)
+        },
+        border = BorderStroke(
+            1.dp,
+            if (selected) {
+                colors.tertiary.copy(alpha = 0.58f)
+            } else {
+                colors.outlineVariant.copy(alpha = 0.30f)
+            },
+        ),
     ) {
         Row(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            RadioButton(selected, onClick = null, enabled = enabled, colors = RadioButtonDefaults.colors(selectedColor = colors.tertiary, unselectedColor = colors.outline))
+            RadioButton(
+                selected,
+                onClick = null,
+                enabled = enabled,
+                colors = RadioButtonDefaults.colors(selectedColor = colors.tertiary, unselectedColor = colors.outline),
+            )
             Column(Modifier.weight(1f).padding(start = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(voice.displayName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = if (selected) colors.tertiary else colors.onSurface)
-                voice.description?.takeIf(String::isNotBlank)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = if (selected) colors.onTertiaryContainer.copy(alpha = 0.82f) else colors.onSurfaceVariant) }
+                Text(
+                    voice.displayName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (selected) colors.tertiary else colors.onSurface,
+                )
+                voice.description?.takeIf(String::isNotBlank)?.let { description ->
+                    Text(
+                        description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (selected) {
+                            colors.onTertiaryContainer.copy(alpha = 0.82f)
+                        } else {
+                            colors.onSurfaceVariant
+                        },
+                    )
+                }
             }
             OutlinedIconButton(
                 onClick = { if (previewing) onStopPreview() else onPreview(voice.id) },
                 enabled = previewEnabled,
-                border = BorderStroke(1.dp, if (previewEnabled) colors.tertiary.copy(alpha = 0.64f) else colors.outlineVariant.copy(alpha = 0.32f)),
-                colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = colors.tertiary, disabledContentColor = colors.onSurface.copy(alpha = 0.38f)),
+                border = BorderStroke(
+                    1.dp,
+                    if (previewEnabled) {
+                        colors.tertiary.copy(alpha = 0.64f)
+                    } else {
+                        colors.outlineVariant.copy(alpha = 0.32f)
+                    },
+                ),
+                colors = IconButtonDefaults.outlinedIconButtonColors(
+                    contentColor = colors.tertiary,
+                    disabledContentColor = colors.onSurface.copy(alpha = 0.38f),
+                ),
             ) {
-                Icon(if (previewing) Icons.Outlined.Stop else Icons.Outlined.PlayArrow, if (previewing) "Stop preview for ${voice.displayName}" else "Play preview for ${voice.displayName}")
+                Icon(
+                    if (previewing) Icons.Outlined.Stop else Icons.Outlined.PlayArrow,
+                    if (previewing) {
+                        "Stop preview for ${voice.displayName}"
+                    } else {
+                        "Play preview for ${voice.displayName}"
+                    },
+                )
             }
         }
     }
@@ -188,20 +258,46 @@ private fun ReferenceVoiceControls(
 ) {
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.30f))
-        Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_156), style = MaterialTheme.typography.titleSmall)
-        Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_157), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            stringResource(CoreUiR.string.tts_text_to_speech_controls_156),
+            style = MaterialTheme.typography.titleSmall,
+        )
+        Text(
+            stringResource(CoreUiR.string.tts_text_to_speech_controls_157),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         if (state.operation in setOf(TtsOperation.RECORDING_REFERENCE, TtsOperation.STOPPING_REFERENCE)) {
             val elapsed = state.referenceLevel?.elapsedMs ?: 0L
             Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_158).format(elapsed / 1_000.0))
-            Button(onClick = onStopRecording, enabled = state.operation == TtsOperation.RECORDING_REFERENCE && elapsed >= 5_000) {
-                Text(stringResource(if (elapsed < 5_000) CoreUiR.string.tts_keep_recording else CoreUiR.string.tts_save_reference))
+            Button(
+                onClick = onStopRecording,
+                enabled = state.operation == TtsOperation.RECORDING_REFERENCE && elapsed >= 5_000,
+            ) {
+                Text(
+                    stringResource(
+                        if (elapsed < 5_000) {
+                            CoreUiR.string.tts_keep_recording
+                        } else {
+                            CoreUiR.string.tts_save_reference
+                        },
+                    ),
+                )
             }
         } else {
             OutlinedButton(onClick = onChoose, enabled = enabled, modifier = Modifier.fillMaxWidth()) {
                 Text(state.selectedVoice?.displayName ?: stringResource(CoreUiR.string.tts_choose_saved_reference))
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = onRecord, enabled = enabled, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary, contentColor = MaterialTheme.colorScheme.onTertiary)) {
+                Button(
+                    onClick = onRecord,
+                    enabled = enabled,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                    ),
+                ) {
                     Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_159))
                 }
                 OutlinedButton(onClick = onImport, enabled = enabled, modifier = Modifier.weight(1f)) {
@@ -223,8 +319,14 @@ private fun ReferenceVoicePickerSheet(
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 24.dp)) {
-            Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_161), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
-            if (state.compatibleVoices.isEmpty()) Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_162), modifier = Modifier.padding(24.dp))
+            Text(
+                stringResource(CoreUiR.string.tts_text_to_speech_controls_161),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+            )
+            if (state.compatibleVoices.isEmpty()) {
+                Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_162), modifier = Modifier.padding(24.dp))
+            }
             LazyColumn(Modifier.fillMaxWidth().heightIn(max = 560.dp)) {
                 items(state.compatibleVoices, key = TtsVoiceOption::id) { voice ->
                     Row(
@@ -279,7 +381,11 @@ internal fun TextToSpeechLanguageControls(
                 onClick = { onApplySample(language) },
                 enabled = enabled && (!englishOnly || language == TtsLanguage.ENGLISH),
             ) {
-                Text(stringResource(CoreUiR.string.tts_text_to_speech_controls_format_16, language.label), maxLines = 1, softWrap = false)
+                Text(
+                    stringResource(CoreUiR.string.tts_text_to_speech_controls_format_16, language.label),
+                    maxLines = 1,
+                    softWrap = false,
+                )
             }
         }
     }

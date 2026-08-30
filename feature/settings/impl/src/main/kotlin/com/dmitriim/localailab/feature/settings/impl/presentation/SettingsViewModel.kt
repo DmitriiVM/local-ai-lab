@@ -36,7 +36,11 @@ class SettingsViewModel(
     val state: StateFlow<SettingsUiState> = mutableState.asStateFlow()
 
     init {
-        viewModelScope.launch { settingsRepository.settings.collectLatest { settings -> mutableState.update { it.copy(settings = settings) } } }
+        viewModelScope.launch {
+            settingsRepository.settings.collectLatest { settings ->
+                mutableState.update { it.copy(settings = settings) }
+            }
+        }
         viewModelScope.launch {
             downloadCredentials.huggingFaceCredentialStatus.collectLatest { status ->
                 mutableState.update { it.copy(huggingFaceCredentialStatus = status) }
@@ -59,7 +63,12 @@ class SettingsViewModel(
 
     fun clearRunHistory() = viewModelScope.launch(Dispatchers.IO) {
         runRepository.clearRuns()
-        mutableState.update { it.copy(pendingRunHistoryClear = false, storage = runRepository.storageUsage()) }
+        mutableState.update {
+            it.copy(
+                pendingRunHistoryClear = false,
+                storage = runRepository.storageUsage(),
+            )
+        }
     }
 
     fun clearTemporaryMedia() = viewModelScope.launch(Dispatchers.IO) {
@@ -73,15 +82,27 @@ class SettingsViewModel(
     }
 
     fun dismissHuggingFaceToken() = mutableState.update {
-        it.copy(showHuggingFaceTokenDialog = false, isSavingHuggingFaceToken = false, huggingFaceTokenError = null)
+        it.copy(
+            showHuggingFaceTokenDialog = false,
+            isSavingHuggingFaceToken = false,
+            huggingFaceTokenError = null,
+        )
     }
 
     fun saveHuggingFaceToken(token: String) = viewModelScope.launch {
-        mutableState.update { it.copy(isSavingHuggingFaceToken = true, huggingFaceTokenError = null) }
+        mutableState.update {
+            it.copy(
+                isSavingHuggingFaceToken = true,
+                huggingFaceTokenError = null,
+            )
+        }
         downloadCredentials.saveHuggingFaceToken(token).fold(
             onSuccess = {
                 mutableState.update {
-                    it.copy(showHuggingFaceTokenDialog = false, isSavingHuggingFaceToken = false)
+                    it.copy(
+                        showHuggingFaceTokenDialog = false,
+                        isSavingHuggingFaceToken = false,
+                    )
                 }
             },
             onFailure = { error ->

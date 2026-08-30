@@ -9,7 +9,10 @@ import dev.zacsweers.metro.Inject
 class AssistantAudioRecorder(
     private val audioInputStore: AudioInputStore,
 ) {
-    suspend fun record(sampleRateHz: Int, onLevel: (AudioLevel) -> Unit): PcmAudioInput = audioInputStore.capture(sampleRateHz, onLevel)
+    suspend fun record(
+        sampleRateHz: Int,
+        onLevel: (AudioLevel) -> Unit,
+    ): PcmAudioInput = audioInputStore.capture(sampleRateHz, onLevel)
 
     fun stop() = audioInputStore.stopCapture()
 

@@ -15,12 +15,15 @@ class SenseVoiceSttProfile :
     BaseSherpaSttProfile(
         senseVoiceSttProfileId,
     ) {
-    override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) =
-        offlineSherpaSession(artifacts, threadCount) {
-            senseVoice = OfflineSenseVoiceModelConfig().apply {
-                model = artifacts.require(ModelFileRoles.PRIMARY_MODEL).path
-                language = request.languageCode
-                useInverseTextNormalization = true
-            }
+    override fun open(
+        request: SpeechToTextLoadRequest,
+        artifacts: ModelArtifacts,
+        threadCount: Int,
+    ) = offlineSherpaSession(artifacts, threadCount) {
+        senseVoice = OfflineSenseVoiceModelConfig().apply {
+            model = artifacts.require(ModelFileRoles.PRIMARY_MODEL).path
+            language = request.languageCode
+            useInverseTextNormalization = true
         }
+    }
 }

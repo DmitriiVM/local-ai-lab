@@ -14,7 +14,7 @@ import dev.zacsweers.metro.binding
 
 @Inject
 @ContributesIntoSet(AppScope::class, binding<NavigationEntryProvider>())
-class ModelDetailsNavigationEntryProvider : NavigationEntryProvider {
+class ModelDetailsNavigation : NavigationEntryProvider {
     override val destinationType = ModelDetailsDestination::class
     override val hostDestination = TopLevelDestination.MODELS
 

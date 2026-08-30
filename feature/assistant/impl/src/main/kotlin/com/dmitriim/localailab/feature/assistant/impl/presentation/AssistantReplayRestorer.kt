@@ -3,6 +3,8 @@ package com.dmitriim.localailab.feature.assistant.impl.presentation
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.engine.ComputePreference
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantInputMode
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantUiState
 import com.dmitriim.localailab.feature.runs.api.domain.history.RunRecord
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.contentOrNull
@@ -27,7 +29,8 @@ internal object AssistantReplayRestorer {
                 computePreference = parameters?.get("computePreference")?.jsonPrimitive?.content
                     ?.let { stored -> ComputePreference.entries.firstOrNull { it.name == stored } }
                     ?: state.chatSettings.computePreference,
-                systemPrompt = parameters?.get("systemPrompt")?.jsonPrimitive?.content ?: state.chatSettings.systemPrompt,
+                systemPrompt = parameters?.get("systemPrompt")?.jsonPrimitive?.content
+                    ?: state.chatSettings.systemPrompt,
                 temperature = parameters?.get("temperature")?.jsonPrimitive?.content ?: state.chatSettings.temperature,
                 topK = parameters?.get("topK")?.jsonPrimitive?.content ?: state.chatSettings.topK,
                 topP = parameters?.get("topP")?.jsonPrimitive?.content ?: state.chatSettings.topP,

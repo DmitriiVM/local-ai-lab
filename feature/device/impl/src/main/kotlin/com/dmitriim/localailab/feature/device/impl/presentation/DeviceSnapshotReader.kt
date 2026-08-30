@@ -14,11 +14,16 @@ internal fun readDeviceSnapshot(application: Application): DeviceSnapshot {
         application.getSystemService(ActivityManager::class.java).getMemoryInfo(info)
     }
     val storage = StatFs(application.filesDir.absolutePath)
-    val battery = application.registerReceiver(null, android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED))
+    val batteryIntentFilter = android.content.IntentFilter(
+        android.content.Intent.ACTION_BATTERY_CHANGED,
+    )
+    val battery = application.registerReceiver(null, batteryIntentFilter)
     val status = battery?.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
     val plugged = battery?.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) ?: 0
     val batteryState = when (status) {
-        BatteryManager.BATTERY_STATUS_CHARGING, BatteryManager.BATTERY_STATUS_FULL -> application.getString(CoreUiR.string.device_battery_charging)
+        BatteryManager.BATTERY_STATUS_CHARGING,
+        BatteryManager.BATTERY_STATUS_FULL,
+        -> application.getString(CoreUiR.string.device_battery_charging)
         else -> application.getString(CoreUiR.string.device_battery_not_charging)
     }
     val thermalState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -31,14 +36,25 @@ internal fun readDeviceSnapshot(application: Application): DeviceSnapshot {
     }
     return DeviceSnapshot(
         deviceName = "${Build.MANUFACTURER} ${Build.MODEL}",
-        androidVersion = application.getString(CoreUiR.string.device_android_version, Build.VERSION.RELEASE, Build.VERSION.SDK_INT),
+        androidVersion = application.getString(
+            CoreUiR.string.device_android_version,
+            Build.VERSION.RELEASE,
+            Build.VERSION.SDK_INT,
+        ),
         abis = Build.SUPPORTED_ABIS.joinToString(),
         totalMemory = memory.totalMem.toGiB(),
         availableMemory = memory.availMem.toGiB(),
         availableStorage = storage.availableBytes.toGiB(),
-        batteryState = if (plugged != 0) application.getString(CoreUiR.string.device_battery_plugged, batteryState) else batteryState,
+        batteryState = if (plugged != 0) {
+            application.getString(CoreUiR.string.device_battery_plugged, batteryState)
+        } else {
+            batteryState
+        },
         thermalState = thermalState,
-        cpuInfo = application.getString(CoreUiR.string.device_available_processors, Runtime.getRuntime().availableProcessors()),
+        cpuInfo = application.getString(
+            CoreUiR.string.device_available_processors,
+            Runtime.getRuntime().availableProcessors(),
+        ),
     )
 }
 

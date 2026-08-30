@@ -47,11 +47,12 @@ class ModelRuntimeProfileRegistry(
         "No packaged runtime profile supports ${key.label}."
     }
 
-    inline fun <reified T : ModelRuntimeProfile> requireTyped(key: ModelProfileKey): T = requireRuntimeProfile(key) as? T
-        ?: error(
-            "The packaged profile ${key.engineId.value}/${key.profileId.value} " +
-                "is not a ${T::class.simpleName}.",
-        )
+    inline fun <reified T : ModelRuntimeProfile> requireTyped(
+        key: ModelProfileKey,
+    ): T = requireRuntimeProfile(key) as? T ?: error(
+        "The packaged profile ${key.engineId.value}/${key.profileId.value} " +
+            "is not a ${T::class.simpleName}.",
+    )
 
     private val ModelProfileKey.label: String
         get() = "${engineId.value}/${profileId.value}"

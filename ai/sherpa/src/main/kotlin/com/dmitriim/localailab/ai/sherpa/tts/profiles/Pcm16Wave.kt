@@ -59,6 +59,8 @@ class Pcm16Wave(val sampleRateHz: Int, val samples: FloatArray) {
             )
         }
 
-        private fun readAscii(input: RandomAccessFile, length: Int) = ByteArray(length).also(input::readFully).toString(Charsets.US_ASCII)
+        private fun readAscii(input: RandomAccessFile, length: Int) = ByteArray(length)
+            .also(input::readFully)
+            .toString(Charsets.US_ASCII)
     }
 }

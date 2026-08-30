@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.ai.api.chat.LlmContextManagement
 import com.dmitriim.localailab.ai.api.chat.LlmFinishReason
 import com.dmitriim.localailab.core.ui.R as CoreUiR
-import com.dmitriim.localailab.feature.assistant.impl.presentation.ChatMetrics
-import com.dmitriim.localailab.feature.assistant.impl.presentation.ContextUsage
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMetrics
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ContextUsage
 import kotlin.math.roundToInt
 
 @Composable
@@ -46,7 +46,10 @@ internal fun ChatMetricsCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(stringResource(CoreUiR.string.assistant_assistant_metrics_card_15), fontWeight = FontWeight.Bold)
+                    Text(
+                        text = stringResource(CoreUiR.string.assistant_assistant_metrics_card_15),
+                        fontWeight = FontWeight.Bold,
+                    )
                     Text(
                         contextUsage?.let { formatContextSummary(it, metrics) }
                             ?: formatPerformanceSummary(metrics),
@@ -81,30 +84,70 @@ private fun ChatMetricsDetails(metrics: ChatMetrics, contextUsage: ContextUsage?
 @Composable
 private fun PerformanceMetrics(metrics: ChatMetrics) {
     RunDetailsSection("Performance")
-    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_24), metrics.timeToFirstTokenMs?.let(::formatDuration) ?: "Not reached", stringResource(CoreUiR.string.ui_description_5))
     RunDetailsMetric(
-        stringResource(CoreUiR.string.ui_copy_25),
-        metrics.generatedTokens?.let { buildMetricValue(it, metrics.generatedTokensPerSecond) } ?: "Token count unavailable",
-        if (metrics.generatedTokens == null) "This runtime did not report generated tokens or output speed." else "Response tokens produced by the model. Tokens per second measures generation speed; higher is faster.",
+        label = stringResource(CoreUiR.string.ui_copy_24),
+        value = metrics.timeToFirstTokenMs?.let(::formatDuration) ?: "Not reached",
+        description = stringResource(CoreUiR.string.ui_description_5),
     )
-    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_26), formatDuration(metrics.totalDurationMs), stringResource(CoreUiR.string.ui_description_6))
+    RunDetailsMetric(
+        label = stringResource(CoreUiR.string.ui_copy_25),
+        value = metrics.generatedTokens?.let {
+            buildMetricValue(it, metrics.generatedTokensPerSecond)
+        } ?: "Token count unavailable",
+        description = if (metrics.generatedTokens == null) {
+            "This runtime did not report generated tokens or output speed."
+        } else {
+            "Response tokens produced by the model. Tokens per second measures generation speed; higher is faster."
+        },
+    )
+    RunDetailsMetric(
+        label = stringResource(CoreUiR.string.ui_copy_26),
+        value = formatDuration(metrics.totalDurationMs),
+        description = stringResource(CoreUiR.string.ui_description_6),
+    )
 }
 
 @Composable
 private fun ContextMetrics(metrics: ChatMetrics, usage: ContextUsage?) {
     RunDetailsSection("Context and request")
     usage?.let {
-        RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_27), formatContextDetails(it), stringResource(CoreUiR.string.ui_description_7))
-        if (it.omittedMessageCount > 0) RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_28), "${it.omittedMessageCount}", stringResource(CoreUiR.string.ui_description_8))
+        RunDetailsMetric(
+            label = stringResource(CoreUiR.string.ui_copy_27),
+            value = formatContextDetails(it),
+            description = stringResource(CoreUiR.string.ui_description_7),
+        )
+        if (it.omittedMessageCount > 0) {
+            RunDetailsMetric(
+                label = stringResource(CoreUiR.string.ui_copy_28),
+                value = "${it.omittedMessageCount}",
+                description = stringResource(CoreUiR.string.ui_description_8),
+            )
+        }
     }
-    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_29), metrics.promptTokens?.let { count -> buildMetricValue(count, metrics.promptTokensPerSecond) } ?: "Token count unavailable", stringResource(CoreUiR.string.ui_description_9))
-    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_30), "Temperature ${metrics.effectiveSettings.temperature} · top-K ${metrics.effectiveSettings.topK} · top-P ${metrics.effectiveSettings.topP}", stringResource(CoreUiR.string.ui_description_10))
+    RunDetailsMetric(
+        label = stringResource(CoreUiR.string.ui_copy_29),
+        value = metrics.promptTokens?.let { count ->
+            buildMetricValue(count, metrics.promptTokensPerSecond)
+        } ?: "Token count unavailable",
+        description = stringResource(CoreUiR.string.ui_description_9),
+    )
+    RunDetailsMetric(
+        label = stringResource(CoreUiR.string.ui_copy_30),
+        value = "Temperature ${metrics.effectiveSettings.temperature} · " +
+            "top-K ${metrics.effectiveSettings.topK} · " +
+            "top-P ${metrics.effectiveSettings.topP}",
+        description = stringResource(CoreUiR.string.ui_description_10),
+    )
 }
 
 @Composable
 private fun RuntimeMetrics(metrics: ChatMetrics) {
     RunDetailsSection("Runtime")
-    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_31), metrics.modelName, stringResource(CoreUiR.string.ui_description_11))
+    RunDetailsMetric(
+        label = stringResource(CoreUiR.string.ui_copy_31),
+        value = metrics.modelName,
+        description = stringResource(CoreUiR.string.ui_description_11),
+    )
     val startupLabel = buildString {
         append(if (metrics.coldStart) "Cold start" else "Warm start")
         metrics.effectiveThreadCount?.let { append(" · $it threads") }
@@ -114,8 +157,16 @@ private fun RuntimeMetrics(metrics: ChatMetrics) {
         startupLabel,
         stringResource(CoreUiR.string.ui_description_12),
     )
-    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_33), formatDuration(metrics.loadDurationMs), stringResource(CoreUiR.string.ui_description_13))
-    RunDetailsMetric(stringResource(CoreUiR.string.ui_copy_34), metrics.finishReason.displayName(), stringResource(CoreUiR.string.ui_description_14))
+    RunDetailsMetric(
+        label = stringResource(CoreUiR.string.ui_copy_33),
+        value = formatDuration(metrics.loadDurationMs),
+        description = stringResource(CoreUiR.string.ui_description_13),
+    )
+    RunDetailsMetric(
+        label = stringResource(CoreUiR.string.ui_copy_34),
+        value = metrics.finishReason.displayName(),
+        description = stringResource(CoreUiR.string.ui_description_14),
+    )
 }
 
 private fun formatContextSummary(

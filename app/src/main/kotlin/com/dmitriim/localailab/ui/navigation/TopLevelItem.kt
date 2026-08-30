@@ -21,7 +21,8 @@ internal enum class TopLevelItem(
     PLAYGROUND(TopLevelDestination.PLAYGROUND, "Playground", Icons.Outlined.Home),
     MODELS(TopLevelDestination.MODELS, "Models", Icons.Outlined.Inventory2),
     RUNS(TopLevelDestination.RUNS, "Runs", Icons.Outlined.History),
-    SETTINGS(TopLevelDestination.SETTINGS, "Settings", Icons.Outlined.Settings);
+    SETTINGS(TopLevelDestination.SETTINGS, "Settings", Icons.Outlined.Settings),
+    ;
 
     val destination: AppDestination
         get() = when (this) {

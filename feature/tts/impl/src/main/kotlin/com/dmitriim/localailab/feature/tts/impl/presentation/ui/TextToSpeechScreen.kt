@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -82,8 +81,27 @@ fun TextToSpeechScreen(
             ),
         verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
-        TtsSetupSection(state, !busy, onSelectModel, onSelectVoice, onPreviewVoice, onRecordReference, onStopReferenceRecording, onImportReference, onDeleteReference, onSelectLanguage, onApplySample, onStop)
-        TtsComposeSection(state, !busy, onTextChange, onSynthesize, onProfile)
+        TtsSetupSection(
+            state = state,
+            enabled = !busy,
+            onSelectModel = onSelectModel,
+            onSelectVoice = onSelectVoice,
+            onPreviewVoice = onPreviewVoice,
+            onRecordReference = onRecordReference,
+            onStopReferenceRecording = onStopReferenceRecording,
+            onImportReference = onImportReference,
+            onDeleteReference = onDeleteReference,
+            onSelectLanguage = onSelectLanguage,
+            onApplySample = onApplySample,
+            onStop = onStop,
+        )
+        TtsComposeSection(
+            state = state,
+            enabled = !busy,
+            onTextChange = onTextChange,
+            onSynthesize = onSynthesize,
+            onProfile = onProfile,
+        )
         TextToSpeechSettings(
             state = state,
             enabled = !busy,
@@ -126,27 +144,91 @@ fun TextToSpeechScreen(
 }
 
 @Composable
-private fun TtsSetupSection(state: TextToSpeechUiState, enabled: Boolean, onSelectModel: (ModelId) -> Unit, onSelectVoice: (String) -> Unit, onPreviewVoice: (String) -> Unit, onRecordReference: () -> Unit, onStopReferenceRecording: () -> Unit, onImportReference: () -> Unit, onDeleteReference: (String) -> Unit, onSelectLanguage: (TtsLanguage) -> Unit, onApplySample: (TtsLanguage) -> Unit, onStop: () -> Unit) {
+private fun TtsSetupSection(
+    state: TextToSpeechUiState,
+    enabled: Boolean,
+    onSelectModel: (ModelId) -> Unit,
+    onSelectVoice: (String) -> Unit,
+    onPreviewVoice: (String) -> Unit,
+    onRecordReference: () -> Unit,
+    onStopReferenceRecording: () -> Unit,
+    onImportReference: () -> Unit,
+    onDeleteReference: (String) -> Unit,
+    onSelectLanguage: (TtsLanguage) -> Unit,
+    onApplySample: (TtsLanguage) -> Unit,
+    onStop: () -> Unit,
+) {
     AppSectionCard("Setup", tone = AppSurfaceTone.TONAL) {
         TextToSpeechModelPicker(state.models, state.selectedModelId, enabled, onSelectModel)
         if (state.usesReferenceVoice) {
-            ChatterboxReferenceVoiceSelector(state, enabled, onSelectVoice, onRecordReference, onStopReferenceRecording, onImportReference, onDeleteReference)
-            Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_179), style = MaterialTheme.typography.bodySmall)
-            Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_180), style = MaterialTheme.typography.labelLarge)
+            ChatterboxReferenceVoiceSelector(
+                state,
+                enabled,
+                onSelectVoice,
+                onRecordReference,
+                onStopReferenceRecording,
+                onImportReference,
+                onDeleteReference,
+            )
+            Text(
+                text = stringResource(CoreUiR.string.tts_text_to_speech_screen_179),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(
+                text = stringResource(CoreUiR.string.tts_text_to_speech_screen_180),
+                style = MaterialTheme.typography.labelLarge,
+            )
         } else {
-            TextToSpeechVoiceSelector(state.selectedModel?.voices?.size?.let { it > 1 } == true, state.compatibleVoices, state.selectedVoiceId, state.language, enabled, state.operation, state.previewVoiceId, state.text.isNotBlank(), onSelectVoice, onPreviewVoice, onStop)
+            TextToSpeechVoiceSelector(
+                state.selectedModel?.voices?.size?.let { it > 1 } == true,
+                state.compatibleVoices, state.selectedVoiceId, state.language, enabled,
+                state.operation, state.previewVoiceId, state.text.isNotBlank(),
+                onSelectVoice, onPreviewVoice, onStop,
+            )
         }
         Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_181), style = MaterialTheme.typography.titleSmall)
-        TextToSpeechLanguageControls(state.language, enabled, onSelectLanguage, onApplySample, englishOnly = state.usesReferenceVoice)
+        TextToSpeechLanguageControls(
+            state.language,
+            enabled,
+            onSelectLanguage,
+            onApplySample,
+            englishOnly = state.usesReferenceVoice,
+        )
     }
 }
 
 @Composable
-private fun TtsComposeSection(state: TextToSpeechUiState, enabled: Boolean, onTextChange: (String) -> Unit, onSynthesize: () -> Unit, onProfile: () -> Unit) {
+private fun TtsComposeSection(
+    state: TextToSpeechUiState,
+    enabled: Boolean,
+    onTextChange: (String) -> Unit,
+    onSynthesize: () -> Unit,
+    onProfile: () -> Unit,
+) {
     AppSectionCard("Compose", tone = AppSurfaceTone.TONAL) {
-        OutlinedTextField(state.text, onTextChange, enabled = enabled, label = { Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_182)) }, supportingText = { Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_format_17, state.text.length, state.characterLimit)) }, minLines = 4, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            value = state.text,
+            onValueChange = onTextChange,
+            enabled = enabled,
+            label = { Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_182)) },
+            supportingText = {
+                Text(
+                    stringResource(
+                        CoreUiR.string.tts_text_to_speech_screen_format_17,
+                        state.text.length,
+                        state.characterLimit,
+                    ),
+                )
+            },
+            minLines = 4,
+            modifier = Modifier.fillMaxWidth(),
+        )
         val canGenerate = enabled && state.selectedVoice != null && state.text.isNotBlank()
-        Button(onClick = onSynthesize, enabled = canGenerate, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary, contentColor = MaterialTheme.colorScheme.onTertiary)) { Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_183)) }
-        OutlinedButton(onClick = onProfile, enabled = canGenerate, modifier = Modifier.fillMaxWidth()) { Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_184)) }
+        Button(onClick = onSynthesize, enabled = canGenerate, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_183))
+        }
+        OutlinedButton(onClick = onProfile, enabled = canGenerate, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(CoreUiR.string.tts_text_to_speech_screen_184))
+        }
     }
 }

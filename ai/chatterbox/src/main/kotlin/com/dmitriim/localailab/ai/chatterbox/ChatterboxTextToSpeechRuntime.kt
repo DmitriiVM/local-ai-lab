@@ -416,7 +416,9 @@ class ChatterboxTextToSpeechRuntime(
         override fun close() = result.close()
     }
 
-    private fun OrtSession.Result.tensor(index: Int): OnnxTensor = get(index) as? OnnxTensor ?: error("Chatterbox output $index is not a tensor.")
+    private fun OrtSession.Result.tensor(index: Int): OnnxTensor = requireNotNull(
+        get(index) as? OnnxTensor,
+    ) { "Chatterbox output $index is not a tensor." }
 
     private fun OnnxTensor.floatValues(): FloatArray {
         val buffer = requireNotNull(floatBuffer) { "Expected a floating-point Chatterbox tensor." }

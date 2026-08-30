@@ -29,10 +29,18 @@ fun SpeechToTextRoute(
         onDispose(viewModel.runtimeLeaseController::onHidden)
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val microphonePermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) viewModel.startRecording() else viewModel.microphonePermissionDenied()
+    val microphonePermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) {
+            viewModel.startRecording()
+        } else {
+            viewModel.microphonePermissionDenied()
+        }
     }
-    val audioPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+    val audioPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument(),
+    ) { uri ->
         uri?.let(viewModel::importAudio)
     }
     SpeechToTextScreen(

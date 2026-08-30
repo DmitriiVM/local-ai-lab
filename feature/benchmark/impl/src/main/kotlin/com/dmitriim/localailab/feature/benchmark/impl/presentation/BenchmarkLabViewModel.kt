@@ -57,7 +57,14 @@ class BenchmarkLabViewModel(
     init {
         viewModelScope.launch {
             profileWorkloadStore.workload.collectLatest { workload ->
-                mutableState.update { it.copy(workload = workload, completedIterations = emptyList(), summary = null, message = null) }
+                mutableState.update {
+                    it.copy(
+                        workload = workload,
+                        completedIterations = emptyList(),
+                        summary = null,
+                        message = null,
+                    )
+                }
             }
         }
     }
@@ -65,7 +72,13 @@ class BenchmarkLabViewModel(
     fun setWarmupIterations(value: Int) = mutableState.update { it.copy(warmupIterations = value.coerceIn(0, 5)) }
     fun setMeasuredIterations(value: Int) = mutableState.update { it.copy(measuredIterations = value.coerceIn(1, 25)) }
     fun toggleStartupMode() = mutableState.update {
-        it.copy(startupMode = if (it.startupMode == BenchmarkStartupMode.WARM) BenchmarkStartupMode.COLD else BenchmarkStartupMode.WARM)
+        it.copy(
+            startupMode = if (it.startupMode == BenchmarkStartupMode.WARM) {
+                BenchmarkStartupMode.COLD
+            } else {
+                BenchmarkStartupMode.WARM
+            },
+        )
     }
 
     fun start() {
@@ -90,16 +103,37 @@ class BenchmarkLabViewModel(
             val results = mutableListOf<BenchmarkWorkloadResult>()
             var status = RunStatus.SUCCEEDED
             var failure: String? = null
-            mutableState.update { it.copy(isRunning = true, completedIterations = emptyList(), summary = null, message = "Running warm-ups…") }
+            mutableState.update {
+                it.copy(
+                    isRunning = true,
+                    completedIterations = emptyList(),
+                    summary = null,
+                    message = "Running warm-ups…",
+                )
+            }
             try {
-                repeat(plan.warmupIterations) { index -> runner.run(workload, UUID.randomUUID().toString(), -(index + 1), plan.startupMode) }
+                repeat(plan.warmupIterations) { index ->
+                    runner.run(
+                        workload = workload,
+                        runId = UUID.randomUUID().toString(),
+                        iteration = -(index + 1),
+                        startupMode = plan.startupMode,
+                    )
+                }
                 for (iteration in 1..plan.measuredIterations) {
                     val iterationStartedAt = System.currentTimeMillis()
                     val result = runner.run(workload, UUID.randomUUID().toString(), iteration, plan.startupMode)
                     results += result
                     runRepository.saveRun(result.toRunRecord(sessionId, capability, iterationStartedAt))
-                    mutableState.update { it.copy(completedIterations = results.map(BenchmarkWorkloadResult::iteration), message = "Measured ${results.size} of ${plan.measuredIterations}") }
-                    if ((result.iteration.telemetry.resources?.thermalStatusEnd ?: Int.MIN_VALUE) >= PowerManager.THERMAL_STATUS_SEVERE) {
+                    mutableState.update {
+                        it.copy(
+                            completedIterations = results.map(BenchmarkWorkloadResult::iteration),
+                            message = "Measured ${results.size} of ${plan.measuredIterations}",
+                        )
+                    }
+                    val thermalStatus = result.iteration.telemetry.resources?.thermalStatusEnd
+                        ?: Int.MIN_VALUE
+                    if (thermalStatus >= PowerManager.THERMAL_STATUS_SEVERE) {
                         status = RunStatus.CANCELLED
                         failure = "Stopped at severe thermal status to protect the device."
                         break
@@ -131,7 +165,13 @@ class BenchmarkLabViewModel(
                             linkedRunIds = results.map { it.iteration.runId },
                         ),
                     )
-                    mutableState.update { it.copy(isRunning = false, summary = summary, message = failure ?: "Saved ${results.size} measured iterations.") }
+                    mutableState.update {
+                        it.copy(
+                            isRunning = false,
+                            summary = summary,
+                            message = failure ?: "Saved ${results.size} measured iterations.",
+                        )
+                    }
                 }
             }
         }
@@ -161,10 +201,20 @@ private val BenchmarkWorkload.description: String
         is BenchmarkWorkload.TextToSpeech -> text
     }
 
-private fun BenchmarkWorkload.fingerprint(mode: BenchmarkStartupMode): String = "$capability:${modelId.value}:$mode:${description.hashCode()}"
-private fun BenchmarkWorkload.parameters(state: BenchmarkLabUiState): String = "{\"startupMode\":\"${state.startupMode}\",\"warmups\":${state.warmupIterations},\"measured\":${state.measuredIterations}}"
+private fun BenchmarkWorkload.fingerprint(
+    mode: BenchmarkStartupMode,
+): String = "$capability:${modelId.value}:$mode:${description.hashCode()}"
 
-private fun BenchmarkWorkloadResult.toRunRecord(sessionId: String, capability: AiCapability, startedAt: Long) = RunRecord(
+private fun BenchmarkWorkload.parameters(
+    state: BenchmarkLabUiState,
+): String = "{\"startupMode\":\"${state.startupMode}\",\"warmups\":${state.warmupIterations}," +
+    "\"measured\":${state.measuredIterations}}"
+
+private fun BenchmarkWorkloadResult.toRunRecord(
+    sessionId: String,
+    capability: AiCapability,
+    startedAt: Long,
+) = RunRecord(
     id = iteration.runId,
     kind = RunKind.INFERENCE,
     benchmarkSessionId = sessionId,
@@ -189,7 +239,9 @@ private fun List<BenchmarkWorkloadResult>.summary(warning: String?): BenchmarkSe
         minimumLatencyMs = latencies.firstOrNull(),
         maximumLatencyMs = latencies.lastOrNull(),
         medianThroughputPerSecond = throughput.getOrNull((throughput.size - 1) / 2),
-        totalBatteryEnergyDeltaNwh = mapNotNull { it.iteration.telemetry.resources?.batteryEnergyDeltaNwh }.sum().takeIf { it != 0L },
+        totalBatteryEnergyDeltaNwh = mapNotNull {
+            it.iteration.telemetry.resources?.batteryEnergyDeltaNwh
+        }.sum().takeIf { it != 0L },
         warning = warning,
     )
 }

@@ -42,8 +42,12 @@ class RoutedSpeechToTextEngine(runtimes: Set<SpeechToTextRuntime>) : SpeechToTex
         return runtime.load(request)
     }
 
-    override fun transcribe(request: SpeechToTextRequest): SpeechToTextResult = synchronized(lock) { checkNotNull(active) { "Load a speech model before transcription." } }
-        .transcribe(request)
+    override fun transcribe(request: SpeechToTextRequest): SpeechToTextResult {
+        val runtime = synchronized(lock) {
+            checkNotNull(active) { "Load a speech model before transcription." }
+        }
+        return runtime.transcribe(request)
+    }
 
     override fun cancel() {
         synchronized(lock) { active }?.cancel()

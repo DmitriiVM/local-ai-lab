@@ -60,7 +60,10 @@ fun BenchmarkScreen(
         ),
         verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
-        Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_26), style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = stringResource(CoreUiR.string.benchmark_benchmark_screen_26),
+            style = MaterialTheme.typography.headlineMedium,
+        )
         Text(
             text = stringResource(CoreUiR.string.ui_copy_38),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -76,12 +79,18 @@ fun BenchmarkScreen(
                 Text(workload.capabilityLabel(), style = MaterialTheme.typography.titleMedium)
                 Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_format_2, workload.modelDisplayName))
                 Text(workload.workloadDescription(), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_28), style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = stringResource(CoreUiR.string.benchmark_benchmark_screen_28),
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
         }
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_29), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = stringResource(CoreUiR.string.benchmark_benchmark_screen_29),
+                    style = MaterialTheme.typography.titleMedium,
+                )
                 IterationControl(
                     label = stringResource(CoreUiR.string.ui_copy_39),
                     description = stringResource(CoreUiR.string.ui_description_17),
@@ -105,7 +114,10 @@ fun BenchmarkScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_30), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            text = stringResource(CoreUiR.string.benchmark_benchmark_screen_30),
+                            style = MaterialTheme.typography.titleSmall,
+                        )
                         Text(
                             text = if (state.startupMode.name == "WARM") {
                                 stringResource(CoreUiR.string.benchmark_reuse_runtime)
@@ -125,8 +137,14 @@ fun BenchmarkScreen(
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = onStart, enabled = !state.isRunning) { Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_31)) }
-            if (state.isRunning) Button(onClick = onCancel) { Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_32)) }
+            Button(onClick = onStart, enabled = !state.isRunning) {
+                Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_31))
+            }
+            if (state.isRunning) {
+                Button(onClick = onCancel) {
+                    Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_32))
+                }
+            }
         }
         state.message?.let { Text(it, color = MaterialTheme.colorScheme.secondary) }
         if (state.completedIterations.isNotEmpty()) {
@@ -137,7 +155,10 @@ fun BenchmarkScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_33), style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            text = stringResource(CoreUiR.string.benchmark_benchmark_screen_33),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
                         TextButton(
                             onClick = { clipboard.setText(AnnotatedString(resultsCopyText)) },
                         ) {
@@ -176,12 +197,15 @@ fun BenchmarkScreen(
                         )
                         ResultMetric(
                             label = stringResource(CoreUiR.string.ui_copy_44),
-                            value = "${summary.minimumLatencyMs.durationText()}–${summary.maximumLatencyMs.durationText()}",
+                            value = "${summary.minimumLatencyMs.durationText()}–" +
+                                summary.maximumLatencyMs.durationText(),
                             description = stringResource(CoreUiR.string.ui_description_21),
                         )
                         ResultMetric(
                             label = stringResource(CoreUiR.string.ui_copy_45),
-                            value = summary.medianThroughputPerSecond?.throughputText(workload.capability) ?: "Unavailable",
+                            value = summary.medianThroughputPerSecond
+                                ?.throughputText(workload.capability)
+                                ?: "Unavailable",
                             description = if (summary.medianThroughputPerSecond == null) {
                                 "This runtime did not report output units, so only latency can be compared."
                             } else {
@@ -193,7 +217,8 @@ fun BenchmarkScreen(
                         ResultSection("Resources — last measured run")
                         ResultMetric(
                             label = stringResource(CoreUiR.string.ui_copy_46),
-                            value = "${resources.averageProcessCpuPercent.percentText()} avg · ${resources.peakProcessCpuPercent.percentText()} peak",
+                            value = "${resources.averageProcessCpuPercent.percentText()} avg · " +
+                                "${resources.peakProcessCpuPercent.percentText()} peak",
                             description = stringResource(CoreUiR.string.ui_description_22),
                         )
                         ResultMetric(
@@ -293,13 +318,22 @@ private fun BenchmarkLabUiState.resultsCopyText(workload: BenchmarkWorkload): St
         add("Latency summary (lower is faster)")
         add("Typical latency (median): ${resultSummary.medianLatencyMs.durationText()}")
         add("p95 latency: ${resultSummary.p95LatencyMs.durationText()}")
-        add("Latency range: ${resultSummary.minimumLatencyMs.durationText()}–${resultSummary.maximumLatencyMs.durationText()}")
-        add("Output rate: ${resultSummary.medianThroughputPerSecond?.throughputText(workload.capability) ?: "Unavailable"}")
+        add(
+            "Latency range: ${resultSummary.minimumLatencyMs.durationText()}–" +
+                resultSummary.maximumLatencyMs.durationText(),
+        )
+        val outputRate = resultSummary.medianThroughputPerSecond
+            ?.throughputText(workload.capability)
+            ?: "Unavailable"
+        add("Output rate: $outputRate")
     }
     completedIterations.lastOrNull()?.telemetry?.resources?.let { resources ->
         add("")
         add("Resources (last measured run)")
-        add("CPU usage: ${resources.averageProcessCpuPercent.percentText()} average · ${resources.peakProcessCpuPercent.percentText()} peak")
+        add(
+            "CPU usage: ${resources.averageProcessCpuPercent.percentText()} average · " +
+                "${resources.peakProcessCpuPercent.percentText()} peak",
+        )
         add("Peak app memory: ${resources.peakPssBytes.memoryText()} PSS")
         add("Thermal state: ${resources.thermalStatusEnd.thermalStatusText()}")
         add("Battery use: ${resources.batteryValueText()}")
@@ -335,14 +369,18 @@ private fun IterationControl(
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onDecrement, enabled = enabled) { Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_35)) }
+            TextButton(onClick = onDecrement, enabled = enabled) {
+                Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_35))
+            }
             Text(
                 text = value.toString(),
                 modifier = Modifier.width(28.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
             )
-            TextButton(onClick = onIncrement, enabled = enabled) { Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_36)) }
+            TextButton(onClick = onIncrement, enabled = enabled) {
+                Text(stringResource(CoreUiR.string.benchmark_benchmark_screen_36))
+            }
         }
     }
 }
@@ -366,8 +404,17 @@ private fun BenchmarkWorkload.capabilityLabel(): String = stringResource(
 @Composable
 private fun BenchmarkWorkload.workloadDescription(): String = when (this) {
     is BenchmarkWorkload.Chat -> stringResource(CoreUiR.string.benchmark_workload_chat, messages.size)
-    is BenchmarkWorkload.SpeechToText -> stringResource(CoreUiR.string.benchmark_workload_stt, input.displayName, input.durationMs, languageCode)
-    is BenchmarkWorkload.TextToSpeech -> stringResource(CoreUiR.string.benchmark_workload_tts, text.length, languageCode)
+    is BenchmarkWorkload.SpeechToText -> stringResource(
+        CoreUiR.string.benchmark_workload_stt,
+        input.displayName,
+        input.durationMs,
+        languageCode,
+    )
+    is BenchmarkWorkload.TextToSpeech -> stringResource(
+        CoreUiR.string.benchmark_workload_tts,
+        text.length,
+        languageCode,
+    )
 }
 
 private fun Double?.percentText(): String = this?.let { "%.1f%%".format(it) } ?: "Unavailable"

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.outlined.Chat
@@ -40,8 +42,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.core.ui.R as CoreUiR
-import com.dmitriim.localailab.feature.assistant.impl.presentation.AssistantOperation
-import com.dmitriim.localailab.feature.assistant.impl.presentation.AssistantUiState
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantOperation
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantUiState
 
 @Composable
 internal fun AssistantConfigurationBar(
@@ -60,7 +62,13 @@ internal fun AssistantConfigurationBar(
             value = state.selectedChatModel?.displayName ?: "Not configured",
             onClick = onOpenChat,
             ready = state.selectedChatModel?.installed == true,
-            icon = { Icon(Icons.Outlined.Chat, contentDescription = null, modifier = Modifier.size(18.dp)) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Outlined.Chat,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+            },
             modifier = Modifier.weight(1f),
         )
         ConfigurationButton(
@@ -68,7 +76,13 @@ internal fun AssistantConfigurationBar(
             value = state.selectedSpeechModel?.displayName ?: "Not configured",
             onClick = onOpenListen,
             ready = state.selectedSpeechModel?.installed == true,
-            icon = { Icon(Icons.Outlined.Mic, contentDescription = null, modifier = Modifier.size(18.dp)) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Outlined.Mic,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+            },
             modifier = Modifier.weight(1f),
         )
         ConfigurationButton(
@@ -76,7 +90,13 @@ internal fun AssistantConfigurationBar(
             value = state.selectedVoice?.displayName ?: "Not configured",
             onClick = onOpenSpeak,
             ready = state.selectedVoiceModel?.installed == true && state.selectedVoice != null,
-            icon = { Icon(Icons.Outlined.VolumeUp, contentDescription = null, modifier = Modifier.size(18.dp)) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Outlined.VolumeUp,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+            },
             modifier = Modifier.weight(1f),
         )
     }
@@ -89,7 +109,10 @@ internal fun AssistantToolbarActions(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         TextButton(
             onClick = onClearConversation,
             enabled = state.isIdle && state.messages.isNotEmpty(),
@@ -97,7 +120,10 @@ internal fun AssistantToolbarActions(
             Text(stringResource(CoreUiR.string.assistant_assistant_controls_4))
         }
         IconButton(onClick = onOpenSettings) {
-            Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(CoreUiR.string.ui_copy_11))
+            Icon(
+                imageVector = Icons.Outlined.MoreVert,
+                contentDescription = stringResource(CoreUiR.string.ui_copy_11),
+            )
         }
     }
 }
@@ -115,7 +141,11 @@ private fun ConfigurationButton(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                 icon()
-                Text(title, style = MaterialTheme.typography.labelLarge, maxLines = 1)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                )
                 Icon(
                     imageVector = if (ready) Icons.Outlined.CheckCircle else Icons.Outlined.ErrorOutline,
                     contentDescription = if (ready) "$title ready" else "$title not configured",
@@ -161,9 +191,21 @@ internal fun AssistantComposer(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            ComposerInput(state.input, active, onInput, onSend)
+            ComposerInput(
+                value = state.input,
+                active = active,
+                onInput = onInput,
+                onSend = onSend,
+            )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.26f))
-            ComposerActions(state, onStartRecording, onStopRecording, onSend, onProfile, onCancel)
+            ComposerActions(
+                state = state,
+                onStartRecording = onStartRecording,
+                onStopRecording = onStopRecording,
+                onSend = onSend,
+                onProfile = onProfile,
+                onCancel = onCancel,
+            )
         }
     }
 }
@@ -180,35 +222,113 @@ private fun ComposerInput(value: String, active: Boolean, onInput: (String) -> U
         minLines = 1,
         maxLines = 4,
         enabled = !active,
-        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = ImeAction.Send),
-        keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSend = { onSend() }),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+        keyboardActions = KeyboardActions(onSend = { onSend() }),
     )
 }
 
 @Composable
-private fun ComposerActions(state: AssistantUiState, onStartRecording: () -> Unit, onStopRecording: () -> Unit, onSend: () -> Unit, onProfile: () -> Unit, onCancel: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+private fun ComposerActions(
+    state: AssistantUiState,
+    onStartRecording: () -> Unit,
+    onStopRecording: () -> Unit,
+    onSend: () -> Unit,
+    onProfile: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         if (state.isIdle) {
             Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                TextButton(onClick = onProfile, enabled = state.canSend) { Text(stringResource(CoreUiR.string.assistant_assistant_controls_7)) }
+                TextButton(onClick = onProfile, enabled = state.canSend) {
+                    Text(stringResource(CoreUiR.string.assistant_assistant_controls_7))
+                }
             }
         } else {
-            AssistantOperationStatus(state.operation, state.level, Modifier.weight(1f))
+            AssistantOperationStatus(
+                operation = state.operation,
+                level = state.level,
+                modifier = Modifier.weight(1f),
+            )
         }
-        ComposerActionButton(state, onStartRecording, onStopRecording, onSend, onCancel)
+        ComposerActionButton(
+            state = state,
+            onStartRecording = onStartRecording,
+            onStopRecording = onStopRecording,
+            onSend = onSend,
+            onCancel = onCancel,
+        )
     }
 }
 
 @Composable
-private fun ComposerActionButton(state: AssistantUiState, onStartRecording: () -> Unit, onStopRecording: () -> Unit, onSend: () -> Unit, onCancel: () -> Unit) {
+private fun ComposerActionButton(
+    state: AssistantUiState,
+    onStartRecording: () -> Unit,
+    onStopRecording: () -> Unit,
+    onSend: () -> Unit,
+    onCancel: () -> Unit,
+) {
     when (state.operation) {
         AssistantOperation.Idle -> {
-            OutlinedIconButton(onClick = onStartRecording, enabled = state.canDictate) { Icon(Icons.Outlined.Mic, contentDescription = stringResource(CoreUiR.string.ui_copy_12)) }
-            AssistantPrimaryActionButton(onClick = onSend, enabled = state.canSend, purpleTonal = true) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(CoreUiR.string.ui_copy_13)) }
+            OutlinedIconButton(
+                onClick = onStartRecording,
+                enabled = state.canDictate,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Mic,
+                    contentDescription = stringResource(CoreUiR.string.ui_copy_12),
+                )
+            }
+            AssistantPrimaryActionButton(
+                onClick = onSend,
+                enabled = state.canSend,
+                purpleTonal = true,
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = stringResource(CoreUiR.string.ui_copy_13),
+                )
+            }
         }
-        AssistantOperation.Recording -> AssistantPrimaryActionButton(onClick = onStopRecording) { Icon(Icons.Outlined.Stop, contentDescription = stringResource(CoreUiR.string.ui_copy_14)) }
-        AssistantOperation.Cancelling -> AssistantPrimaryActionButton(onClick = {}, enabled = false) { Icon(Icons.Outlined.Stop, contentDescription = stringResource(CoreUiR.string.ui_copy_15)) }
-        else -> if (state.operation !in setOf(AssistantOperation.Loading, AssistantOperation.Generating) || state.selectedChatModel?.capabilities?.cancellation == true) AssistantPrimaryActionButton(onClick = onCancel) { Icon(Icons.Outlined.Close, contentDescription = stringResource(CoreUiR.string.ui_copy_16)) }
+
+        AssistantOperation.Recording -> {
+            AssistantPrimaryActionButton(onClick = onStopRecording) {
+                Icon(
+                    imageVector = Icons.Outlined.Stop,
+                    contentDescription = stringResource(CoreUiR.string.ui_copy_14),
+                )
+            }
+        }
+
+        AssistantOperation.Cancelling -> {
+            AssistantPrimaryActionButton(onClick = {}, enabled = false) {
+                Icon(
+                    imageVector = Icons.Outlined.Stop,
+                    contentDescription = stringResource(CoreUiR.string.ui_copy_15),
+                )
+            }
+        }
+
+        else -> {
+            val canCancel =
+                state.operation !in setOf(
+                    AssistantOperation.Loading,
+                    AssistantOperation.Generating,
+                ) ||
+                    state.selectedChatModel?.capabilities?.cancellation == true
+            if (canCancel) {
+                AssistantPrimaryActionButton(onClick = onCancel) {
+                    Icon(
+                        imageVector = Icons.Outlined.Close,
+                        contentDescription = stringResource(CoreUiR.string.ui_copy_16),
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -250,15 +370,26 @@ private fun AssistantOperationStatus(
     Box(modifier = modifier, contentAlignment = Alignment.CenterStart) {
         when {
             level != null -> Text(
-                stringResource(CoreUiR.string.assistant_assistant_controls_format_1, "%.1f".format(level.elapsedMs / 1_000.0), (level.peak * 100).toInt()),
+                text = stringResource(
+                    CoreUiR.string.assistant_assistant_controls_format_1,
+                    "%.1f".format(level.elapsedMs / 1_000.0),
+                    (level.peak * 100).toInt(),
+                ),
                 style = MaterialTheme.typography.bodySmall,
             )
+
             operation !in setOf(AssistantOperation.Idle, AssistantOperation.Recording) -> Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                Text(operationLabel(operation), style = MaterialTheme.typography.bodySmall)
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    strokeWidth = 2.dp,
+                )
+                Text(
+                    text = operationLabel(operation = operation),
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
         }
     }

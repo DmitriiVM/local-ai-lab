@@ -114,6 +114,17 @@ class AndroidInferenceProfiler(
                 (after.processCpuTimeMs - before.processCpuTimeMs).coerceAtLeast(0L) * 100.0 / intervalMs
             }
             val currents = samples.mapNotNull(PerformanceResourceSnapshot::batteryCurrentUa)
+            val batteryEnergyDeltaNwh = start.batteryEnergyNwh?.let { initial ->
+                end.batteryEnergyNwh?.let { initial - it }
+            }
+            val batteryChargeDeltaUah = start.batteryChargeUah?.let { initial ->
+                end.batteryChargeUah?.let { initial - it }
+            }
+            val batteryMeasurementsAvailable = (
+                start.batteryEnergyNwh != null ||
+                    start.batteryChargeUah != null ||
+                    currents.isNotEmpty()
+                )
             return InferenceResourceMetrics(
                 processCpuTimeMs = cpuMs,
                 averageProcessCpuPercent = cpuPercent,
@@ -123,10 +134,10 @@ class AndroidInferenceProfiler(
                 peakPssBytes = samples.mapNotNull(PerformanceResourceSnapshot::pssBytes).maxOrNull(),
                 availableMemoryStartBytes = start.availableMemoryBytes,
                 availableMemoryEndBytes = end.availableMemoryBytes,
-                batteryEnergyDeltaNwh = start.batteryEnergyNwh?.let { initial -> end.batteryEnergyNwh?.let { initial - it } },
-                batteryChargeDeltaUah = start.batteryChargeUah?.let { initial -> end.batteryChargeUah?.let { initial - it } },
+                batteryEnergyDeltaNwh = batteryEnergyDeltaNwh,
+                batteryChargeDeltaUah = batteryChargeDeltaUah,
                 averageBatteryCurrentUa = currents.takeIf(List<Int>::isNotEmpty)?.average(),
-                batteryMeasurementsAvailable = start.batteryEnergyNwh != null || start.batteryChargeUah != null || currents.isNotEmpty(),
+                batteryMeasurementsAvailable = batteryMeasurementsAvailable,
                 powerSaveMode = start.powerSaveMode || end.powerSaveMode,
                 thermalStatusStart = start.thermalStatus,
                 thermalStatusEnd = end.thermalStatus,

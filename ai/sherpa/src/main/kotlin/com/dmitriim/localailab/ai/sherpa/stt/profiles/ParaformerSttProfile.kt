@@ -15,10 +15,13 @@ class ParaformerSttProfile :
     BaseSherpaSttProfile(
         paraformerSttProfileId,
     ) {
-    override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) =
-        offlineSherpaSession(artifacts, threadCount) {
-            paraformer = OfflineParaformerModelConfig().apply {
-                model = artifacts.require(ModelFileRoles.PRIMARY_MODEL).path
-            }
+    override fun open(
+        request: SpeechToTextLoadRequest,
+        artifacts: ModelArtifacts,
+        threadCount: Int,
+    ) = offlineSherpaSession(artifacts, threadCount) {
+        paraformer = OfflineParaformerModelConfig().apply {
+            model = artifacts.require(ModelFileRoles.PRIMARY_MODEL).path
         }
+    }
 }

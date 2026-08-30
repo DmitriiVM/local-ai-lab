@@ -23,5 +23,9 @@ internal object ModelDownloadStorageRequirement {
             .saturatingAdd(estimate.safetyReserveBytes)
     }
 
-    private fun Long.saturatingAdd(other: Long): Long = if (this > Long.MAX_VALUE - other) Long.MAX_VALUE else this + other
+    private fun Long.saturatingAdd(other: Long): Long = if (this > Long.MAX_VALUE - other) {
+        Long.MAX_VALUE
+    } else {
+        this + other
+    }
 }

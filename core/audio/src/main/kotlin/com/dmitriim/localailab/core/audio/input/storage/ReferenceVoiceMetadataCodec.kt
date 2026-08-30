@@ -42,7 +42,10 @@ internal object ReferenceVoiceMetadataCodec {
         )
     }.getOrNull()
 
-    private fun String.isSafeFileName() = isNotBlank() && none { it == '/' || it == '\\' } && this != "." && this != ".."
+    private fun String.isSafeFileName() = isNotBlank() &&
+        none { it == '/' || it == '\\' } &&
+        this != "." &&
+        this != ".."
 
     private const val PCM16_BYTES = 2L
 }

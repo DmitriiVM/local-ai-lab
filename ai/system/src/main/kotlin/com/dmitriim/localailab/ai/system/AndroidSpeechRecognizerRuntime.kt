@@ -89,7 +89,8 @@ class AndroidSpeechRecognizerRuntime(
             ).also { resolvedLanguage ->
                 Log.i(
                     TAG,
-                    "Android SpeechRecognizer language resolved: requested=${request.languageCode}, resolved=$resolvedLanguage",
+                    "Android SpeechRecognizer language resolved: requested=${request.languageCode}, " +
+                        "resolved=$resolvedLanguage",
                 )
             }
         cancelled = false
@@ -523,7 +524,8 @@ class AndroidSpeechRecognizerRuntime(
             SpeechRecognizer.ERROR_AUDIO -> "Android SpeechRecognizer could not read the supplied audio."
             SpeechRecognizer.ERROR_CLIENT -> "Android SpeechRecognizer rejected the recognition request."
             SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Android SpeechRecognizer lacks audio permission."
-            SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED -> "The selected language is not supported by the on-device recognizer."
+            SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED ->
+                "The selected language is not supported by the on-device recognizer."
             SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> "The selected on-device language model is not installed."
             SpeechRecognizer.ERROR_NETWORK,
             SpeechRecognizer.ERROR_NETWORK_TIMEOUT,
@@ -538,7 +540,10 @@ class AndroidSpeechRecognizerRuntime(
         }
     }
 
-    private class AndroidSpeechRecognitionException(val errorCode: Int, message: String) : IllegalStateException(message)
+    private class AndroidSpeechRecognitionException(
+        val errorCode: Int,
+        message: String,
+    ) : IllegalStateException(message)
 
     private companion object {
         const val TAG = "AiP123Stt"

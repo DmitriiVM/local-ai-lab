@@ -30,12 +30,6 @@ Local AI Lab is a native Android app for running AI models locally.
 - `:feature:stt` — STT request/event models, engine orchestration, persistence, UI, and navigation.
 - `:feature:tts` — TTS request/event models, engine orchestration, preview/playback, persistence, UI, and navigation.
 
-## Code organization
-
-Write modular code with one clear responsibility per file. Prefer one primary
-top-level declaration; small private helpers and closely related models may stay
-together. Separate contracts from concrete implementations at architectural
-boundaries.
 
 ## Feature-oriented modularization
 
@@ -56,3 +50,20 @@ capability:
 Keep domain rules and decision policies in the feature's `domain` package.
 Keep filesystem, database, network, Android-framework, and other external
 adapters in `data`.
+
+## Code organization
+
+Write modular code with one clear responsibility per file. Prefer one primary
+top-level declaration; small private helpers and closely related models may stay
+together. Separate contracts from concrete implementations at architectural
+boundaries.
+
+## Code readability
+
+- Prefer clear, multiline code over compressed one-liners.
+- Keep source lines at 120 characters or fewer.
+- Use one argument per line for non-trivial function or constructor calls.
+- Do not place multiple statements, branches, or UI elements on one line.
+- Expand non-trivial `if`, `when`, `try/catch`, and lambda bodies onto
+  separate lines with clear indentation.
+- Prefer named arguments when they make a multiline call easier to understand.

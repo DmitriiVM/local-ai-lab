@@ -24,6 +24,9 @@ internal fun ModelDownloadButton(
             contentColor = MaterialTheme.colorScheme.tertiary,
         ),
     ) {
-        Text(stringResource(CoreUiR.string.models_model_download_button_70), style = MaterialTheme.typography.labelLarge)
+        Text(
+            text = stringResource(CoreUiR.string.models_model_download_button_70),
+            style = MaterialTheme.typography.labelLarge,
+        )
     }
 }

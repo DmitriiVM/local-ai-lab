@@ -22,8 +22,18 @@ class FileSystemModelValidator(
         directory: File,
         verifyChecksums: Boolean = true,
     ): ModelValidationResult {
-        Log.i(TAG, "Model file validation started: modelId=${manifest.modelId.value}, profile=${manifest.profileType}, fileCount=${manifest.files.size}, verifyChecksums=$verifyChecksums")
-        if (!directory.isDirectory) return validationFailure(manifest, ModelManifestValidationPolicy.missingModelDirectory())
+        Log.i(
+            TAG,
+            "Model file validation started: modelId=${manifest.modelId.value}, " +
+                "profile=${manifest.profileType}, fileCount=${manifest.files.size}, " +
+                "verifyChecksums=$verifyChecksums",
+        )
+        if (!directory.isDirectory) {
+            return validationFailure(
+                manifest,
+                ModelManifestValidationPolicy.missingModelDirectory(),
+            )
+        }
         manifest.files.filter { it.required }.forEach { spec ->
             val file = File(directory, spec.relativePath)
             val present = if (spec.directory) file.isDirectory && file.canRead() else file.isFile && file.canRead()
@@ -79,7 +89,11 @@ class FileSystemModelValidator(
         manifest: ModelManifest,
         result: ModelValidationResult,
     ): ModelValidationResult {
-        Log.w(TAG, "Model file validation failed: modelId=${manifest.modelId.value}, state=${result.state}, message=${result.message}")
+        Log.w(
+            TAG,
+            "Model file validation failed: modelId=${manifest.modelId.value}, " +
+                "state=${result.state}, message=${result.message}",
+        )
         return result
     }
 

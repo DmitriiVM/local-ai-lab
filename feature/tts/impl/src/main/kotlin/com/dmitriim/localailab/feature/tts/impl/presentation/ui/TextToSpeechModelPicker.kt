@@ -35,7 +35,10 @@ internal fun TextToSpeechModelPicker(
     var sheetVisible by remember { mutableStateOf(false) }
     val selected = models.firstOrNull { it.id == selectedId }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(stringResource(CoreUiR.string.tts_text_to_speech_model_picker_176), style = MaterialTheme.typography.labelLarge)
+        Text(
+            text = stringResource(CoreUiR.string.tts_text_to_speech_model_picker_176),
+            style = MaterialTheme.typography.labelLarge,
+        )
         OutlinedButton(
             onClick = { sheetVisible = true },
             enabled = enabled && models.isNotEmpty(),

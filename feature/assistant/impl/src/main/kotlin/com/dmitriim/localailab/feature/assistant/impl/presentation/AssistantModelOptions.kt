@@ -11,6 +11,11 @@ import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.ai.api.system.SystemModelProfileKeys
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechVoice
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoice
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.TtsModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.TtsVoiceOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.normalizeLanguageCode
 import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInSpeechToTextModels
 import com.dmitriim.localailab.feature.models.api.domain.library.BuiltInTextToSpeechModels
 import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel

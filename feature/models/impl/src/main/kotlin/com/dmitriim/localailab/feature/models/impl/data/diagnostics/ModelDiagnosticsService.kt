@@ -60,7 +60,8 @@ class ModelDiagnosticsService(
         model.approximateRamBytes?.takeIf { availableRam < it }?.let { recommendedRam ->
             issues += ModelCompatibilityIssue(
                 severity = ModelCompatibilityIssueSeverity.ADVISORY,
-                message = "Available RAM is below this model's approximate ${recommendedRam.toReadableBytes()} recommendation.",
+                message = "Available RAM is below this model's approximate " +
+                    "${recommendedRam.toReadableBytes()} recommendation.",
             )
         }
         ModelCompatibilityPolicy.evaluate(issues)

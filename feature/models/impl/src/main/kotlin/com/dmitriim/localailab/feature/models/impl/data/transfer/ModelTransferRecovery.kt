@@ -20,7 +20,11 @@ internal class ModelTransferRecovery(
         transferState.all().forEach { transfer ->
             val modelId = ModelId(transfer.modelId)
             val entry = modelCatalog.find(modelId)
-            if (entry == null || entry.manifest.catalogVersion != transfer.catalogVersion || entry.manifest.revision != transfer.revision) {
+            val catalogChanged =
+                entry == null ||
+                    entry.manifest.catalogVersion != transfer.catalogVersion ||
+                    entry.manifest.revision != transfer.revision
+            if (catalogChanged) {
                 stagingDirectory(modelId).deleteRecursively()
                 transferState.delete(modelId)
                 return@forEach

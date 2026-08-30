@@ -63,7 +63,10 @@ internal class TextToSpeechOperationController(
                         referenceLevel = null,
                         referenceVoices = referenceVoiceStore.voices.value,
                         selectedVoiceId = voice.id,
-                        statusMessage = UiText.Resource(CoreUiR.string.tts_status_saved_reference, listOf(voice.displayName)),
+                        statusMessage = UiText.Resource(
+                            CoreUiR.string.tts_status_saved_reference,
+                            listOf(voice.displayName),
+                        ),
                     )
                 }
                 state.value.selectedVoice?.let(onVoiceSelected)
@@ -81,7 +84,8 @@ internal class TextToSpeechOperationController(
                         operation = TtsOperation.IDLE,
                         referenceVoices = referenceVoiceStore.voices.value,
                         referenceLevel = null,
-                        errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.tts_error_record_reference),
+                        errorMessage = error.message?.let(UiText::Dynamic)
+                            ?: UiText.Resource(CoreUiR.string.tts_error_record_reference),
                         statusMessage = null,
                     )
                 }
@@ -112,7 +116,10 @@ internal class TextToSpeechOperationController(
                         operation = TtsOperation.IDLE,
                         referenceVoices = referenceVoiceStore.voices.value,
                         selectedVoiceId = voice.id,
-                        statusMessage = UiText.Resource(CoreUiR.string.tts_status_saved_reference, listOf(voice.displayName)),
+                        statusMessage = UiText.Resource(
+                            CoreUiR.string.tts_status_saved_reference,
+                            listOf(voice.displayName),
+                        ),
                     )
                 }
                 state.value.selectedVoice?.let(onVoiceSelected)
@@ -122,7 +129,8 @@ internal class TextToSpeechOperationController(
                 state.update {
                     it.copy(
                         operation = TtsOperation.IDLE,
-                        errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.tts_error_import_reference),
+                        errorMessage = error.message?.let(UiText::Dynamic)
+                            ?: UiText.Resource(CoreUiR.string.tts_error_import_reference),
                         statusMessage = null,
                     )
                 }
@@ -140,7 +148,14 @@ internal class TextToSpeechOperationController(
         }
         val modelId = snapshot.selectedModelId ?: return
         val voice = snapshot.compatibleVoices.firstOrNull { it.id == voiceId } ?: run {
-            state.update { it.copy(errorMessage = UiText.Resource(CoreUiR.string.tts_error_voice_unsupported, listOf(snapshot.language.label))) }
+            state.update {
+                it.copy(
+                    errorMessage = UiText.Resource(
+                        CoreUiR.string.tts_error_voice_unsupported,
+                        listOf(snapshot.language.label),
+                    ),
+                )
+            }
             return
         }
         if (snapshot.text.isBlank()) {
@@ -156,7 +171,10 @@ internal class TextToSpeechOperationController(
                 it.copy(
                     operation = TtsOperation.CANCELLING,
                     previewVoiceId = voice.id,
-                    statusMessage = UiText.Resource(CoreUiR.string.tts_status_switching_preview, listOf(voice.displayName)),
+                    statusMessage = UiText.Resource(
+                        CoreUiR.string.tts_status_switching_preview,
+                        listOf(voice.displayName),
+                    ),
                 )
             }
             previewSpeech.cancel()
@@ -169,7 +187,10 @@ internal class TextToSpeechOperationController(
                     operation = TtsOperation.PREVIEWING,
                     previewVoiceId = voice.id,
                     errorMessage = null,
-                    statusMessage = UiText.Resource(CoreUiR.string.tts_status_previewing_voice, listOf(voice.displayName)),
+                    statusMessage = UiText.Resource(
+                        CoreUiR.string.tts_status_previewing_voice,
+                        listOf(voice.displayName),
+                    ),
                 )
             }
             try {
@@ -202,7 +223,8 @@ internal class TextToSpeechOperationController(
                     it.copy(
                         operation = TtsOperation.IDLE,
                         previewVoiceId = null,
-                        errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.tts_error_preview_voice),
+                        errorMessage = error.message?.let(UiText::Dynamic)
+                            ?: UiText.Resource(CoreUiR.string.tts_error_preview_voice),
                         statusMessage = null,
                     )
                 }
@@ -221,7 +243,14 @@ internal class TextToSpeechOperationController(
             return
         }
         val voice = snapshot.selectedVoice ?: run {
-            state.update { it.copy(errorMessage = UiText.Resource(CoreUiR.string.tts_error_select_voice, listOf(snapshot.language.label))) }
+            state.update {
+                it.copy(
+                    errorMessage = UiText.Resource(
+                        CoreUiR.string.tts_error_select_voice,
+                        listOf(snapshot.language.label),
+                    ),
+                )
+            }
             return
         }
         val threads = snapshot.threadCount.toIntOrNull() ?: run {
@@ -231,7 +260,13 @@ internal class TextToSpeechOperationController(
         val startedAt = System.currentTimeMillis()
         val runId = UUID.randomUUID().toString()
         val model = snapshot.selectedModel
-        Log.i(TAG, "TTS UI synthesis started: model=${model?.displayName}, textLength=${snapshot.text.length}, language=${snapshot.language.code}, voice=${voice.id}, speaker=${voice.speakerId}, speed=${snapshot.speed}, silenceScale=${snapshot.sentenceSilenceScale}, volume=${snapshot.volume}, threads=$threads, audioEffects=${snapshot.audioEffects}")
+        Log.i(
+            TAG,
+            "TTS UI synthesis started: model=${model?.displayName}, textLength=${snapshot.text.length}, " +
+                "language=${snapshot.language.code}, voice=${voice.id}, speaker=${voice.speakerId}, " +
+                "speed=${snapshot.speed}, silenceScale=${snapshot.sentenceSilenceScale}, " +
+                "volume=${snapshot.volume}, threads=$threads, audioEffects=${snapshot.audioEffects}",
+        )
         beginSynthesis(snapshot)
         operationJob = scope.launch(Dispatchers.Default) {
             try {
@@ -244,9 +279,18 @@ internal class TextToSpeechOperationController(
                     ),
                 ).collect { event ->
                     when (event) {
-                        is SpeechSynthesisEvent.Prepared -> Log.i(TAG, "TTS UI received prepared event: loadMs=${event.loadDurationMs}, sampleRateHz=${event.sampleRateHz}, speakers=${event.speakerCount}")
+                        is SpeechSynthesisEvent.Prepared -> Log.i(
+                            TAG,
+                            "TTS UI received prepared event: loadMs=${event.loadDurationMs}, " +
+                                "sampleRateHz=${event.sampleRateHz}, speakers=${event.speakerCount}",
+                        )
                         is SpeechSynthesisEvent.Synthesized -> {
-                            Log.i(TAG, "TTS UI received synthesized event: durationMs=${event.synthesisDurationMs}, outputDurationMs=${event.output.durationMs}")
+                            Log.i(
+                                TAG,
+                                "TTS UI received synthesized event: " +
+                                    "durationMs=${event.synthesisDurationMs}, " +
+                                    "outputDurationMs=${event.output.durationMs}",
+                            )
                             state.update {
                                 it.copy(
                                     operation = TtsOperation.IDLE,
@@ -263,15 +307,45 @@ internal class TextToSpeechOperationController(
                                 statusMessage = UiText.Resource(CoreUiR.string.tts_status_wav_retained),
                             )
                         }.also {
-                            Log.i(TAG, "TTS UI received completed event: synthesisMs=${event.metrics.synthesisDurationMs}, underruns=${event.metrics.playbackUnderrunCount}")
-                            persistTtsRun(TtsRunSnapshotFactory.create(runId, RunStatus.SUCCEEDED, startedAt, model, snapshot, event.metrics, null))
+                            Log.i(
+                                TAG,
+                                "TTS UI received completed event: " +
+                                    "synthesisMs=${event.metrics.synthesisDurationMs}, " +
+                                    "underruns=${event.metrics.playbackUnderrunCount}",
+                            )
+                            persistTtsRun(
+                                TtsRunSnapshotFactory.create(
+                                    runId,
+                                    RunStatus.SUCCEEDED,
+                                    startedAt,
+                                    model,
+                                    snapshot,
+                                    event.metrics,
+                                    null,
+                                ),
+                            )
                         }
                     }
                 }
             } catch (_: CancellationException) {
                 Log.i(TAG, "TTS UI operation cancelled.")
-                state.update { it.copy(operation = TtsOperation.IDLE, statusMessage = UiText.Resource(CoreUiR.string.tts_status_operation_stopped)) }
-                persistTtsRun(TtsRunSnapshotFactory.create(runId, RunStatus.CANCELLED, startedAt, model, snapshot, null, "Speech operation stopped."))
+                state.update {
+                    it.copy(
+                        operation = TtsOperation.IDLE,
+                        statusMessage = UiText.Resource(CoreUiR.string.tts_status_operation_stopped),
+                    )
+                }
+                persistTtsRun(
+                    TtsRunSnapshotFactory.create(
+                        runId,
+                        RunStatus.CANCELLED,
+                        startedAt,
+                        model,
+                        snapshot,
+                        null,
+                        "Speech operation stopped.",
+                    ),
+                )
             } catch (error: Throwable) {
                 Log.e(TAG, "TTS UI operation failed: ${error.message}", error)
                 val message = error.message ?: "Local speech synthesis failed."
@@ -282,7 +356,17 @@ internal class TextToSpeechOperationController(
                         statusMessage = null,
                     )
                 }
-                persistTtsRun(TtsRunSnapshotFactory.create(runId, RunStatus.FAILED, startedAt, model, snapshot, null, message))
+                persistTtsRun(
+                    TtsRunSnapshotFactory.create(
+                        runId,
+                        RunStatus.FAILED,
+                        startedAt,
+                        model,
+                        snapshot,
+                        null,
+                        message,
+                    ),
+                )
             }
         }.also(::registerForegroundCancellation)
     }
@@ -331,7 +415,12 @@ internal class TextToSpeechOperationController(
         val output = state.value.output ?: return
         val volume = state.value.volume
         Log.i(TAG, "TTS UI replay started: durationMs=${output.durationMs}, volume=$volume")
-        state.update { it.copy(errorMessage = null, statusMessage = UiText.Resource(CoreUiR.string.tts_status_replaying_wav)) }
+        state.update {
+            it.copy(
+                errorMessage = null,
+                statusMessage = UiText.Resource(CoreUiR.string.tts_status_replaying_wav),
+            )
+        }
         operationJob = scope.launch(Dispatchers.Default) {
             try {
                 synthesizeSpeech.replay(output, volume)
@@ -342,7 +431,12 @@ internal class TextToSpeechOperationController(
                 state.update { it.copy(statusMessage = UiText.Resource(CoreUiR.string.tts_status_playback_stopped)) }
             } catch (error: Throwable) {
                 Log.e(TAG, "TTS UI replay failed: ${error.message}", error)
-                state.update { it.copy(errorMessage = error.message?.let(UiText::Dynamic) ?: UiText.Resource(CoreUiR.string.tts_error_replay)) }
+                state.update {
+                    it.copy(
+                        errorMessage = error.message?.let(UiText::Dynamic)
+                            ?: UiText.Resource(CoreUiR.string.tts_error_replay),
+                    )
+                }
             }
         }.also(::registerForegroundCancellation)
     }

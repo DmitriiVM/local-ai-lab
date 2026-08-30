@@ -29,8 +29,9 @@ import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.component.OptionPickerItem
-import com.dmitriim.localailab.feature.assistant.impl.presentation.SpeechOutputSettings
-import com.dmitriim.localailab.feature.assistant.impl.presentation.TtsModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechOutputSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.TtsModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.normalizeLanguageCode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,10 +71,17 @@ internal fun AssistantSpeakSettingsSheet(
     val selectedModel = models.firstOrNull { it.id == draftModelId }
     ModalBottomSheet(onDismissRequest = onDismiss) {
         if (selectingSpeechModel) {
-            SpeakModelSelection(models, draftModelId, enabled, onOpenModels, {
-                selectSpeechModel(ModelId(it))
-                selectingSpeechModel = false
-            }) { selectingSpeechModel = false }
+            SpeakModelSelection(
+                models = models,
+                selectedModelId = draftModelId,
+                enabled = enabled,
+                onOpenModels = onOpenModels,
+                onSelect = {
+                    selectSpeechModel(ModelId(it))
+                    selectingSpeechModel = false
+                },
+                onBack = { selectingSpeechModel = false },
+            )
         } else {
             Column(
                 modifier = Modifier
@@ -84,9 +92,17 @@ internal fun AssistantSpeakSettingsSheet(
                     .padding(horizontal = 20.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                AssistantSettingsSheetHeader(stringResource(CoreUiR.string.ui_copy_36), stringResource(CoreUiR.string.ui_description_16))
+                AssistantSettingsSheetHeader(
+                    title = stringResource(CoreUiR.string.ui_copy_36),
+                    description = stringResource(CoreUiR.string.ui_description_16),
+                )
                 SpeakModelAndVoiceSettings(
-                    models, selectedModel, draftModelId, draftVoiceId, draft, enabled,
+                    models = models,
+                    selectedModel = selectedModel,
+                    selectedModelId = draftModelId,
+                    selectedVoiceId = draftVoiceId,
+                    draft = draft,
+                    enabled = enabled,
                     onChooseModel = { selectingSpeechModel = true },
                     onLanguageChange = { language, voiceId ->
                         draftVoiceId = voiceId
@@ -99,25 +115,37 @@ internal fun AssistantSpeakSettingsSheet(
                         commit(draftModelId, voiceId, draft)
                     },
                 )
-                SpeakPlaybackSettings(draft, enabled) { candidate ->
-                    draft = candidate
-                    commit(draftModelId, draftVoiceId, candidate)
-                }
-                SpeakSettingsActions(error, enabled, {
-                    val candidate = SpeechOutputSettings()
-                    val voiceId = selectedModel?.compatibleVoices(candidate.languageCode)?.firstOrNull()?.id
-                    draft = candidate
-                    draftVoiceId = voiceId
-                    commit(draftModelId, voiceId, candidate)
-                }) {
-                    val modelId = draftModelId
-                    val voiceId = draftVoiceId
-                    error = when {
-                        modelId == null -> selectSpeechModelError
-                        voiceId == null -> selectCompatibleVoiceError
-                        else -> onPreview(modelId, voiceId, draft)
-                    }
-                }
+                SpeakPlaybackSettings(
+                    draft = draft,
+                    enabled = enabled,
+                    onChange = { candidate ->
+                        draft = candidate
+                        commit(draftModelId, draftVoiceId, candidate)
+                    },
+                )
+                SpeakSettingsActions(
+                    error = error,
+                    enabled = enabled,
+                    onReset = {
+                        val candidate = SpeechOutputSettings()
+                        val voiceId = selectedModel
+                            ?.compatibleVoices(candidate.languageCode)
+                            ?.firstOrNull()
+                            ?.id
+                        draft = candidate
+                        draftVoiceId = voiceId
+                        commit(draftModelId, voiceId, candidate)
+                    },
+                    onPreview = {
+                        val modelId = draftModelId
+                        val voiceId = draftVoiceId
+                        error = when {
+                            modelId == null -> selectSpeechModelError
+                            voiceId == null -> selectCompatibleVoiceError
+                            else -> onPreview(modelId, voiceId, draft)
+                        }
+                    },
+                )
             }
         }
     }
@@ -135,7 +163,7 @@ private fun speechModelSelection(
     val language = assistantTtsLanguages.firstOrNull { candidate ->
         model?.languages?.isEmpty() == true ||
             model?.languages?.any {
-                com.dmitriim.localailab.feature.assistant.impl.presentation.normalizeLanguageCode(it) == candidate.code
+                normalizeLanguageCode(it) == candidate.code
             } == true
     }?.code ?: "en"
     return SpeechModelSelection(
@@ -173,10 +201,20 @@ private fun SpeakSettingsActions(
     onPreview: () -> Unit,
 ) {
     error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
-    Text(stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_22), style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextButton(onClick = onReset, enabled = enabled) { Text(stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_23)) }
-        TextButton(onClick = onPreview, enabled = enabled) { Text(stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_24)) }
+    Text(
+        text = stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_22),
+        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+    ) {
+        TextButton(onClick = onReset, enabled = enabled) {
+            Text(stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_23))
+        }
+        TextButton(onClick = onPreview, enabled = enabled) {
+            Text(stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_24))
+        }
     }
 }
 
@@ -201,16 +239,24 @@ private fun SpeakModelAndVoiceSettings(
         onClick = onChooseModel,
     )
     AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_voice_language))
-    Text(stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_21), style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
+    Text(
+        text = stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_21),
+        style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
+    )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         assistantTtsLanguages.forEach { language ->
             val supported = selectedModel?.languages?.isEmpty() == true ||
                 selectedModel?.languages?.any {
-                    com.dmitriim.localailab.feature.assistant.impl.presentation.normalizeLanguageCode(it) == language.code
+                    normalizeLanguageCode(it) == language.code
                 } == true
             FilterChip(
                 selected = draft.languageCode == language.code,
-                onClick = { onLanguageChange(language.code, selectedModel?.compatibleVoices(language.code)?.firstOrNull()?.id) },
+                onClick = {
+                    onLanguageChange(
+                        language.code,
+                        selectedModel?.compatibleVoices(language.code)?.firstOrNull()?.id,
+                    )
+                },
                 enabled = enabled && supported,
                 label = { Text(stringResource(language.labelRes)) },
             )
@@ -231,11 +277,31 @@ private fun SpeakPlaybackSettings(
     onChange: (SpeechOutputSettings) -> Unit,
 ) {
     AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_playback))
-    OutputField(stringResource(CoreUiR.string.assistant_settings_speech_rate), draft.speed, enabled) { onChange(draft.copy(speed = it)) }
-    OutputField(stringResource(CoreUiR.string.assistant_settings_volume), draft.volume, enabled) { onChange(draft.copy(volume = it)) }
-    OutputField(stringResource(CoreUiR.string.assistant_settings_sentence_silence), draft.sentenceSilenceScale, enabled) { onChange(draft.copy(sentenceSilenceScale = it)) }
+    OutputField(
+        label = stringResource(CoreUiR.string.assistant_settings_speech_rate),
+        value = draft.speed,
+        enabled = enabled,
+        onChange = { onChange(draft.copy(speed = it)) },
+    )
+    OutputField(
+        label = stringResource(CoreUiR.string.assistant_settings_volume),
+        value = draft.volume,
+        enabled = enabled,
+        onChange = { onChange(draft.copy(volume = it)) },
+    )
+    OutputField(
+        label = stringResource(CoreUiR.string.assistant_settings_sentence_silence),
+        value = draft.sentenceSilenceScale,
+        enabled = enabled,
+        onChange = { onChange(draft.copy(sentenceSilenceScale = it)) },
+    )
     AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_performance))
-    OutputField(stringResource(CoreUiR.string.assistant_settings_thread_count), draft.threadCount, enabled) { onChange(draft.copy(threadCount = it.filter(Char::isDigit))) }
+    OutputField(
+        label = stringResource(CoreUiR.string.assistant_settings_thread_count),
+        value = draft.threadCount,
+        enabled = enabled,
+        onChange = { onChange(draft.copy(threadCount = it.filter(Char::isDigit))) },
+    )
 }
 
 @Composable
@@ -248,7 +314,10 @@ private fun VoicePicker(
     var expanded by remember { mutableStateOf(false) }
     val selected = voices.firstOrNull { it.first == selectedVoiceId }
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_25), style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
+        Text(
+            text = stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_25),
+            style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
+        )
         OutlinedButton(
             onClick = { expanded = true },
             enabled = enabled && voices.isNotEmpty(),
@@ -271,8 +340,8 @@ private fun VoicePicker(
 @Composable
 private fun OutputField(label: String, value: String, enabled: Boolean, onChange: (String) -> Unit) {
     OutlinedTextField(
-        value,
-        onChange,
+        value = value,
+        onValueChange = onChange,
         label = { Text(label) },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,

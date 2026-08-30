@@ -68,7 +68,9 @@ internal fun AssistantInSheetModelSelection(
                 .padding(start = 12.dp, end = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = onBack) { Text(stringResource(CoreUiR.string.assistant_assistant_in_sheet_model_picker_9)) }
+            TextButton(onClick = onBack) {
+                Text(stringResource(CoreUiR.string.assistant_assistant_in_sheet_model_picker_9))
+            }
             Text(title, style = MaterialTheme.typography.titleLarge)
         }
         Text(

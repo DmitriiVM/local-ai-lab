@@ -43,7 +43,10 @@ internal fun AssistantSettingsModelPicker(
             enabled = enabled && items.isNotEmpty(),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(selected?.name ?: stringResource(CoreUiR.string.assistant_not_configured), maxLines = 1)
+            Text(
+                text = selected?.name ?: stringResource(CoreUiR.string.assistant_not_configured),
+                maxLines = 1,
+            )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             items.forEach { item ->
@@ -66,7 +69,9 @@ internal fun AssistantSettingsModelPicker(
             }
         }
         if (items.any { !it.installed }) {
-            TextButton(onClick = onOpenModels) { Text(stringResource(CoreUiR.string.assistant_assistant_settings_model_picker_20)) }
+            TextButton(onClick = onOpenModels) {
+                Text(stringResource(CoreUiR.string.assistant_assistant_settings_model_picker_20))
+            }
         }
     }
 }

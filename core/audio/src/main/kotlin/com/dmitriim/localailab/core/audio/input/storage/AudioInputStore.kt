@@ -63,7 +63,8 @@ class AudioInputStore(
             ).also { input ->
                 Log.i(
                     TAG,
-                    "STT audio import completed: durationMs=${input.durationMs}, sampleRateHz=${input.sampleRateHz}, frames=${decoded.frames}",
+                    "STT audio import completed: durationMs=${input.durationMs}, " +
+                        "sampleRateHz=${input.sampleRateHz}, frames=${decoded.frames}",
                 )
             }
         } catch (error: Throwable) {
@@ -76,7 +77,10 @@ class AudioInputStore(
         }
     }
 
-    suspend fun forEachSegment(input: PcmAudioInput, onSegment: (FloatArray) -> Unit) = PcmSegmentReader.forEachSegment(input, onSegment)
+    suspend fun forEachSegment(
+        input: PcmAudioInput,
+        onSegment: (FloatArray) -> Unit,
+    ) = PcmSegmentReader.forEachSegment(input, onSegment)
 
     fun clear(input: PcmAudioInput?) {
         input?.file?.takeIf { it.parentFile == directory }?.let { file ->

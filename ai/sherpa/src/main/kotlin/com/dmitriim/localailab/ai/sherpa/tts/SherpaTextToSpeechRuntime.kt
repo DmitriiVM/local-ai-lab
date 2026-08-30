@@ -110,7 +110,8 @@ class SherpaTextToSpeechRuntime(
         require(request.text.isNotBlank()) { "Enter text to synthesize." }
         require(request.speed in 0.5f..2f) { "Speech rate must be between 0.5 and 2.0." }
         require(request.sentenceSilenceScale in MIN_SENTENCE_SILENCE_SCALE..MAX_SENTENCE_SILENCE_SCALE) {
-            "Sentence silence must be between $MIN_SENTENCE_SILENCE_SCALE and $MAX_SENTENCE_SILENCE_SCALE for Sherpa TTS."
+            "Sentence silence must be between $MIN_SENTENCE_SILENCE_SCALE and " +
+                "$MAX_SENTENCE_SILENCE_SCALE for Sherpa TTS."
         }
         val speaker = request.voice as? TextToSpeechVoiceCondition.FixedSpeaker
             ?: error("Sherpa TTS requires a fixed speaker voice.")

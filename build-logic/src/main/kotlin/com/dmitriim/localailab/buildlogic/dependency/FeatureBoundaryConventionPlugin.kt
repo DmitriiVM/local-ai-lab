@@ -36,7 +36,8 @@ class FeatureBoundaryConventionPlugin : Plugin<Project> {
                 }
             if (violations.isNotEmpty()) {
                 throw GradleException(
-                    "Feature modules may depend on other features only through their API modules:\n${violations.joinToString("\n")}",
+                    "Feature modules may depend on other features only through their " +
+                        "API modules:\n${violations.joinToString("\n")}",
                 )
             }
             allprojects

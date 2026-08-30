@@ -21,7 +21,10 @@ class PersistTtsRun(private val runRepository: RunRepository) {
                 completedAtEpochMs = System.currentTimeMillis(),
                 model = snapshot.model,
                 input = snapshot.input,
-                output = snapshot.metrics?.let { "Generated ${it.generatedAudioDurationMs} ms WAV at ${it.sampleRateHz} Hz." },
+                output = snapshot.metrics?.let { metrics ->
+                    "Generated ${metrics.generatedAudioDurationMs} ms WAV at " +
+                        "${metrics.sampleRateHz} Hz."
+                },
                 parametersJson = Json.encodeToString(
                     buildJsonObject {
                         put("language", snapshot.languageCode)

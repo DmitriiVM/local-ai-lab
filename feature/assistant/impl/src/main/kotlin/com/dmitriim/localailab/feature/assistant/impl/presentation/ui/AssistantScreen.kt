@@ -26,11 +26,11 @@ import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.component.StatusMessage
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
-import com.dmitriim.localailab.feature.assistant.impl.presentation.AssistantInputMode
-import com.dmitriim.localailab.feature.assistant.impl.presentation.AssistantUiState
-import com.dmitriim.localailab.feature.assistant.impl.presentation.ChatSettings
-import com.dmitriim.localailab.feature.assistant.impl.presentation.SpeechInputSettings
-import com.dmitriim.localailab.feature.assistant.impl.presentation.SpeechOutputSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantInputMode
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantUiState
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechInputSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechOutputSettings
 
 @Composable
 fun AssistantScreen(
@@ -123,10 +123,20 @@ fun AssistantScreen(
     }
 
     AssistantSettingsSheets(
-        activeSheet, uiState, onSelectMode, onApplyChatSettings, onApplySpeechInputSettings,
-        onApplySpeechOutputSettings, onPreviewVoice, onUnloadChatModel, onOpenModels,
+        activeSheet = activeSheet,
+        uiState = uiState,
+        onSelectMode = onSelectMode,
+        onApplyChatSettings = onApplyChatSettings,
+        onApplySpeechInputSettings = onApplySpeechInputSettings,
+        onApplySpeechOutputSettings = onApplySpeechOutputSettings,
+        onPreviewVoice = onPreviewVoice,
+        onUnloadChatModel = onUnloadChatModel,
+        onOpenModels = onOpenModels,
     ) { activeSheet = null }
-    ClearConversationDialog(showClearConfirmation, { showClearConfirmation = false }) {
+    ClearConversationDialog(
+        show = showClearConfirmation,
+        onDismiss = { showClearConfirmation = false },
+    ) {
         onClearConversation()
         showClearConfirmation = false
     }
@@ -158,6 +168,7 @@ private fun AssistantSettingsSheets(
                 onDismiss = onDismiss,
             )
         }
+
         AssistantSettingsSheet.LISTEN -> {
             AssistantListenSettingsSheet(
                 models = uiState.speechModels,
@@ -169,6 +180,7 @@ private fun AssistantSettingsSheets(
                 onDismiss = onDismiss,
             )
         }
+
         AssistantSettingsSheet.SPEAK -> {
             AssistantSpeakSettingsSheet(
                 models = uiState.voiceModels,
@@ -182,6 +194,7 @@ private fun AssistantSettingsSheets(
                 onDismiss = onDismiss,
             )
         }
+
         AssistantSettingsSheet.INPUT_MODE -> {
             AssistantInputModeSettingsSheet(
                 selectedMode = uiState.inputMode,
@@ -190,6 +203,7 @@ private fun AssistantSettingsSheets(
                 onDismiss = onDismiss,
             )
         }
+
         null -> Unit
     }
 }
@@ -204,9 +218,17 @@ private fun ClearConversationDialog(show: Boolean, onDismiss: () -> Unit, onConf
             confirmButton = {
                 TextButton(
                     onClick = onConfirm,
-                ) { Text(stringResource(CoreUiR.string.assistant_assistant_screen_18)) }
+                    content = { Text(stringResource(CoreUiR.string.assistant_assistant_screen_18)) },
+                )
             },
-            dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.assistant_assistant_screen_19)) } },
+            dismissButton = {
+                TextButton(
+                    onClick = onDismiss,
+                    content = {
+                        Text(stringResource(CoreUiR.string.assistant_assistant_screen_19))
+                    },
+                )
+            },
         )
     }
 }

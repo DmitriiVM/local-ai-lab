@@ -84,7 +84,9 @@ class ReferenceVoiceStore(
         }
     }
 
-    fun resolve(id: String): ReferenceVoice? = mutableVoices.value.firstOrNull { it.id == id && File(it.pcmFilePath).isFile }
+    fun resolve(id: String): ReferenceVoice? = mutableVoices.value.firstOrNull { voice ->
+        voice.id == id && File(voice.pcmFilePath).isFile
+    }
 
     fun delete(id: String) {
         val voice = mutableVoices.value.firstOrNull { it.id == id } ?: return

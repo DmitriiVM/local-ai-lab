@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.core.navigation.AppDestination
 import com.dmitriim.localailab.core.navigation.AppNavigator
 import com.dmitriim.localailab.feature.assistant.api.navigation.AssistantDestination
@@ -15,7 +16,10 @@ import com.dmitriim.localailab.feature.tts.api.navigation.TextToSpeechDestinatio
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 
 @Composable
-fun RunsRoute(navigator: AppNavigator, viewModel: RunsViewModel = metroViewModel()) {
+fun RunsRoute(
+    navigator: AppNavigator,
+    viewModel: RunsViewModel = metroViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val shareUri = state.pendingShareUri
@@ -46,15 +50,18 @@ fun RunsRoute(navigator: AppNavigator, viewModel: RunsViewModel = metroViewModel
         onClearRunHistory = viewModel::clearRunHistory,
         onShare = viewModel::prepareShare,
         onRepeat = {
-            viewModel.repeatSelected()?.let { run -> navigator.navigate(run.capability.replayDestination) }
+            viewModel.repeatSelected()?.let { run ->
+                navigator.navigate(run.capability.replayDestination)
+            }
         },
     )
 }
 
-private val com.dmitriim.localailab.ai.api.capability.AiCapability.replayDestination: AppDestination get() = when (this) {
-    com.dmitriim.localailab.ai.api.capability.AiCapability.CHAT -> AssistantDestination
-    com.dmitriim.localailab.ai.api.capability.AiCapability.SPEECH_TO_TEXT -> SpeechToTextDestination
-    com.dmitriim.localailab.ai.api.capability.AiCapability.TEXT_TO_SPEECH -> TextToSpeechDestination
-    com.dmitriim.localailab.ai.api.capability.AiCapability.VOICE_ACTIVITY_DETECTION -> SpeechToTextDestination
-    com.dmitriim.localailab.ai.api.capability.AiCapability.VOICE_ASSISTANT -> AssistantDestination
-}
+private val AiCapability.replayDestination: AppDestination
+    get() = when (this) {
+        AiCapability.CHAT -> AssistantDestination
+        AiCapability.SPEECH_TO_TEXT -> SpeechToTextDestination
+        AiCapability.TEXT_TO_SPEECH -> TextToSpeechDestination
+        AiCapability.VOICE_ACTIVITY_DETECTION -> SpeechToTextDestination
+        AiCapability.VOICE_ASSISTANT -> AssistantDestination
+    }

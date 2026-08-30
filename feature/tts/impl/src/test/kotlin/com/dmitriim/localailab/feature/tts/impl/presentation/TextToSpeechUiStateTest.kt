@@ -59,7 +59,13 @@ class TextToSpeechUiStateTest {
 
         val option = ttsModelOptions(
             installedModels = listOf(installed),
-            catalogModels = listOf(CatalogModel(catalogManifest, ModelCatalogState.APPROVED, CatalogDownload(expectedBytes = 1))),
+            catalogModels = listOf(
+                CatalogModel(
+                    catalogManifest,
+                    ModelCatalogState.APPROVED,
+                    CatalogDownload(expectedBytes = 1),
+                ),
+            ),
         ).single()
 
         assertTrue(option.installed)

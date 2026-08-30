@@ -49,6 +49,7 @@ import com.dmitriim.localailab.core.ui.style.AppFilterChipDefaults
 import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
 import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
+import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
 import com.dmitriim.localailab.feature.models.impl.presentation.ModelsUiState
 
@@ -160,7 +161,15 @@ private fun ModelsList(
                 )
             }
         } else {
-            item { Text(stringResource(CoreUiR.string.models_models_screen_format_10, modelItems.size), style = MaterialTheme.typography.titleLarge) }
+            item {
+                Text(
+                    text = stringResource(
+                        CoreUiR.string.models_models_screen_format_10,
+                        modelItems.size,
+                    ),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }
             items(modelItems.size, key = { modelItems[it].manifest.modelId.value }) { index ->
                 when (val item = modelItems[index]) {
                     is ModelListItem.Installed -> InstalledModelCard(
@@ -194,10 +203,32 @@ private fun DeleteModelDialog(
     model?.let {
         AlertDialog(
             onDismissRequest = onCancelDelete,
-            title = { Text(stringResource(CoreUiR.string.models_models_screen_format_11, it.manifest.displayName)) },
-            text = { Text(stringResource(CoreUiR.string.models_models_screen_format_12, it.totalBytes.toReadableBytes())) },
-            confirmButton = { Button(onClick = onConfirmDelete) { Text(stringResource(CoreUiR.string.models_models_screen_71)) } },
-            dismissButton = { OutlinedButton(onClick = onCancelDelete) { Text(stringResource(CoreUiR.string.models_models_screen_72)) } },
+            title = {
+                Text(
+                    stringResource(
+                        CoreUiR.string.models_models_screen_format_11,
+                        it.manifest.displayName,
+                    ),
+                )
+            },
+            text = {
+                Text(
+                    stringResource(
+                        CoreUiR.string.models_models_screen_format_12,
+                        it.totalBytes.toReadableBytes(),
+                    ),
+                )
+            },
+            confirmButton = {
+                Button(onClick = onConfirmDelete) {
+                    Text(stringResource(CoreUiR.string.models_models_screen_71))
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = onCancelDelete) {
+                    Text(stringResource(CoreUiR.string.models_models_screen_72))
+                }
+            },
         )
     }
 }
@@ -340,7 +371,9 @@ private fun InstalledModelCard(
             size = model.totalBytes.toReadableBytes(),
         )
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            OutlinedButton(onClick = { onDelete(model.manifest.modelId) }) { Text(stringResource(CoreUiR.string.models_models_screen_74)) }
+            OutlinedButton(onClick = { onDelete(model.manifest.modelId) }) {
+                Text(stringResource(CoreUiR.string.models_models_screen_74))
+            }
         }
     }
 }
@@ -358,7 +391,8 @@ private fun CatalogModelCard(
 ) {
     val manifest = model.manifest
     val accessRequired = model.download.authentication == CatalogDownloadAuthentication.HUGGING_FACE_USER_TOKEN &&
-        huggingFaceCredentialStatus == com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus.MISSING
+        huggingFaceCredentialStatus ==
+        HuggingFaceCredentialStatus.MISSING
     var confirmCancel by rememberSaveable(manifest.modelId.value) { mutableStateOf(false) }
     ModelCard(onClick = { onOpenDetails(manifest.modelId) }) {
         ModelCardIdentity(manifest = manifest, status = stringResource(transfer.statusLabelRes()))
@@ -375,33 +409,59 @@ private fun CatalogModelCard(
         when {
             transfer is ModelTransferState.Queued -> {
                 ModelCardAction {
-                    OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text(stringResource(CoreUiR.string.models_models_screen_76)) }
-                    OutlinedButton(onClick = { confirmCancel = true }) { Text(stringResource(CoreUiR.string.models_models_screen_77)) }
+                    OutlinedButton(onClick = { onPause(manifest.modelId) }) {
+                        Text(stringResource(CoreUiR.string.models_models_screen_76))
+                    }
+                    OutlinedButton(onClick = { confirmCancel = true }) {
+                        Text(stringResource(CoreUiR.string.models_models_screen_77))
+                    }
                 }
             }
             transfer is ModelTransferState.Running -> {
                 ModelCardAction {
-                    OutlinedButton(onClick = { onPause(manifest.modelId) }) { Text(stringResource(CoreUiR.string.models_models_screen_78)) }
-                    OutlinedButton(onClick = { confirmCancel = true }) { Text(stringResource(CoreUiR.string.models_models_screen_79)) }
+                    OutlinedButton(onClick = { onPause(manifest.modelId) }) {
+                        Text(stringResource(CoreUiR.string.models_models_screen_78))
+                    }
+                    OutlinedButton(onClick = { confirmCancel = true }) {
+                        Text(stringResource(CoreUiR.string.models_models_screen_79))
+                    }
                 }
             }
             transfer is ModelTransferState.Paused -> {
                 ModelCardAction {
-                    Button(onClick = { onResumeOnWifi(manifest.modelId) }) { Text(stringResource(CoreUiR.string.models_models_screen_80)) }
-                    OutlinedButton(onClick = { confirmCancel = true }) { Text(stringResource(CoreUiR.string.models_models_screen_81)) }
+                    Button(onClick = { onResumeOnWifi(manifest.modelId) }) {
+                        Text(stringResource(CoreUiR.string.models_models_screen_80))
+                    }
+                    OutlinedButton(onClick = { confirmCancel = true }) {
+                        Text(stringResource(CoreUiR.string.models_models_screen_81))
+                    }
                 }
             }
             transfer == ModelTransferState.Installing -> {
                 ModelCardAction {
-                    OutlinedButton(onClick = {}, enabled = false) { Text(stringResource(CoreUiR.string.models_models_screen_82)) }
+                    OutlinedButton(onClick = {}, enabled = false) {
+                        Text(stringResource(CoreUiR.string.models_models_screen_82))
+                    }
                 }
             }
             transfer is ModelTransferState.Failed -> {
                 ModelCardAction {
-                    Button(onClick = { if (accessRequired) onOpenDetails(manifest.modelId) else onDownload(manifest.modelId) }) {
+                    Button(
+                        onClick = {
+                            if (accessRequired) {
+                                onOpenDetails(manifest.modelId)
+                            } else {
+                                onDownload(manifest.modelId)
+                            }
+                        },
+                    ) {
                         Text(
                             stringResource(
-                                if (accessRequired) CoreUiR.string.models_set_up_access else CoreUiR.string.models_retry,
+                                if (accessRequired) {
+                                    CoreUiR.string.models_set_up_access
+                                } else {
+                                    CoreUiR.string.models_retry
+                                },
                             ),
                         )
                     }
@@ -429,7 +489,11 @@ private fun CatalogModelCard(
                     onCancel(manifest.modelId)
                 }) { Text(stringResource(CoreUiR.string.models_models_screen_86)) }
             },
-            dismissButton = { OutlinedButton(onClick = { confirmCancel = false }) { Text(stringResource(CoreUiR.string.models_models_screen_87)) } },
+            dismissButton = {
+                OutlinedButton(onClick = { confirmCancel = false }) {
+                    Text(stringResource(CoreUiR.string.models_models_screen_87))
+                }
+            },
         )
     }
 }
@@ -500,7 +564,11 @@ private fun TypeBadge(label: String) {
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         shape = RoundedCornerShape(50),
     ) {
-        Text(label, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelMedium,
+        )
     }
 }
 
@@ -547,7 +615,9 @@ private fun ModelManifest.typeLabelRes(): Int = when {
 private fun ModelManifest.languageSummary(): String {
     val totalLanguageCount = supportedLanguageCount
     return when {
-        AiCapability.VOICE_ACTIVITY_DETECTION in capabilities -> stringResource(CoreUiR.string.models_language_independent)
+        AiCapability.VOICE_ACTIVITY_DETECTION in capabilities -> {
+            stringResource(CoreUiR.string.models_language_independent)
+        }
         languages.isEmpty() -> stringResource(CoreUiR.string.models_language_not_specified)
         totalLanguageCount != null && totalLanguageCount > languages.size ->
             "${languages.joinToString()} +${totalLanguageCount - languages.size}"
@@ -565,7 +635,11 @@ private fun ModelValidationState.statusLabelRes(): Int = when (this) {
 
 private fun ModelTransferState?.statusLabelRes(): Int = when (this) {
     is ModelTransferState.Queued -> CoreUiR.string.models_status_queued
-    is ModelTransferState.Running -> if (completedBytes >= totalBytes) CoreUiR.string.models_status_verifying else CoreUiR.string.models_status_downloading
+    is ModelTransferState.Running -> if (completedBytes >= totalBytes) {
+        CoreUiR.string.models_status_verifying
+    } else {
+        CoreUiR.string.models_status_downloading
+    }
     is ModelTransferState.Paused -> CoreUiR.string.models_status_paused
     ModelTransferState.Installing -> CoreUiR.string.models_status_installing
     is ModelTransferState.Failed -> CoreUiR.string.models_status_download_failed
@@ -587,9 +661,13 @@ private fun ModelTransferState?.downloadedBytesOrNull(): Long? = when (this) {
     -> null
 }
 
-private fun com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy.networkLabelRes(): Int = when (this) {
-    com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy.WIFI_ONLY -> CoreUiR.string.models_network_wifi_only
-    com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy.ANY_NETWORK -> CoreUiR.string.models_network_any
+private fun ModelTransferNetworkPolicy.networkLabelRes(): Int = when (this) {
+    ModelTransferNetworkPolicy.WIFI_ONLY -> {
+        CoreUiR.string.models_network_wifi_only
+    }
+    ModelTransferNetworkPolicy.ANY_NETWORK -> {
+        CoreUiR.string.models_network_any
+    }
 }
 
 private fun Long.toReadableBytes(): String = when {

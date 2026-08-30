@@ -15,14 +15,17 @@ class WhisperSttProfile :
     BaseSherpaSttProfile(
         profileId = whisperSttProfileId,
     ) {
-    override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) =
-        offlineSherpaSession(artifacts, threadCount) {
-            whisper = OfflineWhisperModelConfig().apply {
-                encoder = artifacts.require(ModelFileRoles.ENCODER).path
-                decoder = artifacts.require(ModelFileRoles.DECODER).path
-                language = request.languageCode
-                task = "transcribe"
-                enableSegmentTimestamps = true
-            }
+    override fun open(
+        request: SpeechToTextLoadRequest,
+        artifacts: ModelArtifacts,
+        threadCount: Int,
+    ) = offlineSherpaSession(artifacts, threadCount) {
+        whisper = OfflineWhisperModelConfig().apply {
+            encoder = artifacts.require(ModelFileRoles.ENCODER).path
+            decoder = artifacts.require(ModelFileRoles.DECODER).path
+            language = request.languageCode
+            task = "transcribe"
+            enableSegmentTimestamps = true
         }
+    }
 }

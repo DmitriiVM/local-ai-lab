@@ -21,13 +21,12 @@ class KittenTtsProfile :
     BaseSherpaTtsProfile(
         kittenTtsProfileId,
     ) {
-    override fun open(artifacts: ModelArtifacts, threadCount: Int) =
-        openSherpaTts(threadCount) {
-            kitten = OfflineTtsKittenModelConfig().apply {
-                model = artifacts.require(KittenTtsArtifacts.MODEL).path
-                voices = artifacts.require(KittenTtsArtifacts.VOICES).path
-                tokens = artifacts.require(ModelFileRoles.TOKENS).path
-                dataDir = artifacts.require(ModelFileRoles.FRONTEND_DATA).path
-            }
+    override fun open(artifacts: ModelArtifacts, threadCount: Int) = openSherpaTts(threadCount) {
+        kitten = OfflineTtsKittenModelConfig().apply {
+            model = artifacts.require(KittenTtsArtifacts.MODEL).path
+            voices = artifacts.require(KittenTtsArtifacts.VOICES).path
+            tokens = artifacts.require(ModelFileRoles.TOKENS).path
+            dataDir = artifacts.require(ModelFileRoles.FRONTEND_DATA).path
         }
+    }
 }

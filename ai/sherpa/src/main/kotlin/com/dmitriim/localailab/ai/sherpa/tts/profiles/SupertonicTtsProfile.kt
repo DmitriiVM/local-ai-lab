@@ -22,17 +22,16 @@ class SupertonicTtsProfile :
     BaseSherpaTtsProfile(
         supertonicTtsProfileId,
     ) {
-    override fun open(artifacts: ModelArtifacts, threadCount: Int) =
-        openSherpaTts(threadCount) {
-            supertonic = OfflineTtsSupertonicModelConfig().apply {
-                durationPredictor =
-                    artifacts.require(SupertonicTtsArtifacts.DURATION_PREDICTOR).path
-                textEncoder = artifacts.require(SupertonicTtsArtifacts.TEXT_ENCODER).path
-                vectorEstimator = artifacts.require(SupertonicTtsArtifacts.VECTOR_ESTIMATOR).path
-                vocoder = artifacts.require(ModelFileRoles.VOCODER).path
-                ttsJson = artifacts.require(ModelFileRoles.CONFIG).path
-                unicodeIndexer = artifacts.require(SupertonicTtsArtifacts.UNICODE_INDEXER).path
-                voiceStyle = artifacts.require(SupertonicTtsArtifacts.VOICE_STYLE).path
-            }
+    override fun open(artifacts: ModelArtifacts, threadCount: Int) = openSherpaTts(threadCount) {
+        supertonic = OfflineTtsSupertonicModelConfig().apply {
+            durationPredictor =
+                artifacts.require(SupertonicTtsArtifacts.DURATION_PREDICTOR).path
+            textEncoder = artifacts.require(SupertonicTtsArtifacts.TEXT_ENCODER).path
+            vectorEstimator = artifacts.require(SupertonicTtsArtifacts.VECTOR_ESTIMATOR).path
+            vocoder = artifacts.require(ModelFileRoles.VOCODER).path
+            ttsJson = artifacts.require(ModelFileRoles.CONFIG).path
+            unicodeIndexer = artifacts.require(SupertonicTtsArtifacts.UNICODE_INDEXER).path
+            voiceStyle = artifacts.require(SupertonicTtsArtifacts.VOICE_STYLE).path
         }
+    }
 }

@@ -44,8 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.style.AppSurfaceStyle
-import com.dmitriim.localailab.feature.assistant.impl.presentation.ChatMessage
-import com.dmitriim.localailab.feature.assistant.impl.presentation.ChatMessageRole
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMessage
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMessageRole
 
 @Composable
 internal fun AssistantConversation(
@@ -165,8 +165,21 @@ private fun MessageCardHeader(message: ChatMessage, isUserMessage: Boolean) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         MessageRoleLabel(isUserMessage)
         Spacer(modifier = Modifier.weight(1f))
-        if (message.streaming) CircularProgressIndicator(modifier = Modifier.height(16.dp).width(16.dp), strokeWidth = 2.dp)
-        if (message.failed) Text(stringResource(CoreUiR.string.assistant_assistant_conversation_8), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+        if (message.streaming) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .height(16.dp)
+                    .width(16.dp),
+                strokeWidth = 2.dp,
+            )
+        }
+        if (message.failed) {
+            Text(
+                text = stringResource(CoreUiR.string.assistant_assistant_conversation_8),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
     }
 }
 
@@ -177,12 +190,40 @@ private fun MessageActions(
     onEdit: (String) -> Unit,
     onRegenerate: (() -> Unit)?,
     onSpeak: (() -> Unit)?,
-) = CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 32.dp) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End)) {
-        MessageActionButton(Icons.Outlined.ContentCopy, stringResource(CoreUiR.string.ui_copy_17), { onCopy(message.content) }, message.content.isNotBlank())
-        onRegenerate?.let { MessageActionButton(Icons.Outlined.Replay, stringResource(CoreUiR.string.ui_copy_18), onClick = it) }
-        onSpeak?.let { MessageActionButton(Icons.Outlined.VolumeUp, stringResource(CoreUiR.string.ui_copy_19), onClick = it) }
-        if (message.role == ChatMessageRole.USER) MessageActionButton(Icons.Outlined.Edit, stringResource(CoreUiR.string.ui_copy_20), { onEdit(message.id) })
+) = CompositionLocalProvider(
+    LocalMinimumInteractiveComponentSize provides 32.dp,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
+    ) {
+        MessageActionButton(
+            icon = Icons.Outlined.ContentCopy,
+            contentDescription = stringResource(CoreUiR.string.ui_copy_17),
+            onClick = { onCopy(message.content) },
+            enabled = message.content.isNotBlank(),
+        )
+        onRegenerate?.let { onRegenerate ->
+            MessageActionButton(
+                icon = Icons.Outlined.Replay,
+                contentDescription = stringResource(CoreUiR.string.ui_copy_18),
+                onClick = onRegenerate,
+            )
+        }
+        onSpeak?.let { onSpeak ->
+            MessageActionButton(
+                icon = Icons.Outlined.VolumeUp,
+                contentDescription = stringResource(CoreUiR.string.ui_copy_19),
+                onClick = onSpeak,
+            )
+        }
+        if (message.role == ChatMessageRole.USER) {
+            MessageActionButton(
+                icon = Icons.Outlined.Edit,
+                contentDescription = stringResource(CoreUiR.string.ui_copy_20),
+                onClick = { onEdit(message.id) },
+            )
+        }
     }
 }
 
@@ -215,7 +256,13 @@ private fun MessageRoleLabel(isUserMessage: Boolean) {
                 modifier = Modifier.size(14.dp),
             )
             Text(
-                text = stringResource(if (isUserMessage) CoreUiR.string.assistant_you else CoreUiR.string.assistant_assistant),
+                text = stringResource(
+                    if (isUserMessage) {
+                        CoreUiR.string.assistant_you
+                    } else {
+                        CoreUiR.string.assistant_assistant
+                    },
+                ),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
             )

@@ -44,17 +44,72 @@ class ChatterboxTurboQ4EnModelDefinition(
             architecture = "Chatterbox Turbo 350M",
             revision = chatterboxRevision,
             files = listOf(
-                ModelFileSpec("conditional_decoder_q4.onnx", ChatterboxTtsArtifacts.CONDITIONAL_DECODER, 2_179_022, "dccb7a6cea3472dc7f7d070eeb70ade18e6327fb4ec61a3d62cf211bfed90ea2"),
-                ModelFileSpec("conditional_decoder_q4.onnx_data", ModelFileRoles.EXTERNAL_DATA, 246_397_384, "b5c5317e0b79a1a19dd3d5e2b2091ea06b15716716ab801a54eaeb906c6971ec"),
-                ModelFileSpec("embed_tokens_q4.onnx", ChatterboxTtsArtifacts.EMBED_TOKENS, 2_844, "fd6ba1d22902e8f539d3dd6d7c1c44b98ebb4c84ebbb5e47fcb826ddcf667561"),
-                ModelFileSpec("embed_tokens_q4.onnx_data", ModelFileRoles.EXTERNAL_DATA, 37_286_384, "f54a51e234b509b64c3a03bb79e1149fba7e2eba6c2d9c222f18883379e1f5d8"),
-                ModelFileSpec("language_model_q4.onnx", ChatterboxTtsArtifacts.LANGUAGE_MODEL, 274_572, "b39d03d3f8b943b9e60c6fce3fb41191dbc1df4589f913291db1e214eef669b1"),
-                ModelFileSpec("language_model_q4.onnx_data", ModelFileRoles.EXTERNAL_DATA, 204_456_572, "2c029dc0acf48752473d8c74c72b5ceaaad76b9886fe106eaf2022142d5b5d5e"),
-                ModelFileSpec("speech_encoder_q4.onnx", ChatterboxTtsArtifacts.SPEECH_ENCODER, 1_200_346, "37956c20b67bed85a0da4bc83509d67b5969a1b257d1c546516a5236a17ad71e"),
-                ModelFileSpec("speech_encoder_q4.onnx_data", ModelFileRoles.EXTERNAL_DATA, 229_560_112, "58956db217c6443e49c91bdd54d7cf76b4a243f225c748b7bf746459fc27bc7d"),
-                ModelFileSpec("tokenizer.json", ChatterboxTtsArtifacts.TOKENIZER, 3_562_272, "3f04e34bea22f9144d1a19151154095bc9ce0430bf421304f5797e716288a906"),
-                ModelFileSpec("tokenizer_config.json", ModelFileRoles.CONFIG, 414, "0d637373c70a54c3c7202c0c12b40ff4f346c329960283f5a88031717d73c66f"),
-                ModelFileSpec("config.json", ModelFileRoles.CONFIG, 1_188, "6b52ed838c3bc347ef519659d82fbd35b9ee805fc7a6da92fc46bc58dfa08770"),
+                ModelFileSpec(
+                    relativePath = "conditional_decoder_q4.onnx",
+                    role = ChatterboxTtsArtifacts.CONDITIONAL_DECODER,
+                    expectedBytes = 2_179_022,
+                    sha256 = "dccb7a6cea3472dc7f7d070eeb70ade18e6327fb4ec61a3d62cf211bfed90ea2",
+                ),
+                ModelFileSpec(
+                    relativePath = "conditional_decoder_q4.onnx_data",
+                    role = ModelFileRoles.EXTERNAL_DATA,
+                    expectedBytes = 246_397_384,
+                    sha256 = "b5c5317e0b79a1a19dd3d5e2b2091ea06b15716716ab801a54eaeb906c6971ec",
+                ),
+                ModelFileSpec(
+                    relativePath = "embed_tokens_q4.onnx",
+                    role = ChatterboxTtsArtifacts.EMBED_TOKENS,
+                    expectedBytes = 2_844,
+                    sha256 = "fd6ba1d22902e8f539d3dd6d7c1c44b98ebb4c84ebbb5e47fcb826ddcf667561",
+                ),
+                ModelFileSpec(
+                    relativePath = "embed_tokens_q4.onnx_data",
+                    role = ModelFileRoles.EXTERNAL_DATA,
+                    expectedBytes = 37_286_384,
+                    sha256 = "f54a51e234b509b64c3a03bb79e1149fba7e2eba6c2d9c222f18883379e1f5d8",
+                ),
+                ModelFileSpec(
+                    relativePath = "language_model_q4.onnx",
+                    role = ChatterboxTtsArtifacts.LANGUAGE_MODEL,
+                    expectedBytes = 274_572,
+                    sha256 = "b39d03d3f8b943b9e60c6fce3fb41191dbc1df4589f913291db1e214eef669b1",
+                ),
+                ModelFileSpec(
+                    relativePath = "language_model_q4.onnx_data",
+                    role = ModelFileRoles.EXTERNAL_DATA,
+                    expectedBytes = 204_456_572,
+                    sha256 = "2c029dc0acf48752473d8c74c72b5ceaaad76b9886fe106eaf2022142d5b5d5e",
+                ),
+                ModelFileSpec(
+                    relativePath = "speech_encoder_q4.onnx",
+                    role = ChatterboxTtsArtifacts.SPEECH_ENCODER,
+                    expectedBytes = 1_200_346,
+                    sha256 = "37956c20b67bed85a0da4bc83509d67b5969a1b257d1c546516a5236a17ad71e",
+                ),
+                ModelFileSpec(
+                    relativePath = "speech_encoder_q4.onnx_data",
+                    role = ModelFileRoles.EXTERNAL_DATA,
+                    expectedBytes = 229_560_112,
+                    sha256 = "58956db217c6443e49c91bdd54d7cf76b4a243f225c748b7bf746459fc27bc7d",
+                ),
+                ModelFileSpec(
+                    relativePath = "tokenizer.json",
+                    role = ChatterboxTtsArtifacts.TOKENIZER,
+                    expectedBytes = 3_562_272,
+                    sha256 = "3f04e34bea22f9144d1a19151154095bc9ce0430bf421304f5797e716288a906",
+                ),
+                ModelFileSpec(
+                    relativePath = "tokenizer_config.json",
+                    role = ModelFileRoles.CONFIG,
+                    expectedBytes = 414,
+                    sha256 = "0d637373c70a54c3c7202c0c12b40ff4f346c329960283f5a88031717d73c66f",
+                ),
+                ModelFileSpec(
+                    relativePath = "config.json",
+                    role = ModelFileRoles.CONFIG,
+                    expectedBytes = 1_188,
+                    sha256 = "6b52ed838c3bc347ef519659d82fbd35b9ee805fc7a6da92fc46bc58dfa08770",
+                ),
             ),
             source = ModelSource(
                 url = "https://huggingface.co/$chatterboxRepository/tree/$chatterboxRevision",
@@ -96,7 +151,9 @@ class ChatterboxTurboQ4EnModelDefinition(
     )
 }
 
-private fun chatterboxFiles(vararg relativePaths: String): List<CatalogDownloadFile> = relativePaths.map { relativePath ->
+private fun chatterboxFiles(
+    vararg relativePaths: String,
+): List<CatalogDownloadFile> = relativePaths.map { relativePath ->
     CatalogDownloadFile(
         relativePath = relativePath,
         url = "https://huggingface.co/$chatterboxRepository/resolve/$chatterboxRevision/" +

@@ -85,14 +85,14 @@ class LlamaCppRuntime(
                     !it.directory
             },
         ) { "The llama.cpp model does not declare a primary model file." }
+        val model = File(artifact.path)
         val contextSize = request.options.contextSize ?: DEFAULT_CONTEXT_SIZE
         val threadCount = request.options.threadCount ?: DEFAULT_THREAD_COUNT
         val computePreference = request.options.computePreference
         Log.i(
             TAG,
-            "llama.cpp load requested: model=${File(
-                artifact.path,
-            ).name}, contextSize=$contextSize, requestedThreads=$threadCount, compute=$computePreference",
+            "llama.cpp load requested: model=${model.name}, contextSize=$contextSize, " +
+                "requestedThreads=$threadCount, compute=$computePreference",
         )
         require(
             computePreference == ComputePreference.AUTO ||
@@ -102,7 +102,6 @@ class LlamaCppRuntime(
         }
         require(contextSize >= 128) { "Context size must be at least 128 tokens." }
         require(threadCount >= 0) { "Thread count cannot be negative." }
-        val model = File(artifact.path)
         require(model.isFile && model.canRead()) { "Model file is not readable: ${model.name}" }
         if (isLoaded && activeRequest == request) {
             Log.i(TAG, "llama.cpp model reuse: effectiveThreads=${native.nativeEffectiveThreads()}")
@@ -128,7 +127,8 @@ class LlamaCppRuntime(
         activeRequest = request
         Log.i(
             TAG,
-            "llama.cpp model loaded: coldStart=$coldStart, loadMs=$durationMs, effectiveThreads=${native.nativeEffectiveThreads()}",
+            "llama.cpp model loaded: coldStart=$coldStart, loadMs=$durationMs, " +
+                "effectiveThreads=${native.nativeEffectiveThreads()}",
         )
         LlmLoadResult(
             effectiveComputePreference = ComputePreference.CPU,
@@ -191,7 +191,8 @@ class LlamaCppRuntime(
         require(topP in 0.05f..1f) { "Top-P must be between 0.05 and 1." }
         Log.i(
             TAG,
-            "llama.cpp generation started: promptChars=${request.prompt.length}, maxTokens=$maxTokens, temperature=$temperature, topK=$topK, topP=$topP, seed=$seed",
+            "llama.cpp generation started: promptChars=${request.prompt.length}, maxTokens=$maxTokens, " +
+                "temperature=$temperature, topK=$topK, topP=$topP, seed=$seed",
         )
         val result = try {
             native.nativeGenerate(
@@ -220,7 +221,11 @@ class LlamaCppRuntime(
         ).also { generation ->
             Log.i(
                 TAG,
-                "llama.cpp generation completed: outputChars=${generation.text.length}, promptTokens=${generation.promptTokenCount}, generatedTokens=${generation.generatedTokenCount}, firstTokenMs=${generation.firstTokenLatencyMs}, totalMs=${generation.totalDurationMs}, finishReason=${generation.finishReason}",
+                "llama.cpp generation completed: outputChars=${generation.text.length}, " +
+                    "promptTokens=${generation.promptTokenCount}, " +
+                    "generatedTokens=${generation.generatedTokenCount}, " +
+                    "firstTokenMs=${generation.firstTokenLatencyMs}, " +
+                    "totalMs=${generation.totalDurationMs}, finishReason=${generation.finishReason}",
             )
         }
     }

@@ -27,8 +27,8 @@ import com.dmitriim.localailab.ai.api.chat.LlmLoadOption
 import com.dmitriim.localailab.ai.api.engine.ComputePreference
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.ui.R as CoreUiR
-import com.dmitriim.localailab.feature.assistant.impl.presentation.ChatModelOption
-import com.dmitriim.localailab.feature.assistant.impl.presentation.ChatSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatSettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,15 +114,42 @@ private fun ChatSettingsEditor(
     onReset: () -> ChatSettings,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).imePadding()
-            .navigationBarsPadding().padding(horizontal = 20.dp, vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .imePadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        AssistantSettingsSheetHeader(stringResource(CoreUiR.string.ui_copy_6), stringResource(CoreUiR.string.ui_description_2))
-        ChatModelSettings(models, selectedModel, selectedModelId, draft, enabled, onSelectModel, onDraftChange)
+        AssistantSettingsSheetHeader(
+            title = stringResource(CoreUiR.string.ui_copy_6),
+            description = stringResource(CoreUiR.string.ui_description_2),
+        )
+        ChatModelSettings(
+            models = models,
+            model = selectedModel,
+            selectedModelId = selectedModelId,
+            draft = draft,
+            enabled = enabled,
+            onSelectModel = onSelectModel,
+            onDraftChange = onDraftChange,
+        )
         ChatGenerationSettings(selectedModel, draft, enabled, onDraftChange)
-        ChatAdvancedSettings(selectedModel, draft, advancedVisible, enabled, onAdvancedVisibilityChange, onDraftChange)
-        error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
+        ChatAdvancedSettings(
+            model = selectedModel,
+            draft = draft,
+            visible = advancedVisible,
+            enabled = enabled,
+            onVisibilityChange = onAdvancedVisibilityChange,
+            onDraftChange = onDraftChange,
+        )
+        error?.let {
+            Text(
+                text = it,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+            )
+        }
         ChatSettingsActions(enabled, onUnload) { onDraftChange(onReset()) }
     }
 }
@@ -138,11 +165,22 @@ private fun ChatModelSettings(
     onDraftChange: (ChatSettings) -> Unit,
 ) {
     AssistantSettingsSection("Model")
-    AssistantChatModelPicker(models, selectedModelId?.value, enabled, onSelectModel)
+    AssistantChatModelPicker(
+        models = models,
+        selectedId = selectedModelId?.value,
+        enabled = enabled,
+        onClick = onSelectModel,
+    )
     model?.capabilities?.computePreferences?.takeIf { it.size > 1 }?.let { preferences ->
         AssistantSettingsModelPicker(
             label = stringResource(CoreUiR.string.ui_copy_7),
-            items = preferences.map { SettingsModelItem(it.name, it.displayName(), installed = true) },
+            items = preferences.map {
+                SettingsModelItem(
+                    id = it.name,
+                    name = it.displayName(),
+                    installed = true,
+                )
+            },
             selectedId = draft.computePreference.name,
             onSelect = { onDraftChange(draft.copy(computePreference = ComputePreference.valueOf(it))) },
             onOpenModels = {},
@@ -161,15 +199,55 @@ private fun ChatGenerationSettings(
     val capabilities = model?.capabilities ?: return
     if (capabilities.systemInstructions) {
         AssistantSettingsSection("Instructions")
-        SettingField("System prompt", draft.systemPrompt, enabled) { onDraftChange(draft.copy(systemPrompt = it)) }
+        SettingField(
+            label = "System prompt",
+            value = draft.systemPrompt,
+            enabled = enabled,
+            onChange = { onDraftChange(draft.copy(systemPrompt = it)) },
+        )
     }
     val options = capabilities.generationOptions
     if (options.any { it in chatGenerationOptions }) AssistantSettingsSection("Generation")
-    if (LlmGenerationOption.TEMPERATURE in options) SettingField("Temperature (0–2)", draft.temperature, enabled) { onDraftChange(draft.copy(temperature = it)) }
-    if (LlmGenerationOption.MAX_OUTPUT_TOKENS in options) SettingField("Maximum output tokens", draft.maxOutputTokens, enabled) { onDraftChange(draft.copy(maxOutputTokens = it)) }
-    if (LlmGenerationOption.TOP_K in options) SettingField("Top-K (1–200)", draft.topK, enabled) { onDraftChange(draft.copy(topK = it)) }
-    if (LlmGenerationOption.TOP_P in options) SettingField("Top-P (0.05–1)", draft.topP, enabled) { onDraftChange(draft.copy(topP = it)) }
-    if (LlmLoadOption.CONTEXT_SIZE in capabilities.loadOptions) SettingField("Context size", draft.contextSize, enabled) { onDraftChange(draft.copy(contextSize = it)) }
+    if (LlmGenerationOption.TEMPERATURE in options) {
+        SettingField(
+            label = "Temperature (0–2)",
+            value = draft.temperature,
+            enabled = enabled,
+            onChange = { onDraftChange(draft.copy(temperature = it)) },
+        )
+    }
+    if (LlmGenerationOption.MAX_OUTPUT_TOKENS in options) {
+        SettingField(
+            label = "Maximum output tokens",
+            value = draft.maxOutputTokens,
+            enabled = enabled,
+            onChange = { onDraftChange(draft.copy(maxOutputTokens = it)) },
+        )
+    }
+    if (LlmGenerationOption.TOP_K in options) {
+        SettingField(
+            label = "Top-K (1–200)",
+            value = draft.topK,
+            enabled = enabled,
+            onChange = { onDraftChange(draft.copy(topK = it)) },
+        )
+    }
+    if (LlmGenerationOption.TOP_P in options) {
+        SettingField(
+            label = "Top-P (0.05–1)",
+            value = draft.topP,
+            enabled = enabled,
+            onChange = { onDraftChange(draft.copy(topP = it)) },
+        )
+    }
+    if (LlmLoadOption.CONTEXT_SIZE in capabilities.loadOptions) {
+        SettingField(
+            label = "Context size",
+            value = draft.contextSize,
+            enabled = enabled,
+            onChange = { onDraftChange(draft.copy(contextSize = it)) },
+        )
+    }
 }
 
 @Composable
@@ -186,19 +264,48 @@ private fun ChatAdvancedSettings(
     val canSetThreads = LlmLoadOption.THREAD_COUNT in capabilities.loadOptions
     if (!canSetSeed && !canSetThreads) return
     TextButton(onClick = { onVisibilityChange(!visible) }, enabled = enabled) {
-        Text(stringResource(if (visible) CoreUiR.string.assistant_hide_advanced_settings else CoreUiR.string.assistant_show_advanced_settings))
+        Text(
+            stringResource(
+                if (visible) {
+                    CoreUiR.string.assistant_hide_advanced_settings
+                } else {
+                    CoreUiR.string.assistant_show_advanced_settings
+                },
+            ),
+        )
     }
     if (!visible) return
     AssistantSettingsSection("Advanced")
-    if (canSetSeed) SettingField("Seed (blank = engine-selected)", draft.seed, enabled) { onDraftChange(draft.copy(seed = it)) }
-    if (canSetThreads) SettingField("Thread count (0 = default)", draft.threadCount, enabled) { onDraftChange(draft.copy(threadCount = it)) }
+    if (canSetSeed) {
+        SettingField(
+            label = "Seed (blank = engine-selected)",
+            value = draft.seed,
+            enabled = enabled,
+            onChange = { onDraftChange(draft.copy(seed = it)) },
+        )
+    }
+    if (canSetThreads) {
+        SettingField(
+            label = "Thread count (0 = default)",
+            value = draft.threadCount,
+            enabled = enabled,
+            onChange = { onDraftChange(draft.copy(threadCount = it)) },
+        )
+    }
 }
 
 @Composable
 private fun ChatSettingsActions(enabled: Boolean, onUnload: () -> Unit, onReset: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        TextButton(onClick = onUnload, enabled = enabled) { Text(stringResource(CoreUiR.string.assistant_assistant_chat_settings_sheet_2)) }
-        TextButton(onClick = onReset, enabled = enabled) { Text(stringResource(CoreUiR.string.assistant_assistant_chat_settings_sheet_3)) }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        TextButton(onClick = onUnload, enabled = enabled) {
+            Text(stringResource(CoreUiR.string.assistant_assistant_chat_settings_sheet_2))
+        }
+        TextButton(onClick = onReset, enabled = enabled) {
+            Text(stringResource(CoreUiR.string.assistant_assistant_chat_settings_sheet_3))
+        }
     }
 }
 

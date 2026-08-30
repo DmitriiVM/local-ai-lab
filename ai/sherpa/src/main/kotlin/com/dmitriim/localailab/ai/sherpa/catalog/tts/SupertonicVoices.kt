@@ -4,7 +4,7 @@ package com.dmitriim.localailab.ai.sherpa.catalog.tts
  * The pinned sherpa-onnx export sorts the official JSON filenames before packing voice.bin.
  * That makes the speaker order F1..F5 followed by M1..M5.
  *
- * https://github.com/k2-fsa/sherpa-onnx/blob/f69171f48e9b43f9eb21061f2de18ef2f58ef661/scripts/supertonic/generate_voices_bin.py
+ * Generated with sherpa-onnx's upstream Supertonic `generate_voices_bin.py` script.
  * https://huggingface.co/Supertone/supertonic-3/tree/main/voice_styles
  */
 internal fun supertonicV3Voices() = listOf(

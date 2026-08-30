@@ -87,7 +87,10 @@ internal fun CompatibilityDetails(uiState: ModelsUiState, modelId: ModelId) {
                 Text(stringResource(CoreUiR.string.models_model_details_screen_48))
             }
             uiState.compatibilityError != null && uiState.compatibilityModelId == modelId -> {
-                StatusMessage(stringResource(CoreUiR.string.models_compatibility_unavailable), uiState.compatibilityError)
+                StatusMessage(
+                    stringResource(CoreUiR.string.models_compatibility_unavailable),
+                    uiState.compatibilityError,
+                )
             }
             uiState.compatibility != null && uiState.compatibilityModelId == modelId -> {
                 val compatibility = uiState.compatibility
@@ -101,7 +104,10 @@ internal fun CompatibilityDetails(uiState: ModelsUiState, modelId: ModelId) {
                     },
                 )
                 compatibility.reasons.forEach { reason ->
-                    Text(stringResource(CoreUiR.string.models_model_details_screen_format_5, reason), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = stringResource(CoreUiR.string.models_model_details_screen_format_5, reason),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
             else -> Text(stringResource(CoreUiR.string.models_model_details_screen_49))
@@ -127,19 +133,30 @@ internal fun DownloadStorageDetails(model: CatalogModel) {
 }
 
 @Composable
-internal fun InstallationDetails(model: com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel?, validationFeedback: ModelValidationFeedback?) {
+internal fun InstallationDetails(
+    model: com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel?,
+    validationFeedback: ModelValidationFeedback?,
+) {
     DetailsSection("Installation") {
         if (model == null) {
             DetailValue("Status", "Not installed")
         } else {
             DetailValue("Status", model.validationState.detailsStatusLabel())
             model.manifest.installedAtEpochMs.takeIf { it > 0 }?.let { installedAt ->
-                DetailValue("Installed", DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(installedAt)))
+                DetailValue(
+                    "Installed",
+                    DateFormat.getDateTimeInstance(
+                        DateFormat.MEDIUM,
+                        DateFormat.SHORT,
+                    ).format(Date(installedAt)),
+                )
             }
             model.validationMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             validationFeedback?.let {
                 StatusMessage(
-                    title = stringResource(if (it.isError) CoreUiR.string.models_validation_issue else CoreUiR.string.models_validation),
+                    title = stringResource(
+                        if (it.isError) CoreUiR.string.models_validation_issue else CoreUiR.string.models_validation,
+                    ),
                     explanation = it.message,
                 )
             }
@@ -156,7 +173,15 @@ internal fun TechnicalDetails(manifest: ModelManifest, expanded: Boolean, onTogg
                 contentDescription = null,
             )
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(if (expanded) CoreUiR.string.models_hide_technical_details else CoreUiR.string.models_show_technical_details))
+            Text(
+                stringResource(
+                    if (expanded) {
+                        CoreUiR.string.models_hide_technical_details
+                    } else {
+                        CoreUiR.string.models_show_technical_details
+                    },
+                ),
+            )
         }
         if (expanded) {
             SelectionContainer {
@@ -165,7 +190,10 @@ internal fun TechnicalDetails(manifest: ModelManifest, expanded: Boolean, onTogg
                     DetailValue("Profile", manifest.profileType.value)
                     manifest.revision?.let { DetailValue("Revision", it) }
                     manifest.catalogVersion?.let { DetailValue("Catalog version", it.toString()) }
-                    Text(stringResource(CoreUiR.string.models_model_details_screen_47), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        text = stringResource(CoreUiR.string.models_model_details_screen_47),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
                     manifest.files.forEachIndexed { index, file ->
                         FileDetails(file)
                         if (index != manifest.files.lastIndex) HorizontalDivider()
@@ -212,7 +240,11 @@ private fun FileDetails(file: ModelFileSpec) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         file.sha256?.let {
-            Text(stringResource(CoreUiR.string.models_model_details_screen_format_6, it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                text = stringResource(CoreUiR.string.models_model_details_screen_format_6, it),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -249,7 +281,11 @@ internal fun ModelValidationState.detailsStatusLabel(): String = stringResource(
 internal fun ModelTransferState?.detailsStatusLabel(): String = stringResource(
     when (this) {
         is ModelTransferState.Queued -> CoreUiR.string.models_status_queued
-        is ModelTransferState.Running -> if (completedBytes >= totalBytes) CoreUiR.string.models_status_verifying else CoreUiR.string.models_status_downloading
+        is ModelTransferState.Running -> if (completedBytes >= totalBytes) {
+            CoreUiR.string.models_status_verifying
+        } else {
+            CoreUiR.string.models_status_downloading
+        }
         is ModelTransferState.Paused -> CoreUiR.string.models_status_paused
         is ModelTransferState.Failed -> CoreUiR.string.models_status_download_failed
         ModelTransferState.Installing, ModelTransferState.Completed -> CoreUiR.string.models_status_installing
@@ -289,7 +325,11 @@ private fun Enum<*>.displayLabel(): String = name.displayLabel()
 
 private fun String.displayLabel(): String = lowercase().replace('_', ' ').replaceFirstChar(Char::uppercase)
 
-private fun Int.toSampleRate(): String = if (this % 1_000 == 0) "${this / 1_000} kHz" else "%.2f kHz".format(this / 1_000.0)
+private fun Int.toSampleRate(): String = if (this % 1_000 == 0) {
+    "${this / 1_000} kHz"
+} else {
+    "%.2f kHz".format(this / 1_000.0)
+}
 
 internal fun Long.toDetailsReadableBytes(): String = when {
     this >= 1_073_741_824 -> "%.2f GiB".format(toDouble() / 1_073_741_824)

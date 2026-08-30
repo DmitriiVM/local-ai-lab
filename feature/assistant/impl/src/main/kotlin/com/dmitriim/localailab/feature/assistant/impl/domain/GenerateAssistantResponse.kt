@@ -35,7 +35,8 @@ class GenerateAssistantResponse(
             CHAT_TAG,
             "Chat generation requested: modelId=${request.modelId.value}, turns=${request.turns.size}, " +
                 "contextSize=${request.config.contextSize}, maxOutputTokens=${request.config.maxOutputTokens}, " +
-                "temperature=${request.config.temperature}, topK=${request.config.topK}, topP=${request.config.topP}, " +
+                "temperature=${request.config.temperature}, topK=${request.config.topK}, " +
+                "topP=${request.config.topP}, " +
                 "seed=${request.config.seed}, requestedThreads=${request.config.threadCount}",
         )
         val profile = profiler.start(request.runId, AiCapability.CHAT)
@@ -66,15 +67,18 @@ class GenerateAssistantResponse(
             Log.i(
                 CHAT_TAG,
                 "Chat model loaded: coldStart=${load.coldStart}, loadMs=${load.loadDurationMs}, " +
-                    "compute=${load.effectiveComputePreference}, effectiveThreads=${load.diagnostics.effectiveThreadCount}",
+                    "compute=${load.effectiveComputePreference}, " +
+                    "effectiveThreads=${load.diagnostics.effectiveThreadCount}",
             )
             val prepared = profile.trace(InferencePhase.PROMPT_PREPARATION) {
                 promptPreparer.prepare(request.turns, request.config, capabilities)
             }
             Log.i(
                 CHAT_TAG,
-                "Chat prompt prepared: promptChars=${prepared.prompt.length}, promptTokens=${prepared.usage.promptTokens}, " +
-                    "contextSize=${prepared.usage.contextSize}, reservedOutputTokens=${prepared.usage.reservedOutputTokens}, " +
+                "Chat prompt prepared: promptChars=${prepared.prompt.length}, " +
+                    "promptTokens=${prepared.usage.promptTokens}, " +
+                    "contextSize=${prepared.usage.contextSize}, " +
+                    "reservedOutputTokens=${prepared.usage.reservedOutputTokens}, " +
                     "omittedMessages=${prepared.usage.omittedTurnCount}",
             )
             trySend(ChatGenerationEvent.Prepared(prepared.usage))
@@ -84,15 +88,23 @@ class GenerateAssistantResponse(
                     request = generationRequest(prepared.prompt, request, capabilities),
                     onToken = { token ->
                         streamedTokenCallbacks += 1
-                        if (streamedTokenCallbacks == 1) Log.i(CHAT_TAG, "Chat first streamed token callback received: tokenChars=${token.length}")
+                        if (streamedTokenCallbacks == 1) {
+                            Log.i(
+                                CHAT_TAG,
+                                "Chat first streamed token callback received: " +
+                                    "tokenChars=${token.length}",
+                            )
+                        }
                         trySend(ChatGenerationEvent.Token(token))
                     },
                 )
             }
             Log.i(
                 CHAT_TAG,
-                "Chat generation completed: callbacks=$streamedTokenCallbacks, outputChars=${generation.text.length}, " +
-                    "promptTokens=${generation.promptTokenCount}, generatedTokens=${generation.generatedTokenCount}, " +
+                "Chat generation completed: callbacks=$streamedTokenCallbacks, " +
+                    "outputChars=${generation.text.length}, " +
+                    "promptTokens=${generation.promptTokenCount}, " +
+                    "generatedTokens=${generation.generatedTokenCount}, " +
                     "firstTokenMs=${generation.firstTokenLatencyMs}, promptMs=${generation.promptDurationMs}, " +
                     "generationMs=${generation.generationDurationMs}, totalMs=${generation.totalDurationMs}, " +
                     "finishReason=${generation.finishReason}",
@@ -113,8 +125,12 @@ class GenerateAssistantResponse(
     ) = LlmGenerationRequest(
         prompt = prompt,
         options = LlmGenerationOptions(
-            maxTokens = request.config.maxOutputTokens.takeIf { LlmGenerationOption.MAX_OUTPUT_TOKENS in capabilities.generationOptions },
-            temperature = request.config.temperature.takeIf { LlmGenerationOption.TEMPERATURE in capabilities.generationOptions },
+            maxTokens = request.config.maxOutputTokens.takeIf {
+                LlmGenerationOption.MAX_OUTPUT_TOKENS in capabilities.generationOptions
+            },
+            temperature = request.config.temperature.takeIf {
+                LlmGenerationOption.TEMPERATURE in capabilities.generationOptions
+            },
             topK = request.config.topK.takeIf { LlmGenerationOption.TOP_K in capabilities.generationOptions },
             topP = request.config.topP.takeIf { LlmGenerationOption.TOP_P in capabilities.generationOptions },
             seed = request.config.seed.takeIf { LlmGenerationOption.SEED in capabilities.generationOptions },

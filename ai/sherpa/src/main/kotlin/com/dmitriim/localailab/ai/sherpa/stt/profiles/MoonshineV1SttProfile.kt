@@ -15,13 +15,16 @@ class MoonshineV1SttProfile :
     BaseSherpaSttProfile(
         moonshineV1SttProfileId,
     ) {
-    override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) =
-        offlineSherpaSession(artifacts, threadCount) {
-            moonshine = OfflineMoonshineModelConfig().apply {
-                preprocessor = artifacts.require(ModelFileRoles.PREPROCESSOR).path
-                encoder = artifacts.require(ModelFileRoles.ENCODER).path
-                uncachedDecoder = artifacts.require(ModelFileRoles.UNCACHED_DECODER).path
-                cachedDecoder = artifacts.require(ModelFileRoles.CACHED_DECODER).path
-            }
+    override fun open(
+        request: SpeechToTextLoadRequest,
+        artifacts: ModelArtifacts,
+        threadCount: Int,
+    ) = offlineSherpaSession(artifacts, threadCount) {
+        moonshine = OfflineMoonshineModelConfig().apply {
+            preprocessor = artifacts.require(ModelFileRoles.PREPROCESSOR).path
+            encoder = artifacts.require(ModelFileRoles.ENCODER).path
+            uncachedDecoder = artifacts.require(ModelFileRoles.UNCACHED_DECODER).path
+            cachedDecoder = artifacts.require(ModelFileRoles.CACHED_DECODER).path
         }
+    }
 }

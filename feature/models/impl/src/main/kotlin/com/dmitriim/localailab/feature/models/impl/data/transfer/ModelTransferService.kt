@@ -132,7 +132,10 @@ class ModelTransferService(
         val entry = catalogEntry(modelId)
         val transfer = requireNotNull(transferState.find(modelId)) { "This download is no longer available." }
         require(transfer.status != PersistedModelTransferStatus.INSTALLING) { "The model is being installed." }
-        require(transfer.catalogVersion == requireNotNull(entry.manifest.catalogVersion) && transfer.revision == entry.manifest.revision) {
+        val catalogMatchesTransfer =
+            transfer.catalogVersion == requireNotNull(entry.manifest.catalogVersion) &&
+                transfer.revision == entry.manifest.revision
+        require(catalogMatchesTransfer) {
             "The bundled catalog changed. Restart this download."
         }
         queue(entry, networkPolicy)
@@ -162,7 +165,10 @@ class ModelTransferService(
         try {
             publishDownloadProgress(claimed)
             val entry = catalogEntry(modelId)
-            require(claimed.catalogVersion == requireNotNull(entry.manifest.catalogVersion) && claimed.revision == entry.manifest.revision) {
+            val catalogMatchesClaimedTransfer =
+                claimed.catalogVersion == requireNotNull(entry.manifest.catalogVersion) &&
+                    claimed.revision == entry.manifest.revision
+            require(catalogMatchesClaimedTransfer) {
                 "The bundled catalog changed. Restart this download."
             }
             withContext(Dispatchers.IO) {
@@ -170,7 +176,10 @@ class ModelTransferService(
             }
         } catch (cancelled: CancellationException) {
             val latest = transferState.find(modelId)
-            if (latest?.status == PersistedModelTransferStatus.RUNNING && latest.executionGeneration == executionGeneration) {
+            val hasActiveExecution =
+                latest?.status == PersistedModelTransferStatus.RUNNING &&
+                    latest.executionGeneration == executionGeneration
+            if (hasActiveExecution) {
                 handleDownloadFailure(
                     modelId,
                     executionGeneration,
@@ -237,7 +246,10 @@ class ModelTransferService(
     private suspend fun handleDownloadFailure(modelId: ModelId, executionGeneration: Long, error: Throwable) {
         transferSchedulingMutex.withLock {
             val transfer = transferState.find(modelId) ?: return@withLock
-            if (transfer.status != PersistedModelTransferStatus.RUNNING || transfer.executionGeneration != executionGeneration) {
+            val isDifferentExecution =
+                transfer.status != PersistedModelTransferStatus.RUNNING ||
+                    transfer.executionGeneration != executionGeneration
+            if (isDifferentExecution) {
                 return@withLock
             }
             throughputEstimator.clear(modelId)

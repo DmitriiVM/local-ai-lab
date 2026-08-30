@@ -1,6 +1,15 @@
 package com.dmitriim.localailab.feature.assistant.impl.presentation
 
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantUiState
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.EffectiveChatSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechInputSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechOutputSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.TtsModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.normalizeLanguageCode
 import com.dmitriim.localailab.feature.settings.api.domain.AssistantChatPreferences
 import com.dmitriim.localailab.feature.settings.api.domain.AssistantPreferences
 import com.dmitriim.localailab.feature.settings.api.domain.AssistantSpeechInputPreferences
@@ -34,8 +43,13 @@ internal fun AssistantUiState.withConfiguration(
         ?: options.voice.firstOrNull { it.installed }?.id
     val voiceModel = options.voice.firstOrNull { it.id == voiceId }
     val outputLanguage = preferences.speechOutput.languageCode.takeIf { language ->
-        voiceModel?.languages?.isEmpty() == true || voiceModel?.languages?.any { normalizeLanguageCode(it) == language } == true
-    } ?: voiceModel?.languages?.firstOrNull()?.let(::normalizeLanguageCode) ?: "en"
+        voiceModel?.languages?.isEmpty() == true ||
+            voiceModel?.languages?.any { normalizeLanguageCode(it) == language } == true
+    } ?: voiceModel
+        ?.languages
+        ?.firstOrNull()
+        ?.let(::normalizeLanguageCode)
+        ?: "en"
     val compatibleVoices = voiceModel?.compatibleVoices(outputLanguage).orEmpty()
     val selectedOutputVoice = preferences.speechOutput.voiceId?.takeIf { id -> compatibleVoices.any { it.id == id } }
         ?: selectedVoiceId?.takeIf { id -> compatibleVoices.any { it.id == id } }
@@ -108,6 +122,8 @@ private fun AssistantChatPreferences.toUi() = ChatSettings(
     threadCount = threadCount.toString(),
 )
 
-private fun ChatSettings.toEffectiveOrDefault(contextSize: Int): EffectiveChatSettings = runCatching(::toEffective).getOrElse {
+private fun ChatSettings.toEffectiveOrDefault(
+    contextSize: Int,
+): EffectiveChatSettings = runCatching(::toEffective).getOrElse {
     ChatSettings(contextSize = contextSize.toString()).toEffective()
 }

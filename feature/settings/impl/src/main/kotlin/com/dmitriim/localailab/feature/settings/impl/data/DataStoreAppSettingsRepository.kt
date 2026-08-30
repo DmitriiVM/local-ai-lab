@@ -36,12 +36,20 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
         AppSettings(
             keepScreenAwake = values[KEEP_AWAKE] ?: true,
             confirmDestructiveActions = values[CONFIRM_DESTRUCTIVE] ?: true,
-            recordingRetention = values[RECORDING_RETENTION]?.asEnum(AudioRetention.SESSION_ONLY) ?: AudioRetention.SESSION_ONLY,
-            generatedAudioRetention = values[GENERATED_RETENTION]?.asEnum(AudioRetention.LATEST_SUCCESSFUL) ?: AudioRetention.LATEST_SUCCESSFUL,
+            recordingRetention = values[RECORDING_RETENTION]
+                ?.asEnum(AudioRetention.SESSION_ONLY)
+                ?: AudioRetention.SESSION_ONLY,
+            generatedAudioRetention = values[GENERATED_RETENTION]
+                ?.asEnum(AudioRetention.LATEST_SUCCESSFUL)
+                ?: AudioRetention.LATEST_SUCCESSFUL,
             showAdvancedControls = values[SHOW_ADVANCED] ?: false,
-            threadCountPolicy = values[THREAD_POLICY]?.asEnum(ThreadCountPolicy.ENGINE_DEFAULT) ?: ThreadCountPolicy.ENGINE_DEFAULT,
+            threadCountPolicy = values[THREAD_POLICY]
+                ?.asEnum(ThreadCountPolicy.ENGINE_DEFAULT)
+                ?: ThreadCountPolicy.ENGINE_DEFAULT,
             fixedThreadCount = values[FIXED_THREADS] ?: 0,
-            modelUnloadPolicy = values[UNLOAD_POLICY]?.asEnum(ModelUnloadPolicy.WHEN_IDLE) ?: ModelUnloadPolicy.WHEN_IDLE,
+            modelUnloadPolicy = values[UNLOAD_POLICY]
+                ?.asEnum(ModelUnloadPolicy.WHEN_IDLE)
+                ?: ModelUnloadPolicy.WHEN_IDLE,
             warmUpSelectedModel = values[WARM_UP] ?: false,
             metricDetail = values[METRIC_DETAIL]?.asEnum(MetricDetail.STANDARD) ?: MetricDetail.STANDARD,
         )
@@ -109,7 +117,9 @@ class DataStoreAppSettingsRepository(application: Application) : AppSettingsRepo
         store.edit { values -> values[STT_SELECTED_MODEL] = modelId }
     }
 
-    private inline fun <reified T : Enum<T>> String.asEnum(default: T): T = enumValues<T>().firstOrNull { it.name == this } ?: default
+    private inline fun <reified T : Enum<T>> String.asEnum(default: T): T = enumValues<T>()
+        .firstOrNull { it.name == this }
+        ?: default
 
     private companion object {
         val KEEP_AWAKE = booleanPreferencesKey("keep_screen_awake")

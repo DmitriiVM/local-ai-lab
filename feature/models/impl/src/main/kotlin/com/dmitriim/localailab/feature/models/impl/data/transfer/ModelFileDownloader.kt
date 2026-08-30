@@ -23,7 +23,8 @@ internal class ModelFileDownloader(
         var failure: Throwable? = null
         for (attempt in RETRY_DELAYS_MS.indices) {
             if (attempt > 0) {
-                val retryDelay = maxOf(RETRY_DELAYS_MS[attempt], (failure as? ModelDownloadFailure)?.retryAfterMillis ?: 0L)
+                val retryAfterMillis = (failure as? ModelDownloadFailure)?.retryAfterMillis ?: 0L
+                val retryDelay = maxOf(RETRY_DELAYS_MS[attempt], retryAfterMillis)
                 delay(retryDelay)
             }
             try {
@@ -54,7 +55,8 @@ internal class ModelFileDownloader(
         var resetUsed = false
         while (true) {
             ensureRunning(request.transfer.modelIdAsModelId(), request.transfer.executionGeneration)
-            val validator = transferState.fileValidators(request.transfer.modelIdAsModelId())[request.relativePath] ?: request.existingValidator
+            val validators = transferState.fileValidators(request.transfer.modelIdAsModelId())
+            val validator = validators[request.relativePath] ?: request.existingValidator
             val response = openResponse(
                 request.url,
                 offset,
@@ -66,7 +68,14 @@ internal class ModelFileDownloader(
                 val status = connection.responseCode
                 if (status == HTTP_RANGE_NOT_SATISFIABLE) {
                     if (offset == request.expectedBytes) return request.transfer
-                    if (resetUsed) failDownload(ModelDownloadFailure("Server rejected the download range.", retryable = false))
+                    if (resetUsed) {
+                        failDownload(
+                            ModelDownloadFailure(
+                                "Server rejected the download range.",
+                                retryable = false,
+                            ),
+                        )
+                    }
                     request.destination.delete()
                     offset = 0L
                     resetUsed = true
@@ -98,13 +107,23 @@ internal class ModelFileDownloader(
                 }
                 val announced = connection.getHeaderFieldLong("Content-Length", -1)
                 if (announced >= 0 && announced != request.expectedBytes - if (append) offset else 0L) {
-                    failDownload(ModelDownloadFailure("Server response length does not match the catalog.", retryable = false))
+                    failDownload(
+                        ModelDownloadFailure(
+                            "Server response length does not match the catalog.",
+                            retryable = false,
+                        ),
+                    )
                 }
                 val eTag = connection.getHeaderField("ETag")
                 val lastModified = connection.getHeaderField("Last-Modified")
                 if (append && validator?.eTag != null && eTag != null && validator.eTag != eTag) {
                     if (resetUsed) {
-                        failDownload(ModelDownloadFailure("Server changed the download while it was paused.", retryable = false))
+                        failDownload(
+                            ModelDownloadFailure(
+                                "Server changed the download while it was paused.",
+                                retryable = false,
+                            ),
+                        )
                     }
                     request.destination.delete()
                     offset = 0L
@@ -211,7 +230,10 @@ internal class ModelFileDownloader(
 
     private fun httpFailure(status: Int, connection: HttpURLConnection): ModelDownloadFailure = when (status) {
         HTTP_UNAUTHORIZED -> ModelDownloadFailure("Hugging Face token is invalid or expired.", retryable = false)
-        HTTP_FORBIDDEN -> ModelDownloadFailure("Access denied. Accept the model license and verify repository access.", retryable = false)
+        HTTP_FORBIDDEN -> ModelDownloadFailure(
+            "Access denied. Accept the model license and verify repository access.",
+            retryable = false,
+        )
         else -> ModelDownloadFailure(
             message = "Download failed with HTTP $status.",
             retryable = status == 408 || status == 429 || status >= 500,

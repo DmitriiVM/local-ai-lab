@@ -34,7 +34,10 @@ internal class NavigationRegistry(
 
     fun isRootDestination(destination: AppDestination): Boolean = providerFor(destination).isRootDestination
 
-    fun entryFor(key: NavKey, navigator: AppNavigator): NavEntry<NavKey>? = (key as? AppDestination)?.let { destination ->
+    fun entryFor(
+        key: NavKey,
+        navigator: AppNavigator,
+    ): NavEntry<NavKey>? = (key as? AppDestination)?.let { destination ->
         val provider = providerFor(destination)
         NavEntry(destination) {
             provider.Content(destination, navigator)

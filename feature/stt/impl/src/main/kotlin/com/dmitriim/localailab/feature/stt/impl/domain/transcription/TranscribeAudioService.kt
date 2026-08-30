@@ -39,7 +39,8 @@ class TranscribeAudioService(
         val effectiveSettings = request.settings.toEffective()
         Log.i(
             TAG,
-            "STT transcription requested: modelId=${request.modelId.value}, inputDurationMs=${request.input.durationMs}, " +
+            "STT transcription requested: modelId=${request.modelId.value}, " +
+                "inputDurationMs=${request.input.durationMs}, " +
                 "sampleRateHz=${request.input.sampleRateHz}, language=${effectiveSettings.languageCode}, " +
                 "requestedThreads=${effectiveSettings.threadCount}, source=${request.input.sourceDescription}",
         )
@@ -77,7 +78,8 @@ class TranscribeAudioService(
             val totalDurationMs = SystemClock.elapsedRealtime() - startedAt
             Log.i(
                 TAG,
-                "STT transcription completed: segments=${segments.count}, transcriptLength=${segments.transcript.length}, " +
+                "STT transcription completed: segments=${segments.count}, " +
+                    "transcriptLength=${segments.transcript.length}, " +
                     "processingMs=${segments.processingDurationMs}, totalMs=$totalDurationMs",
             )
             val telemetry = profile.finish()
@@ -88,7 +90,9 @@ class TranscribeAudioService(
                         audioDurationMs = request.input.durationMs,
                         processingDurationMs = segments.processingDurationMs,
                         timeToFinalMs = totalDurationMs,
-                        realTimeFactor = request.input.durationMs.takeIf { it > 0 }?.let { totalDurationMs.toDouble() / it },
+                        realTimeFactor = request.input.durationMs
+                            .takeIf { it > 0 }
+                            ?.let { totalDurationMs.toDouble() / it },
                         segmentCount = segments.count,
                         loadDurationMs = load.loadDurationMs,
                         effectiveThreadCount = load.effectiveThreadCount,
@@ -125,7 +129,11 @@ class TranscribeAudioService(
         profile.trace(InferencePhase.TRANSCRIPTION) {
             audioInputStore.forEachSegment(request.input) { samples ->
                 val number = count + 1
-                Log.i(TAG, "STT segment started: number=$number, samples=${samples.size}, durationMs=${samples.size * 1_000L / request.input.sampleRateHz}")
+                Log.i(
+                    TAG,
+                    "STT segment started: number=$number, samples=${samples.size}, " +
+                        "durationMs=${samples.size * 1_000L / request.input.sampleRateHz}",
+                )
                 val result = speechEngine.transcribe(SpeechToTextRequest(samples, request.input.sampleRateHz))
                 if (result.text.isNotBlank()) {
                     if (transcript.isNotEmpty()) transcript.append(' ')
@@ -133,7 +141,12 @@ class TranscribeAudioService(
                 }
                 count++
                 processingDurationMs += result.processingDurationMs
-                Log.i(TAG, "STT segment completed: number=$number, processingMs=${result.processingDurationMs}, transcriptLength=${result.text.length}")
+                Log.i(
+                    TAG,
+                    "STT segment completed: number=$number, " +
+                        "processingMs=${result.processingDurationMs}, " +
+                        "transcriptLength=${result.text.length}",
+                )
             }
         }
         return TranscribedSegments(transcript.toString(), count, processingDurationMs)

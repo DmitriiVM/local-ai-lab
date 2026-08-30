@@ -22,6 +22,12 @@ import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantSpeechOutp
 import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantTranscriber
 import com.dmitriim.localailab.feature.assistant.impl.domain.GenerateAssistantResponse
 import com.dmitriim.localailab.feature.assistant.impl.domain.PersistAssistantTurn
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantInputMode
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantUiState
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMessageRole
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechInputSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechOutputSettings
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkWorkload
 import com.dmitriim.localailab.feature.benchmark.api.launch.ProfileWorkloadStore
 import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
@@ -255,7 +261,14 @@ class AssistantViewModel(
         val oldId = conversationId
         conversationId = UUID.randomUUID().toString()
         mutableState.update {
-            it.copy(messages = emptyList(), input = "", metrics = null, contextUsage = null, statusMessage = null, errorMessage = null)
+            it.copy(
+                messages = emptyList(),
+                input = "",
+                metrics = null,
+                contextUsage = null,
+                statusMessage = null,
+                errorMessage = null,
+            )
         }
         viewModelScope.launch(Dispatchers.IO) { runRepository.deleteConversation(oldId) }
     }

@@ -120,7 +120,9 @@ class SynthesizeSpeechServiceTest {
     private object FakeModelResolver : LocalModelResolver {
         override suspend fun resolveChatModel(modelId: ModelId): Result<ChatModelReference> = error("Not used by TTS")
 
-        override suspend fun resolveSpeechToTextModel(modelId: ModelId): Result<SpeechToTextModelReference> = error("Not used by TTS")
+        override suspend fun resolveSpeechToTextModel(
+            modelId: ModelId,
+        ): Result<SpeechToTextModelReference> = error("Not used by TTS")
 
         override suspend fun resolveTextToSpeechModel(modelId: ModelId) = Result.success(
             TextToSpeechModelReference(
@@ -166,7 +168,11 @@ class SynthesizeSpeechServiceTest {
         val sessions = mutableListOf<FakeSession>()
         val releaseCalls = mutableListOf<Boolean>()
 
-        override fun open(sampleRateHz: Int, volume: Float, runAnchorNanos: Long): SpeechPlaybackSession = FakeSession(acceptWrites).also(sessions::add)
+        override fun open(
+            sampleRateHz: Int,
+            volume: Float,
+            runAnchorNanos: Long,
+        ): SpeechPlaybackSession = FakeSession(acceptWrites).also(sessions::add)
 
         override fun pause() = Unit
 

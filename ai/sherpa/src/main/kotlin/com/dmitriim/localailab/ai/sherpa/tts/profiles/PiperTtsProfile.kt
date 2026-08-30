@@ -18,12 +18,11 @@ class PiperTtsProfile :
     BaseSherpaTtsProfile(
         piperTtsProfileId,
     ) {
-    override fun open(artifacts: ModelArtifacts, threadCount: Int) =
-        openSherpaTts(threadCount) {
-            vits = OfflineTtsVitsModelConfig().apply {
-                model = artifacts.require(PiperTtsArtifacts.MODEL).path
-                tokens = artifacts.require(ModelFileRoles.TOKENS).path
-                dataDir = artifacts.require(ModelFileRoles.FRONTEND_DATA).path
-            }
+    override fun open(artifacts: ModelArtifacts, threadCount: Int) = openSherpaTts(threadCount) {
+        vits = OfflineTtsVitsModelConfig().apply {
+            model = artifacts.require(PiperTtsArtifacts.MODEL).path
+            tokens = artifacts.require(ModelFileRoles.TOKENS).path
+            dataDir = artifacts.require(ModelFileRoles.FRONTEND_DATA).path
         }
+    }
 }

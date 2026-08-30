@@ -64,7 +64,10 @@ fun PlaygroundScreen(
                         .padding(bottom = 12.dp),
                     colorFilter = ColorFilter.tint(AssistantPurple),
                 )
-                Text(stringResource(CoreUiR.string.playground_playground_screen_88), style = MaterialTheme.typography.headlineMedium)
+                Text(
+                    text = stringResource(CoreUiR.string.playground_playground_screen_88),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
                 Text(
                     stringResource(CoreUiR.string.playground_privacy_description),
                     style = MaterialTheme.typography.bodyMedium,
@@ -95,7 +98,9 @@ fun PlaygroundScreen(
                     ) {
                         Text(error.title, style = MaterialTheme.typography.titleMedium)
                         Text(error.explanation)
-                        OutlinedButton(onClick = onRefresh) { Text(stringResource(CoreUiR.string.playground_playground_screen_91)) }
+                        OutlinedButton(onClick = onRefresh) {
+                            Text(stringResource(CoreUiR.string.playground_playground_screen_91))
+                        }
                     }
                 }
             }

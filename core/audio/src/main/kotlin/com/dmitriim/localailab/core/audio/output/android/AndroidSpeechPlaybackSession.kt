@@ -158,7 +158,8 @@ internal class AndroidSpeechPlaybackSession(
             if (!paused && presentedFrames() >= framesWritten) {
                 Log.i(
                     TAG,
-                    "AudioTrack drained: framesPresented=${presentedFrames()}, underruns=${track.underrunCount - underrunsAtStart}",
+                    "AudioTrack drained: framesPresented=${presentedFrames()}, " +
+                        "underruns=${track.underrunCount - underrunsAtStart}",
                 )
                 return
             }
@@ -168,7 +169,8 @@ internal class AndroidSpeechPlaybackSession(
             ) {
                 Log.e(
                     TAG,
-                    "AudioTrack drain stalled: framesWritten=$framesWritten, framesPresented=${presentedFrames()}, paused=$paused",
+                    "AudioTrack drain stalled: framesWritten=$framesWritten, " +
+                        "framesPresented=${presentedFrames()}, paused=$paused",
                 )
                 error("Android speech playback stopped making progress.")
             }

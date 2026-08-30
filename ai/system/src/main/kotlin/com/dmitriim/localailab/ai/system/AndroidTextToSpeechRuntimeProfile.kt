@@ -14,5 +14,12 @@ import java.io.File
 @ContributesIntoSet(AppScope::class, binding = binding<ModelRuntimeProfile>())
 class AndroidTextToSpeechRuntimeProfile : ModelRuntimeProfile {
     override val key = SystemModelProfileKeys.ANDROID_TEXT_TO_SPEECH
-    override fun validate(manifest: ModelManifest, directory: File) = RuntimeValidationResult(false, "Android text to speech is system managed.")
+
+    override fun validate(
+        manifest: ModelManifest,
+        directory: File,
+    ) = RuntimeValidationResult(
+        valid = false,
+        message = "Android text to speech is system managed.",
+    )
 }

@@ -63,8 +63,16 @@ class RunsViewModel(
         val run = state.value.selectedRun ?: return
         val linkedRuns = state.value.runs.filter { it.id in run.linkedRunIds }
         runCatching { exporter.export(run, linkedRuns) }
-            .onSuccess { uri -> mutableState.update { it.copy(pendingShareUri = uri, errorMessage = null) } }
-            .onFailure { error -> mutableState.update { it.copy(errorMessage = error.message ?: "Could not create the run export.") } }
+            .onSuccess { uri ->
+                mutableState.update {
+                    it.copy(pendingShareUri = uri, errorMessage = null)
+                }
+            }
+            .onFailure { error ->
+                mutableState.update {
+                    it.copy(errorMessage = error.message ?: "Could not create the run export.")
+                }
+            }
     }
 
     fun consumeShare() = mutableState.update { it.copy(pendingShareUri = null) }
@@ -82,6 +90,9 @@ data class RunsUiState(
     val errorMessage: String? = null,
 ) {
     val filteredRuns: List<RunRecord>
-        get() = runs.filter { (capability == null || it.capability == capability) && (status == null || it.status == status) }
+        get() = runs.filter { run ->
+            (capability == null || run.capability == capability) &&
+                (status == null || run.status == status)
+        }
     val selectedRun: RunRecord? get() = runs.firstOrNull { it.id == selectedRunId }
 }

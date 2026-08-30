@@ -217,7 +217,8 @@ internal fun ttsModelOptions(
 }
 
 private const val ENGLISH_SAMPLE = "Local speech synthesis is running entirely on this device."
-private const val RUSSIAN_SAMPLE = "Локальный синтез речи полностью выполняется на этом устройстве."
+private const val RUSSIAN_SAMPLE = "Локальный синтез речи полностью " +
+    "выполняется на этом устройстве."
 private const val CHINESE_SAMPLE = "本地语音合成完全在这台设备上运行。"
 
 private fun languageCode(value: String): String {

@@ -17,7 +17,8 @@ class LiteRtLmPromptCodecTest {
         )
 
         assertEquals(
-            """{"version":1,"messages":[{"role":"system","content":"Be concise."},{"role":"user","content":"Hello"}]}""",
+            """{"version":1,"messages":[{"role":"system","content":"Be concise."},""" +
+                """{"role":"user","content":"Hello"}]}""",
             prompt,
         )
     }

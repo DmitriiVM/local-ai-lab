@@ -14,5 +14,12 @@ import java.io.File
 @ContributesIntoSet(AppScope::class, binding = binding<ModelRuntimeProfile>())
 class AndroidSpeechRecognizerRuntimeProfile : ModelRuntimeProfile {
     override val key = SystemModelProfileKeys.ANDROID_SPEECH_RECOGNIZER
-    override fun validate(manifest: ModelManifest, directory: File) = RuntimeValidationResult(false, "Android speech recognition is system managed.")
+
+    override fun validate(
+        manifest: ModelManifest,
+        directory: File,
+    ) = RuntimeValidationResult(
+        valid = false,
+        message = "Android speech recognition is system managed.",
+    )
 }

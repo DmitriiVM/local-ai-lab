@@ -35,12 +35,17 @@ internal class ModelTransferExecution(
                 listOf(CatalogDownloadFile(file.relativePath, requireNotNull(entry.download.url)))
             }
             val specifications = entry.manifest.files.associateBy(ModelFileSpec::relativePath)
-            require(downloads.sumOf { requireNotNull(specifications[it.relativePath]?.expectedBytes) } == entry.download.expectedBytes)
+            val totalDownloadBytes = downloads.sumOf { download ->
+                requireNotNull(specifications[download.relativePath]?.expectedBytes)
+            }
+            require(totalDownloadBytes == entry.download.expectedBytes)
             var completed = 0L
             val validators = transferState.fileValidators(modelId)
             downloads.forEach { download ->
                 ensureRunning(modelId, transfer.executionGeneration)
-                val specification = requireNotNull(specifications[download.relativePath]) { "The catalog download is undeclared." }
+                val specification = requireNotNull(specifications[download.relativePath]) {
+                    "The catalog download is undeclared."
+                }
                 val expectedBytes = requireNotNull(specification.expectedBytes) { "The catalog size is missing." }
                 val expectedSha256 = requireNotNull(specification.sha256) { "The catalog checksum is missing." }
                 val destination = destinationFor(stagingDirectory, download.relativePath)

@@ -3,9 +3,9 @@ package com.dmitriim.localailab.feature.assistant.impl.domain
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.ai.api.tts.TextToSpeechVoiceCondition
 import com.dmitriim.localailab.core.audio.processing.SpeechAudioEffects
-import com.dmitriim.localailab.feature.assistant.impl.presentation.SpeechOutputSettings
-import com.dmitriim.localailab.feature.assistant.impl.presentation.TtsModelOption
-import com.dmitriim.localailab.feature.assistant.impl.presentation.TtsVoiceOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechOutputSettings
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.TtsModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.TtsVoiceOption
 import com.dmitriim.localailab.feature.tts.api.domain.PreviewSpeech
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechPreviewRequest
 import com.dmitriim.localailab.feature.tts.api.domain.SpeechSynthesisEvent
@@ -76,7 +76,8 @@ private fun SpeechOutputSettings.toDomain(
     )
 }
 
-private fun TtsVoiceOption.toCondition(): TextToSpeechVoiceCondition = platformVoiceId?.let(TextToSpeechVoiceCondition::PlatformVoice)
+private fun TtsVoiceOption.toCondition(): TextToSpeechVoiceCondition = platformVoiceId
+    ?.let(TextToSpeechVoiceCondition::PlatformVoice)
     ?: reference?.let { reference ->
         TextToSpeechVoiceCondition.ReferenceAudio(
             referenceId = reference.id,

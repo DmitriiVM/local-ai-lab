@@ -76,7 +76,10 @@ internal class ModelTransferScheduler(
             putString(MODEL_ID_KEY, entry.manifest.modelId.value)
             putLong(MODEL_TRANSFER_GENERATION_KEY, executionGeneration)
         }
-        val job = JobInfo.Builder(jobId(entry.manifest.modelId), ComponentName(application, ModelDownloadJobService::class.java))
+        val job = JobInfo.Builder(
+            jobId(entry.manifest.modelId),
+            ComponentName(application, ModelDownloadJobService::class.java),
+        )
             .setRequiredNetwork(networkRequest(networkPolicy))
             .setRequiresBatteryNotLow(true)
             .setEstimatedNetworkBytes(entry.download.expectedBytes, 0)

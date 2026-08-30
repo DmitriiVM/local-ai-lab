@@ -69,7 +69,10 @@ internal object TtsReplayRestorer {
                 ),
                 errorMessage = when {
                     replayModelId != null && installedModelId == null ->
-                        UiText.Resource(CoreUiR.string.tts_error_saved_model_missing, listOf(run.model?.displayName.orEmpty()))
+                        UiText.Resource(
+                            CoreUiR.string.tts_error_saved_model_missing,
+                            listOf(run.model?.displayName.orEmpty()),
+                        )
                     selectedModel?.voiceMode == TtsVoiceMode.REFERENCE_AUDIO &&
                         replayVoiceId != null &&
                         voices.none { it.id == replayVoiceId } ->

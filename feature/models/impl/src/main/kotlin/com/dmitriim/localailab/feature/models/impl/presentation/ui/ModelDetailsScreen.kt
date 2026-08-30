@@ -83,10 +83,25 @@ fun ModelDetailsScreen(
     uiState.pendingDelete?.takeIf { it.manifest.modelId == modelId }?.let { model ->
         AlertDialog(
             onDismissRequest = onCancelDelete,
-            title = { Text(stringResource(CoreUiR.string.models_model_details_screen_format_4, model.manifest.displayName)) },
-            text = { Text(stringResource(CoreUiR.string.models_model_details_screen_43) + "${model.totalBytes.toDetailsReadableBytes()}. Historical run metadata is preserved.") },
-            confirmButton = { Button(onClick = onConfirmDelete) { Text(stringResource(CoreUiR.string.models_model_details_screen_44)) } },
-            dismissButton = { OutlinedButton(onClick = onCancelDelete) { Text(stringResource(CoreUiR.string.models_model_details_screen_45)) } },
+            title = {
+                Text(stringResource(CoreUiR.string.models_model_details_screen_format_4, model.manifest.displayName))
+            },
+            text = {
+                Text(
+                    stringResource(CoreUiR.string.models_model_details_screen_43) +
+                        "${model.totalBytes.toDetailsReadableBytes()}. Historical run metadata is preserved.",
+                )
+            },
+            confirmButton = {
+                Button(onClick = onConfirmDelete) {
+                    Text(stringResource(CoreUiR.string.models_model_details_screen_44))
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = onCancelDelete) {
+                    Text(stringResource(CoreUiR.string.models_model_details_screen_45))
+                }
+            },
         )
     }
     if (uiState.pendingHuggingFaceTokenModelId == modelId) {
@@ -127,16 +142,34 @@ private fun ModelDetailsContent(
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
         bottomBar = {
-            ModelActionBar(installedModel, transfer, manifest.modelId in uiState.validatingModelIds, onDownload, onPauseTransfer, onResumeOnWifi, onResumeOnAnyNetwork, onCancelTransfer, onValidate, onDelete)
+            ModelActionBar(
+                installedModel = installedModel,
+                transfer = transfer,
+                validating = manifest.modelId in uiState.validatingModelIds,
+                onDownload = onDownload,
+                onPauseTransfer = onPauseTransfer,
+                onResumeOnWifi = onResumeOnWifi,
+                onResumeOnAnyNetwork = onResumeOnAnyNetwork,
+                onCancelTransfer = onCancelTransfer,
+                onValidate = onValidate,
+                onDelete = onDelete,
+            )
         },
     ) { scaffoldPadding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(scaffoldPadding).padding(horizontal = dimensions.screenPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(scaffoldPadding)
+                .padding(horizontal = dimensions.screenPadding),
             contentPadding = PaddingValues(top = dimensions.topBarOverlayClearance + 40.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
         ) {
             item { ModelDetailsHeader(manifest, status) }
-            uiState.message?.let { message -> item { StatusMessage(stringResource(CoreUiR.string.models_lifecycle), message) } }
+            uiState.message?.let { message ->
+                item {
+                    StatusMessage(stringResource(CoreUiR.string.models_lifecycle), message)
+                }
+            }
             item {
                 DetailsSection("At a glance") {
                     size?.let { DetailValue("Size", it.toDetailsReadableBytes()) }
@@ -160,7 +193,11 @@ private fun ModelDetailsContent(
             item { ModelSourceDetails(manifest, uriHandler::openUri) }
             if (catalogModel?.download?.authentication == CatalogDownloadAuthentication.HUGGING_FACE_USER_TOKEN) {
                 item {
-                    HuggingFaceAccessSection(manifest.source.url, uiState.huggingFaceCredentialStatus, onRequestHuggingFaceToken)
+                    HuggingFaceAccessSection(
+                        accessUrl = manifest.source.url,
+                        credentialStatus = uiState.huggingFaceCredentialStatus,
+                        onConfigure = onRequestHuggingFaceToken,
+                    )
                 }
             }
             item { TechnicalDetails(manifest, technicalExpanded) { technicalExpanded = !technicalExpanded } }
@@ -177,7 +214,11 @@ private fun ModelDetailsHeader(manifest: ModelManifest, status: String) {
             DetailsBadge(status)
         }
         Text(
-            manifest.description ?: if (manifest.family == "Imported") "User-imported model." else "No description is available for this model.",
+            manifest.description ?: if (manifest.family == "Imported") {
+                "User-imported model."
+            } else {
+                "No description is available for this model."
+            },
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -187,8 +228,16 @@ private fun ModelDetailsHeader(manifest: ModelManifest, status: String) {
 private fun ModelSourceDetails(manifest: ModelManifest, onOpenUrl: (String) -> Unit) {
     DetailsSection("Source and license") {
         DetailValue("License", manifest.source.licenseName)
-        Text(manifest.source.attribution, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        manifest.source.url?.let { url -> OutlinedButton(onClick = { onOpenUrl(url) }) { Text(stringResource(CoreUiR.string.models_model_details_screen_46)) } }
+        Text(
+            text = manifest.source.attribution,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        manifest.source.url?.let { url ->
+            OutlinedButton(onClick = { onOpenUrl(url) }) {
+                Text(stringResource(CoreUiR.string.models_model_details_screen_46))
+            }
+        }
     }
 }
 
@@ -197,19 +246,38 @@ private fun DetailsBadge(label: String) = androidx.compose.material3.Surface(
     shape = MaterialTheme.shapes.extraLarge,
     color = MaterialTheme.colorScheme.secondaryContainer,
     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-) { Text(label, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp), style = MaterialTheme.typography.labelMedium) }
+) {
+    Text(
+        text = label,
+        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+        style = MaterialTheme.typography.labelMedium,
+    )
+}
 
 @Composable
-private fun ModelDetailsLoading() = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+private fun ModelDetailsLoading() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator()
+    }
+}
 
 @Composable
 private fun ModelUnavailable(message: String?, onNavigateBack: () -> Unit) {
     val dimensions = LocalAppDimensions.current
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = dimensions.screenPadding).padding(top = dimensions.topBarOverlayClearance + 20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = dimensions.screenPadding)
+            .padding(top = dimensions.topBarOverlayClearance + 20.dp),
         verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
-        Text(stringResource(CoreUiR.string.models_model_details_screen_68), style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = stringResource(CoreUiR.string.models_model_details_screen_68),
+            style = MaterialTheme.typography.headlineMedium,
+        )
         Text(message ?: "This model is no longer present in the catalog or installed library.")
         Button(onClick = onNavigateBack) { Text(stringResource(CoreUiR.string.models_model_details_screen_69)) }
     }

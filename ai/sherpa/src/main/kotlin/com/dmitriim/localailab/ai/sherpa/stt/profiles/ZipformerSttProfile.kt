@@ -18,7 +18,11 @@ class ZipformerSttProfile :
     BaseSherpaSttProfile(
         zipformerSttProfileId,
     ) {
-    override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) = SherpaSttSession.Streaming(
+    override fun open(
+        request: SpeechToTextLoadRequest,
+        artifacts: ModelArtifacts,
+        threadCount: Int,
+    ) = SherpaSttSession.Streaming(
         OnlineRecognizer(
             null,
             OnlineRecognizerConfig().apply {

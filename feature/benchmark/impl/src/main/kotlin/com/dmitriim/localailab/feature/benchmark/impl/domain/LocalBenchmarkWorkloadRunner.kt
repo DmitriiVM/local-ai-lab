@@ -87,9 +87,11 @@ class LocalBenchmarkWorkloadRunner(
                     workload.messages.filterNot { it.role == LlmChatRole.SYSTEM }
                 }
                 when (capabilities.chatTemplateHandling) {
-                    LlmChatTemplateHandling.ENGINE_FORMATS_MESSAGES -> requireNotNull(chatEngine.activeChatFormatter()) {
-                        "The active LLM runtime does not provide its declared chat formatter."
-                    }.format(messages)
+                    LlmChatTemplateHandling.ENGINE_FORMATS_MESSAGES -> {
+                        requireNotNull(chatEngine.activeChatFormatter()) {
+                            "The active LLM runtime does not provide its declared chat formatter."
+                        }.format(messages)
+                    }
                     LlmChatTemplateHandling.CALLER_PROVIDES_PROMPT -> formatRoleLabeledPrompt(messages)
                 }
             }
@@ -125,7 +127,14 @@ class LocalBenchmarkWorkloadRunner(
         val rate = generation.generatedTokenCount?.takeIf { generation.generationDurationMs > 0 }
             ?.toDouble()?.times(1_000.0 / generation.generationDurationMs)
         return BenchmarkWorkloadResult(
-            iteration = BenchmarkIterationResult(runId, iteration, telemetry.wallDurationMs, rate, generation.generatedTokenCount, telemetry),
+            iteration = BenchmarkIterationResult(
+                runId = runId,
+                iteration = iteration,
+                latencyMs = telemetry.wallDurationMs,
+                throughputPerSecond = rate,
+                outputUnits = generation.generatedTokenCount,
+                telemetry = telemetry,
+            ),
             model = RunModelSnapshot(model.modelId.value, model.displayName, model.engineId.value, null),
             input = workload.messages.joinToString("\n") { message -> "${message.role.wireName}: ${message.content}" },
             output = generation.text,
@@ -190,7 +199,14 @@ class LocalBenchmarkWorkloadRunner(
         val metrics = event.metrics
         val telemetry = requireNotNull(metrics.telemetry)
         return BenchmarkWorkloadResult(
-            iteration = BenchmarkIterationResult(runId, iteration, telemetry.wallDurationMs, metrics.realTimeFactor?.let { 1.0 / it }, metrics.segmentCount, telemetry),
+            iteration = BenchmarkIterationResult(
+                runId = runId,
+                iteration = iteration,
+                latencyMs = telemetry.wallDurationMs,
+                throughputPerSecond = metrics.realTimeFactor?.let { 1.0 / it },
+                outputUnits = metrics.segmentCount,
+                telemetry = telemetry,
+            ),
             model = RunModelSnapshot(model.modelId.value, model.displayName, model.engineId.value, null),
             input = "${workload.input.displayName} (${workload.input.durationMs} ms)",
             output = event.transcript,
@@ -241,7 +257,13 @@ class LocalBenchmarkWorkloadRunner(
             val startedAt = android.os.SystemClock.elapsedRealtime()
             val result = profile.trace(InferencePhase.SYNTHESIS) {
                 textToSpeechEngine.synthesize(
-                    TextToSpeechRequest(workload.text, workload.languageCode, workload.voice, workload.speed, workload.sentenceSilenceScale),
+                    TextToSpeechRequest(
+                        text = workload.text,
+                        languageCode = workload.languageCode,
+                        voice = workload.voice,
+                        speed = workload.speed,
+                        sentenceSilenceScale = workload.sentenceSilenceScale,
+                    ),
                 ) { true }
             }
             val durationMs = android.os.SystemClock.elapsedRealtime() - startedAt
@@ -249,7 +271,14 @@ class LocalBenchmarkWorkloadRunner(
             val telemetry = profile.finish()
             val rtf = audioDurationMs.takeIf { it > 0 }?.let { durationMs.toDouble() / it }
             return BenchmarkWorkloadResult(
-                iteration = BenchmarkIterationResult(runId, iteration, telemetry.wallDurationMs, rtf?.let { 1.0 / it }, result.samples.size, telemetry),
+                iteration = BenchmarkIterationResult(
+                    runId = runId,
+                    iteration = iteration,
+                    latencyMs = telemetry.wallDurationMs,
+                    throughputPerSecond = rtf?.let { 1.0 / it },
+                    outputUnits = result.samples.size,
+                    telemetry = telemetry,
+                ),
                 model = RunModelSnapshot(model.modelId.value, model.displayName, model.engineId.value, null),
                 input = workload.text,
                 output = "Generated $audioDurationMs ms PCM at ${result.sampleRateHz} Hz.",

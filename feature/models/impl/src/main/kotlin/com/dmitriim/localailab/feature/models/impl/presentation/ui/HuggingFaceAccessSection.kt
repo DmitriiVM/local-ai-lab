@@ -19,7 +19,9 @@ fun HuggingFaceAccessSection(
         Text(stringResource(CoreUiR.string.models_hugging_face_access_section_37))
         Text(huggingFaceCredentialStatusLabel(credentialStatus))
         accessUrl?.let { url ->
-            OutlinedButton(onClick = { uriHandler.openUri(url) }) { Text(stringResource(CoreUiR.string.models_hugging_face_access_section_38)) }
+            OutlinedButton(onClick = { uriHandler.openUri(url) }) {
+                Text(stringResource(CoreUiR.string.models_hugging_face_access_section_38))
+            }
         }
         OutlinedButton(onClick = onConfigure) {
             Text(

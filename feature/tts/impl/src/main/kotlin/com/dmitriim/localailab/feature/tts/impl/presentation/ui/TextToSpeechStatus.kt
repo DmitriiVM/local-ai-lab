@@ -34,7 +34,11 @@ internal fun TextToSpeechPlaybackStatus(playback: SpeechPlaybackState) {
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                stringResource(CoreUiR.string.tts_text_to_speech_status_format_18, formatDuration(playback.positionMs), formatDuration(playback.queuedDurationMs)),
+                stringResource(
+                    CoreUiR.string.tts_text_to_speech_status_format_18,
+                    formatDuration(playback.positionMs),
+                    formatDuration(playback.queuedDurationMs),
+                ),
                 fontFamily = FontFamily.Monospace,
             )
             playback.focusMessage?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
@@ -46,8 +50,17 @@ internal fun TextToSpeechPlaybackStatus(playback: SpeechPlaybackState) {
 internal fun GeneratedAudioCard(output: GeneratedAudioFile) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(CoreUiR.string.tts_text_to_speech_status_185), style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(CoreUiR.string.tts_text_to_speech_status_format_19, formatDuration(output.durationMs), output.sampleRateHz))
+            Text(
+                text = stringResource(CoreUiR.string.tts_text_to_speech_status_185),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = stringResource(
+                    CoreUiR.string.tts_text_to_speech_status_format_19,
+                    formatDuration(output.durationMs),
+                    output.sampleRateHz,
+                ),
+            )
             Text(
                 stringResource(CoreUiR.string.tts_text_to_speech_status_186),
                 style = MaterialTheme.typography.bodySmall,

@@ -5,7 +5,7 @@ import androidx.compose.ui.res.stringResource
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.component.OptionPickerItem
-import com.dmitriim.localailab.feature.assistant.impl.presentation.ChatModelOption
+import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatModelOption
 
 @Composable
 internal fun AssistantChatModelPicker(

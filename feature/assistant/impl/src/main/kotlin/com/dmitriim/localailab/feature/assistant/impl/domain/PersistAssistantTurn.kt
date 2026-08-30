@@ -36,7 +36,11 @@ class PersistAssistantTurn(private val runRepository: RunRepository) {
             ConversationRecord(
                 id = snapshot.conversationId,
                 kind = ConversationKind.ASSISTANT,
-                title = snapshot.messages.firstOrNull { it.role == ConversationMessageRole.USER }?.content?.take(48) ?: "Assistant conversation",
+                title = snapshot.messages
+                    .firstOrNull { it.role == ConversationMessageRole.USER }
+                    ?.content
+                    ?.take(48)
+                    ?: "Assistant conversation",
                 createdAtEpochMs = now,
                 updatedAtEpochMs = now,
             ),

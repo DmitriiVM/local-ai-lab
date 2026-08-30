@@ -105,7 +105,8 @@ class FileSystemModelValidatorTest {
         File(directory, "weights.bin").writeText("abc")
         val manifest = manifest(ModelFileSpec("weights.bin", ModelFileRole("WEIGHTS")))
 
-        val validation = FileSystemModelValidator(ModelRuntimeProfileRegistry(emptySet(), emptySet())).validate(manifest, directory)
+        val profiles = ModelRuntimeProfileRegistry(emptySet(), emptySet())
+        val validation = FileSystemModelValidator(profiles).validate(manifest, directory)
 
         assertEquals(ModelValidationState.INCOMPATIBLE, validation.state)
     }

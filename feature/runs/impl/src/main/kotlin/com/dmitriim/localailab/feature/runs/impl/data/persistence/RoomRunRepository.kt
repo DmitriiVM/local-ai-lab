@@ -27,17 +27,33 @@ class RoomRunRepository(
     private val conversationDao = database.conversationDao()
     private val json = Json { ignoreUnknownKeys = true }
 
-    override val runs: Flow<List<RunRecord>> = runDao.observeAll().map { entities -> entities.map { it.toDomain(json) } }
+    override val runs: Flow<List<RunRecord>> = runDao.observeAll().map { entities ->
+        entities.map { it.toDomain(json) }
+    }
     override val conversations: Flow<List<ConversationRecord>> =
         conversationDao.observeAll().map { entities -> entities.map { it.toDomain() } }
 
-    override fun observeRun(id: String): Flow<RunRecord?> = runDao.observe(id).map { it?.toDomain(json) }
+    override fun observeRun(id: String): Flow<RunRecord?> = runDao.observe(id).map { entity ->
+        entity?.toDomain(json)
+    }
 
-    override fun observeMessages(conversationId: String): Flow<List<ConversationMessageRecord>> = conversationDao.observeMessages(conversationId).map { entities -> entities.map { it.toDomain() } }
+    override fun observeMessages(
+        conversationId: String,
+    ): Flow<List<ConversationMessageRecord>> = conversationDao.observeMessages(conversationId).map { entities ->
+        entities.map { it.toDomain() }
+    }
 
     override suspend fun saveRun(record: RunRecord) = runDao.upsert(record.toEntity(json))
 
-    override suspend fun saveConversation(record: ConversationRecord, messages: List<ConversationMessageRecord>) = conversationDao.replaceConversation(record.toEntity(), messages.map { it.toEntity() })
+    override suspend fun saveConversation(
+        record: ConversationRecord,
+        messages: List<ConversationMessageRecord>,
+    ) {
+        conversationDao.replaceConversation(
+            record.toEntity(),
+            messages.map { it.toEntity() },
+        )
+    }
 
     override suspend fun deleteConversation(id: String) = conversationDao.deleteConversation(id)
 
@@ -52,7 +68,12 @@ class RoomRunRepository(
             application.getDatabasePath("$DATABASE_NAME-shm").length(),
     )
 
-    private fun directoryBytes(directory: File): Long = directory.takeIf(File::exists)?.walkTopDown()?.filter(File::isFile)?.sumOf(File::length) ?: 0
+    private fun directoryBytes(directory: File): Long = directory
+        .takeIf(File::exists)
+        ?.walkTopDown()
+        ?.filter(File::isFile)
+        ?.sumOf(File::length)
+        ?: 0
 
     private companion object {
         const val DATABASE_NAME = "local-ai-runs.db"

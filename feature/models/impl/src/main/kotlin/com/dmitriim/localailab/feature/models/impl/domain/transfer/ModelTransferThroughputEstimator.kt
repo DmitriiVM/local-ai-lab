@@ -15,14 +15,22 @@ internal class ModelTransferThroughputEstimator {
     fun record(progress: ModelTransferProgress) {
         val modelId = progress.modelId
         val previous = samples[modelId]
-        samples[modelId] = TransferSample(progress.executionGeneration, progress.completedBytes, progress.recordedAtElapsedMs)
+        samples[modelId] = TransferSample(
+            executionGeneration = progress.executionGeneration,
+            completedBytes = progress.completedBytes,
+            recordedAtElapsedMs = progress.recordedAtElapsedMs,
+        )
         if (previous == null || previous.executionGeneration != progress.executionGeneration) return
         val elapsedMillis = progress.recordedAtElapsedMs - previous.recordedAtElapsedMs
         val transferredBytes = progress.completedBytes - previous.completedBytes
         if (elapsedMillis <= 0L || transferredBytes <= 0L) return
-        val instantaneousRate = (transferredBytes.toDouble() * MILLIS_PER_SECOND / elapsedMillis).toLong().coerceAtLeast(1L)
+        val instantaneousRate = (
+            transferredBytes.toDouble() * MILLIS_PER_SECOND / elapsedMillis
+            ).toLong().coerceAtLeast(1L)
         val previousRate = mutableEstimates.value[modelId]?.bytesPerSecond
-        val smoothedRate = previousRate?.let { (it * PREVIOUS_RATE_WEIGHT + instantaneousRate) / RATE_WEIGHT_SUM } ?: instantaneousRate
+        val smoothedRate = previousRate?.let { previous ->
+            (previous * PREVIOUS_RATE_WEIGHT + instantaneousRate) / RATE_WEIGHT_SUM
+        } ?: instantaneousRate
         val remainingBytes = (progress.totalBytes - progress.completedBytes).coerceAtLeast(0L)
         val remainingMillis = if (remainingBytes == 0L) {
             0L

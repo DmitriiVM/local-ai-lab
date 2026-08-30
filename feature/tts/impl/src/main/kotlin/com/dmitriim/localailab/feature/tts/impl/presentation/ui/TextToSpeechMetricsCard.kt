@@ -23,7 +23,10 @@ internal fun TextToSpeechMetricsCard(metrics: SpeechSynthesisMetrics) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(stringResource(CoreUiR.string.tts_text_to_speech_metrics_card_175), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = stringResource(CoreUiR.string.tts_text_to_speech_metrics_card_175),
+                    style = MaterialTheme.typography.titleMedium,
+                )
                 Text(
                     text = stringResource(
                         CoreUiR.string.ui_copy_83,
@@ -47,37 +50,104 @@ internal fun TextToSpeechMetricsCard(metrics: SpeechSynthesisMetrics) {
 @Composable
 private fun TtsPlaybackMetrics(metrics: SpeechSynthesisMetrics) {
     TtsMetricsSection("Response and playback")
-    TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_84), metrics.timeToFirstChunkMs.formatOptionalDuration(), stringResource(CoreUiR.string.ui_description_37))
-    TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_85), metrics.timeToFirstWriteMs.formatOptionalDuration(), stringResource(CoreUiR.string.ui_description_38))
-    TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_86), metrics.timeToFirstPresentationMs.formatOptionalDuration(), if (metrics.timeToFirstPresentationMs == null) "This audio route did not expose a reliable presentation timestamp, so callback time is not substituted." else "Time until Android reported that the first generated audio frame reached the output device.")
+    TtsMetricsItem(
+        label = stringResource(CoreUiR.string.ui_copy_84),
+        value = metrics.timeToFirstChunkMs.formatOptionalDuration(),
+        description = stringResource(CoreUiR.string.ui_description_37),
+    )
+    TtsMetricsItem(
+        label = stringResource(CoreUiR.string.ui_copy_85),
+        value = metrics.timeToFirstWriteMs.formatOptionalDuration(),
+        description = stringResource(CoreUiR.string.ui_description_38),
+    )
+    TtsMetricsItem(
+        label = stringResource(CoreUiR.string.ui_copy_86),
+        value = metrics.timeToFirstPresentationMs.formatOptionalDuration(),
+        description = if (metrics.timeToFirstPresentationMs == null) {
+            "This audio route did not expose a reliable presentation timestamp, " +
+                "so callback time is not substituted."
+        } else {
+            "Time until Android reported that the first generated audio frame " +
+                "reached the output device."
+        },
+    )
 }
 
 @Composable
 private fun TtsOutputMetrics(metrics: SpeechSynthesisMetrics) {
     TtsMetricsSection("Synthesis output")
-    TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_87), formatTtsDuration(metrics.synthesisDurationMs), stringResource(CoreUiR.string.ui_description_39))
-    TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_88), formatTtsDuration(metrics.generatedAudioDurationMs), stringResource(CoreUiR.string.ui_description_40))
-    TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_89), metrics.realTimeFactor.formatRealTimeFactor(), stringResource(CoreUiR.string.ui_description_41))
-    TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_90), "${metrics.sampleRateHz} Hz · mono PCM16", stringResource(CoreUiR.string.ui_description_42))
+    TtsMetricsItem(
+        stringResource(CoreUiR.string.ui_copy_87),
+        formatTtsDuration(metrics.synthesisDurationMs),
+        stringResource(CoreUiR.string.ui_description_39),
+    )
+    TtsMetricsItem(
+        stringResource(CoreUiR.string.ui_copy_88),
+        formatTtsDuration(metrics.generatedAudioDurationMs),
+        stringResource(CoreUiR.string.ui_description_40),
+    )
+    TtsMetricsItem(
+        stringResource(CoreUiR.string.ui_copy_89),
+        metrics.realTimeFactor.formatRealTimeFactor(),
+        stringResource(CoreUiR.string.ui_description_41),
+    )
+    TtsMetricsItem(
+        stringResource(CoreUiR.string.ui_copy_90),
+        "${metrics.sampleRateHz} Hz · mono PCM16",
+        stringResource(CoreUiR.string.ui_description_42),
+    )
 }
 
 @Composable
 private fun TtsRuntimeMetrics(metrics: SpeechSynthesisMetrics) {
     TtsMetricsSection("Runtime")
-    TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_91), formatTtsDuration(metrics.loadDurationMs), stringResource(CoreUiR.string.ui_description_43))
-    TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_92), metrics.effectiveThreadCount.toString(), stringResource(CoreUiR.string.ui_description_44))
-    TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_93), metrics.playbackUnderrunCount.toString(), stringResource(CoreUiR.string.ui_description_45))
+    TtsMetricsItem(
+        stringResource(CoreUiR.string.ui_copy_91),
+        formatTtsDuration(metrics.loadDurationMs),
+        stringResource(CoreUiR.string.ui_description_43),
+    )
+    TtsMetricsItem(
+        stringResource(CoreUiR.string.ui_copy_92),
+        metrics.effectiveThreadCount.toString(),
+        stringResource(CoreUiR.string.ui_description_44),
+    )
+    TtsMetricsItem(
+        stringResource(CoreUiR.string.ui_copy_93),
+        metrics.playbackUnderrunCount.toString(),
+        stringResource(CoreUiR.string.ui_description_45),
+    )
 }
 
 @Composable
 private fun ChatterboxMetrics(metrics: SpeechSynthesisMetrics) {
     metrics.conditioningDurationMs?.let { duration ->
         TtsMetricsSection("Chatterbox pipeline")
-        TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_94), "${formatTtsDuration(duration)} · ${if (metrics.conditioningCacheHit == true) "cache hit" else "encoded"}", stringResource(CoreUiR.string.ui_description_46))
-        TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_95), metrics.generatedTokenCount?.toString() ?: "Unavailable", stringResource(CoreUiR.string.ui_description_47))
-        TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_96), metrics.tokenGenerationDurationMs.formatOptionalDuration(), stringResource(CoreUiR.string.ui_description_48))
-        TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_97), metrics.decoderDurationMs.formatOptionalDuration(), stringResource(CoreUiR.string.ui_description_49))
-        TtsMetricsItem(stringResource(CoreUiR.string.ui_copy_98), "${metrics.peakProcessPssBytes.toMebibytes()} peak app · ${metrics.availableDeviceMemoryBytes.toMebibytes()} device available", stringResource(CoreUiR.string.ui_description_50))
+        TtsMetricsItem(
+            stringResource(CoreUiR.string.ui_copy_94),
+            "${formatTtsDuration(duration)} · ${if (metrics.conditioningCacheHit == true) "cache hit" else "encoded"}",
+            stringResource(CoreUiR.string.ui_description_46),
+        )
+        TtsMetricsItem(
+            stringResource(CoreUiR.string.ui_copy_95),
+            metrics.generatedTokenCount?.toString() ?: "Unavailable",
+            stringResource(CoreUiR.string.ui_description_47),
+        )
+        TtsMetricsItem(
+            stringResource(CoreUiR.string.ui_copy_96),
+            metrics.tokenGenerationDurationMs.formatOptionalDuration(),
+            stringResource(CoreUiR.string.ui_description_48),
+        )
+        TtsMetricsItem(
+            stringResource(CoreUiR.string.ui_copy_97),
+            metrics.decoderDurationMs.formatOptionalDuration(),
+            stringResource(CoreUiR.string.ui_description_49),
+        )
+        TtsMetricsItem(
+            stringResource(CoreUiR.string.ui_copy_98),
+            "${metrics.peakProcessPssBytes.toMebibytes()} peak app · " +
+                "${metrics.availableDeviceMemoryBytes.toMebibytes()} device available",
+            stringResource(CoreUiR.string.ui_description_50),
+        )
     }
 }
 

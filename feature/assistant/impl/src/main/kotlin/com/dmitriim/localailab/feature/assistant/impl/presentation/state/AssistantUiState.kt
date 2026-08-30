@@ -1,4 +1,4 @@
-package com.dmitriim.localailab.feature.assistant.impl.presentation
+package com.dmitriim.localailab.feature.assistant.impl.presentation.state
 
 import androidx.annotation.StringRes
 import com.dmitriim.localailab.ai.api.chat.LlmContextManagement
@@ -148,7 +148,11 @@ data class ChatMessage(
 ) {
     companion object {
         fun user(content: String) = ChatMessage(UUID.randomUUID().toString(), ChatMessageRole.USER, content)
-        fun assistant(id: String, content: String, streaming: Boolean) = ChatMessage(id, ChatMessageRole.ASSISTANT, content, streaming)
+        fun assistant(
+            id: String,
+            content: String,
+            streaming: Boolean,
+        ) = ChatMessage(id, ChatMessageRole.ASSISTANT, content, streaming)
     }
 }
 
@@ -178,7 +182,9 @@ data class ChatSettings(
         require(topPValue in 0.05f..1f) { "Top-P must be between 0.05 and 1." }
         require(seedValue == null || seedValue >= 0) { "Seed cannot be negative; leave it blank for engine selection." }
         require(contextValue in 128..32_768) { "Context size must be between 128 and 32,768 tokens." }
-        require(maxOutputValue in 1 until contextValue) { "Maximum output must be positive and smaller than the context size." }
+        require(maxOutputValue in 1 until contextValue) {
+            "Maximum output must be positive and smaller than the context size."
+        }
         require(threadsValue in 0..64) { "Thread count must be between 0 and 64; 0 chooses a safe default." }
         return EffectiveChatSettings(
             computePreference = computePreference,

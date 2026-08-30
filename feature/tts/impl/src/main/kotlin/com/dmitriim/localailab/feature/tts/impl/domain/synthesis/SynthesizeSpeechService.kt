@@ -98,7 +98,8 @@ class SynthesizeSpeechService(
                     request.settings.expectedSpeakerCount?.let { it == load.speakerCount } != false &&
                         load.speakerCount?.let { fixedSpeaker.speakerId < it } == true,
                 ) {
-                    "${request.settings.voiceName ?: "The selected voice"} is unavailable in the installed ${model.displayName} bundle."
+                    "${request.settings.voiceName ?: "The selected voice"} is unavailable " +
+                        "in the installed ${model.displayName} bundle."
                 }
             }
             emit(

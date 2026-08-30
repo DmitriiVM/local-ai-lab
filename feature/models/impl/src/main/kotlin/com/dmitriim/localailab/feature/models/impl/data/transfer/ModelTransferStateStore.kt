@@ -57,7 +57,10 @@ class ModelTransferStateStore(
         return transfer.toStored()
     }
 
-    internal suspend fun claimQueuedWhenNoTransferIsActive(modelId: ModelId, executionGeneration: Long): Boolean = dao.claimQueuedWhenNoTransferIsActive(
+    internal suspend fun claimQueuedWhenNoTransferIsActive(
+        modelId: ModelId,
+        executionGeneration: Long,
+    ): Boolean = dao.claimQueuedWhenNoTransferIsActive(
         modelId = modelId.value,
         executionGeneration = executionGeneration,
         queuedStatus = PersistedModelTransferStatus.QUEUED.name,
@@ -71,7 +74,10 @@ class ModelTransferStateStore(
         installingStatus = PersistedModelTransferStatus.INSTALLING.name,
     )
 
-    internal suspend fun nextQueued(): StoredModelTransfer? = dao.nextQueued(PersistedModelTransferStatus.QUEUED.name, System.currentTimeMillis())?.toStored()
+    internal suspend fun nextQueued(): StoredModelTransfer? = dao.nextQueued(
+        PersistedModelTransferStatus.QUEUED.name,
+        System.currentTimeMillis(),
+    )?.toStored()
 
     internal suspend fun scheduleRetry(transfer: StoredModelTransfer, delayMillis: Long): StoredModelTransfer {
         val now = System.currentTimeMillis()
@@ -165,7 +171,10 @@ class ModelTransferStateStore(
         fileDao.upsert(current.copy(verified = true))
     }
 
-    internal suspend fun fileValidators(modelId: ModelId): Map<String, ModelTransferFileEntity> = fileDao.filesFor(modelId.value).associateBy(ModelTransferFileEntity::relativePath)
+    internal suspend fun fileValidators(
+        modelId: ModelId,
+    ): Map<String, ModelTransferFileEntity> = fileDao.filesFor(modelId.value)
+        .associateBy(ModelTransferFileEntity::relativePath)
 
     suspend fun delete(modelId: ModelId) = dao.deleteTransfer(modelId.value)
 
@@ -184,9 +193,15 @@ class ModelTransferStateStore(
         nextAttemptAtEpochMs = nextAttemptAtEpochMs,
     )
 
-    private fun Long.saturatingAdd(other: Long): Long = if (this > Long.MAX_VALUE - other) Long.MAX_VALUE else this + other
+    private fun Long.saturatingAdd(other: Long): Long = if (this > Long.MAX_VALUE - other) {
+        Long.MAX_VALUE
+    } else {
+        this + other
+    }
 
-    private fun ModelTransferEntity.toState(): ModelTransferState = when (PersistedModelTransferStatus.valueOf(status)) {
+    private fun ModelTransferEntity.toState(): ModelTransferState = when (
+        PersistedModelTransferStatus.valueOf(status)
+    ) {
         PersistedModelTransferStatus.QUEUED -> ModelTransferState.Queued(
             completedBytes = completedBytes,
             totalBytes = totalBytes,

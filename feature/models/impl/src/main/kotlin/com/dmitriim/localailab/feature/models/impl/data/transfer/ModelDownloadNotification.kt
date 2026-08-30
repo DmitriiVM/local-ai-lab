@@ -41,7 +41,10 @@ internal fun modelDownloadNotification(
                 )
                 setProgress(
                     NOTIFICATION_PROGRESS_MAX,
-                    ((completedBytes.coerceIn(0L, totalBytes).toDouble() / totalBytes) * NOTIFICATION_PROGRESS_MAX).toInt(),
+                    (
+                        completedBytes.coerceIn(0L, totalBytes).toDouble() / totalBytes *
+                            NOTIFICATION_PROGRESS_MAX
+                        ).toInt(),
                     false,
                 )
             } else {

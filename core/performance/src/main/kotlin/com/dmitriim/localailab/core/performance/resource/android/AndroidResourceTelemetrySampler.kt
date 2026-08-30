@@ -67,7 +67,9 @@ class AndroidResourceTelemetrySampler(
         ActivityManager.MemoryInfo().also(activityManager::getMemoryInfo).availMem
     }.getOrNull()
 
-    private fun BatteryManager.longPropertyOrNull(property: Int): Long? = getLongProperty(property).takeUnless { it == Long.MIN_VALUE }
+    private fun BatteryManager.longPropertyOrNull(property: Int): Long? = getLongProperty(property)
+        .takeUnless { it == Long.MIN_VALUE }
 
-    private fun BatteryManager.intPropertyOrNull(property: Int): Int? = getIntProperty(property).takeUnless { it == Int.MIN_VALUE }
+    private fun BatteryManager.intPropertyOrNull(property: Int): Int? = getIntProperty(property)
+        .takeUnless { it == Int.MIN_VALUE }
 }

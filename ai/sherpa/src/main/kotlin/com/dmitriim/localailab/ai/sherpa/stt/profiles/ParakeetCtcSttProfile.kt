@@ -12,6 +12,9 @@ class ParakeetCtcSttProfile :
     BaseSherpaSttProfile(
         parakeetCtcSttProfileId,
     ) {
-    override fun open(request: SpeechToTextLoadRequest, artifacts: ModelArtifacts, threadCount: Int) =
-        nemoCtcSession(artifacts, threadCount)
+    override fun open(
+        request: SpeechToTextLoadRequest,
+        artifacts: ModelArtifacts,
+        threadCount: Int,
+    ) = nemoCtcSession(artifacts, threadCount)
 }

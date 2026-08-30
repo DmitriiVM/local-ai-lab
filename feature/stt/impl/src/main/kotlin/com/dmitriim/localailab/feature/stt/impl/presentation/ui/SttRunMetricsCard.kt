@@ -26,7 +26,10 @@ internal fun SttRunMetricsCard(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(stringResource(CoreUiR.string.stt_stt_run_metrics_card_150), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = stringResource(CoreUiR.string.stt_stt_run_metrics_card_150),
+                    style = MaterialTheme.typography.titleMedium,
+                )
                 Text(
                     text = stringResource(
                         CoreUiR.string.ui_copy_69,
@@ -81,7 +84,8 @@ internal fun SttRunMetricsCard(
                 label = stringResource(CoreUiR.string.ui_copy_77),
                 value = if (streamingModel) "Streaming-capable" else "Offline segment decoding",
                 description = if (streamingModel) {
-                    "The selected model supports streaming, though this screen finalizes captured audio after recording stops."
+                    "The selected model supports streaming, though this screen finalizes " +
+                        "captured audio after recording stops."
                 } else {
                     "The selected model transcribes bounded audio segments after recording stops."
                 },

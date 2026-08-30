@@ -124,8 +124,9 @@ class AppNavigationState internal constructor(
 
     internal fun stackFor(destination: TopLevelDestination): NavBackStack<NavKey> = stacks[destination]
 
-    internal fun entryDecoratorsFor(destination: TopLevelDestination): List<NavEntryDecorator<NavKey>> =
-        entryDecorators[destination]
+    internal fun entryDecoratorsFor(
+        destination: TopLevelDestination,
+    ): List<NavEntryDecorator<NavKey>> = entryDecorators[destination]
 
     val shouldHandleSystemBack: Boolean
         get() = activeStack.size == 1 && selectedDestination != startHostDestination

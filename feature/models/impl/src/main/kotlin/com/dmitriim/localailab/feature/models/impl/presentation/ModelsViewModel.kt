@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitriim.localailab.ai.api.model.library.CatalogDownloadAuthentication
+import com.dmitriim.localailab.ai.api.model.library.CatalogModel
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.di.AppScope
@@ -12,8 +13,10 @@ import com.dmitriim.localailab.feature.models.api.data.ModelDownloadCredentials
 import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
 import com.dmitriim.localailab.feature.models.api.data.ModelTransfers
 import com.dmitriim.localailab.feature.models.api.domain.diagnostics.ModelDiagnostics
+import com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel
 import com.dmitriim.localailab.feature.models.api.domain.library.ModelValidationState
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
+import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
@@ -107,7 +110,8 @@ class ModelsViewModel(
                         onFailure = { error ->
                             Log.e(
                                 TAG,
-                                "Model compatibility check failed: modelId=${manifest.modelId.value}, message=${error.message}",
+                                "Model compatibility check failed: modelId=${manifest.modelId.value}, " +
+                                    "message=${error.message}",
                                 error,
                             )
                             current.copy(
@@ -148,7 +152,10 @@ class ModelsViewModel(
 
     fun resumeOnAnyNetwork(modelId: ModelId) = resumeTransfer(modelId, ModelTransferNetworkPolicy.ANY_NETWORK)
 
-    private fun resumeTransfer(modelId: ModelId, networkPolicy: ModelTransferNetworkPolicy) = launchOperation("resume download") {
+    private fun resumeTransfer(
+        modelId: ModelId,
+        networkPolicy: ModelTransferNetworkPolicy,
+    ) = launchOperation("resume download") {
         modelTransfers.resumeTransfer(modelId, networkPolicy).getOrThrow()
         if (networkPolicy == ModelTransferNetworkPolicy.ANY_NETWORK) {
             "Download scheduled using any network."
@@ -222,7 +229,11 @@ class ModelsViewModel(
             val feedback = modelLibrary.validate(modelId).fold(
                 onSuccess = { model ->
                     val ready = model.validationState == ModelValidationState.READY
-                    Log.i(TAG, "Models UI validation completed: modelId=${modelId.value}, state=${model.validationState}, bytes=${model.totalBytes}")
+                    Log.i(
+                        TAG,
+                        "Models UI validation completed: modelId=${modelId.value}, " +
+                            "state=${model.validationState}, bytes=${model.totalBytes}",
+                    )
                     ModelValidationFeedback(
                         message = if (ready) {
                             "Validation passed."
@@ -251,7 +262,11 @@ class ModelsViewModel(
 
     fun requestDelete(modelId: ModelId) {
         Log.i(TAG, "Models UI delete confirmation requested: modelId=${modelId.value}")
-        mutableUiState.update { state -> state.copy(pendingDelete = state.installed.firstOrNull { it.manifest.modelId == modelId }) }
+        mutableUiState.update { state ->
+            state.copy(
+                pendingDelete = state.installed.firstOrNull { it.manifest.modelId == modelId },
+            )
+        }
     }
 
     fun cancelDelete() {
@@ -268,7 +283,11 @@ class ModelsViewModel(
             )
         }
         launchOperation("delete") {
-            Log.i(TAG, "Models UI delete confirmed: modelId=${model.manifest.modelId.value}, displayName=${model.manifest.displayName}, bytes=${model.totalBytes}")
+            Log.i(
+                TAG,
+                "Models UI delete confirmed: modelId=${model.manifest.modelId.value}, " +
+                    "displayName=${model.manifest.displayName}, bytes=${model.totalBytes}",
+            )
             modelLibrary.delete(model.manifest.modelId).getOrThrow()
             Log.i(TAG, "Models UI delete completed: modelId=${model.manifest.modelId.value}")
             "${model.manifest.displayName} was deleted."
@@ -303,8 +322,8 @@ class ModelsViewModel(
 }
 
 private data class ModelData(
-    val installed: List<com.dmitriim.localailab.feature.models.api.domain.library.InstalledModel>,
-    val catalog: List<com.dmitriim.localailab.ai.api.model.library.CatalogModel>,
-    val transfers: Map<ModelId, com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState>,
-    val credentialStatus: com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus,
+    val installed: List<InstalledModel>,
+    val catalog: List<CatalogModel>,
+    val transfers: Map<ModelId, ModelTransferState>,
+    val credentialStatus: HuggingFaceCredentialStatus,
 )

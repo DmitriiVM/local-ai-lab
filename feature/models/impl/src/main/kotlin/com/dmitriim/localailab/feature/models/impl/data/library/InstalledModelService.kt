@@ -73,7 +73,12 @@ class InstalledModelService(
                 totalBytes = directory.totalFileBytes(),
             )
             dao.upsert(updated)
-            Log.i(TAG, "Installed model validation completed: modelId=${modelId.value}, state=${validation.state}, bytes=${updated.totalBytes}, message=${validation.message}")
+            Log.i(
+                TAG,
+                "Installed model validation completed: modelId=${modelId.value}, " +
+                    "state=${validation.state}, bytes=${updated.totalBytes}, " +
+                    "message=${validation.message}",
+            )
             updated.toDomainOrNull() ?: error("The saved model manifest is invalid.")
         }
     }
@@ -81,7 +86,11 @@ class InstalledModelService(
     override suspend fun delete(modelId: ModelId): Result<Unit> = runCatching {
         val record = requireNotNull(dao.find(modelId.value)) { "This model is not installed." }
         val directory = File(rootDirectory, record.localDirectoryName)
-        Log.i(TAG, "Installed model deletion started: modelId=${modelId.value}, directory=${directory.name}, bytes=${directory.totalFileBytes()}")
+        Log.i(
+            TAG,
+            "Installed model deletion started: modelId=${modelId.value}, " +
+                "directory=${directory.name}, bytes=${directory.totalFileBytes()}",
+        )
         require(directory.canonicalFile.parentFile == rootDirectory.canonicalFile) { "Invalid model directory." }
         if (directory.exists()) require(directory.deleteRecursively()) { "Could not delete model files." }
         dao.delete(modelId.value)
@@ -105,7 +114,11 @@ class InstalledModelService(
         temporary: File,
         verifyChecksums: Boolean = true,
     ) {
-        Log.i(TAG, "Model installation validation started: modelId=${manifest.modelId.value}, profile=${manifest.profileType}, verifyChecksums=$verifyChecksums")
+        Log.i(
+            TAG,
+            "Model installation validation started: modelId=${manifest.modelId.value}, " +
+                "profile=${manifest.profileType}, verifyChecksums=$verifyChecksums",
+        )
         val validation = validator.validate(manifest, temporary, verifyChecksums)
         require(validation.state == ModelValidationState.READY) { validation.message ?: "Model validation failed." }
         val enriched = validator.enrichChecksums(manifest, temporary)
@@ -116,9 +129,19 @@ class InstalledModelService(
             require(temporary.renameTo(finalDirectory)) { "Could not complete the model installation transaction." }
             try {
                 dao.upsert(enriched.toEntity(finalDirectory))
-                Log.i(TAG, "Model installation completed: modelId=${enriched.modelId.value}, directory=${finalDirectory.name}, bytes=${finalDirectory.totalFileBytes()}, files=${enriched.files.size}")
+                Log.i(
+                    TAG,
+                    "Model installation completed: modelId=${enriched.modelId.value}, " +
+                        "directory=${finalDirectory.name}, " +
+                        "bytes=${finalDirectory.totalFileBytes()}, files=${enriched.files.size}",
+                )
             } catch (error: Throwable) {
-                Log.e(TAG, "Model installation database registration failed: modelId=${enriched.modelId.value}, message=${error.message}", error)
+                Log.e(
+                    TAG,
+                    "Model installation database registration failed: " +
+                        "modelId=${enriched.modelId.value}, message=${error.message}",
+                    error,
+                )
                 finalDirectory.deleteRecursively()
                 throw error
             }
