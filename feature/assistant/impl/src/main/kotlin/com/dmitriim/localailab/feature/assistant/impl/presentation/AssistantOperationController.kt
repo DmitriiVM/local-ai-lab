@@ -1,10 +1,12 @@
 package com.dmitriim.localailab.feature.assistant.impl.presentation
 
+import android.app.Application
 import android.util.Log
 import com.dmitriim.localailab.ai.api.chat.ChatEngine
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
 import com.dmitriim.localailab.core.operation.ForegroundOperationInterruption
+import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantRunRecorder
 import com.dmitriim.localailab.feature.assistant.impl.domain.chat.GenerateAssistantResponse
 import com.dmitriim.localailab.feature.assistant.impl.domain.chat.PersistAssistantTurn
@@ -24,6 +26,7 @@ import kotlinx.coroutines.launch
 
 /** Routes assistant actions to the focused chat, STT, and TTS controllers. */
 internal class AssistantOperationController(
+    private val application: Application,
     override val scope: CoroutineScope,
     override val state: MutableStateFlow<AssistantUiState>,
     chatEngine: ChatEngine,
@@ -44,6 +47,7 @@ internal class AssistantOperationController(
         host = this,
         speechOutput = speechOutput,
         runRecorder = runRecorder,
+        application = application,
     )
     private val chatController = AssistantChatController(
         host = this,
@@ -52,6 +56,7 @@ internal class AssistantOperationController(
         persistAssistantTurn = persistAssistantTurn,
         ttsController = ttsController,
         conversationId = conversationId,
+        application = application,
     )
     private val sttController = AssistantSttController(
         host = this,
@@ -59,6 +64,7 @@ internal class AssistantOperationController(
         transcriber = transcriber,
         runRecorder = runRecorder,
         chatController = chatController,
+        application = application,
     )
 
     fun unloadChatRuntime() = chatController.unloadRuntime()
@@ -83,7 +89,12 @@ internal class AssistantOperationController(
 
     fun cancel() {
         if (activeJob?.isActive != true) return
-        state.update { it.copy(operation = AssistantOperation.Cancelling, statusMessage = "Stopping…") }
+        state.update {
+            it.copy(
+                operation = AssistantOperation.Cancelling,
+                statusMessage = application.getString(CoreUiR.string.assistant_operation_stopping),
+            )
+        }
         sttController.cancel()
         chatController.cancel()
         ttsController.cancel()
@@ -122,7 +133,8 @@ internal class AssistantOperationController(
                 operation = AssistantOperation.Idle,
                 level = null,
                 speakingMessageId = null,
-                errorMessage = error.message ?: "The local assistant operation failed.",
+                errorMessage = error.message
+                    ?: application.getString(CoreUiR.string.assistant_error_operation_failed),
             )
         }
     }
@@ -131,8 +143,7 @@ internal class AssistantOperationController(
         if (activeJob?.isActive != true) return
         state.update {
             it.copy(
-                errorMessage = "Generation stopped because the device is low on memory. " +
-                    "Close other apps or choose a smaller model, then try again.",
+                errorMessage = application.getString(CoreUiR.string.assistant_error_memory_pressure),
             )
         }
         cancel()

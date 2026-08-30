@@ -1,5 +1,6 @@
 package com.dmitriim.localailab.feature.assistant.impl.presentation
 
+import android.app.Application
 import com.dmitriim.localailab.ai.api.capability.AiCapability
 import com.dmitriim.localailab.ai.api.chat.LlmEngineCapabilities
 import com.dmitriim.localailab.ai.api.engine.EngineId
@@ -11,6 +12,7 @@ import com.dmitriim.localailab.ai.api.model.manifest.TtsVoiceMode
 import com.dmitriim.localailab.ai.api.system.SystemModelProfileKeys
 import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechVoice
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoice
+import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatModelOption
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.SpeechModelOption
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.TtsModelOption
@@ -37,6 +39,7 @@ internal fun chatModelOptions(
 }
 
 internal fun speechModelOptions(
+    application: Application,
     installedModels: List<InstalledModel>,
     catalogModels: List<CatalogModel>,
     includeAndroidRecognizer: Boolean,
@@ -45,7 +48,7 @@ internal fun speechModelOptions(
         add(
             SpeechModelOption(
                 id = BuiltInSpeechToTextModels.ANDROID_SPEECH_RECOGNIZER,
-                displayName = "Android On-device SpeechRecognizer",
+                displayName = application.getString(CoreUiR.string.assistant_model_android_speech_recognizer),
                 engineId = EngineId("android-speech-recognizer"),
                 languages = setOf("en", "ru", "zh", "ja", "ko", "yue"),
                 sampleRateHz = 16_000,
@@ -68,18 +71,19 @@ internal fun speechModelOptions(
 }
 
 internal fun textToSpeechModelOptions(
+    application: Application,
     installedModels: List<InstalledModel>,
     catalogModels: List<CatalogModel>,
     referenceVoices: List<ReferenceVoice>,
     systemVoices: List<SystemTextToSpeechVoice>,
 ): List<TtsModelOption> = buildList {
-    if (systemVoices.isNotEmpty()) add(androidTextToSpeechOption(systemVoices))
+    if (systemVoices.isNotEmpty()) add(androidTextToSpeechOption(application, systemVoices))
     addAll(
         capabilityModels(installedModels, catalogModels, AiCapability.TEXT_TO_SPEECH) { manifest, installed ->
             val catalogManifest = catalogModels.firstOrNull {
                 it.manifest.modelId == manifest.modelId && it.manifest.revision == manifest.revision
             }?.manifest ?: manifest
-            catalogManifest.toTtsOption(installed, referenceVoices)
+            catalogManifest.toTtsOption(application, installed, referenceVoices)
         },
     )
 }
@@ -106,6 +110,7 @@ private inline fun <T> capabilityModels(
 }
 
 private fun ModelManifest.toTtsOption(
+    application: Application,
     installed: Boolean,
     referenceVoices: List<ReferenceVoice>,
 ): TtsModelOption {
@@ -114,7 +119,7 @@ private fun ModelManifest.toTtsOption(
         List(count) { speakerId ->
             TtsVoiceDescriptor(
                 id = "speaker-$speakerId",
-                displayName = "Speaker ${speakerId + 1}",
+                displayName = application.getString(CoreUiR.string.assistant_model_speaker, speakerId + 1),
                 speakerId = speakerId,
                 languages = languages.mapTo(linkedSetOf(), ::normalizeLanguageCode),
             )
@@ -127,7 +132,11 @@ private fun ModelManifest.toTtsOption(
                 displayName = reference.displayName,
                 speakerId = null,
                 languages = setOf("en"),
-                description = "${reference.durationMs / 1_000.0} s · ${reference.sourceDescription}",
+                description = application.getString(
+                    CoreUiR.string.assistant_reference_voice_duration,
+                    reference.durationMs / 1_000.0,
+                    reference.sourceDescription,
+                ),
                 reference = reference,
             )
         }
@@ -156,9 +165,12 @@ private fun ModelManifest.toTtsOption(
     )
 }
 
-private fun androidTextToSpeechOption(voices: List<SystemTextToSpeechVoice>): TtsModelOption = TtsModelOption(
+private fun androidTextToSpeechOption(
+    application: Application,
+    voices: List<SystemTextToSpeechVoice>,
+): TtsModelOption = TtsModelOption(
     id = BuiltInTextToSpeechModels.ANDROID_TEXT_TO_SPEECH,
-    displayName = "Android On-device TextToSpeech",
+    displayName = application.getString(CoreUiR.string.assistant_model_android_text_to_speech),
     engineId = SystemModelProfileKeys.ANDROID_TEXT_TO_SPEECH.engineId,
     profileType = SystemModelProfileKeys.ANDROID_TEXT_TO_SPEECH.profileId,
     languages = voices.mapTo(linkedSetOf()) { normalizeLanguageCode(it.languageTag) },

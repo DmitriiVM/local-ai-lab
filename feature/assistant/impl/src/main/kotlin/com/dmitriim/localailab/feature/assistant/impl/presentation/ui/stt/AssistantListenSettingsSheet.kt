@@ -49,8 +49,13 @@ internal fun AssistantListenSettingsSheet(
     var draft by remember(settings) { mutableStateOf(settings) }
     var error by remember { mutableStateOf<String?>(null) }
     var selectingRecognitionModel by remember { mutableStateOf(false) }
+    val selectRecognitionModelError = stringResource(CoreUiR.string.assistant_error_select_recognition_model)
     val commit = { modelId: ModelId?, candidate: SpeechInputSettings ->
-        error = if (modelId == null) "Select an installed recognition model." else onApply(modelId, candidate)
+        error = if (modelId == null) {
+            selectRecognitionModelError
+        } else {
+            onApply(modelId, candidate)
+        }
     }
     val selectRecognitionModel: (ModelId) -> Unit = { modelId ->
         val model = models.firstOrNull { it.id == modelId }
@@ -131,7 +136,7 @@ private fun ListenSettingsContent(
             title = stringResource(CoreUiR.string.ui_copy_22),
             description = stringResource(CoreUiR.string.ui_description_4),
         )
-        AssistantSettingsSection("Model")
+        AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_model))
         AssistantInSheetModelPicker(
             label = stringResource(CoreUiR.string.ui_copy_23),
             items = models.map {
@@ -158,7 +163,7 @@ private fun ListenLanguageSettings(
     enabled: Boolean,
     onDraftChange: (SpeechInputSettings) -> Unit,
 ) {
-    AssistantSettingsSection("Recognition")
+    AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_recognition))
     Text(
         text = stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_12),
         style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
@@ -184,7 +189,7 @@ private fun ListenPerformanceSettings(
     error: String?,
     onDraftChange: (SpeechInputSettings) -> Unit,
 ) {
-    AssistantSettingsSection("Performance")
+    AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_performance))
     OutlinedTextField(
         value = draft.threadCount,
         onValueChange = { onDraftChange(draft.copy(threadCount = it.filter(Char::isDigit))) },

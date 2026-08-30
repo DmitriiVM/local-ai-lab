@@ -1,6 +1,8 @@
 package com.dmitriim.localailab.feature.assistant.impl.presentation
 
+import android.app.Application
 import com.dmitriim.localailab.core.audio.input.model.PcmAudioInput
+import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantRunRecorder
 import com.dmitriim.localailab.feature.assistant.impl.domain.stt.AssistantAudioRecorder
 import com.dmitriim.localailab.feature.assistant.impl.domain.stt.AssistantTranscriber
@@ -19,6 +21,7 @@ import kotlinx.coroutines.withContext
 
 internal class AssistantSttController(
     private val host: AssistantOperationHost,
+    private val application: Application,
     private val audioRecorder: AssistantAudioRecorder,
     private val transcriber: AssistantTranscriber,
     private val runRecorder: AssistantRunRecorder,
@@ -30,7 +33,9 @@ internal class AssistantSttController(
         val speechModel = snapshot.selectedSpeechModel?.takeIf { it.installed }
         if (speechModel == null) {
             host.state.update {
-                it.copy(errorMessage = "Configure speech-to-text before using the microphone.")
+                it.copy(
+                    errorMessage = application.getString(CoreUiR.string.assistant_error_configure_speech_to_text),
+                )
             }
             return
         }
@@ -51,7 +56,7 @@ internal class AssistantSttController(
             it.copy(
                 operation = AssistantOperation.Transcribing,
                 level = null,
-                statusMessage = "Finalizing recorded speech…",
+                statusMessage = application.getString(CoreUiR.string.assistant_status_finalizing_recorded_speech),
             )
         }
         audioRecorder.stop()
@@ -68,7 +73,7 @@ internal class AssistantSttController(
                 it.copy(
                     operation = AssistantOperation.Recording,
                     level = null,
-                    statusMessage = "Listening…",
+                    statusMessage = application.getString(CoreUiR.string.assistant_operation_listening),
                     errorMessage = null,
                 )
             }
@@ -79,7 +84,7 @@ internal class AssistantSttController(
                 it.copy(
                     operation = AssistantOperation.Transcribing,
                     level = null,
-                    statusMessage = "Transcribing locally…",
+                    statusMessage = application.getString(CoreUiR.string.assistant_status_transcribing_locally),
                 )
             }
             transcriber.transcribe(
@@ -93,7 +98,9 @@ internal class AssistantSttController(
                     metrics = event.metrics
                 }
             }
-            require(!transcript.isNullOrBlank()) { "No speech was recognized. Record another turn and try again." }
+            require(!transcript.isNullOrBlank()) {
+                application.getString(CoreUiR.string.assistant_error_no_speech_recognized)
+            }
             host.activeLinkedRunIds += runRecorder.recordSpeechInput(
                 status = RunStatus.SUCCEEDED,
                 startedAtEpochMs = startedAt,
@@ -109,7 +116,7 @@ internal class AssistantSttController(
                     it.copy(
                         input = appendTranscript(initial.input, requireNotNull(transcript)),
                         operation = AssistantOperation.Idle,
-                        statusMessage = "Transcript added to the message draft.",
+                        statusMessage = application.getString(CoreUiR.string.assistant_status_transcript_added),
                     )
                 }
             } else {
@@ -132,8 +139,8 @@ internal class AssistantSttController(
                     transcript = transcript,
                     initial = initial,
                     metrics = metrics,
-                    inputError = "Voice input cancelled.",
-                    turnError = "Voice turn cancelled.",
+                    inputError = application.getString(CoreUiR.string.assistant_error_voice_input_cancelled),
+                    turnError = application.getString(CoreUiR.string.assistant_error_voice_turn_cancelled),
                 )
             }
             host.state.update {
@@ -141,7 +148,7 @@ internal class AssistantSttController(
                     operation = AssistantOperation.Idle,
                     level = null,
                     speakingMessageId = null,
-                    statusMessage = "Voice operation stopped.",
+                    statusMessage = application.getString(CoreUiR.string.assistant_status_voice_operation_stopped),
                 )
             }
         } catch (error: Throwable) {

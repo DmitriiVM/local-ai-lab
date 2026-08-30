@@ -49,8 +49,9 @@ internal fun AssistantChatSettingsSheet(
     var error by remember { mutableStateOf<String?>(null) }
     var selectingChatModel by remember { mutableStateOf(false) }
     var advancedSettingsVisible by remember { mutableStateOf(false) }
+    val selectChatModelError = stringResource(CoreUiR.string.assistant_error_select_chat_model)
     val commit = { modelId: ModelId?, candidate: ChatSettings ->
-        error = if (modelId == null) "Select an installed chat model." else onApply(modelId, candidate)
+        error = if (modelId == null) selectChatModelError else onApply(modelId, candidate)
     }
     val selectChatModel: (ModelId) -> Unit = { modelId ->
         val model = models.firstOrNull { it.id == modelId }
@@ -166,7 +167,7 @@ private fun ChatModelSettings(
     onSelectModel: () -> Unit,
     onDraftChange: (ChatSettings) -> Unit,
 ) {
-    AssistantSettingsSection("Model")
+    AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_model))
     AssistantChatModelPicker(
         models = models,
         selectedId = selectedModelId?.value,
@@ -200,19 +201,21 @@ private fun ChatGenerationSettings(
 ) {
     val capabilities = model?.capabilities ?: return
     if (capabilities.systemInstructions) {
-        AssistantSettingsSection("Instructions")
+        AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_instructions))
         SettingField(
-            label = "System prompt",
+            label = stringResource(CoreUiR.string.assistant_settings_system_prompt),
             value = draft.systemPrompt,
             enabled = enabled,
             onChange = { onDraftChange(draft.copy(systemPrompt = it)) },
         )
     }
     val options = capabilities.generationOptions
-    if (options.any { it in chatGenerationOptions }) AssistantSettingsSection("Generation")
+    if (options.any { it in chatGenerationOptions }) {
+        AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_generation))
+    }
     if (LlmGenerationOption.TEMPERATURE in options) {
         SettingField(
-            label = "Temperature (0–2)",
+            label = stringResource(CoreUiR.string.assistant_settings_temperature),
             value = draft.temperature,
             enabled = enabled,
             onChange = { onDraftChange(draft.copy(temperature = it)) },
@@ -220,7 +223,7 @@ private fun ChatGenerationSettings(
     }
     if (LlmGenerationOption.MAX_OUTPUT_TOKENS in options) {
         SettingField(
-            label = "Maximum output tokens",
+            label = stringResource(CoreUiR.string.assistant_settings_max_output_tokens),
             value = draft.maxOutputTokens,
             enabled = enabled,
             onChange = { onDraftChange(draft.copy(maxOutputTokens = it)) },
@@ -228,7 +231,7 @@ private fun ChatGenerationSettings(
     }
     if (LlmGenerationOption.TOP_K in options) {
         SettingField(
-            label = "Top-K (1–200)",
+            label = stringResource(CoreUiR.string.assistant_settings_top_k),
             value = draft.topK,
             enabled = enabled,
             onChange = { onDraftChange(draft.copy(topK = it)) },
@@ -236,7 +239,7 @@ private fun ChatGenerationSettings(
     }
     if (LlmGenerationOption.TOP_P in options) {
         SettingField(
-            label = "Top-P (0.05–1)",
+            label = stringResource(CoreUiR.string.assistant_settings_top_p),
             value = draft.topP,
             enabled = enabled,
             onChange = { onDraftChange(draft.copy(topP = it)) },
@@ -244,7 +247,7 @@ private fun ChatGenerationSettings(
     }
     if (LlmLoadOption.CONTEXT_SIZE in capabilities.loadOptions) {
         SettingField(
-            label = "Context size",
+            label = stringResource(CoreUiR.string.assistant_settings_context_size),
             value = draft.contextSize,
             enabled = enabled,
             onChange = { onDraftChange(draft.copy(contextSize = it)) },
@@ -277,10 +280,10 @@ private fun ChatAdvancedSettings(
         )
     }
     if (!visible) return
-    AssistantSettingsSection("Advanced")
+    AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_advanced))
     if (canSetSeed) {
         SettingField(
-            label = "Seed (blank = engine-selected)",
+            label = stringResource(CoreUiR.string.assistant_settings_seed),
             value = draft.seed,
             enabled = enabled,
             onChange = { onDraftChange(draft.copy(seed = it)) },
@@ -288,7 +291,7 @@ private fun ChatAdvancedSettings(
     }
     if (canSetThreads) {
         SettingField(
-            label = "Thread count (0 = default)",
+            label = stringResource(CoreUiR.string.assistant_settings_thread_count),
             value = draft.threadCount,
             enabled = enabled,
             onChange = { onDraftChange(draft.copy(threadCount = it)) },

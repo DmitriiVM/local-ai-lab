@@ -59,7 +59,8 @@ internal fun AssistantConfigurationBar(
     ) {
         ConfigurationButton(
             title = stringResource(CoreUiR.string.ui_copy_8),
-            value = state.selectedChatModel?.displayName ?: "Not configured",
+            value = state.selectedChatModel?.displayName
+                ?: stringResource(CoreUiR.string.assistant_not_configured),
             onClick = onOpenChat,
             ready = state.selectedChatModel?.installed == true,
             icon = {
@@ -73,7 +74,8 @@ internal fun AssistantConfigurationBar(
         )
         ConfigurationButton(
             title = stringResource(CoreUiR.string.ui_copy_9),
-            value = state.selectedSpeechModel?.displayName ?: "Not configured",
+            value = state.selectedSpeechModel?.displayName
+                ?: stringResource(CoreUiR.string.assistant_not_configured),
             onClick = onOpenListen,
             ready = state.selectedSpeechModel?.installed == true,
             icon = {
@@ -87,7 +89,8 @@ internal fun AssistantConfigurationBar(
         )
         ConfigurationButton(
             title = stringResource(CoreUiR.string.ui_copy_10),
-            value = state.selectedVoice?.displayName ?: "Not configured",
+            value = state.selectedVoice?.displayName
+                ?: stringResource(CoreUiR.string.assistant_not_configured),
             onClick = onOpenSpeak,
             ready = state.selectedVoiceModel?.installed == true && state.selectedVoice != null,
             icon = {
@@ -148,7 +151,14 @@ private fun ConfigurationButton(
                 )
                 Icon(
                     imageVector = if (ready) Icons.Outlined.CheckCircle else Icons.Outlined.ErrorOutline,
-                    contentDescription = if (ready) "$title ready" else "$title not configured",
+                    contentDescription = stringResource(
+                        if (ready) {
+                            CoreUiR.string.assistant_configuration_ready
+                        } else {
+                            CoreUiR.string.assistant_configuration_not_configured
+                        },
+                        title,
+                    ),
                     tint = if (ready) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                 )
             }
@@ -372,7 +382,7 @@ private fun AssistantOperationStatus(
             level != null -> Text(
                 text = stringResource(
                     CoreUiR.string.assistant_assistant_controls_format_1,
-                    "%.1f".format(level.elapsedMs / 1_000.0),
+                    level.elapsedMs / 1_000.0,
                     (level.peak * 100).toInt(),
                 ),
                 style = MaterialTheme.typography.bodySmall,

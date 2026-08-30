@@ -1,6 +1,8 @@
 package com.dmitriim.localailab.feature.assistant.impl.presentation
 
+import android.app.Application
 import com.dmitriim.localailab.ai.api.chat.ChatEngine
+import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.assistant.impl.domain.chat.ChatGenerationEvent
 import com.dmitriim.localailab.feature.assistant.impl.domain.chat.ChatGenerationRequest
 import com.dmitriim.localailab.feature.assistant.impl.domain.chat.GenerateAssistantResponse
@@ -25,6 +27,7 @@ import kotlinx.coroutines.withContext
 
 internal class AssistantChatController(
     private val host: AssistantOperationHost,
+    private val application: Application,
     private val chatEngine: ChatEngine,
     private val generateResponse: GenerateAssistantResponse,
     private val persistAssistantTurn: PersistAssistantTurn,
@@ -35,10 +38,21 @@ internal class AssistantChatController(
         if (!host.state.value.isIdle) return
         host.scope.launch(Dispatchers.Default) {
             runCatching { chatEngine.unload() }
-                .onSuccess { host.state.update { it.copy(statusMessage = "Chat model unloaded.") } }
+                .onSuccess {
+                    host.state.update {
+                        it.copy(
+                            statusMessage = application.getString(
+                                CoreUiR.string.assistant_status_chat_model_unloaded,
+                            ),
+                        )
+                    }
+                }
                 .onFailure { error ->
                     host.state.update {
-                        it.copy(errorMessage = error.message ?: "Could not unload the chat model.")
+                        it.copy(
+                            errorMessage = error.message
+                                ?: application.getString(CoreUiR.string.assistant_error_unload_chat_model),
+                        )
                     }
                 }
         }
@@ -96,7 +110,9 @@ internal class AssistantChatController(
         speakAfter: Boolean,
     ): GenerationOutcome {
         val snapshot = host.state.value
-        val selectedId = snapshot.selectedChatModelId ?: error("Select an installed chat model first.")
+        val selectedId = snapshot.selectedChatModelId ?: error(
+            application.getString(CoreUiR.string.assistant_error_chat_model_selection),
+        )
         val settings = snapshot.chatSettings.toEffective()
         val visibleMessages = if (appendUser) base + ChatMessage.user(userText) else base
         val startedAt = System.currentTimeMillis()
@@ -110,7 +126,7 @@ internal class AssistantChatController(
                     messages = visibleMessages,
                     operation = AssistantOperation.Loading,
                     errorMessage = null,
-                    statusMessage = "Loading the local chat model…",
+                    statusMessage = application.getString(CoreUiR.string.assistant_status_chat_model_loading),
                     metrics = null,
                 )
             }
@@ -129,7 +145,9 @@ internal class AssistantChatController(
                         host.state.update {
                             it.copy(
                                 operation = AssistantOperation.Generating,
-                                statusMessage = "Generating locally…",
+                                statusMessage = application.getString(
+                                    CoreUiR.string.assistant_status_generating_locally,
+                                ),
                                 contextUsage = event.contextUsage.toUi(),
                                 messages = visibleMessages + ChatMessage.assistant(
                                     id = requireNotNull(assistantId),
@@ -148,7 +166,7 @@ internal class AssistantChatController(
 
                     is ChatGenerationEvent.Completed -> {
                         val id = requireNotNull(assistantId) {
-                            "The chat engine completed without preparing a response."
+                            application.getString(CoreUiR.string.assistant_error_response_not_prepared)
                         }
                         val result = event.generation
                         completedText = result.text
@@ -203,7 +221,7 @@ internal class AssistantChatController(
                 current.copy(
                     operation = AssistantOperation.Idle,
                     speakingMessageId = null,
-                    statusMessage = "Generation stopped.",
+                    statusMessage = application.getString(CoreUiR.string.assistant_status_generation_stopped),
                     messages = current.messages.map { message ->
                         if (message.streaming) {
                             message.copy(streaming = false, failed = true)
@@ -226,7 +244,7 @@ internal class AssistantChatController(
                         output = partial,
                         settings = settings,
                         metrics = null,
-                        error = "Generation cancelled.",
+                        error = application.getString(CoreUiR.string.assistant_error_generation_cancelled),
                         messages = host.state.value.messages,
                         incompleteAssistant = true,
                     ),
@@ -234,7 +252,8 @@ internal class AssistantChatController(
             }
             throw cancelled
         } catch (error: Throwable) {
-            val message = error.message ?: "Local generation failed."
+            val message = error.message
+                ?: application.getString(CoreUiR.string.assistant_error_local_generation_failed)
             host.state.update { current ->
                 current.copy(
                     operation = AssistantOperation.Idle,

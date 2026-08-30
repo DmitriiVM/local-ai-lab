@@ -1,5 +1,6 @@
 package com.dmitriim.localailab.feature.assistant.impl.presentation
 
+import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +17,7 @@ import com.dmitriim.localailab.ai.api.system.SystemTextToSpeechSupport
 import com.dmitriim.localailab.core.audio.input.storage.ReferenceVoiceStore
 import com.dmitriim.localailab.core.di.AppScope
 import com.dmitriim.localailab.core.operation.ForegroundOperationCoordinator
+import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantRunRecorder
 import com.dmitriim.localailab.feature.assistant.impl.domain.chat.GenerateAssistantResponse
 import com.dmitriim.localailab.feature.assistant.impl.domain.chat.PersistAssistantTurn
@@ -53,6 +55,7 @@ import kotlinx.coroutines.launch
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
 class AssistantViewModel(
+    private val application: Application,
     private val modelLibrary: ModelLibrary,
     private val modelTransfers: ModelTransfers,
     private val systemSpeechSupport: SystemSpeechToTextSupport,
@@ -77,6 +80,7 @@ class AssistantViewModel(
     private var conversationId = UUID.randomUUID().toString()
 
     private val operationController = AssistantOperationController(
+        application = application,
         scope = viewModelScope,
         state = mutableState,
         chatEngine = chatEngine,
@@ -118,10 +122,12 @@ class AssistantViewModel(
     }
 
     fun applyChatSettings(modelId: ModelId, settings: ChatSettings): String? {
-        if (!mutableState.value.isIdle) return "Wait for the current operation to finish."
+        if (!mutableState.value.isIdle) return application.getString(CoreUiR.string.assistant_error_operation_active)
         val model = mutableState.value.chatModels.firstOrNull { it.id == modelId && it.installed }
-            ?: return "Select an installed chat model."
-        if (model.capabilities == null) return "The selected model's LLM runtime is not packaged."
+            ?: return application.getString(CoreUiR.string.assistant_error_select_chat_model)
+        if (model.capabilities == null) {
+            return application.getString(CoreUiR.string.assistant_error_chat_runtime_unavailable)
+        }
         val normalizedSettings = settings.copy(
             computePreference = model.supportedComputePreference(settings.computePreference),
         )
@@ -134,7 +140,14 @@ class AssistantViewModel(
                 chatSettings = normalizedSettings,
                 metrics = null,
                 errorMessage = null,
-                statusMessage = if (modelChanged) "${model.displayName} will be used for the next message." else null,
+                statusMessage = if (modelChanged) {
+                    application.getString(
+                        CoreUiR.string.assistant_status_chat_model_next_message,
+                        model.displayName,
+                    )
+                } else {
+                    null
+                },
             )
         }
         if (modelChanged) operationController.unloadChatRuntime()
@@ -143,12 +156,17 @@ class AssistantViewModel(
     }
 
     fun applySpeechInputSettings(modelId: ModelId, settings: SpeechInputSettings): String? {
-        if (!mutableState.value.isIdle) return "Wait for the current operation to finish."
+        if (!mutableState.value.isIdle) return application.getString(CoreUiR.string.assistant_error_operation_active)
         val model = mutableState.value.speechModels.firstOrNull { it.id == modelId && it.installed }
-            ?: return "Select an installed speech-to-text model."
+            ?: return application.getString(CoreUiR.string.assistant_error_select_speech_model)
         val error = runCatching(settings::validate).exceptionOrNull()?.message
         if (error != null) return error
-        if (!model.supports(settings.languageCode)) return "${model.displayName} does not support this language."
+        if (!model.supports(settings.languageCode)) {
+            return application.getString(
+                CoreUiR.string.assistant_error_model_language_unsupported,
+                model.displayName,
+            )
+        }
         mutableState.update {
             it.copy(selectedSpeechModelId = modelId, speechInputSettings = settings, errorMessage = null)
         }
@@ -157,13 +175,13 @@ class AssistantViewModel(
     }
 
     fun applySpeechOutputSettings(modelId: ModelId, voiceId: String, settings: SpeechOutputSettings): String? {
-        if (!mutableState.value.isIdle) return "Wait for the current operation to finish."
+        if (!mutableState.value.isIdle) return application.getString(CoreUiR.string.assistant_error_operation_active)
         val model = mutableState.value.voiceModels.firstOrNull { it.id == modelId && it.installed }
-            ?: return "Select an installed text-to-speech model."
+            ?: return application.getString(CoreUiR.string.assistant_error_select_tts_model)
         val error = runCatching(settings::validate).exceptionOrNull()?.message
         if (error != null) return error
         if (model.compatibleVoices(settings.languageCode).none { it.id == voiceId }) {
-            return "Select a voice compatible with this language."
+            return application.getString(CoreUiR.string.assistant_error_select_compatible_voice)
         }
         val modelChanged = mutableState.value.selectedVoiceModelId != modelId
         mutableState.update {
@@ -188,7 +206,12 @@ class AssistantViewModel(
         if (!snapshot.canSend) return false
         val model = snapshot.selectedChatModel ?: return false
         val settings = runCatching(snapshot.chatSettings::toEffective).getOrElse { error ->
-            mutableState.update { it.copy(errorMessage = error.message ?: "Chat settings are invalid.") }
+            mutableState.update {
+                it.copy(
+                    errorMessage = error.message
+                        ?: application.getString(CoreUiR.string.assistant_error_chat_settings_invalid),
+                )
+            }
             return false
         }
         val messages = buildList {
@@ -231,7 +254,7 @@ class AssistantViewModel(
     fun stopRecording() = operationController.stopRecording()
 
     fun microphonePermissionDenied() = mutableState.update {
-        it.copy(errorMessage = "Microphone permission is required for voice input.")
+        it.copy(errorMessage = application.getString(CoreUiR.string.assistant_error_microphone_permission))
     }
 
     fun speakMessage(messageId: String) = operationController.speakMessage(messageId)
@@ -298,11 +321,18 @@ class AssistantViewModel(
                 AssistantModelOptions(
                     chat = chatModelOptions(installed, catalog, chatEngine::capabilitiesFor),
                     speech = speechModelOptions(
-                        installed,
-                        catalog,
+                        application = application,
+                        installedModels = installed,
+                        catalogModels = catalog,
                         includeAndroidRecognizer = systemSpeechSupport.isOnDeviceRecognizerAvailable,
                     ),
-                    voice = textToSpeechModelOptions(installed, catalog, references, systemVoices),
+                    voice = textToSpeechModelOptions(
+                        application = application,
+                        installedModels = installed,
+                        catalogModels = catalog,
+                        referenceVoices = references,
+                        systemVoices = systemVoices,
+                    ),
                 )
             }
             combine(options, preferencesRepository.preferences, ::Pair).collectLatest { (modelOptions, preferences) ->

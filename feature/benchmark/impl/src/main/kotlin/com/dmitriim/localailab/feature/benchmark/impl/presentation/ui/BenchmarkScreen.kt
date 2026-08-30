@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -31,6 +32,7 @@ import com.dmitriim.localailab.ai.api.profiling.InferenceResourceMetrics
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkWorkload
+import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkStartupMode
 import com.dmitriim.localailab.feature.benchmark.impl.presentation.BenchmarkLabUiState
 
 @Composable
@@ -119,7 +121,7 @@ fun BenchmarkScreen(
                             style = MaterialTheme.typography.titleSmall,
                         )
                         Text(
-                            text = if (state.startupMode.name == "WARM") {
+                            text = if (state.startupMode == BenchmarkStartupMode.WARM) {
                                 stringResource(CoreUiR.string.benchmark_reuse_runtime)
                             } else {
                                 stringResource(CoreUiR.string.benchmark_reload_runtime)
@@ -131,7 +133,7 @@ fun BenchmarkScreen(
                     AssistChip(
                         onClick = onToggleStartupMode,
                         enabled = !state.isRunning,
-                        label = { Text(state.startupMode.name.lowercase().replaceFirstChar(Char::titlecase)) },
+                        label = { Text(state.startupMode.displayName()) },
                     )
                 }
             }
@@ -168,8 +170,11 @@ fun BenchmarkScreen(
                     Text(
                         text = stringResource(
                             CoreUiR.string.benchmark_measurement_summary,
-                            state.completedIterations.size,
-                            if (state.completedIterations.size == 1) "" else "s",
+                            pluralStringResource(
+                                CoreUiR.plurals.benchmark_measurement_count,
+                                state.completedIterations.size,
+                                state.completedIterations.size,
+                            ),
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
@@ -184,7 +189,7 @@ fun BenchmarkScreen(
                         style = MaterialTheme.typography.bodySmall,
                     )
                     state.summary?.let { summary ->
-                        ResultSection("Latency summary")
+                        ResultSection(stringResource(CoreUiR.string.benchmark_result_latency_summary))
                         ResultMetric(
                             label = stringResource(CoreUiR.string.ui_copy_42),
                             value = summary.medianLatencyMs.durationText(),
@@ -197,28 +202,34 @@ fun BenchmarkScreen(
                         )
                         ResultMetric(
                             label = stringResource(CoreUiR.string.ui_copy_44),
-                            value = "${summary.minimumLatencyMs.durationText()}–" +
+                            value = stringResource(
+                                CoreUiR.string.benchmark_result_latency_range,
+                                summary.minimumLatencyMs.durationText(),
                                 summary.maximumLatencyMs.durationText(),
+                            ),
                             description = stringResource(CoreUiR.string.ui_description_21),
                         )
                         ResultMetric(
                             label = stringResource(CoreUiR.string.ui_copy_45),
                             value = summary.medianThroughputPerSecond
                                 ?.throughputText(workload.capability)
-                                ?: "Unavailable",
+                                ?: stringResource(CoreUiR.string.benchmark_result_output_rate_unavailable),
                             description = if (summary.medianThroughputPerSecond == null) {
-                                "This runtime did not report output units, so only latency can be compared."
+                                stringResource(CoreUiR.string.benchmark_result_output_rate_unavailable_description)
                             } else {
-                                "Median generated output per second across measured runs. Higher is faster."
+                                stringResource(CoreUiR.string.benchmark_result_output_rate_description)
                             },
                         )
                     }
                     state.completedIterations.last().telemetry.resources?.let { resources ->
-                        ResultSection("Resources — last measured run")
+                        ResultSection(stringResource(CoreUiR.string.benchmark_result_resources_last_run))
                         ResultMetric(
                             label = stringResource(CoreUiR.string.ui_copy_46),
-                            value = "${resources.averageProcessCpuPercent.percentText()} avg · " +
-                                "${resources.peakProcessCpuPercent.percentText()} peak",
+                            value = stringResource(
+                                CoreUiR.string.benchmark_result_cpu_usage,
+                                resources.averageProcessCpuPercent.percentText(),
+                                resources.peakProcessCpuPercent.percentText(),
+                            ),
                             description = stringResource(CoreUiR.string.ui_description_22),
                         )
                         ResultMetric(
@@ -245,7 +256,7 @@ fun BenchmarkScreen(
                         }
                     }
                     HorizontalDivider()
-                    ResultSection("Individual run latency")
+                    ResultSection(stringResource(CoreUiR.string.benchmark_result_individual_run_latency))
                     Text(
                         text = stringResource(CoreUiR.string.ui_copy_51),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -296,53 +307,98 @@ private fun ResultMetric(
 }
 
 @Composable
-private fun BenchmarkLabUiState.resultsCopyText(workload: BenchmarkWorkload): String = buildList {
-    add("Profile results")
-    add(workload.capabilityLabel())
-    add("Model: ${workload.modelDisplayName}")
-    add("Workload: ${workload.workloadDescription()}")
-    add(
-        "Configuration: $warmupIterations warm-up${if (warmupIterations == 1) "" else "s"}, " +
-            "$measuredIterations measured run${if (measuredIterations == 1) "" else "s"}, " +
-            "${startupMode.name.lowercase().replaceFirstChar(Char::titlecase)} startup",
+private fun BenchmarkLabUiState.resultsCopyText(workload: BenchmarkWorkload): String {
+    val lines = mutableListOf(
+        stringResource(CoreUiR.string.benchmark_copy_profile_results),
+        workload.capabilityLabel(),
+        stringResource(CoreUiR.string.benchmark_copy_model, workload.modelDisplayName),
+        stringResource(CoreUiR.string.benchmark_copy_workload, workload.workloadDescription()),
+        stringResource(
+            CoreUiR.string.benchmark_copy_configuration,
+            pluralStringResource(
+                CoreUiR.plurals.benchmark_warmup_count,
+                warmupIterations,
+                warmupIterations,
+            ),
+            pluralStringResource(
+                CoreUiR.plurals.benchmark_measured_run_count,
+                measuredIterations,
+                measuredIterations,
+            ),
+            startupMode.displayName(),
+        ),
     )
-    add(
-        "External trace: " + if (completedIterations.any { it.telemetry.systemTraceEnabled }) {
-            "recording"
-        } else {
-            "not recording (in-app telemetry collected)"
-        },
-    )
-    summary?.let { resultSummary ->
-        add("")
-        add("Latency summary (lower is faster)")
-        add("Typical latency (median): ${resultSummary.medianLatencyMs.durationText()}")
-        add("p95 latency: ${resultSummary.p95LatencyMs.durationText()}")
-        add(
-            "Latency range: ${resultSummary.minimumLatencyMs.durationText()}–" +
+    val traceStatus = if (completedIterations.any { it.telemetry.systemTraceEnabled }) {
+        stringResource(CoreUiR.string.benchmark_copy_trace_recording)
+    } else {
+        stringResource(CoreUiR.string.benchmark_copy_trace_not_recording)
+    }
+    lines += stringResource(CoreUiR.string.benchmark_copy_external_trace, traceStatus)
+
+    val resultSummary = summary
+    if (resultSummary != null) {
+        lines += ""
+        lines += stringResource(CoreUiR.string.benchmark_copy_latency_summary)
+        lines += stringResource(
+            CoreUiR.string.benchmark_copy_typical_latency,
+            resultSummary.medianLatencyMs.durationText(),
+        )
+        lines += stringResource(
+            CoreUiR.string.benchmark_copy_p95_latency,
+            resultSummary.p95LatencyMs.durationText(),
+        )
+        lines += stringResource(
+            CoreUiR.string.benchmark_copy_latency_range,
+            stringResource(
+                CoreUiR.string.benchmark_result_latency_range,
+                resultSummary.minimumLatencyMs.durationText(),
                 resultSummary.maximumLatencyMs.durationText(),
+            ),
         )
         val outputRate = resultSummary.medianThroughputPerSecond
             ?.throughputText(workload.capability)
-            ?: "Unavailable"
-        add("Output rate: $outputRate")
+            ?: stringResource(CoreUiR.string.benchmark_result_output_rate_unavailable)
+        lines += stringResource(CoreUiR.string.benchmark_copy_output_rate, outputRate)
     }
-    completedIterations.lastOrNull()?.telemetry?.resources?.let { resources ->
-        add("")
-        add("Resources (last measured run)")
-        add(
-            "CPU usage: ${resources.averageProcessCpuPercent.percentText()} average · " +
-                "${resources.peakProcessCpuPercent.percentText()} peak",
+
+    val resources = completedIterations.lastOrNull()?.telemetry?.resources
+    if (resources != null) {
+        lines += ""
+        lines += stringResource(CoreUiR.string.benchmark_copy_resources_last_run)
+        lines += stringResource(
+            CoreUiR.string.benchmark_copy_cpu_usage,
+            resources.averageProcessCpuPercent.percentText(),
+            resources.peakProcessCpuPercent.percentText(),
         )
-        add("Peak app memory: ${resources.peakPssBytes.memoryText()} PSS")
-        add("Thermal state: ${resources.thermalStatusEnd.thermalStatusText()}")
-        add("Battery use: ${resources.batteryValueText()}")
-        summary?.totalBatteryEnergyDeltaNwh?.let { add("Session energy: ${it.energyText()}") }
+        lines += stringResource(
+            CoreUiR.string.benchmark_copy_peak_memory,
+            resources.peakPssBytes.memoryText(),
+        )
+        lines += stringResource(
+            CoreUiR.string.benchmark_copy_thermal_state,
+            resources.thermalStatusEnd.thermalStatusText(),
+        )
+        lines += stringResource(
+            CoreUiR.string.benchmark_copy_battery_use,
+            resources.batteryValueText(),
+        )
+        val energy = summary?.totalBatteryEnergyDeltaNwh
+        if (energy != null) {
+            lines += stringResource(CoreUiR.string.benchmark_copy_session_energy, energy.energyText())
+        }
     }
-    add("")
-    add("Individual run latency (lower is faster)")
-    completedIterations.forEach { result -> add("Run ${result.iteration}: ${result.latencyMs.durationText()}") }
-}.joinToString(separator = "\n")
+
+    lines += ""
+    lines += stringResource(CoreUiR.string.benchmark_copy_individual_run_latency)
+    for (result in completedIterations) {
+        lines += stringResource(
+            CoreUiR.string.benchmark_copy_run,
+            result.iteration,
+            result.latencyMs.durationText(),
+        )
+    }
+    return lines.joinToString(separator = "\n")
+}
 
 @Composable
 private fun IterationControl(
@@ -417,21 +473,48 @@ private fun BenchmarkWorkload.workloadDescription(): String = when (this) {
     )
 }
 
-private fun Double?.percentText(): String = this?.let { "%.1f%%".format(it) } ?: "Unavailable"
+@Composable
+private fun BenchmarkStartupMode.displayName(): String = stringResource(
+    when (this) {
+        BenchmarkStartupMode.WARM -> CoreUiR.string.benchmark_startup_mode_warm
+        BenchmarkStartupMode.COLD -> CoreUiR.string.benchmark_startup_mode_cold
+    },
+)
 
-private fun Long?.durationText(): String = this?.let { durationMs ->
-    if (durationMs >= 1_000L) "%.2f s".format(durationMs / 1_000.0) else "$durationMs ms"
-} ?: "Unavailable"
-
-private fun Double.throughputText(capability: AiCapability): String = when (capability) {
-    AiCapability.CHAT -> "${"%.2f".format(this)} tokens/s"
-    AiCapability.SPEECH_TO_TEXT,
-    AiCapability.TEXT_TO_SPEECH,
-    -> "${"%.2f".format(this)}× real time"
-    else -> "${"%.2f".format(this)} units/s"
+@Composable
+private fun Double?.percentText(): String = if (this == null) {
+    stringResource(CoreUiR.string.benchmark_value_unavailable)
+} else {
+    stringResource(CoreUiR.string.benchmark_value_percent, this)
 }
 
-private fun Long?.memoryText(): String = this?.let { "%.1f MiB".format(it / 1_048_576.0) } ?: "Unavailable"
+@Composable
+private fun Long?.durationText(): String = if (this == null) {
+    stringResource(CoreUiR.string.benchmark_value_unavailable)
+} else if (this >= 1_000L) {
+    stringResource(CoreUiR.string.benchmark_value_duration_seconds, this / 1_000.0)
+} else {
+    stringResource(CoreUiR.string.benchmark_value_duration_millis, this)
+}
+
+@Composable
+private fun Double.throughputText(capability: AiCapability): String = stringResource(
+    when (capability) {
+        AiCapability.CHAT -> CoreUiR.string.benchmark_value_chat_rate
+        AiCapability.SPEECH_TO_TEXT,
+        AiCapability.TEXT_TO_SPEECH,
+        -> CoreUiR.string.benchmark_value_realtime_rate
+        else -> CoreUiR.string.benchmark_value_units_rate
+    },
+    this,
+)
+
+@Composable
+private fun Long?.memoryText(): String = if (this == null) {
+    stringResource(CoreUiR.string.benchmark_value_unavailable)
+} else {
+    stringResource(CoreUiR.string.benchmark_value_memory_mib, this / 1_048_576.0)
+}
 
 @Composable
 private fun Int?.thermalStatusText(): String = stringResource(
@@ -448,28 +531,36 @@ private fun Int?.thermalStatusText(): String = stringResource(
     },
 )
 
+@Composable
 private fun InferenceResourceMetrics.batteryValueText(): String {
-    if (!batteryMeasurementsAvailable) return "Unavailable"
-    val readings = buildList {
-        batteryEnergyDeltaNwh?.takeIf { kotlin.math.abs(it) >= 10_000L }?.let { add(it.energyText()) }
-        batteryChargeDeltaUah?.takeIf { kotlin.math.abs(it) >= 10L }?.let { add(it.chargeText()) }
-        averageBatteryCurrentUa
-            ?.takeIf { kotlin.math.abs(it) >= 500.0 }
-            ?.let { current -> add("${"%.1f".format(current / 1_000.0)} mA average") }
+    if (!batteryMeasurementsAvailable) return stringResource(CoreUiR.string.benchmark_value_unavailable)
+    val readings = mutableListOf<String>()
+    val energy = batteryEnergyDeltaNwh
+    if (energy != null && kotlin.math.abs(energy) >= 10_000L) {
+        readings += energy.energyText()
     }
-    return readings.takeIf(List<String>::isNotEmpty)
-        ?.joinToString(separator = " · ")
-        ?: "No measurable change"
+    val charge = batteryChargeDeltaUah
+    if (charge != null && kotlin.math.abs(charge) >= 10L) {
+        readings += charge.chargeText()
+    }
+    val current = averageBatteryCurrentUa
+    if (current != null && kotlin.math.abs(current) >= 500.0) {
+        readings += stringResource(CoreUiR.string.benchmark_battery_current, current / 1_000.0)
+    }
+    return readings.joinToString(separator = " · ")
+        .ifEmpty { stringResource(CoreUiR.string.benchmark_battery_no_measurable_change) }
 }
 
+@Composable
 private fun Long.energyText(): String = if (this >= 0L) {
-    "energy used: ${"%.3f".format(this / 1_000_000.0)} mWh"
+    stringResource(CoreUiR.string.benchmark_energy_used, this / 1_000_000.0)
 } else {
-    "energy change: ${"%.3f".format(this / 1_000_000.0)} mWh"
+    stringResource(CoreUiR.string.benchmark_energy_change, this / 1_000_000.0)
 }
 
+@Composable
 private fun Long.chargeText(): String = if (this >= 0L) {
-    "charge used: ${"%.1f".format(this / 1_000.0)} mAh"
+    stringResource(CoreUiR.string.benchmark_charge_used, this / 1_000.0)
 } else {
-    "charge change: ${"%.1f".format(this / 1_000.0)} mAh"
+    stringResource(CoreUiR.string.benchmark_charge_change, this / 1_000.0)
 }

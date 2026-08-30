@@ -1,5 +1,6 @@
 package com.dmitriim.localailab.feature.models.impl.models.presentation
 
+import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import com.dmitriim.localailab.ai.api.model.library.CatalogModel
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
 import com.dmitriim.localailab.ai.api.model.manifest.ModelManifest
 import com.dmitriim.localailab.core.di.AppScope
+import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.models.api.data.HuggingFaceCredentialStatus
 import com.dmitriim.localailab.feature.models.api.data.ModelDownloadCredentials
 import com.dmitriim.localailab.feature.models.api.data.ModelLibrary
@@ -31,6 +33,7 @@ import kotlinx.coroutines.launch
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
 class ModelsViewModel(
+    private val application: Application,
     private val modelLibrary: ModelLibrary,
     private val modelTransfers: ModelTransfers,
     private val modelDiagnostics: ModelDiagnostics,
@@ -116,7 +119,8 @@ class ModelsViewModel(
                             )
                             current.copy(
                                 isCheckingCompatibility = false,
-                                compatibilityError = error.message ?: "Compatibility could not be checked.",
+                                compatibilityError = error.message
+                                    ?: application.getString(CoreUiR.string.models_error_compatibility_check),
                             )
                         },
                     )
@@ -137,14 +141,16 @@ class ModelsViewModel(
             Log.i(TAG, "Models UI download requested: modelId=${modelId.value}")
             modelTransfers.download(modelId, ModelTransferNetworkPolicy.WIFI_ONLY).getOrThrow()
             Log.i(TAG, "Models UI download scheduled: modelId=${modelId.value}")
-            "Download scheduled."
+            application.getString(CoreUiR.string.models_status_download_scheduled)
         }
     }
 
     fun pauseTransfer(modelId: ModelId) {
         viewModelScope.launch {
             modelTransfers.pauseTransfer(modelId)
-            mutableUiState.update { it.copy(message = "Download paused.") }
+            mutableUiState.update {
+                it.copy(message = application.getString(CoreUiR.string.models_status_download_paused))
+            }
         }
     }
 
@@ -158,9 +164,9 @@ class ModelsViewModel(
     ) = launchOperation("resume download") {
         modelTransfers.resumeTransfer(modelId, networkPolicy).getOrThrow()
         if (networkPolicy == ModelTransferNetworkPolicy.ANY_NETWORK) {
-            "Download scheduled using any network."
+            application.getString(CoreUiR.string.models_status_download_any_network)
         } else {
-            "Download scheduled on Wi-Fi."
+            application.getString(CoreUiR.string.models_status_download_wifi)
         }
     }
 
@@ -197,7 +203,7 @@ class ModelsViewModel(
                         it.copy(
                             pendingHuggingFaceTokenModelId = null,
                             isSavingHuggingFaceToken = false,
-                            message = "Download scheduled.",
+                            message = application.getString(CoreUiR.string.models_status_download_scheduled),
                         )
                     }
                 },
@@ -205,7 +211,8 @@ class ModelsViewModel(
                     mutableUiState.update {
                         it.copy(
                             isSavingHuggingFaceToken = false,
-                            huggingFaceTokenError = error.message ?: "The token could not be saved.",
+                            huggingFaceTokenError = error.message
+                                ?: application.getString(CoreUiR.string.models_error_save_token),
                         )
                     }
                 },
@@ -236,9 +243,10 @@ class ModelsViewModel(
                     )
                     ModelValidationFeedback(
                         message = if (ready) {
-                            "Validation passed."
+                            application.getString(CoreUiR.string.models_validation_passed)
                         } else {
-                            model.validationMessage ?: "Validation found a problem."
+                            model.validationMessage
+                                ?: application.getString(CoreUiR.string.models_validation_problem)
                         },
                         isError = !ready,
                     )
@@ -246,7 +254,8 @@ class ModelsViewModel(
                 onFailure = { error ->
                     Log.e(TAG, "Models UI validation failed: modelId=${modelId.value}, message=${error.message}", error)
                     ModelValidationFeedback(
-                        message = error.message ?: "Validation failed.",
+                        message = error.message
+                            ?: application.getString(CoreUiR.string.models_error_validation),
                         isError = true,
                     )
                 },
@@ -290,7 +299,10 @@ class ModelsViewModel(
             )
             modelLibrary.delete(model.manifest.modelId).getOrThrow()
             Log.i(TAG, "Models UI delete completed: modelId=${model.manifest.modelId.value}")
-            "${model.manifest.displayName} was deleted."
+            application.getString(
+                CoreUiR.string.models_status_deleted,
+                model.manifest.displayName,
+            )
         }
     }
 
@@ -311,7 +323,12 @@ class ModelsViewModel(
                 }
                 .onFailure { error ->
                     Log.e(TAG, "Models UI operation failed: operation=$operation, message=${error.message}", error)
-                    mutableUiState.update { it.copy(message = error.message ?: "The operation failed.") }
+                    mutableUiState.update {
+                        it.copy(
+                            message = error.message
+                                ?: application.getString(CoreUiR.string.models_error_operation),
+                        )
+                    }
                 }
         }
     }

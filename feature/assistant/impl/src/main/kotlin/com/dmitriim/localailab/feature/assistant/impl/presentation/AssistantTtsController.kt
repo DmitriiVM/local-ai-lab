@@ -1,6 +1,8 @@
 package com.dmitriim.localailab.feature.assistant.impl.presentation
 
+import android.app.Application
 import com.dmitriim.localailab.ai.api.model.manifest.ModelId
+import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.assistant.impl.domain.AssistantRunRecorder
 import com.dmitriim.localailab.feature.assistant.impl.domain.tts.AssistantSpeechOutput
 import com.dmitriim.localailab.feature.assistant.impl.presentation.state.AssistantOperation
@@ -21,6 +23,7 @@ import kotlinx.coroutines.withContext
 
 internal class AssistantTtsController(
     private val host: AssistantOperationHost,
+    private val application: Application,
     private val speechOutput: AssistantSpeechOutput,
     private val runRecorder: AssistantRunRecorder,
 ) {
@@ -48,19 +51,24 @@ internal class AssistantTtsController(
         settings: SpeechOutputSettings,
     ): String? {
         val snapshot = host.state.value
-        if (!snapshot.isIdle) return "Wait for the current operation to finish."
+        if (!snapshot.isIdle) {
+            return application.getString(CoreUiR.string.assistant_error_operation_active)
+        }
         val model = snapshot.voiceModels.firstOrNull { it.id == modelId && it.installed }
-            ?: return "Select an installed text-to-speech model."
+            ?: return application.getString(CoreUiR.string.assistant_error_select_tts_model)
         val validationError = runCatching(settings::validate).exceptionOrNull()?.message
         if (validationError != null) return validationError
         val voice = model.compatibleVoices(settings.languageCode).firstOrNull { it.id == voiceId }
-            ?: return "Select a voice compatible with this language."
+            ?: return application.getString(CoreUiR.string.assistant_error_select_compatible_voice)
         host.launchForeground {
             try {
                 host.state.update {
                     it.copy(
                         operation = AssistantOperation.Speaking,
-                        statusMessage = "Previewing ${voice.displayName}…",
+                        statusMessage = application.getString(
+                            CoreUiR.string.assistant_status_previewing_voice,
+                            voice.displayName,
+                        ),
                         errorMessage = null,
                     )
                 }
@@ -68,21 +76,22 @@ internal class AssistantTtsController(
                 host.state.update {
                     it.copy(
                         operation = AssistantOperation.Idle,
-                        statusMessage = "Voice preview completed.",
+                        statusMessage = application.getString(CoreUiR.string.assistant_status_voice_preview_completed),
                     )
                 }
             } catch (_: CancellationException) {
                 host.state.update {
                     it.copy(
                         operation = AssistantOperation.Idle,
-                        statusMessage = "Voice preview stopped.",
+                        statusMessage = application.getString(CoreUiR.string.assistant_status_voice_preview_stopped),
                     )
                 }
             } catch (error: Throwable) {
                 host.state.update {
                     it.copy(
                         operation = AssistantOperation.Idle,
-                        errorMessage = error.message ?: "Could not preview this voice.",
+                        errorMessage = error.message
+                            ?: application.getString(CoreUiR.string.assistant_error_preview_voice),
                     )
                 }
             }
@@ -97,7 +106,7 @@ internal class AssistantTtsController(
         if (model == null || voice == null || !model.installed) {
             return SpeechOutcome(
                 succeeded = false,
-                error = "Configure text-to-speech before speaking responses.",
+                error = application.getString(CoreUiR.string.assistant_error_configure_text_to_speech),
             )
         }
         val startedAt = System.currentTimeMillis()
@@ -107,7 +116,10 @@ internal class AssistantTtsController(
                 it.copy(
                     operation = AssistantOperation.Speaking,
                     speakingMessageId = messageId,
-                    statusMessage = "Speaking with ${voice.displayName}…",
+                    statusMessage = application.getString(
+                        CoreUiR.string.assistant_status_speaking_with_voice,
+                        voice.displayName,
+                    ),
                     errorMessage = null,
                 )
             }
@@ -142,19 +154,20 @@ internal class AssistantTtsController(
                     languageCode = snapshot.speechOutputSettings.languageCode,
                     voiceId = voice.id,
                     metrics = metrics,
-                    error = "Speech playback cancelled.",
+                    error = application.getString(CoreUiR.string.assistant_error_speech_playback_cancelled),
                 )
             }
             host.state.update {
                 it.copy(
                     operation = AssistantOperation.Idle,
                     speakingMessageId = null,
-                    statusMessage = "Speech stopped.",
+                    statusMessage = application.getString(CoreUiR.string.assistant_status_speech_stopped),
                 )
             }
             throw cancelled
         } catch (error: Throwable) {
-            val message = error.message ?: "Could not speak this response."
+            val message = error.message
+                ?: application.getString(CoreUiR.string.assistant_error_speak_response)
             withContext(NonCancellable) {
                 host.activeLinkedRunIds += runRecorder.recordSpeechOutput(
                     status = RunStatus.FAILED,

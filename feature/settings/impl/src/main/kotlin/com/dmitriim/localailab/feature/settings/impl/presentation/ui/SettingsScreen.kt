@@ -82,9 +82,12 @@ fun SettingsScreen(
         )
         DeviceAndRuntimeCard(onClick = onOpenDeviceAndRuntimes)
         if (settings.showAdvancedControls) {
-            SettingsCard("Performance defaults", styled = false) {
+            SettingsCard(
+                stringResource(CoreUiR.string.settings_section_performance_defaults),
+                styled = false,
+            ) {
                 EnumRadioGroup(
-                    label = "Thread policy",
+                    label = stringResource(CoreUiR.string.settings_thread_policy),
                     selected = settings.threadCountPolicy,
                     values = ThreadCountPolicy.entries,
                     text = ThreadCountPolicy::label,
@@ -92,7 +95,7 @@ fun SettingsScreen(
                     onUpdate { it.copy(threadCountPolicy = value) }
                 }
                 EnumRadioGroup(
-                    label = "Unload models",
+                    label = stringResource(CoreUiR.string.settings_unload_models),
                     selected = settings.modelUnloadPolicy,
                     values = ModelUnloadPolicy.entries,
                     text = ModelUnloadPolicy::label,
@@ -100,13 +103,13 @@ fun SettingsScreen(
                     onUpdate { it.copy(modelUnloadPolicy = value) }
                 }
                 Toggle(
-                    label = "Warm up selected model",
+                    label = stringResource(CoreUiR.string.settings_warm_up_selected_model),
                     checked = settings.warmUpSelectedModel,
                 ) { value ->
                     onUpdate { it.copy(warmUpSelectedModel = value) }
                 }
                 EnumSelector(
-                    label = "Metric detail",
+                    label = stringResource(CoreUiR.string.settings_metric_detail),
                     selected = settings.metricDetail,
                     values = MetricDetail.entries,
                     text = MetricDetail::label,
@@ -115,27 +118,27 @@ fun SettingsScreen(
                 }
             }
         }
-        SettingsCard("Appearance", styled = false) {
+        SettingsCard(stringResource(CoreUiR.string.settings_section_appearance), styled = false) {
             Toggle(
-                label = "Keep screen awake during active inference",
+                label = stringResource(CoreUiR.string.settings_keep_screen_awake),
                 checked = settings.keepScreenAwake,
             ) { value ->
                 onUpdate { it.copy(keepScreenAwake = value) }
             }
             Toggle(
-                label = "Confirm before deleting history",
+                label = stringResource(CoreUiR.string.settings_confirm_history_deletion),
                 checked = settings.confirmDestructiveActions,
             ) { value ->
                 onUpdate { it.copy(confirmDestructiveActions = value) }
             }
             Toggle(
-                label = "Show advanced controls",
+                label = stringResource(CoreUiR.string.settings_show_advanced_controls),
                 checked = settings.showAdvancedControls,
             ) { value ->
                 onUpdate { it.copy(showAdvancedControls = value) }
             }
         }
-        SettingsCard("Retention", purpleTonal = true) {
+        SettingsCard(stringResource(CoreUiR.string.settings_section_retention), purpleTonal = true) {
             Text(
                 text = stringResource(CoreUiR.string.settings_settings_screen_115),
                 style = MaterialTheme.typography.titleSmall,
@@ -153,7 +156,7 @@ fun SettingsScreen(
                 style = MaterialTheme.typography.bodySmall,
             )
         }
-        SettingsCard("Model downloads", purpleTonal = true) {
+        SettingsCard(stringResource(CoreUiR.string.settings_section_model_downloads), purpleTonal = true) {
             Text(
                 text = stringResource(CoreUiR.string.settings_settings_screen_119),
                 style = MaterialTheme.typography.titleSmall,
@@ -203,11 +206,17 @@ fun SettingsScreen(
                 }
             }
         }
-        SettingsCard("Storage & privacy", purpleTonal = true) {
-            StorageLine("Models", state.storage.modelsBytes)
-            StorageLine("Temporary recordings", state.storage.recordingsBytes)
-            StorageLine("Generated audio", state.storage.generatedAudioBytes)
-            StorageLine("History", state.storage.historyBytes)
+        SettingsCard(stringResource(CoreUiR.string.settings_section_storage_privacy), purpleTonal = true) {
+            StorageLine(stringResource(CoreUiR.string.settings_storage_models), state.storage.modelsBytes)
+            StorageLine(
+                stringResource(CoreUiR.string.settings_storage_temporary_recordings),
+                state.storage.recordingsBytes,
+            )
+            StorageLine(
+                stringResource(CoreUiR.string.settings_storage_generated_audio),
+                state.storage.generatedAudioBytes,
+            )
+            StorageLine(stringResource(CoreUiR.string.settings_storage_history), state.storage.historyBytes)
             OutlinedButton(
                 onClick = onClearTemporaryMedia,
                 modifier = Modifier.fillMaxWidth(),
@@ -370,7 +379,7 @@ private fun <T> EnumSelector(
     label: String,
     selected: T,
     values: Iterable<T>,
-    text: (T) -> String,
+    text: @Composable (T) -> String,
     onSelected: (T) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -413,7 +422,7 @@ private fun <T> EnumRadioGroup(
     label: String,
     selected: T,
     values: Iterable<T>,
-    text: (T) -> String,
+    text: @Composable (T) -> String,
     onSelected: (T) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -461,11 +470,35 @@ private fun StorageLine(label: String, bytes: Long) {
     }
 }
 
+@Composable
 private fun Long.readable(): String = when {
-    this < 1_024 -> "$this B"
-    this < 1_048_576 -> "${this / 1_024} KB"
-    else -> "${"%.1f".format(this / 1_048_576.0)} MB"
+    this < 1_024 -> stringResource(CoreUiR.string.settings_storage_bytes, this)
+    this < 1_048_576 -> stringResource(CoreUiR.string.settings_storage_kilobytes, this / 1_024)
+    else -> stringResource(CoreUiR.string.settings_storage_megabytes, this / 1_048_576.0)
 }
-private val ThreadCountPolicy.label get() = name.lowercase().replace('_', ' ').replaceFirstChar(Char::uppercase)
-private val ModelUnloadPolicy.label get() = name.lowercase().replace('_', ' ').replaceFirstChar(Char::uppercase)
-private val MetricDetail.label get() = name.lowercase().replaceFirstChar(Char::uppercase)
+
+@Composable
+private fun ThreadCountPolicy.label(): String = stringResource(
+    when (this) {
+        ThreadCountPolicy.ENGINE_DEFAULT -> CoreUiR.string.settings_thread_policy_engine_default
+        ThreadCountPolicy.AVAILABLE_PROCESSORS -> CoreUiR.string.settings_thread_policy_available_processors
+        ThreadCountPolicy.FIXED -> CoreUiR.string.settings_thread_policy_fixed
+    },
+)
+
+@Composable
+private fun ModelUnloadPolicy.label(): String = stringResource(
+    when (this) {
+        ModelUnloadPolicy.WHEN_IDLE -> CoreUiR.string.settings_model_unload_when_idle
+        ModelUnloadPolicy.WHEN_BACKGROUND -> CoreUiR.string.settings_model_unload_when_background
+        ModelUnloadPolicy.MANUAL -> CoreUiR.string.settings_model_unload_manual
+    },
+)
+
+@Composable
+private fun MetricDetail.label(): String = stringResource(
+    when (this) {
+        MetricDetail.STANDARD -> CoreUiR.string.settings_metric_detail_standard
+        MetricDetail.VERBOSE -> CoreUiR.string.settings_metric_detail_verbose
+    },
+)

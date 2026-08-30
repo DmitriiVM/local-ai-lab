@@ -1,5 +1,6 @@
 package com.dmitriim.localailab.feature.benchmark.impl.presentation
 
+import android.app.Application
 import android.os.PowerManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import com.dmitriim.localailab.ai.api.memory.AiRuntimeKind
 import com.dmitriim.localailab.ai.api.memory.AiRuntimeLeaseManager
 import com.dmitriim.localailab.ai.api.memory.FeatureRuntimeLeaseController
 import com.dmitriim.localailab.core.di.AppScope
+import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkPlan
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkSessionSummary
 import com.dmitriim.localailab.feature.benchmark.api.domain.BenchmarkStartupMode
@@ -40,6 +42,7 @@ import kotlinx.serialization.json.Json
 @ViewModelKey
 @ContributesIntoMap(AppScope::class)
 class BenchmarkLabViewModel(
+    private val application: Application,
     private val profileWorkloadStore: ProfileWorkloadStore,
     private val runner: LocalBenchmarkWorkloadRunner,
     private val runRepository: RunRepository,
@@ -84,7 +87,9 @@ class BenchmarkLabViewModel(
     fun start() {
         if (benchmarkJob?.isActive == true) return
         val initial = state.value
-        val workload = initial.workload ?: return showMessage("Open Profile from Chat, STT, or TTS first.")
+        val workload = initial.workload ?: return showMessage(
+            application.getString(CoreUiR.string.benchmark_error_open_profile),
+        )
         benchmarkJob = viewModelScope.launch(Dispatchers.Default) {
             val capability = workload.capability
             val sessionId = UUID.randomUUID().toString()
@@ -108,7 +113,7 @@ class BenchmarkLabViewModel(
                     isRunning = true,
                     completedIterations = emptyList(),
                     summary = null,
-                    message = "Running warm-ups…",
+                    message = application.getString(CoreUiR.string.benchmark_status_warmups),
                 )
             }
             try {
@@ -128,23 +133,28 @@ class BenchmarkLabViewModel(
                     mutableState.update {
                         it.copy(
                             completedIterations = results.map(BenchmarkWorkloadResult::iteration),
-                            message = "Measured ${results.size} of ${plan.measuredIterations}",
+                            message = application.getString(
+                                CoreUiR.string.benchmark_status_measured,
+                                results.size,
+                                plan.measuredIterations,
+                            ),
                         )
                     }
                     val thermalStatus = result.iteration.telemetry.resources?.thermalStatusEnd
                         ?: Int.MIN_VALUE
                     if (thermalStatus >= PowerManager.THERMAL_STATUS_SEVERE) {
                         status = RunStatus.CANCELLED
-                        failure = "Stopped at severe thermal status to protect the device."
+                        failure = application.getString(CoreUiR.string.benchmark_error_thermal_severe)
                         break
                     }
                 }
             } catch (_: CancellationException) {
                 status = RunStatus.CANCELLED
-                failure = "Profile cancelled. Completed iterations were retained."
+                failure = application.getString(CoreUiR.string.benchmark_error_cancelled)
             } catch (error: Throwable) {
                 status = RunStatus.FAILED
-                failure = error.message ?: "Profiling failed."
+                failure = error.message
+                    ?: application.getString(CoreUiR.string.benchmark_error_profiling)
             } finally {
                 runner.unload(workload)
                 val summary = results.summary(failure)
@@ -169,7 +179,10 @@ class BenchmarkLabViewModel(
                         it.copy(
                             isRunning = false,
                             summary = summary,
-                            message = failure ?: "Saved ${results.size} measured iterations.",
+                            message = failure ?: application.getString(
+                                CoreUiR.string.benchmark_status_measurements_saved,
+                                results.size,
+                            ),
                         )
                     }
                 }

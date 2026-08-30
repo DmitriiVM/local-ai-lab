@@ -75,11 +75,16 @@ private fun AssistantInputModeOption(
     enabled: Boolean,
     onSelect: (AssistantInputMode) -> Unit,
 ) {
-    val title = if (mode == AssistantInputMode.DICTATE) "Dictate" else "Voice"
-    val description = if (mode == AssistantInputMode.DICTATE) {
-        "Add the transcript to your editable draft. Review it, then send when ready."
-    } else {
-        "Send the final transcript automatically and speak the completed response."
+    val (title, description) = when (mode) {
+        AssistantInputMode.DICTATE -> {
+            stringResource(CoreUiR.string.assistant_input_mode_dictate) to
+                stringResource(CoreUiR.string.assistant_input_mode_dictate_description)
+        }
+
+        AssistantInputMode.VOICE -> {
+            stringResource(CoreUiR.string.assistant_input_mode_voice) to
+                stringResource(CoreUiR.string.assistant_input_mode_voice_description)
+        }
     }
     Row(
         modifier = Modifier

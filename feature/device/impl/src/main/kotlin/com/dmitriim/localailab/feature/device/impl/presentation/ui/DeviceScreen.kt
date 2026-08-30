@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.dmitriim.localailab.ai.api.capability.AiCapability
+import com.dmitriim.localailab.ai.api.engine.ComputePreference
 import com.dmitriim.localailab.ai.api.engine.EngineAvailability
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.core.ui.layout.LocalAppDimensions
@@ -101,9 +103,13 @@ private fun LazyListScope.deviceSnapshot(state: DeviceUiState) {
                 title = snapshot.deviceName,
                 lines = listOf(
                     snapshot.androidVersion,
-                    "ABIs: ${snapshot.abis}",
-                    "Memory: ${snapshot.availableMemory} available / ${snapshot.totalMemory} total",
-                    "App storage available: ${snapshot.availableStorage}",
+                    stringResource(CoreUiR.string.device_abis, snapshot.abis),
+                    stringResource(
+                        CoreUiR.string.device_memory,
+                        snapshot.availableMemory,
+                        snapshot.totalMemory,
+                    ),
+                    stringResource(CoreUiR.string.device_app_storage_available, snapshot.availableStorage),
                     snapshot.cpuInfo,
                     snapshot.batteryState,
                     snapshot.thermalState,
@@ -132,12 +138,15 @@ private fun LazyListScope.engineCards(state: DeviceUiState) {
             title = engine.descriptor.displayName,
             lines = listOf(
                 engine.statusLine(),
-                "Capabilities: ${engine.descriptor.capabilities.joinToString()}",
+                stringResource(
+                    CoreUiR.string.device_capabilities,
+                    engine.descriptor.capabilities.displayNames(),
+                ),
                 engine.runtimeLine(),
                 if (engine.descriptor.bundledRuntime) {
-                    "Runtime is bundled with the app."
+                    stringResource(CoreUiR.string.device_runtime_bundled)
                 } else {
-                    "Runtime is supplied by the system."
+                    stringResource(CoreUiR.string.device_runtime_system)
                 },
             ),
             isError = engine !is EngineAvailability.Available,
@@ -147,32 +156,97 @@ private fun LazyListScope.engineCards(state: DeviceUiState) {
 
 @Composable
 private fun EngineAvailability.statusLine(): String = when (this) {
-    is EngineAvailability.Available -> "Available • $effectiveComputePreference • $detail"
+    is EngineAvailability.Available -> stringResource(
+        CoreUiR.string.device_engine_available,
+        effectiveComputePreference.displayName(),
+        detail,
+    )
     is EngineAvailability.Unsupported -> stringResource(CoreUiR.string.device_engine_unsupported, reason)
-    is EngineAvailability.TemporarilyUnavailable -> "Temporarily unavailable • $reason"
+    is EngineAvailability.TemporarilyUnavailable -> stringResource(
+        CoreUiR.string.device_engine_temporarily_unavailable,
+        reason,
+    )
 }
 
-private fun EngineAvailability.runtimeLine(): String = (this as? EngineAvailability.Available)?.let {
-    "Requested compute: $requestedComputePreference; effective: $effectiveComputePreference" +
-        (computeDetail?.let { detail -> "; runtime: $detail" } ?: "") +
-        "; threads: ${effectiveThreadCount ?: "not reported"}" +
-        (fallbackReason?.let { reason -> "; fallback: $reason" } ?: "")
-} ?: "No active runtime is available."
+@Composable
+private fun EngineAvailability.runtimeLine(): String {
+    val availability = this as? EngineAvailability.Available
+        ?: return stringResource(CoreUiR.string.device_runtime_unavailable)
+    var line = stringResource(
+        CoreUiR.string.device_runtime_compute,
+        availability.requestedComputePreference.displayName(),
+        availability.effectiveComputePreference.displayName(),
+    )
+    availability.computeDetail?.let { detail ->
+        line += stringResource(CoreUiR.string.device_runtime_detail, detail)
+    }
+    line += stringResource(
+        CoreUiR.string.device_runtime_threads,
+        availability.effectiveThreadCount?.toString()
+            ?: stringResource(CoreUiR.string.device_runtime_threads_not_reported),
+    )
+    availability.fallbackReason?.let { reason ->
+        line += stringResource(CoreUiR.string.device_runtime_fallback, reason)
+    }
+    return line
+}
 
 private fun LazyListScope.diagnosticsCard(state: DeviceUiState) {
     state.diagnostics?.let { diagnostics ->
         item {
+            val offlineCapabilities = diagnostics.offlineReadyCapabilities.displayNames()
             DeviceInfoCard(
                 title = stringResource(CoreUiR.string.ui_copy_54),
                 lines = listOf(
-                    "Model storage writable: ${diagnostics.modelDirectoryWritable}",
-                    "Temporary storage: ${diagnostics.availableTemporaryBytes / 1024 / 1024} MiB available",
-                    "Installed files valid: ${diagnostics.installedFilesValid}",
-                    "Offline-ready capabilities: " +
-                        diagnostics.offlineReadyCapabilities.joinToString().ifBlank { "None" },
+                    stringResource(
+                        CoreUiR.string.device_model_storage_writable,
+                        diagnostics.modelDirectoryWritable,
+                    ),
+                    stringResource(
+                        CoreUiR.string.device_temporary_storage,
+                        diagnostics.availableTemporaryBytes / 1024 / 1024,
+                    ),
+                    stringResource(
+                        CoreUiR.string.device_installed_files_valid,
+                        diagnostics.installedFilesValid,
+                    ),
+                    stringResource(
+                        CoreUiR.string.device_offline_ready_capabilities,
+                        if (offlineCapabilities.isBlank()) {
+                            stringResource(CoreUiR.string.device_none)
+                        } else {
+                            offlineCapabilities
+                        },
+                    ),
                 ) + diagnostics.detail,
                 isError = !diagnostics.modelDirectoryWritable || !diagnostics.installedFilesValid,
             )
         }
     }
+}
+
+@Composable
+private fun ComputePreference.displayName(): String = when (this) {
+    ComputePreference.AUTO -> stringResource(CoreUiR.string.compute_automatic)
+    ComputePreference.CPU -> stringResource(CoreUiR.string.compute_cpu)
+    ComputePreference.GPU -> stringResource(CoreUiR.string.compute_gpu)
+    ComputePreference.NPU -> stringResource(CoreUiR.string.compute_npu)
+    ComputePreference.SYSTEM_SERVICE -> stringResource(CoreUiR.string.compute_system_service)
+}
+
+@Composable
+private fun Set<AiCapability>.displayNames(): String {
+    val labels = mutableListOf<String>()
+    for (capability in this) {
+        labels += stringResource(capability.labelResource())
+    }
+    return labels.joinToString()
+}
+
+private fun AiCapability.labelResource(): Int = when (this) {
+    AiCapability.CHAT -> CoreUiR.string.runs_capability_chat
+    AiCapability.SPEECH_TO_TEXT -> CoreUiR.string.runs_capability_speech_to_text
+    AiCapability.TEXT_TO_SPEECH -> CoreUiR.string.runs_capability_text_to_speech
+    AiCapability.VOICE_ACTIVITY_DETECTION -> CoreUiR.string.runs_capability_voice_activity_detection
+    AiCapability.VOICE_ASSISTANT -> CoreUiR.string.runs_capability_voice_assistant
 }
