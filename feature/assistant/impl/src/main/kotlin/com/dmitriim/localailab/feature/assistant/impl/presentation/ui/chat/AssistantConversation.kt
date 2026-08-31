@@ -50,7 +50,6 @@ import com.dmitriim.localailab.feature.assistant.impl.presentation.state.ChatMes
 @Composable
 internal fun AssistantConversation(
     messages: List<ChatMessage>,
-    modifier: Modifier,
     onCopy: (String) -> Unit,
     onEdit: (String) -> Unit,
     onRegenerate: () -> Unit,
@@ -58,6 +57,7 @@ internal fun AssistantConversation(
     canSpeak: Boolean,
     canRegenerate: Boolean,
     header: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
     footer: @Composable () -> Unit,
 ) {
     val listState = rememberLazyListState()

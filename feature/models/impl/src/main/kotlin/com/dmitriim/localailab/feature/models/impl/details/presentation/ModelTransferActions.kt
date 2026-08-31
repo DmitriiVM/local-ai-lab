@@ -1,6 +1,7 @@
 package com.dmitriim.localailab.feature.models.impl.details.presentation
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
@@ -22,27 +23,29 @@ internal fun TransferQueuedActions(
     onCancel: () -> Unit,
     onUseAnyNetwork: () -> Unit,
 ) {
-    Text(
-        stringResource(
-            CoreUiR.string.models_model_details_screen_format_7,
-            transfer.networkPolicy.detailsNetworkLabel(),
-        ),
-    )
-    Text(
-        stringResource(CoreUiR.string.models_model_download_battery_requirement),
-        style = MaterialTheme.typography.bodySmall,
-    )
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        OutlinedButton(onClick = onPause, modifier = Modifier.weight(1f)) {
-            Text(stringResource(CoreUiR.string.models_model_details_screen_51))
+    Column {
+        Text(
+            stringResource(
+                CoreUiR.string.models_model_details_screen_format_7,
+                transfer.networkPolicy.detailsNetworkLabel(),
+            ),
+        )
+        Text(
+            stringResource(CoreUiR.string.models_model_download_battery_requirement),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            OutlinedButton(onClick = onPause, modifier = Modifier.weight(1f)) {
+                Text(stringResource(CoreUiR.string.models_model_details_screen_51))
+            }
+            OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
+                Text(stringResource(CoreUiR.string.models_model_details_screen_52))
+            }
         }
-        OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
-            Text(stringResource(CoreUiR.string.models_model_details_screen_52))
-        }
-    }
-    if (transfer.networkPolicy == ModelTransferNetworkPolicy.WIFI_ONLY) {
-        OutlinedButton(onClick = onUseAnyNetwork, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(CoreUiR.string.models_model_details_screen_53))
+        if (transfer.networkPolicy == ModelTransferNetworkPolicy.WIFI_ONLY) {
+            OutlinedButton(onClick = onUseAnyNetwork, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(CoreUiR.string.models_model_details_screen_53))
+            }
         }
     }
 }
@@ -53,30 +56,32 @@ internal fun TransferRunningActions(
     onPause: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    Text(
-        stringResource(
-            CoreUiR.string.models_model_details_screen_format_8,
-            transfer.completedBytes.toDetailsReadableBytes(),
-            transfer.totalBytes.toDetailsReadableBytes(),
-        ),
-    )
-    transfer.bytesPerSecond?.takeIf { it > 0L }?.let { bytesPerSecond ->
-        val remaining = transfer.estimatedRemainingMillis?.toDetailsRemainingDuration() ?: return@let
+    Column {
         Text(
             stringResource(
-                CoreUiR.string.models_model_transfer_speed_eta,
-                bytesPerSecond.toDetailsReadableBytes(),
-                remaining,
+                CoreUiR.string.models_model_details_screen_format_8,
+                transfer.completedBytes.toDetailsReadableBytes(),
+                transfer.totalBytes.toDetailsReadableBytes(),
             ),
-            style = MaterialTheme.typography.bodySmall,
         )
-    }
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        OutlinedButton(onClick = onPause, modifier = Modifier.weight(1f)) {
-            Text(stringResource(CoreUiR.string.models_model_details_screen_54))
+        transfer.bytesPerSecond?.takeIf { it > 0L }?.let { bytesPerSecond ->
+            val remaining = transfer.estimatedRemainingMillis?.toDetailsRemainingDuration() ?: return@let
+            Text(
+                stringResource(
+                    CoreUiR.string.models_model_transfer_speed_eta,
+                    bytesPerSecond.toDetailsReadableBytes(),
+                    remaining,
+                ),
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
-        OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
-            Text(stringResource(CoreUiR.string.models_model_details_screen_55))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            OutlinedButton(onClick = onPause, modifier = Modifier.weight(1f)) {
+                Text(stringResource(CoreUiR.string.models_model_details_screen_54))
+            }
+            OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
+                Text(stringResource(CoreUiR.string.models_model_details_screen_55))
+            }
         }
     }
 }
@@ -100,19 +105,21 @@ internal fun TransferPausedActions(
     onResume: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    Text(
-        stringResource(
-            CoreUiR.string.models_model_details_screen_format_9,
-            transfer.completedBytes.toDetailsReadableBytes(),
-            transfer.totalBytes.toDetailsReadableBytes(),
-        ),
-    )
-    transfer.reason?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-    Button(onClick = onResume, modifier = Modifier.fillMaxWidth()) {
-        Text(stringResource(CoreUiR.string.models_model_details_screen_56))
-    }
-    OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) {
-        Text(stringResource(CoreUiR.string.models_model_details_screen_57))
+    Column {
+        Text(
+            stringResource(
+                CoreUiR.string.models_model_details_screen_format_9,
+                transfer.completedBytes.toDetailsReadableBytes(),
+                transfer.totalBytes.toDetailsReadableBytes(),
+            ),
+        )
+        transfer.reason?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+        Button(onClick = onResume, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(CoreUiR.string.models_model_details_screen_56))
+        }
+        OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(CoreUiR.string.models_model_details_screen_57))
+        }
     }
 }
 

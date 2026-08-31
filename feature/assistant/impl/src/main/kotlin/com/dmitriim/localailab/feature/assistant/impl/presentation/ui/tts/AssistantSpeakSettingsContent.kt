@@ -158,20 +158,22 @@ private fun SpeakSettingsActions(
     onReset: () -> Unit,
     onPreview: () -> Unit,
 ) {
-    error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
-    Text(
-        text = stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_22),
-        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-    )
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
-    ) {
-        TextButton(onClick = onReset, enabled = enabled) {
-            Text(stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_23))
-        }
-        TextButton(onClick = onPreview, enabled = enabled) {
-            Text(stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_24))
+    Column {
+        error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
+        Text(
+            text = stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_22),
+            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            TextButton(onClick = onReset, enabled = enabled) {
+                Text(stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_23))
+            }
+            TextButton(onClick = onPreview, enabled = enabled) {
+                Text(stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_24))
+            }
         }
     }
 }
@@ -188,40 +190,46 @@ private fun SpeakModelAndVoiceSettings(
     onLanguageChange: (String, String?) -> Unit,
     onVoiceChange: (String?) -> Unit,
 ) {
-    AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_model))
-    AssistantInSheetModelPicker(
-        label = stringResource(CoreUiR.string.ui_copy_37),
-        items = models.map { OptionPickerItem(it.id.value, it.displayName, it.languages.joinToString(), it.installed) },
-        selectedId = selectedModelId?.value,
-        enabled = enabled,
-        onClick = onChooseModel,
-    )
-    AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_voice_language))
-    Text(
-        text = stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_21),
-        style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
-    )
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        assistantTtsLanguages.forEach { language ->
-            val supported = selectedModel?.languages?.isEmpty() == true ||
-                selectedModel?.languages?.any { normalizeLanguageCode(it) == language.code } == true
-            androidx.compose.material3.FilterChip(
-                selected = draft.languageCode == language.code,
-                onClick = {
-                    onLanguageChange(
-                        language.code,
-                        selectedModel?.compatibleVoices(language.code)?.firstOrNull()?.id,
-                    )
-                },
-                enabled = enabled && supported,
-                label = { Text(stringResource(language.labelRes)) },
-            )
+    Column {
+        AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_model))
+        AssistantInSheetModelPicker(
+            label = stringResource(CoreUiR.string.ui_copy_37),
+            items = models.map {
+                OptionPickerItem(it.id.value, it.displayName, it.languages.joinToString(), it.installed)
+            },
+            selectedId = selectedModelId?.value,
+            enabled = enabled,
+            onClick = onChooseModel,
+        )
+        AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_voice_language))
+        Text(
+            text = stringResource(CoreUiR.string.assistant_assistant_speak_settings_sheet_21),
+            style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            assistantTtsLanguages.forEach { language ->
+                val supported = selectedModel?.languages?.isEmpty() == true ||
+                    selectedModel?.languages?.any { normalizeLanguageCode(it) == language.code } == true
+                androidx.compose.material3.FilterChip(
+                    selected = draft.languageCode == language.code,
+                    onClick = {
+                        onLanguageChange(
+                            language.code,
+                            selectedModel?.compatibleVoices(language.code)?.firstOrNull()?.id,
+                        )
+                    },
+                    enabled = enabled && supported,
+                    label = { Text(stringResource(language.labelRes)) },
+                )
+            }
         }
+        VoicePicker(
+            voices = selectedModel?.compatibleVoices(draft.languageCode).orEmpty().map {
+                it.id to it.displayName
+            },
+            selectedVoiceId = selectedVoiceId,
+            onSelect = { onVoiceChange(it) },
+            enabled = enabled,
+        )
     }
-    VoicePicker(
-        voices = selectedModel?.compatibleVoices(draft.languageCode).orEmpty().map { it.id to it.displayName },
-        selectedVoiceId = selectedVoiceId,
-        onSelect = { onVoiceChange(it) },
-        enabled = enabled,
-    )
 }

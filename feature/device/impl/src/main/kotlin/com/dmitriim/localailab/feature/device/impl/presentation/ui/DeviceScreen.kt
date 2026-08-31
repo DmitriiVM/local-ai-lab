@@ -25,6 +25,7 @@ import com.dmitriim.localailab.feature.device.impl.presentation.DeviceUiState
 fun DeviceScreen(
     state: DeviceUiState,
     onRefresh: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val dimensions = LocalAppDimensions.current
     val systemNavigationPadding = if (dimensions.bottomNavigationOverlayClearance == 0.dp) {
@@ -36,7 +37,7 @@ fun DeviceScreen(
     DeviceScreenContent(
         state = state,
         onRefresh = onRefresh,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .then(systemNavigationPadding)
             .padding(horizontal = dimensions.screenPadding),
@@ -52,9 +53,9 @@ fun DeviceScreen(
 private fun DeviceScreenContent(
     state: DeviceUiState,
     onRefresh: () -> Unit,
-    modifier: Modifier,
     contentPadding: PaddingValues,
     itemSpacing: androidx.compose.ui.unit.Dp,
+    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
         modifier = modifier,

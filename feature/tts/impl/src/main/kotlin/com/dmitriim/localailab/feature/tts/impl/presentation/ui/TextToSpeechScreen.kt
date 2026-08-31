@@ -7,12 +7,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,14 +35,13 @@ import com.dmitriim.localailab.feature.tts.impl.presentation.TtsLanguage
 import com.dmitriim.localailab.feature.tts.impl.presentation.TtsOperation
 
 @Composable
-fun TextToSpeechScreen(
+internal fun TextToSpeechScreen(
     state: TextToSpeechUiState,
     onSelectModel: (ModelId) -> Unit,
     onSelectVoice: (String) -> Unit,
     onPreviewVoice: (String) -> Unit,
-    onRecordReference: () -> Unit,
+    activityCallbacks: TextToSpeechActivityCallbacks,
     onStopReferenceRecording: () -> Unit,
-    onImportReference: () -> Unit,
     onDeleteReference: (String) -> Unit,
     onTextChange: (String) -> Unit,
     onSelectLanguage: (TtsLanguage) -> Unit,
@@ -58,19 +63,15 @@ fun TextToSpeechScreen(
     onResume: () -> Unit,
     onStop: () -> Unit,
     onReplay: () -> Unit,
-    onExport: () -> Unit,
     onShare: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val dimensions = LocalAppDimensions.current
-    val busy = state.operation != TtsOperation.IDLE ||
-        state.playback.status in setOf(
-            SpeechPlaybackStatus.READY,
-            SpeechPlaybackStatus.PLAYING,
-            SpeechPlaybackStatus.PAUSED,
-        )
+    val activityActions = rememberTextToSpeechActivityActions(activityCallbacks)
+    val busy = state.isBusy()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(
@@ -87,9 +88,9 @@ fun TextToSpeechScreen(
             onSelectModel = onSelectModel,
             onSelectVoice = onSelectVoice,
             onPreviewVoice = onPreviewVoice,
-            onRecordReference = onRecordReference,
+            onRecordReference = activityActions.requestReferenceRecording,
             onStopReferenceRecording = onStopReferenceRecording,
-            onImportReference = onImportReference,
+            onImportReference = activityActions.selectReferenceAudio,
             onDeleteReference = onDeleteReference,
             onSelectLanguage = onSelectLanguage,
             onApplySample = onApplySample,
@@ -127,7 +128,7 @@ fun TextToSpeechScreen(
             onResume = onResume,
             onStop = onStop,
             onReplay = onReplay,
-            onExport = onExport,
+            onExport = { activityActions.createExportDocument(state.output?.displayName ?: "local-ai-speech.wav") },
             onShare = onShare,
         )
 
@@ -158,17 +159,18 @@ private fun TtsSetupSection(
     onApplySample: (TtsLanguage) -> Unit,
     onStop: () -> Unit,
 ) {
+    var consentAction by remember { mutableStateOf<ReferenceConsentAction?>(null) }
     AppSectionCard("Setup", tone = AppSurfaceTone.TONAL) {
         TextToSpeechModelPicker(state.models, state.selectedModelId, enabled, onSelectModel)
         if (state.usesReferenceVoice) {
             ChatterboxReferenceVoiceSelector(
-                state,
-                enabled,
-                onSelectVoice,
-                onRecordReference,
-                onStopReferenceRecording,
-                onImportReference,
-                onDeleteReference,
+                state = state,
+                enabled = enabled,
+                onSelect = onSelectVoice,
+                onRecord = { consentAction = ReferenceConsentAction.RECORD },
+                onStopRecording = onStopReferenceRecording,
+                onImport = { consentAction = ReferenceConsentAction.IMPORT },
+                onDelete = onDeleteReference,
             )
             Text(
                 text = stringResource(CoreUiR.string.tts_text_to_speech_screen_179),
@@ -194,8 +196,55 @@ private fun TtsSetupSection(
             onApplySample,
             englishOnly = state.usesReferenceVoice,
         )
+        ReferenceConsentDialog(
+            action = consentAction,
+            onDismiss = { consentAction = null },
+            onConfirm = { action ->
+                consentAction = null
+                when (action) {
+                    ReferenceConsentAction.RECORD -> onRecordReference()
+                    ReferenceConsentAction.IMPORT -> onImportReference()
+                }
+            },
+        )
     }
 }
+
+@Composable
+private fun ReferenceConsentDialog(
+    action: ReferenceConsentAction?,
+    onDismiss: () -> Unit,
+    onConfirm: (ReferenceConsentAction) -> Unit,
+) {
+    action?.let {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(stringResource(CoreUiR.string.tts_text_to_speech_route_151)) },
+            text = {
+                Text(
+                    stringResource(CoreUiR.string.tts_text_to_speech_route_152),
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { onConfirm(it) },
+                ) { Text(stringResource(CoreUiR.string.tts_text_to_speech_route_153)) }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) { Text(stringResource(CoreUiR.string.tts_text_to_speech_route_154)) }
+            },
+        )
+    }
+}
+
+private enum class ReferenceConsentAction { RECORD, IMPORT }
+
+private fun TextToSpeechUiState.isBusy(): Boolean = operation != TtsOperation.IDLE ||
+    playback.status in setOf(
+        SpeechPlaybackStatus.READY,
+        SpeechPlaybackStatus.PLAYING,
+        SpeechPlaybackStatus.PAUSED,
+    )
 
 @Composable
 private fun TtsComposeSection(

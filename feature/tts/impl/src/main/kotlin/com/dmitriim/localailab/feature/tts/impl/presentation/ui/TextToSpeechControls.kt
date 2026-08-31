@@ -363,29 +363,31 @@ internal fun TextToSpeechLanguageControls(
     onApplySample: (TtsLanguage) -> Unit,
     englishOnly: Boolean = false,
 ) {
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(TtsLanguage.entries) { language ->
-            FilterChip(
-                selected = selectedLanguage == language,
-                onClick = { onSelectLanguage(language) },
-                // Chatterbox Turbo Q4 is English-only.
-                enabled = enabled && (!englishOnly || language == TtsLanguage.ENGLISH),
-                label = { Text(language.label) },
-                colors = AppFilterChipDefaults.colors(),
-            )
-        }
-    }
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(TtsLanguage.entries) { language ->
-            TextButton(
-                onClick = { onApplySample(language) },
-                enabled = enabled && (!englishOnly || language == TtsLanguage.ENGLISH),
-            ) {
-                Text(
-                    stringResource(CoreUiR.string.tts_text_to_speech_controls_format_16, language.label),
-                    maxLines = 1,
-                    softWrap = false,
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(TtsLanguage.entries) { language ->
+                FilterChip(
+                    selected = selectedLanguage == language,
+                    onClick = { onSelectLanguage(language) },
+                    // Chatterbox Turbo Q4 is English-only.
+                    enabled = enabled && (!englishOnly || language == TtsLanguage.ENGLISH),
+                    label = { Text(language.label) },
+                    colors = AppFilterChipDefaults.colors(),
                 )
+            }
+        }
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            items(TtsLanguage.entries) { language ->
+                TextButton(
+                    onClick = { onApplySample(language) },
+                    enabled = enabled && (!englishOnly || language == TtsLanguage.ENGLISH),
+                ) {
+                    Text(
+                        stringResource(CoreUiR.string.tts_text_to_speech_controls_format_16, language.label),
+                        maxLines = 1,
+                        softWrap = false,
+                    )
+                }
             }
         }
     }

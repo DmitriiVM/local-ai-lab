@@ -138,7 +138,7 @@ private fun ConfigurationButton(
     onClick: () -> Unit,
     ready: Boolean,
     icon: @Composable () -> Unit,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
 ) {
     OutlinedButton(onClick = onClick, modifier = modifier) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

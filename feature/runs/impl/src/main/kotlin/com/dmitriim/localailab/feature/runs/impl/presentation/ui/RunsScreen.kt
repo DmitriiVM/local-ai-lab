@@ -55,6 +55,7 @@ fun RunsScreen(
     onClearRunHistory: () -> Unit,
     onShare: () -> Unit,
     onRepeat: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val dimensions = LocalAppDimensions.current
     val selected = state.selectedRun
@@ -74,7 +75,7 @@ fun RunsScreen(
         return
     }
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = dimensions.screenPadding),
         contentPadding = PaddingValues(

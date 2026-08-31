@@ -28,7 +28,6 @@ internal fun PerformanceSettingsCard(
 ) {
     SettingsCard(
         stringResource(CoreUiR.string.settings_section_performance_defaults),
-        styled = false,
     ) {
         EnumRadioGroup(
             label = stringResource(CoreUiR.string.settings_thread_policy),
@@ -60,7 +59,7 @@ internal fun AppearanceSettingsCard(
     settings: AppSettings,
     onUpdate: (((AppSettings) -> AppSettings)) -> Unit,
 ) {
-    SettingsCard(stringResource(CoreUiR.string.settings_section_appearance), styled = false) {
+    SettingsCard(stringResource(CoreUiR.string.settings_section_appearance)) {
         Toggle(
             label = stringResource(CoreUiR.string.settings_keep_screen_awake),
             checked = settings.keepScreenAwake,

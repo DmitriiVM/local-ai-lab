@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
@@ -30,27 +29,14 @@ import com.dmitriim.localailab.core.ui.component.AppSurfaceTone
 @Composable
 internal fun SettingsCard(
     title: String,
-    styled: Boolean = true,
     purpleTonal: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    if (styled) {
-        AppSectionCard(
-            title = title,
-            tone = if (purpleTonal) AppSurfaceTone.TONAL else AppSurfaceTone.GLASS,
-        ) {
-            content()
-        }
-    } else {
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Text(title, style = MaterialTheme.typography.titleMedium)
-                content()
-            }
-        }
+    AppSectionCard(
+        title = title,
+        tone = if (purpleTonal) AppSurfaceTone.TONAL else AppSurfaceTone.GLASS,
+    ) {
+        content()
     }
 }
 
@@ -70,7 +56,7 @@ internal fun SettingsSurfaceCard(
 internal fun Toggle(
     label: String,
     checked: Boolean,
-    onChanged: (Boolean) -> Unit,
+    onChange: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -84,7 +70,7 @@ internal fun Toggle(
         )
         Switch(
             checked = checked,
-            onCheckedChange = onChanged,
+            onCheckedChange = onChange,
             modifier = Modifier.scale(0.82f),
             colors = SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.onTertiary,
@@ -101,7 +87,7 @@ internal fun <T> EnumSelector(
     selected: T,
     values: Iterable<T>,
     text: @Composable (T) -> String,
-    onSelected: (T) -> Unit,
+    onSelect: (T) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(label, style = MaterialTheme.typography.titleSmall)
@@ -109,7 +95,7 @@ internal fun <T> EnumSelector(
             values.forEach { value ->
                 val isSelected = value == selected
                 OutlinedButton(
-                    onClick = { onSelected(value) },
+                    onClick = { onSelect(value) },
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = if (isSelected) {
                             MaterialTheme.colorScheme.tertiaryContainer
@@ -144,7 +130,7 @@ internal fun <T> EnumRadioGroup(
     selected: T,
     values: Iterable<T>,
     text: @Composable (T) -> String,
-    onSelected: (T) -> Unit,
+    onSelect: (T) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(label, style = MaterialTheme.typography.titleSmall)
@@ -153,7 +139,7 @@ internal fun <T> EnumRadioGroup(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(role = Role.RadioButton) { onSelected(value) }
+                    .clickable(role = Role.RadioButton) { onSelect(value) }
                     .padding(vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,

@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -16,7 +17,10 @@ import com.dmitriim.localailab.feature.playground.api.navigation.PlaygroundDesti
 import com.dmitriim.localailab.ui.navigation.AdaptiveNavigationScaffold
 
 @Composable
-fun LocalAiLabApp(graph: AppGraph) {
+fun LocalAiLabApp(
+    graph: AppGraph,
+    modifier: Modifier = Modifier,
+) {
     val navigationState = rememberAppNavigationState(
         providers = graph.navigationEntryProviders,
         startDestination = PlaygroundDestination,
@@ -40,6 +44,7 @@ fun LocalAiLabApp(graph: AppGraph) {
     )
 
     AdaptiveNavigationScaffold(
+        modifier = modifier,
         selectedDestination = navigationState.selectedDestination,
         showTopLevelNavigation = !navigationState.canNavigateUp,
         onSelectDestination = navigationState::navigate,

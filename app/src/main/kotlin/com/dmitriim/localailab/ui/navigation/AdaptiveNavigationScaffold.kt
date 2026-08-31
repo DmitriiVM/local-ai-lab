@@ -18,6 +18,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,11 +36,17 @@ fun AdaptiveNavigationScaffold(
     onSelectDestination: (AppDestination) -> Unit,
     onNavigateUp: (() -> Unit)?,
     toolbarTitle: String?,
+    modifier: Modifier = Modifier,
     content: @Composable (Modifier) -> Unit,
 ) {
     val dimensions = LocalAppDimensions.current
+    val movableContent = remember {
+        movableContentOf<Modifier> { contentModifier ->
+            content(contentModifier)
+        }
+    }
     BoxWithConstraints(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .background(AppSurfaceStyle.pageBackgroundBrush(MaterialTheme.colorScheme)),
@@ -66,7 +74,7 @@ fun AdaptiveNavigationScaffold(
                             WindowInsetsSides.Horizontal,
                         ),
                     ) { contentPadding ->
-                        content(Modifier.padding(contentPadding))
+                        movableContent(Modifier.padding(contentPadding))
                     }
                     AppTopBar(
                         onNavigateUp = onNavigateUp,
@@ -89,7 +97,7 @@ fun AdaptiveNavigationScaffold(
                             WindowInsetsSides.Horizontal,
                         ),
                     ) { contentPadding ->
-                        content(Modifier.padding(contentPadding))
+                        movableContent(Modifier.padding(contentPadding))
                     }
                 }
                 if (showTopLevelNavigation) {

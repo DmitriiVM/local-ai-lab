@@ -30,6 +30,7 @@ fun SettingsScreen(
     onDismissHuggingFaceToken: () -> Unit,
     onSaveHuggingFaceToken: (String) -> Unit,
     onClearHuggingFaceToken: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val dimensions = LocalAppDimensions.current
     val settings = state.settings
@@ -41,7 +42,7 @@ fun SettingsScreen(
         onDismissToken = onDismissHuggingFaceToken,
     )
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(

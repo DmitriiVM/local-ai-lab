@@ -206,8 +206,12 @@ internal fun TechnicalDetails(manifest: ModelManifest, expanded: Boolean, onTogg
 }
 
 @Composable
-internal fun DetailsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Card(Modifier.fillMaxWidth()) {
+internal fun DetailsSection(
+    title: String,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Card(modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),

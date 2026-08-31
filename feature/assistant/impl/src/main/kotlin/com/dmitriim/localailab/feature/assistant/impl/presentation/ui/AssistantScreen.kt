@@ -57,13 +57,14 @@ fun AssistantScreen(
     onPreviewVoice: (ModelId, String, SpeechOutputSettings) -> String?,
     onUnloadChatModel: () -> Unit,
     onOpenModels: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val dimensions = LocalAppDimensions.current
     val clipboard = LocalClipboardManager.current
     var activeSheet by remember { mutableStateOf<AssistantSettingsSheet?>(null) }
     var showClearConfirmation by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         AssistantWorkspace(
             uiState = uiState,
             onOpenChat = { activeSheet = AssistantSettingsSheet.CHAT },

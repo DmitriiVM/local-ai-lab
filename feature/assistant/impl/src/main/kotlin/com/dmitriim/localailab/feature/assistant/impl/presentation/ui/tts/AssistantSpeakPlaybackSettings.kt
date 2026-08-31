@@ -26,32 +26,34 @@ internal fun SpeakPlaybackSettings(
     enabled: Boolean,
     onChange: (SpeechOutputSettings) -> Unit,
 ) {
-    AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_playback))
-    OutputField(
-        label = stringResource(CoreUiR.string.assistant_settings_speech_rate),
-        value = draft.speed,
-        enabled = enabled,
-        onChange = { onChange(draft.copy(speed = it)) },
-    )
-    OutputField(
-        label = stringResource(CoreUiR.string.assistant_settings_volume),
-        value = draft.volume,
-        enabled = enabled,
-        onChange = { onChange(draft.copy(volume = it)) },
-    )
-    OutputField(
-        label = stringResource(CoreUiR.string.assistant_settings_sentence_silence),
-        value = draft.sentenceSilenceScale,
-        enabled = enabled,
-        onChange = { onChange(draft.copy(sentenceSilenceScale = it)) },
-    )
-    AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_performance))
-    OutputField(
-        label = stringResource(CoreUiR.string.assistant_settings_thread_count),
-        value = draft.threadCount,
-        enabled = enabled,
-        onChange = { onChange(draft.copy(threadCount = it.filter(Char::isDigit))) },
-    )
+    Column {
+        AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_playback))
+        OutputField(
+            label = stringResource(CoreUiR.string.assistant_settings_speech_rate),
+            value = draft.speed,
+            enabled = enabled,
+            onChange = { onChange(draft.copy(speed = it)) },
+        )
+        OutputField(
+            label = stringResource(CoreUiR.string.assistant_settings_volume),
+            value = draft.volume,
+            enabled = enabled,
+            onChange = { onChange(draft.copy(volume = it)) },
+        )
+        OutputField(
+            label = stringResource(CoreUiR.string.assistant_settings_sentence_silence),
+            value = draft.sentenceSilenceScale,
+            enabled = enabled,
+            onChange = { onChange(draft.copy(sentenceSilenceScale = it)) },
+        )
+        AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_performance))
+        OutputField(
+            label = stringResource(CoreUiR.string.assistant_settings_thread_count),
+            value = draft.threadCount,
+            enabled = enabled,
+            onChange = { onChange(draft.copy(threadCount = it.filter(Char::isDigit))) },
+        )
+    }
 }
 
 @Composable

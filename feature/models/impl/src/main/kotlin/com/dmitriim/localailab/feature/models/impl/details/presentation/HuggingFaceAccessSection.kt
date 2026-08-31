@@ -3,6 +3,7 @@ package com.dmitriim.localailab.feature.models.impl.details.presentation
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import com.dmitriim.localailab.core.ui.R as CoreUiR
@@ -13,10 +14,12 @@ fun HuggingFaceAccessSection(
     accessUrl: String?,
     credentialStatus: HuggingFaceCredentialStatus,
     onConfigure: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
     DetailsSection(
-        stringResource(CoreUiR.string.models_hugging_face_access),
+        title = stringResource(CoreUiR.string.models_hugging_face_access),
+        modifier = modifier,
     ) {
         Text(stringResource(CoreUiR.string.models_hugging_face_access_section_37))
         Text(huggingFaceCredentialStatusLabel(credentialStatus))

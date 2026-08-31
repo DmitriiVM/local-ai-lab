@@ -31,6 +31,7 @@ fun SpeechToTextScreen(
     onProfile: () -> Unit,
     onCancel: () -> Unit,
     onClear: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val dimensions = LocalAppDimensions.current
     val clipboard = LocalClipboardManager.current
@@ -42,7 +43,7 @@ fun SpeechToTextScreen(
         Modifier
     }
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .then(systemNavigationPadding)
             .verticalScroll(rememberScrollState())

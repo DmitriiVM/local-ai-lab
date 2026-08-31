@@ -43,6 +43,7 @@ Compose:
     active: true
   CompositionLocalAllowlist:
     active: true
+    allowedCompositionLocals: LocalAppDimensions
   CompositionLocalNaming:
     active: true
   ContentEmitterReturningValues:
@@ -68,7 +69,7 @@ Compose:
   RememberMissing:
     active: true
   UnstableCollections:
-    active: true
+    active: false
   ViewModelForwarding:
     active: true
   ViewModelInjection:

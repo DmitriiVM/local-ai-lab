@@ -152,81 +152,83 @@ private fun TextToSpeechAudioEffectsContent(
     onSaturationChange: (Float) -> Unit,
     onReset: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
-    ) {
-        TextButton(
-            onClick = onReset,
-            enabled = enabled && !effects.isNeutral,
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
         ) {
-            Text(
-                stringResource(
-                    CoreUiR.string.tts_text_to_speech_controls_165,
-                ),
-            )
+            TextButton(
+                onClick = onReset,
+                enabled = enabled && !effects.isNeutral,
+            ) {
+                Text(
+                    stringResource(
+                        CoreUiR.string.tts_text_to_speech_controls_165,
+                    ),
+                )
+            }
         }
+        Text(
+            stringResource(
+                CoreUiR.string.tts_text_to_speech_controls_166,
+            ),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        TextToSpeechParameterSlider(
+            "Pitch",
+            effects.pitchSemitones,
+            effects.pitchSemitones.signed("st"),
+            SpeechAudioEffects.PITCH_RANGE,
+            enabled,
+            onPitchChange,
+        )
+        TextToSpeechParameterSlider(
+            "Formant",
+            effects.formantSemitones,
+            effects.formantSemitones.signed("st"),
+            SpeechAudioEffects.FORMANT_RANGE,
+            enabled,
+            onFormantChange,
+        )
+        Text(
+            stringResource(
+                CoreUiR.string.tts_text_to_speech_controls_167,
+            ),
+            style = MaterialTheme.typography.labelLarge,
+        )
+        TextToSpeechParameterSlider(
+            "Low · 160 Hz",
+            effects.lowEqDb,
+            effects.lowEqDb.signed("dB"),
+            SpeechAudioEffects.EQ_RANGE,
+            enabled,
+            onLowEqChange,
+        )
+        TextToSpeechParameterSlider(
+            "Presence · 1.5 kHz",
+            effects.midEqDb,
+            effects.midEqDb.signed("dB"),
+            SpeechAudioEffects.EQ_RANGE,
+            enabled,
+            onMidEqChange,
+        )
+        TextToSpeechParameterSlider(
+            "High · 5 kHz",
+            effects.highEqDb,
+            effects.highEqDb.signed("dB"),
+            SpeechAudioEffects.EQ_RANGE,
+            enabled,
+            onHighEqChange,
+        )
+        TextToSpeechParameterSlider(
+            "Saturation drive",
+            effects.saturationDriveDb,
+            "%.1f dB".format(effects.saturationDriveDb),
+            SpeechAudioEffects.SATURATION_RANGE,
+            enabled,
+            onSaturationChange,
+        )
     }
-    Text(
-        stringResource(
-            CoreUiR.string.tts_text_to_speech_controls_166,
-        ),
-        style = MaterialTheme.typography.bodySmall,
-    )
-    TextToSpeechParameterSlider(
-        "Pitch",
-        effects.pitchSemitones,
-        effects.pitchSemitones.signed("st"),
-        SpeechAudioEffects.PITCH_RANGE,
-        enabled,
-        onPitchChange,
-    )
-    TextToSpeechParameterSlider(
-        "Formant",
-        effects.formantSemitones,
-        effects.formantSemitones.signed("st"),
-        SpeechAudioEffects.FORMANT_RANGE,
-        enabled,
-        onFormantChange,
-    )
-    Text(
-        stringResource(
-            CoreUiR.string.tts_text_to_speech_controls_167,
-        ),
-        style = MaterialTheme.typography.labelLarge,
-    )
-    TextToSpeechParameterSlider(
-        "Low · 160 Hz",
-        effects.lowEqDb,
-        effects.lowEqDb.signed("dB"),
-        SpeechAudioEffects.EQ_RANGE,
-        enabled,
-        onLowEqChange,
-    )
-    TextToSpeechParameterSlider(
-        "Presence · 1.5 kHz",
-        effects.midEqDb,
-        effects.midEqDb.signed("dB"),
-        SpeechAudioEffects.EQ_RANGE,
-        enabled,
-        onMidEqChange,
-    )
-    TextToSpeechParameterSlider(
-        "High · 5 kHz",
-        effects.highEqDb,
-        effects.highEqDb.signed("dB"),
-        SpeechAudioEffects.EQ_RANGE,
-        enabled,
-        onHighEqChange,
-    )
-    TextToSpeechParameterSlider(
-        "Saturation drive",
-        effects.saturationDriveDb,
-        "%.1f dB".format(effects.saturationDriveDb),
-        SpeechAudioEffects.SATURATION_RANGE,
-        enabled,
-        onSaturationChange,
-    )
 }
 
 @Composable

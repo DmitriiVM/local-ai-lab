@@ -163,20 +163,22 @@ private fun ListenLanguageSettings(
     enabled: Boolean,
     onDraftChange: (SpeechInputSettings) -> Unit,
 ) {
-    AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_recognition))
-    Text(
-        text = stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_12),
-        style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
-    )
-    languages.chunked(3).forEach { row ->
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            row.forEach { language ->
-                FilterChip(
-                    selected = draft.languageCode == language.code,
-                    onClick = { onDraftChange(draft.copy(languageCode = language.code)) },
-                    enabled = enabled,
-                    label = { Text(stringResource(language.labelRes)) },
-                )
+    Column {
+        AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_recognition))
+        Text(
+            text = stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_12),
+            style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
+        )
+        languages.chunked(3).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { language ->
+                    FilterChip(
+                        selected = draft.languageCode == language.code,
+                        onClick = { onDraftChange(draft.copy(languageCode = language.code)) },
+                        enabled = enabled,
+                        label = { Text(stringResource(language.labelRes)) },
+                    )
+                }
             }
         }
     }
@@ -189,24 +191,26 @@ private fun ListenPerformanceSettings(
     error: String?,
     onDraftChange: (SpeechInputSettings) -> Unit,
 ) {
-    AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_performance))
-    OutlinedTextField(
-        value = draft.threadCount,
-        onValueChange = { onDraftChange(draft.copy(threadCount = it.filter(Char::isDigit))) },
-        label = {
-            Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_13))
-        },
-        modifier = Modifier.fillMaxWidth(),
-        singleLine = true,
-        enabled = enabled,
-    )
-    error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextButton(
-            onClick = { onDraftChange(SpeechInputSettings()) },
+    Column {
+        AssistantSettingsSection(stringResource(CoreUiR.string.assistant_settings_performance))
+        OutlinedTextField(
+            value = draft.threadCount,
+            onValueChange = { onDraftChange(draft.copy(threadCount = it.filter(Char::isDigit))) },
+            label = {
+                Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_13))
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
             enabled = enabled,
-        ) {
-            Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_14))
+        )
+        error?.let { Text(it, color = androidx.compose.material3.MaterialTheme.colorScheme.error) }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            TextButton(
+                onClick = { onDraftChange(SpeechInputSettings()) },
+                enabled = enabled,
+            ) {
+                Text(stringResource(CoreUiR.string.assistant_assistant_listen_settings_sheet_14))
+            }
         }
     }
 }

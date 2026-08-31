@@ -1,6 +1,7 @@
 package com.dmitriim.localailab.feature.stt.impl.presentation.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
@@ -50,19 +51,23 @@ private fun RecordingBusyControls(
             Text(androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_140))
         }
         SttOperation.IMPORTING -> {
-            OutlinedButton(onClick = {}, enabled = false) {
-                Text(androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_141))
-            }
-            TextButton(onClick = onCancel) {
-                Text(androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_142))
+            Column {
+                OutlinedButton(onClick = {}, enabled = false) {
+                    Text(androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_141))
+                }
+                TextButton(onClick = onCancel) {
+                    Text(androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_142))
+                }
             }
         }
         SttOperation.TRANSCRIBING -> {
-            OutlinedButton(onClick = {}, enabled = false) {
-                Text(androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_143))
-            }
-            TextButton(onClick = onCancel) {
-                Text(androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_144))
+            Column {
+                OutlinedButton(onClick = {}, enabled = false) {
+                    Text(androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_143))
+                }
+                TextButton(onClick = onCancel) {
+                    Text(androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_144))
+                }
             }
         }
         SttOperation.CANCELLING -> OutlinedButton(onClick = {}, enabled = false) {
@@ -82,53 +87,55 @@ private fun IdleRecordingControls(
     onRepeat: () -> Unit,
     onClear: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Button(
-            modifier = Modifier.weight(1f),
-            onClick = onStart,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary,
-            ),
-        ) {
-            Text(
-                text = androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_146),
-                maxLines = 1,
-                softWrap = false,
-            )
-        }
-        OutlinedButton(
-            modifier = Modifier.weight(1f),
-            onClick = onImport,
-        ) {
-            Text(
-                text = androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_147),
-                maxLines = 1,
-                softWrap = false,
-            )
-        }
-    }
-    if (hasInput) {
+    Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            OutlinedButton(modifier = Modifier.weight(1f), onClick = onRepeat) {
+            Button(
+                modifier = Modifier.weight(1f),
+                onClick = onStart,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                ),
+            ) {
                 Text(
-                    text = androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_148),
+                    text = androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_146),
                     maxLines = 1,
                     softWrap = false,
                 )
             }
-            OutlinedButton(modifier = Modifier.weight(1f), onClick = onClear) {
+            OutlinedButton(
+                modifier = Modifier.weight(1f),
+                onClick = onImport,
+            ) {
                 Text(
-                    text = androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_149),
+                    text = androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_147),
                     maxLines = 1,
                     softWrap = false,
                 )
+            }
+        }
+        if (hasInput) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedButton(modifier = Modifier.weight(1f), onClick = onRepeat) {
+                    Text(
+                        text = androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_148),
+                        maxLines = 1,
+                        softWrap = false,
+                    )
+                }
+                OutlinedButton(modifier = Modifier.weight(1f), onClick = onClear) {
+                    Text(
+                        text = androidx.compose.ui.res.stringResource(CoreUiR.string.stt_speech_to_text_screen_149),
+                        maxLines = 1,
+                        softWrap = false,
+                    )
+                }
             }
         }
     }

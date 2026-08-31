@@ -39,6 +39,7 @@ fun BenchmarkScreen(
     onToggleStartupMode: () -> Unit,
     onStart: () -> Unit,
     onCancel: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val dimensions = LocalAppDimensions.current
     val clipboard = LocalClipboardManager.current
@@ -49,7 +50,7 @@ fun BenchmarkScreen(
         Modifier
     }
     Column(
-        modifier = Modifier.fillMaxSize().then(systemNavigationPadding).verticalScroll(rememberScrollState()).padding(
+        modifier = modifier.fillMaxSize().then(systemNavigationPadding).verticalScroll(rememberScrollState()).padding(
             start = dimensions.screenPadding,
             top = dimensions.topBarOverlayClearance + 20.dp,
             end = dimensions.screenPadding,
@@ -88,15 +89,17 @@ fun BenchmarkScreen(
 
 @Composable
 private fun BenchmarkHeader() {
-    Text(
-        text = stringResource(CoreUiR.string.benchmark_benchmark_screen_26),
-        style = MaterialTheme.typography.headlineMedium,
-    )
-    Text(
-        text = stringResource(CoreUiR.string.ui_copy_38),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        style = MaterialTheme.typography.bodyMedium,
-    )
+    Column {
+        Text(
+            text = stringResource(CoreUiR.string.benchmark_benchmark_screen_26),
+            style = MaterialTheme.typography.headlineMedium,
+        )
+        Text(
+            text = stringResource(CoreUiR.string.ui_copy_38),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+    }
 }
 
 @Composable

@@ -35,6 +35,7 @@ fun PlaygroundScreen(
     state: PlaygroundUiState,
     onRefresh: () -> Unit,
     onOpenCapability: (AiCapability) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val dimensions = LocalAppDimensions.current
     val visibleCapabilities = state.capabilities.filterNot {
@@ -43,7 +44,7 @@ fun PlaygroundScreen(
     }
 
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = dimensions.screenPadding),
         contentPadding = PaddingValues(
