@@ -27,55 +27,18 @@ internal class ModelTransferExecution(
         var transfer = initialTransfer
         val modelId = entry.manifest.modelId
         val archive = entry.download.archive
+        var completedBytes = 0L
         if (archive != null) {
             transfer = downloadAndExtractArchive(entry, archive, stagingDirectory, transfer, authorizationToken)
-        } else {
-            val downloads = entry.download.files.ifEmpty {
-                val file = entry.manifest.files.single()
-                listOf(CatalogDownloadFile(file.relativePath, requireNotNull(entry.download.url)))
-            }
-            val specifications = entry.manifest.files.associateBy(ModelFileSpec::relativePath)
-            val totalDownloadBytes = downloads.sumOf { download ->
-                requireNotNull(specifications[download.relativePath]?.expectedBytes)
-            }
-            require(totalDownloadBytes == entry.download.expectedBytes)
-            var completed = 0L
-            val validators = transferState.fileValidators(modelId)
-            downloads.forEach { download ->
-                ensureRunning(modelId, transfer.executionGeneration)
-                val specification = requireNotNull(specifications[download.relativePath]) {
-                    "The catalog download is undeclared."
-                }
-                val expectedBytes = requireNotNull(specification.expectedBytes) { "The catalog size is missing." }
-                val expectedSha256 = requireNotNull(specification.sha256) { "The catalog checksum is missing." }
-                val destination = destinationFor(stagingDirectory, download.relativePath)
-                val fileValidator = validators[download.relativePath]
-                if (fileValidator?.verified == true && destination.length() == expectedBytes) {
-                    completed += expectedBytes
-                    transfer = transferState.updateWhileRunning(
-                        transfer,
-                        completedBytes = completed,
-                        currentRelativePath = download.relativePath,
-                    ) ?: throw CancellationException("The download was paused.")
-                    publishProgress(transfer)
-                    return@forEach
-                }
-                transfer = fileDownloader.download(
-                    ModelFileDownloadRequest(
-                        transfer = transfer,
-                        url = download.url,
-                        destination = destination,
-                        relativePath = download.relativePath,
-                        expectedBytes = expectedBytes,
-                        expectedSha256 = expectedSha256,
-                        completedBeforeFile = completed,
-                        authorizationToken = authorizationToken,
-                        existingValidator = fileValidator,
-                    ),
-                )
-                completed += expectedBytes
-            }
+            completedBytes = archive.expectedBytes
         }
+        transfer = downloadFiles(
+            entry = entry,
+            transfer = transfer,
+            stagingDirectory = stagingDirectory,
+            authorizationToken = authorizationToken,
+            completedBytes = completedBytes,
+        )
         ensureRunning(modelId, transfer.executionGeneration)
         transfer = transferState.updateWhileRunning(
             transfer,
@@ -97,7 +60,7 @@ internal class ModelTransferExecution(
         transfer: StoredModelTransfer,
         authorizationToken: String?,
     ): StoredModelTransfer {
-        require(archive.expectedBytes == entry.download.expectedBytes) { "The catalog archive size does not match." }
+        require(archive.expectedBytes <= entry.download.expectedBytes) { "The catalog archive size is invalid." }
         val relativePath = if (archive.format == CatalogArchiveFormat.ZIP) ARCHIVE_ZIP else ARCHIVE_TAR_BZIP2
         val archiveFile = destinationFor(stagingDirectory, relativePath)
         val existing = transferState.fileValidators(entry.manifest.modelId)[relativePath]
@@ -128,6 +91,73 @@ internal class ModelTransferExecution(
         ModelArchiveExtractor.extract(archiveFile, stagingDirectory, archive.rootDirectory, archive.format)
         require(archiveFile.delete()) { "Could not remove the verified model archive." }
         return downloaded
+    }
+
+    private suspend fun downloadFiles(
+        entry: CatalogModel,
+        transfer: StoredModelTransfer,
+        stagingDirectory: File,
+        authorizationToken: String?,
+        completedBytes: Long,
+    ): StoredModelTransfer {
+        val downloads = when {
+            entry.download.files.isNotEmpty() -> entry.download.files
+            entry.download.archive != null -> {
+                require(completedBytes == entry.download.expectedBytes) {
+                    "The catalog download size does not match."
+                }
+                return transfer
+            }
+            else -> {
+                val file = entry.manifest.files.single()
+                listOf(CatalogDownloadFile(file.relativePath, requireNotNull(entry.download.url)))
+            }
+        }
+        val specifications = entry.manifest.files.associateBy(ModelFileSpec::relativePath)
+        val totalDownloadBytes = downloads.sumOf { download ->
+            requireNotNull(specifications[download.relativePath]?.expectedBytes)
+        }
+        require(completedBytes + totalDownloadBytes == entry.download.expectedBytes) {
+            "The catalog download size does not match."
+        }
+        var activeTransfer = transfer
+        var completed = completedBytes
+        val validators = transferState.fileValidators(entry.manifest.modelId)
+        downloads.forEach { download ->
+            ensureRunning(entry.manifest.modelId, activeTransfer.executionGeneration)
+            val specification = requireNotNull(specifications[download.relativePath]) {
+                "The catalog download is undeclared."
+            }
+            val expectedBytes = requireNotNull(specification.expectedBytes) { "The catalog size is missing." }
+            val expectedSha256 = requireNotNull(specification.sha256) { "The catalog checksum is missing." }
+            val destination = destinationFor(stagingDirectory, download.relativePath)
+            val fileValidator = validators[download.relativePath]
+            if (fileValidator?.verified == true && destination.length() == expectedBytes) {
+                completed += expectedBytes
+                activeTransfer = transferState.updateWhileRunning(
+                    activeTransfer,
+                    completedBytes = completed,
+                    currentRelativePath = download.relativePath,
+                ) ?: throw CancellationException("The download was paused.")
+                publishProgress(activeTransfer)
+                return@forEach
+            }
+            activeTransfer = fileDownloader.download(
+                ModelFileDownloadRequest(
+                    transfer = activeTransfer,
+                    url = download.url,
+                    destination = destination,
+                    relativePath = download.relativePath,
+                    expectedBytes = expectedBytes,
+                    expectedSha256 = expectedSha256,
+                    completedBeforeFile = completed,
+                    authorizationToken = authorizationToken,
+                    existingValidator = fileValidator,
+                ),
+            )
+            completed += expectedBytes
+        }
+        return activeTransfer
     }
 
     private fun destinationFor(root: File, relativePath: String): File = File(root, relativePath).also { destination ->
