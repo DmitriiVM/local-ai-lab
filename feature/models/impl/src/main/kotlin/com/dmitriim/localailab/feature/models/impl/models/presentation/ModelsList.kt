@@ -47,7 +47,9 @@ internal fun ModelsList(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = dimensions.screenPadding),
-        contentPadding = PaddingValues(bottom = dimensions.bottomNavigationOverlayClearance + 64.dp),
+        contentPadding = PaddingValues(
+            bottom = dimensions.bottomNavigationOverlayClearance + ModelDownloadActivityBarClearance,
+        ),
         verticalArrangement = Arrangement.spacedBy(dimensions.itemSpacing),
     ) {
         item {

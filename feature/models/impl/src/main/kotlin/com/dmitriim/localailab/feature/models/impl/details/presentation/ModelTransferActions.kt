@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.dmitriim.localailab.core.ui.R as CoreUiR
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferNetworkPolicy
 import com.dmitriim.localailab.feature.models.api.domain.transfer.ModelTransferState
+import com.dmitriim.localailab.feature.models.impl.models.presentation.toModelTransferRemainingDuration
 
 @Composable
 internal fun TransferQueuedActions(
@@ -65,7 +66,7 @@ internal fun TransferRunningActions(
             ),
         )
         transfer.bytesPerSecond?.takeIf { it > 0L }?.let { bytesPerSecond ->
-            val remaining = transfer.estimatedRemainingMillis?.toDetailsRemainingDuration() ?: return@let
+            val remaining = transfer.estimatedRemainingMillis?.toModelTransferRemainingDuration() ?: return@let
             Text(
                 stringResource(
                     CoreUiR.string.models_model_transfer_speed_eta,
@@ -82,19 +83,6 @@ internal fun TransferRunningActions(
             OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
                 Text(stringResource(CoreUiR.string.models_model_details_screen_55))
             }
-        }
-    }
-}
-
-private fun Long.toDetailsRemainingDuration(): String {
-    val remainingSeconds = (coerceAtLeast(0L) + 999L) / 1_000L
-    return when {
-        remainingSeconds < 60L -> "< 1 min"
-        remainingSeconds < 3_600L -> "${(remainingSeconds + 59L) / 60L} min"
-        else -> {
-            val hours = remainingSeconds / 3_600L
-            val minutes = (remainingSeconds % 3_600L + 59L) / 60L
-            if (minutes == 60L) "${hours + 1L} h" else "$hours h $minutes min"
         }
     }
 }

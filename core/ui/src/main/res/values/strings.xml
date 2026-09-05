@@ -66,6 +66,18 @@
     <string name="models_model_details_screen_68" formatted="false">Model unavailable</string>
     <string name="models_model_details_screen_69" formatted="false">Back to models</string>
     <string name="models_model_transfer_speed_eta">%1$s/s · %2$s remaining</string>
+    <plurals name="models_download_activity_in_progress">
+        <item quantity="one">%d download in progress</item>
+        <item quantity="other">%d downloads in progress</item>
+    </plurals>
+    <plurals name="models_download_activity_waiting">
+        <item quantity="one">%d download waiting</item>
+        <item quantity="other">%d downloads waiting</item>
+    </plurals>
+    <string name="models_download_activity_progress">%1$s of %2$s · %3$s</string>
+    <string name="models_download_activity_remaining">%1$s remaining</string>
+    <string name="models_download_activity_calculating" formatted="false">Calculating remaining time…</string>
+    <string name="models_download_activity_waiting_time" formatted="false">Waiting to download</string>
     <string name="models_model_download_button_70" formatted="false">Download</string>
     <string name="models_models_screen_71" formatted="false">Delete</string>
     <string name="models_models_screen_72" formatted="false">Cancel</string>
